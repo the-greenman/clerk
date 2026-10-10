@@ -1,0 +1,53 @@
+name: Programme validate
+
+# Reusable. The programme repository's conformance gate, run by the programme's thin
+# validate.yml on push and pull request. Triggers stay in the caller.
+#
+# clerk-ref: a reusable workflow cannot reliably learn which ref of itself the caller pinned
+# (github.job_workflow_sha is unset or the caller's in some contexts), so the caller passes the
+# same SHA it pins in `uses:`. One SHA, written twice, bumped together.
+#
+# The srs CLI pin (SRS_RUST_CLI_TAG) stays declared once, in the CALLER's validate.yml
+# (`clerk fetch-srs` reads it from there). Gates are judged by exit code.
+
+on:
+  workflow_call:
+    inputs:
+      clerk-ref:
+        description: "Commit SHA of the clerk to run; set it to the same SHA as in the caller's uses: line"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the programme
+        uses: actions/checkout@v4
+
+      # The clerk at the SAME ref the caller pinned in `uses:` (see clerk-ref above).
+      - name: Checkout the clerk
+        uses: actions/checkout@v4
+        with:
+          repository: the-greenman/clerk
+          ref: ${{ inputs.clerk-ref }}
+          path: .clerk
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate the programme repository with the pinned CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          clerk() { node "$GITHUB_WORKSPACE/.clerk/bin/clerk.mjs" "$@" --repo "$GITHUB_WORKSPACE"; }
+          export $(clerk fetch-srs)
+          "$SRS_CLI_PATH" repo validate --repo . --pretty
+          clerk conformance
+          clerk check
+          # fails on no active period, overlapping periods, or objective_rank pointing at a non-objective
+          clerk roadmap --json > /dev/null

@@ -1,0 +1,22 @@
+name: Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# The called workflow needs these; a caller must grant at least what the callee asks for.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    uses: the-greenman/clerk/.github/workflows/programme-pages.yml@<clerk-sha>
+    with:
+      clerk-ref: <clerk-sha>

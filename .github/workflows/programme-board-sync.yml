@@ -1,0 +1,82 @@
+name: Programme board sync
+
+# Reusable. Reconciles the programme board and promotes work onto the Ready queue: ONE
+# invocation of `clerk board sync` (stories-sync, rollup, topup, promote, stale-claims,
+# reconcile on a single board fetch; do not split it into per-step calls). Triggers (push to the
+# default branch, hourly cron, dispatch) and the concurrency group stay in the caller, which
+# should use group board-sync, cancel-in-progress false.
+#
+# Project, story repo and mirror repos come from the programme settings record; the inputs
+# override. Needs a PAT with project scope (the default GITHUB_TOKEN has none for user-level
+# Projects v2): BOARD_SECRET, or BOARD_TOKEN. With neither the job FAILS (a silent skip lets
+# labels drift from the board).
+# clerk-ref: as in programme-validate.yml.
+
+on:
+  workflow_call:
+    inputs:
+      clerk-ref:
+        description: "Commit SHA of the clerk to run; set it to the same SHA as in the caller's uses: line"
+        type: string
+        required: true
+      project:
+        description: "Board project number (default: settings board_project)"
+        type: string
+        default: ""
+      story-repo:
+        description: "Story repo (default: settings board_story_repo)"
+        type: string
+        default: ""
+      mirror-repos:
+        description: "Comma-separated mirror repos (default: settings governed_repos)"
+        type: string
+        default: ""
+    secrets:
+      BOARD_SECRET:
+        required: false
+      BOARD_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  board-sync:
+    name: Promote, reconcile & rollup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the programme
+        uses: actions/checkout@v4
+
+      # The clerk at the SAME ref the caller pinned in `uses:` (see clerk-ref above).
+      - name: Checkout the clerk
+        uses: actions/checkout@v4
+        with:
+          repository: the-greenman/clerk
+          ref: ${{ inputs.clerk-ref }}
+          path: .clerk
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Sync the board
+        env:
+          GH_TOKEN: ${{ secrets.BOARD_SECRET || secrets.BOARD_TOKEN }}
+          IN_PROJECT: ${{ inputs.project }}
+          IN_STORY_REPO: ${{ inputs.story-repo }}
+          IN_MIRROR_REPOS: ${{ inputs.mirror-repos }}
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::Board PAT not set. Add a PAT with 'project' scope as the BOARD_SECRET (or BOARD_TOKEN) secret. A silent skip lets labels drift from the board and routines pick up stale work, so this is a hard failure."
+            exit 1
+          fi
+          clerk() { node "$GITHUB_WORKSPACE/.clerk/bin/clerk.mjs" "$@"; }
+          # settings are read through the pinned srs CLI, fetched with the default token
+          export $(GH_TOKEN=${{ github.token }} clerk fetch-srs --repo "$GITHUB_WORKSPACE")
+          S=$(clerk settings --repo "$GITHUB_WORKSPACE" --json)
+          export GHP_OWNER=$(jq -r .githubOwner <<<"$S")
+          export GHP_PROJECT=${IN_PROJECT:-$(jq -r .boardProject <<<"$S")}
+          export GHP_STORY_REPO=${IN_STORY_REPO:-$(jq -r .boardStoryRepo <<<"$S")}
+          export GHP_MIRROR_REPOS=${IN_MIRROR_REPOS:-$(jq -r '.repos|join(",")' <<<"$S")}
+          clerk board sync

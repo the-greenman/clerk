@@ -189,7 +189,7 @@ if (isOwner) try {
   const inFlight = Number(gh(['api', '-X', 'GET', 'search/issues', '-f', `q=user:${GH_OWNER} is:pr is:open label:"wg:third-party-ready"`, '--jq', '.total_count']).trim());
   next = { ready: A.orderQueue(issues, A.localPriorities(records.filter((r) => memberSet(groupLog).has(r.instanceId)))), inFlight, merged: 0, budget: 10 };
 } catch { /* queue unknown */ }
-const g = isOwner ? groupState(repo) : { pause: 'n/a', merged: '-', budget: '-' };
+const g = isOwner ? await groupState(repo) : { pause: 'n/a', merged: '-', budget: '-' };
 if (next) { next.merged = Number(g.merged) || 0; next.budget = Number(g.budget) || 10; }
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const acted = { merge: 0 }; const doneIds = { 5: new Set() };

@@ -1,0 +1,38 @@
+name: PR upkeep
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+    - cron: "20 7 * * *"   # the daily digest run; must equal digest-cron below
+  push:
+    branches: [master]
+  workflow_run:
+    workflows: [Validate]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Act (false = dry run)"
+        type: boolean
+        default: false
+      digest:
+        description: "Post the digest"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-upkeep
+  cancel-in-progress: false
+
+jobs:
+  upkeep:
+    uses: the-greenman/clerk/.github/workflows/programme-pr-upkeep.yml@<clerk-sha>
+    with:
+      clerk-ref: <clerk-sha>
+      apply: ${{ inputs.apply == true }}
+      digest: ${{ inputs.digest == true }}
+      digest-cron: "20 7 * * *"
+    secrets: inherit
