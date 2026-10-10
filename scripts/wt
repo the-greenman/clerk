@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# wt: the one way to create, list and prune git worktrees.
+#   wt new <repo> <slug> [branch]   worktree at $WT_ROOT/<repo>/<slug> off origin/<default>
+#   wt ls                           every worktree: dirty / merged / pushed
+#   wt prune [-n]                   remove worktrees that are clean AND merged (-n = dry run)
+# Independent of the gh project tooling on purpose.
+set -euo pipefail
+
+WT_ROOT=${WT_ROOT:-$HOME/dev/.wt}
+DEV=${DEV:-$HOME/dev}
+# Repos to scan. Override: WT_REPOS="a b c" (names under $DEV/semanticops or $DEV).
+WT_REPOS=${WT_REPOS:-"srs srs-rust srs-vscode srs-web srs-programme clerk semanticops.com browser-executor-relay muDemocracy.org ena decision-logger equilibrium_cards"}
+
+repo_path() { for b in "$DEV/semanticops" "$DEV"; do [ -e "$b/$1/.git" ] && { echo "$b/$1"; return; }; done; echo "wt: unknown repo $1" >&2; return 1; }
+default_branch() { git -C "$1" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||' || echo master; }
+
+# worktrees of a repo, excluding the main checkout: "path<TAB>branch"
+worktrees() {
+  git -C "$1" worktree list --porcelain | awk '/^worktree /{p=$2} /^branch /{b=$2; sub("refs/heads/","",b)} /^$/{if(n++)print p"\t"b; b=""}'
+}
+
+# merged = HEAD is in origin/<default>, or (gh) the branch has a merged PR (squash merges)
+is_merged() { # repo path branch
+  local def; def=$(default_branch "$1")
+  git -C "$1" merge-base --is-ancestor "$(git -C "$2" rev-parse HEAD)" "origin/$def" 2>/dev/null && return 0
+  # squash merge: a merged PR whose head commit is exactly our HEAD (a name match alone could hide unpushed commits)
+  [ -n "$3" ] && command -v gh >/dev/null && \
+    (cd "$1" && gh pr list --head "$3" --state merged --json headRefOid -q '.[].headRefOid' 2>/dev/null) | grep -qx "$(git -C "$2" rev-parse HEAD)" && return 0
+  return 1
+}
+
+each() { # fn(repo_path name path branch)
+  for n in $WT_REPOS; do
+    r=$(repo_path "$n") || continue
+    git -C "$r" fetch -q origin 2>/dev/null || true
+    while IFS=$'\t' read -r p b; do [ -n "$p" ] && "$1" "$r" "$n" "$p" "$b"; done < <(worktrees "$r")
+  done
+}
+
+ls_one() {
+  local d m=NO pu=NO
+  d=$(git -C "$3" status --porcelain 2>/dev/null | wc -l)
+  is_merged "$1" "$3" "$4" && m=yes
+  [ -n "$4" ] && git -C "$1" branch -r --contains "$(git -C "$3" rev-parse HEAD)" | grep -q . && pu=yes
+  printf '%-22s dirty=%-3s merged=%-4s pushed=%-4s %s (%s)\n' "$2" "$d" "$m" "$pu" "$3" "${4:-detached}"
+}
+
+prune_one() {
+  if [ "$(git -C "$3" status --porcelain | wc -l)" = 0 ] && is_merged "$1" "$3" "$4"; then
+    if [ -n "${DRY:-}" ]; then echo "would remove $3"; else git -C "$1" worktree remove "$3" && echo "removed $3"; fi
+  else echo "kept    $3"; fi
+}
+
+case "${1:-}" in
+  new)
+    [ $# -ge 3 ] || { echo "usage: wt new <repo> <slug> [branch]"; exit 2; }
+    r=$(repo_path "$2"); def=$(default_branch "$r"); dest=$WT_ROOT/$2/$3
+    git -C "$r" fetch -q origin
+    mkdir -p "$WT_ROOT/$2"
+    git -C "$r" worktree add -b "${4:-$3}" "$dest" "origin/$def"
+    [ "$(git -C "$dest" rev-parse --is-shallow-repository)" = true ] && git -C "$dest" fetch -q --unshallow
+    echo "$dest" ;;
+  ls) each ls_one ;;
+  prune) [ "${2:-}" = -n ] && DRY=1; each prune_one; for n in $WT_REPOS; do git -C "$(repo_path "$n")" worktree prune; done ;;
+  *) sed -n '2,5p' "$0"; exit 2 ;;
+esac

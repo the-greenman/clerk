@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# session: set up the context for a governance session and open the clerk.
+#   session                     open the clerk agenda as owner (fresh copy of srs-programme master)
+#   session --as tpr-reviewer   act as another role (your SRS_ACTOR must hold it)
+#   session --prepare           set up only; print the repo path (used by Claude Code's /session)
+#   SESSION_REPO=<path> session …   reuse that copy instead of making a new one
+#   session agenda              print the whole agenda read-only and exit
+# Anything else is passed to the clerk (e.g. `session session --dry-run --ratify all`).
+set -euo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# 2. A fresh copy of srs-programme master for this session (never your main checkout).
+# Reuse SESSION_REPO when set (one copy for a whole session: briefing, dry run, record).
+if [ -n "${SESSION_REPO:-}" ] && [ -d "$SESSION_REPO" ]; then repo="$SESSION_REPO"; git -C "$repo" pull -q --ff-only 2>/dev/null || true
+else slug="session-$(date -u +%Y%m%d-%H%M%S)"; repo=$("$HERE/scripts/wt" new srs-programme "$slug" 2>/dev/null | tail -1); fi
+( cd "$repo" && export $(node "$HERE/scripts/fetch-pinned-srs.mjs" --repo "$repo" 2>/dev/null) && true )
+
+# 3. Who is acting. Default: the owner.
+role=owner; args=()
+while [ $# -gt 0 ]; do case "$1" in --as) role="$2"; shift 2 ;; *) args+=("$1"); shift ;; esac; done
+# Acting as owner always means the owner's own actor (this is the owner's tool; an AI actor in the environment
+# must not leak in). Other roles use the SRS_ACTOR already set, which the clerk checks against the role.
+OWNER_ACTOR='{"kind":"human","id":"human:the-greenman","name":"Peter Brownell"}'
+if [ "$role" = owner ]; then export SRS_ACTOR="$OWNER_ACTOR"; else export SRS_ACTOR="${SRS_ACTOR:?set SRS_ACTOR for role $role}"; fi
+
+if [ "${args[0]:-}" = "--prepare" ]; then echo "$repo"; exit 0; fi
+cmd=(); [ "${args[0]:-}" = agenda ] || [ "${args[0]:-}" = session ] || [ "${args[0]:-}" = comment ] && { cmd=("${args[0]}"); args=("${args[@]:1}"); }
+exec node "$HERE/bin/clerk.mjs" "${cmd[@]}" --repo "$repo" --as "$role" "${args[@]}"

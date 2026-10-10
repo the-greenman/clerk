@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import * as A from '../lib/agenda.mjs';
-import { quorum, quorumText, ROLES, GROUP_MEMBERS } from '../lib/roles.mjs';
-import { take, assertQuorum, summarise, endSession, postComments } from '../lib/session.mjs';
+import * as A from '../lib/practice/agenda.mjs';
+import { quorum, quorumText, ROLES, GROUP_MEMBERS } from '../lib/practice/roles.mjs';
+import { take, assertQuorum, summarise } from '../lib/practice/session.mjs';
+import { endSession, postComments } from '../lib/adapters/session.mjs';
 
 const owner = { ...ROLES.owner, roleId: 'owner-role', logId: 'L' };
 const grp = ROLES['tpr-steward'];
@@ -56,7 +57,7 @@ test('history counts earlier sessions that considered a decision', () => {
   assert.match(A.decisionScreen(r, dates).join('\n'), /History:\s+Considered in 2/);
 });
 
-import * as D from '../lib/discussion.mjs';
+import * as D from '../lib/practice/discussion.mjs';
 const cm = (id, at, text = id, by = { kind: 'human', id: 'h', name: 'Owner' }) => ({ instanceId: id, record: { createdAt: at, createdBy: by, fieldValues: { comment_text: text } } });
 const on = (s, t) => ({ sourceId: s, targetId: t });
 test('comment threading: top-level by time, replies nested under their parent', () => {

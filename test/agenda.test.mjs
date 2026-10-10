@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import * as A from '../lib/agenda.mjs';
-import { summarise, sessionTitle, heldAtIso, stamp } from '../lib/session.mjs';
-import { authorise, resolveContext, ROLES } from '../lib/roles.mjs';
+import * as A from '../lib/practice/agenda.mjs';
+import { summarise, sessionTitle, heldAtIso, stamp } from '../lib/practice/session.mjs';
+import { authorise, resolveContext, ROLES } from '../lib/practice/roles.mjs';
 
 const d = (id, state, by, title = id) => ({ instanceId: id, record: { lifecycleState: state, createdBy: { id: by }, createdAt: '2026-10-10T10:00:00Z', fieldValues: { title } } });
 const log = (...ids) => ({ memberInstanceIds: ids.map((instanceId) => ({ instanceId })) });
@@ -73,7 +73,7 @@ test('session title, held_at and summary', () => {
 });
 
 test('a decision listed in a parent log is the parent context\'s to ratify', async () => {
-  const { ratifyItems } = await import('../lib/agenda.mjs');
+  const { ratifyItems } = await import('../lib/practice/agenda.mjs');
   const rec = (id) => ({ instanceId: id, record: { lifecycleState: 'proposed', fieldValues: { title: id } } });
   const records = [rec('local'), rec('escalated')];
   const groupLog = { memberInstanceIds: [{ instanceId: 'local' }, { instanceId: 'escalated' }] };
