@@ -32,6 +32,18 @@
       "fieldId": "840d83c1-56c4-4598-a870-705130ee56df",
       "order": 4,
       "required": false
+    },
+    {
+      "displayLabel": "Routine id",
+      "fieldId": "7ae7b17d-9ec5-45ac-b336-909779884a72",
+      "order": 5,
+      "required": false
+    },
+    {
+      "displayLabel": "Brief path",
+      "fieldId": "64ad68fd-5ea8-40ad-9d88-346991c1f6c1",
+      "order": 6,
+      "required": false
     }
   ],
   "id": "58f0ee7b-8063-4fc7-9b39-af918962c91f",

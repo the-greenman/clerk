@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Optional. Id of the claude.ai cloud trigger that runs this job (e.g. trig_01...). Leave empty when no trigger exists or its id is unknown. Checked against the live trigger list by `clerk routines --check`."
+  },
+  "createdAt": "2026-10-10T12:00:00+00:00",
+  "description": "Optional. Id of the claude.ai cloud trigger that runs this job (e.g. trig_01...). Leave empty when no trigger exists or its id is unknown. Checked against the live trigger list by `clerk routines --check`.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "7ae7b17d-9ec5-45ac-b336-909779884a72",
+  "name": "routine_id",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}
