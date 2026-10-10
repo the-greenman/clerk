@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as A from '../lib/agenda.mjs';
 import { quorum, quorumText, ROLES, GROUP_MEMBERS } from '../lib/roles.mjs';
-import { take, assertQuorum, summarise, endSession } from '../lib/session.mjs';
+import { take, assertQuorum, summarise, endSession, postComments } from '../lib/session.mjs';
 
 const owner = { ...ROLES.owner, roleId: 'owner-role', logId: 'L' };
 const grp = ROLES['tpr-steward'];
@@ -88,4 +88,18 @@ test('citations build correct sourceRefs', () => {
   assert.equal(D.buildSourceRef(undefined), null);
   assert.throws(() => D.buildSourceRef('transcript'), /no transcript/);
   assert.throws(() => D.buildSourceRef('nonsense'), /cite must be/);
+});
+
+test('a standalone comment plans no session and no considers; inside a session it still yields considers', () => {
+  const ch = [];
+  take(ch, it, { comment: { text: 'between sessions', cite: 'https://x.org/a' } });
+  const out = [];
+  postComments({ choices: ch, dryRun: true, log: (m) => out.push(m) });
+  assert.match(out[0], /would create 1 comment \(no session\)/);
+  assert.match(out[0], /"sourceType":"external-document"/);
+  assert.doesNotMatch(out[0], /considers|attended|quorum|ONE session/);
+  assert.throws(() => postComments({ choices: [{ ...ch[0], comments: [{ text: 'x', cite: 'transcript' }] }], dryRun: true, log() {} }), /no transcript/);
+  const inSession = [];
+  endSession({ role: owner, choices: ch, attendees: at('x'), quorum: { met: false, needs: 'x' }, dryRun: true, log: (m) => inSession.push(m) });
+  assert.match(inSession[0], /ONE session record[\s\S]*session considers it/);
 });

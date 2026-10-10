@@ -57,4 +57,6 @@ Humans and agents comment on proposals the same way: a `com.semanticops.comments
 
 - **Citations** are `sourceRefs` on the comment, a provenance pointer and not a relation: a source-document id (`repository-document`), a URL (`external-document`) or `transcript`, with `sourceRole` `evidence` (default) or `quoted-from` (default for the transcript); a passage locator goes in the sourceRef `note`.
 - **Transcripts**: `clerk session --transcript <file>` (TUI `[t]`) stores the file as a source document under `sessions/<date>`, links it to the session record (`attaches`), and lets a comment in that session cite `transcript`.
-- **Agents**: `clerk comment --repo <path> --as <role> --on <id> --text <...> [--reply-to <commentId>] [--cite <docId|url|transcript>] [--role-of-cite quoted-from|evidence] [--transcript <file>] [--dry-run]`. It uses the same path as the TUI, so it records a (considers-only) session.
+- **Agents**: `clerk comment --repo <path> --as <role> --on <id> --text <...> [--reply-to <commentId>] [--cite <docId|url|transcript>] [--role-of-cite quoted-from|evidence] [--transcript <file>] [--dry-run]`. It writes the comment code shared with the TUI, but records no session.
+
+Comments between sessions are discussion: `clerk comment` writes only the comment (and its `comments-on` relation) in its own `gate:auto-merge` PR titled "Comment on <decision>", with no session record and no quorum. Taking a decision up in a session is what counts as considering it.

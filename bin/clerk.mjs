@@ -7,7 +7,7 @@ import { OWNER_LOG, GROUP_LOG } from '../lib/roles.mjs';
 import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/io.mjs';
 import * as A from '../lib/agenda.mjs';
 import * as D from '../lib/discussion.mjs';
-import { endSession, stamp, take, FIELDS, needsTranscript } from '../lib/session.mjs';
+import { endSession, postComments, stamp, take, FIELDS, needsTranscript } from '../lib/session.mjs';
 import { authorise, resolveContext, quorum, quorumText } from '../lib/roles.mjs';
 
 const argv = process.argv.slice(2);
@@ -80,6 +80,7 @@ if (sub) {
       const reply = arg('--reply-to') && (() => { const m = commentRecs.filter((c) => c.instanceId.startsWith(arg('--reply-to'))); if (m.length !== 1) throw new Error(`no single comment matches "${arg('--reply-to')}"`); return m[0].instanceId; })();
       take(choices, item(find(arg('--on') ?? die('--on <decision id> is required'))), { comment: { text: arg('--text') ?? die('--text is required'), replyTo: reply, cite: arg('--cite'), role: arg('--role-of-cite') } });
     }
+    if (argv[0] === 'comment') { postComments({ cli, now, choices, transcript, dryRun }); process.exit(0); } // discussion between sessions: no session record, no quorum
     args('--set-aside').forEach((p) => take(choices, item(pick(p)), { action: 'setaside' }));
     args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => take(choices, item(r), { action: 'ratify' }));
     args('--consider').forEach((p) => take(choices, item(find(p)), {}));
