@@ -13,7 +13,7 @@ SRS_ACTOR='{"kind":"ai","id":"agent:tpr-steward"}' \
   clerk session --repo <srs-programme checkout> --as tpr-steward [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]... [--edit <id> --field <resolution|why|options|review|question> --text <text>]... [--dry-run]
 ```
 
-`--as <role>`: `owner`, `tpr-steward`, `tpr-builder`, `tpr-reviewer` (prototype mapping in `lib/roles.mjs`). The actor in `SRS_ACTOR` must hold that role (owner = `human:the-greenman`; `agent:tpr-*` hold the matching group role) or the clerk refuses, naming role and actor. The owner's session is recorded in the SemanticOps decision log, a group's in its own log. Escalation, report acknowledgement and PR merge sections are owner-only.
+`--as <role>`: `owner`, `tpr-steward`, `tpr-builder`, `tpr-reviewer` (prototype mapping in `lib/roles.mjs`). The actor in `SRS_ACTOR` must hold that role (owner = `human:the-greenman`; `agent:tpr-*` hold the matching group role) or the clerk refuses, naming role and actor. The owner's session is recorded in the SemanticOps decision log, a group's in its own log. Reports, escalation and PR merge sections are owner-only.
 
 Needs Node >= 20, `gh` (logged in), and the repo's `scripts/fetch-pinned-srs.mjs`. No dependencies. Requires the `com.semanticops.programme/session` type on srs-programme master.
 
@@ -21,21 +21,25 @@ Needs Node >= 20, `gh` (logged in), and the repo's `scripts/fetch-pinned-srs.mjs
 
 One screen of counts, plus a status line per working group (running or paused, merged/10 this cycle):
 
-1. **Ratify (decisions since the last session)**: `proposed` decisions in the SemanticOps decision log.
-2. **Decide**: escalations: `proposed` decisions in a group log made by `agent:tpr-steward` that are not yet in the SemanticOps log.
-3. **Acknowledge**: working-group report comments on semanticops.com#31 without your +1.
-4. **Merge**: open, clean `gate:owner-merge` PRs.
+The agenda follows a meeting's order:
+
+1. **Decisions since the last session**: `proposed` decisions in the SemanticOps decision log, to ratify (like approving the minutes).
+2. **Reports from working groups**: owner only. One item per working-group report you have not yet received: the group's `run-report` record, paired by cycle date with its marked comment on semanticops.com#31 (a report that exists only as a comment is shown and marked "comment only"). A group role gets an empty section.
+3. **Decisions for this session**: escalations: `proposed` decisions in a group log made by `agent:tpr-steward` that are not yet in the SemanticOps log. The report's "Decisions for you" count points here.
+4. **Merges**: open, clean `gate:owner-merge` PRs.
+
+**Receiving a report** means the parent context (you, as owner) has taken the group's report in: it is noted for the session, and when the session ends a `receives` relation runs from the session record to the run-report record (nothing goes into SRS for a comment-only report; the summary says so). It needs no quorum beyond the acting role being present. The 👍 on the #31 comment is only the mechanical side effect, added at once so `pr-upkeep.sh`'s pause rule (2 unacknowledged reports) sees it: "received; acknowledged on #31 so the group keeps running". There is no separate Acknowledge section.
 
 Pick a section and the items come **one at a time**, essentials only. Read-only until you press a key.
 
 | Section | Keys |
 |---|---|
-| Ratify | `r` ratify, `s` set aside, `e` edit a field in place (decision stays proposed), `h` hold for a later session (optional note), `o` full record, `n` next (skip, nothing recorded), `q` quit |
-| Decide | `a` accept recommendation, `c` choose other (asks for resolution text), `d` defer, `o`, `n`, `q` |
-| Acknowledge | `a` +1 via `gh api` (acts now), `o` open in browser, `n` |
-| Merge | `m` `gh pr merge --merge` (acts now), `o`, `n` |
+| Decisions since the last session | `r` ratify, `s` set aside, `e` edit a field in place (decision stays proposed), `h` hold for a later session (optional note), `o` full record, `n` next (skip, nothing recorded), `q` quit |
+| Decisions for this session | `a` accept recommendation, `c` choose other (asks for resolution text), `d` defer, `o`, `n`, `q` |
+| Reports | `r` receive (noted for the session; +1 on the comment at once), `c` comment (on the run-report record when the session ends; a reply on #31 if there is no record), `o` open the whole report, `n`, `q` |
+| Merges | `m` `gh pr merge --merge` (acts now), `o`, `n` |
 
-Ratify and Decide choices are collected. The TUI header reads `Session: <date time UTC> (ad hoc) · attendees: <names>`; attendees default to the acting role and `+` adds more (roles and stewardship agents). On end session the clerk creates ONE `com.semanticops.programme/session` record (title `Session <YYYY-MM-DD HH:MM UTC>: <context>`, status `ended`) as the acting actor in a fresh srs-programme worktree, adds `attended-by` relations to each attendee and `ratifies` / `sets-aside` to each decision, transitions each decision (ratified or abandoned), adds accepted escalations to the SemanticOps log, validates, commits (signed), pushes and opens a `gate:auto-merge` PR, then prints its URL. `--dry-run` prints the summary instead of doing any of it.
+Decision choices and received reports are collected. The TUI header reads `Session: <date time UTC> (ad hoc) · attendees: <names>`; attendees default to the acting role and `+` adds more (roles and stewardship agents). On end session the clerk creates ONE `com.semanticops.programme/session` record (title `Session <YYYY-MM-DD HH:MM UTC>: <context>`, status `ended`) as the acting actor in a fresh srs-programme worktree, adds `attended-by` relations to each attendee and `ratifies` / `sets-aside` to each decision, transitions each decision (ratified or abandoned), adds accepted escalations to the SemanticOps log, validates, commits (signed), pushes and opens a `gate:auto-merge` PR, then prints its URL. `--dry-run` prints the summary instead of doing any of it.
 
 **Level and quorum.** A decision is ratified or set aside only in a session at the level of the context that owns it (a decision also in the SemanticOps log is the owner's) and whose attendees meet that context's quorum: SemanticOps needs the Owner role; WG Third-party ready needs two distinct member records, one the reviewer agent (prototype rules in `lib/roles.mjs`). Below quorum `r`/`s` (and `clerk session --ratify/--set-aside`, exit 1) are refused, naming what is missing; `e` and `h` still work. The header shows `quorum: met` or `quorum: not met (needs ...)`. A session records `attended-by` per attendee and `ratifies` / `sets-aside` / `considers` per decision taken up (transitions only for ratify and set aside); a session that ratified nothing is still a valid record. Each decision's screen shows its history: `Considered in N earlier sessions (dates)`.
 

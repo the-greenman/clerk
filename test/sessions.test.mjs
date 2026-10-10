@@ -103,3 +103,17 @@ test('a standalone comment plans no session and no considers; inside a session i
   endSession({ role: owner, choices: ch, attendees: at('x'), quorum: { met: false, needs: 'x' }, dryRun: true, log: (m) => inSession.push(m) });
   assert.match(inSession[0], /ONE session record[\s\S]*session considers it/);
 });
+
+test('receiving a report: receives in the plan, no quorum, no considers; comment-only says so', () => {
+  const ch = [];
+  take(ch, { instanceId: 'rrrrrrrr1', title: 'WG report 2026-10-10' }, { report: true, comment: { text: 'why 3?' } });
+  take(ch, { instanceId: 'rrrrrrrr1', title: 'WG report 2026-10-10' }, { action: 'receive', report: true });
+  take(ch, { instanceId: 'comment:7', title: 'WG report 2026-10-11' }, { action: 'receive', report: true, commentOnly: true });
+  assertQuorum(ch, { met: false, needs: 'x' }); // receiving never needs quorum
+  assert.match(summarise(ch, 'S'), /- Received: WG report 2026-10-11 \(comment only\)/);
+  assert.doesNotMatch(summarise(ch, 'S'), /Considered/);
+  const out = [];
+  endSession({ role: owner, choices: ch, attendees: at('x'), quorum: { met: false, needs: 'x' }, dryRun: true, log: (m) => out.push(m) });
+  assert.match(out[0], /relation receives: session -> WG report 2026-10-10 \[rrrrrrrr\]/);
+  assert.doesNotMatch(out[0], /comment:7\]|considers it/);
+});

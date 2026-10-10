@@ -15,11 +15,27 @@ test('ratify: proposed and in the main log only', () => {
 test('decide: steward proposals in the group log, not yet in the main log', () => {
   assert.deepEqual(A.escalationItems(recs, log('a', 'c', 'e', 'f'), log('e')).map((r) => r.instanceId), ['c']);
 });
-test('acknowledge: owner reports without the owner +1', () => {
-  const c = (id, body = '<!-- wg-report cycle=2026-10-10 -->\nx', aa = 'OWNER') => ({ id, body, author_association: aa });
-  const out = A.unackedReports([c(1), c(2), c(3, 'chat'), c(4, undefined, 'NONE')],
-    { 1: [{ content: '+1', user: { login: 'me' } }], 2: [{ content: '+1', user: { login: 'other' } }] }, 'me');
-  assert.deepEqual(out.map((x) => x.id), [2]);
+const run = (id, date, chose) => ({ instanceId: id, record: { fieldValues: { title: 'Run ' + date, run_date: date, chose } } });
+const mark = (id, date, body = 'x') => ({ id, body: `<!-- wg-report cycle=${date} -->\n${body}`, created_at: date + 'T11:30:00Z', html_url: 'u' + id });
+const REPORT = ['1. Decisions for you: None', '2. Decided within mandate:', '- a (why: b)', '- c', '- d', '- e', '3. Done: 2 PRs', '4. Stuck or lost: none',
+  '5. Budget: 2 of 10', '5b. Awaiting ratification: none', 'What we learned: reports are short'].join('\n');
+test('reports: unreceived records paired with their comment by cycle date; comment-only fallback', () => {
+  const rr = [run('r1', '2026-10-09', REPORT), run('r2', '2026-10-10', REPORT)];
+  const cs = [mark(1, '2026-10-10'), mark(2, '2026-10-11'), mark(3, '2026-10-12'), { id: 4, body: 'chat' }];
+  const out = A.reportItems(rr, new Set(['r1']), cs, new Set([3]), 'WG');
+  assert.deepEqual(out.map((x) => [x.instanceId, x.cycle, x.commentOnly ?? false, x.comment?.id]), [['r2', '2026-10-10', false, 1], ['comment:2', '2026-10-11', true, 2]]);
+  assert.equal(A.reportItems([], new Set(), [], new Set(), 'WG').length, 0);
+});
+test('report screen: sections trimmed, escalations point at section 3, pause shown', () => {
+  const it = A.reportItems([run('r1', '2026-10-10', REPORT)], new Set(), [], new Set(), 'WG')[0];
+  const out = A.reportScreen(it, { pause: 'paused: 2 reports unacknowledged', waiting: 2 }).join('\n');
+  assert.match(out, /WG report 2026-10-10/);
+  assert.match(out, /Decisions for you: 2 waiting \(see Decisions for this session\)/);
+  assert.match(out, /Decided within mandate[\s\S]*- a \(why: b\)[\s\S]*\[o\]pen shows all/);
+  assert.doesNotMatch(out, /- e/);
+  assert.match(out, /Done:\n    2 PRs[\s\S]*Budget:\n    2 of 10[\s\S]*What we learned:\n    reports are short[\s\S]*PAUSED/);
+  assert.doesNotMatch(out, /Awaiting/);
+  assert.match(A.reportScreen(A.reportItems([], new Set(), [mark(2, '2026-10-11', REPORT)], new Set(), 'WG')[0]).join('\n'), /comment only/);
 });
 test('merge: clean owner-merge PRs, not drafts', () => {
   const p = (n, s, label = 'gate:owner-merge', isDraft = false) => ({ number: n, mergeStateStatus: s, isDraft, labels: [{ name: label }] });
@@ -29,8 +45,7 @@ test('screens and status', () => {
   assert.match(A.prScreen({ title: 't', repo: 'srs', number: 5, body: 'x\nDecision asked: ship it?\ny', statusCheckRollup: [{ conclusion: 'SUCCESS' }] }).join('\n'), /Decision asked: ship it\?[\s\S]*all green/);
   assert.equal(A.statusLine('G', 'ok', '3', '10'), 'G: running, merged 3/10 this cycle');
   assert.match(A.statusLine('G', 'paused: 2 reports unacknowledged', '0', '10'), /PAUSED/);
-  assert.equal(A.reportScreen({ created_at: '2026-10-10T0', html_url: 'u', body: Array(30).fill('l').join('\n') }).length, 13);
-  assert.match(summarise([{ id: 'abcdef123', title: 'T', action: 'setaside' }], 'Session X'), /Set aside: T \[abcdef12\]/);
+    assert.match(summarise([{ id: 'abcdef123', title: 'T', action: 'setaside' }], 'Session X'), /Set aside: T \[abcdef12\]/);
 });
 
 const act = (kind, id) => JSON.stringify({ kind, id });
@@ -69,13 +84,23 @@ test('a decision listed in a parent log is the parent context\'s to ratify', asy
 
 test('agenda shows progress per section and a tally of the session so far', () => {
   const items = [1, 2, 3, 4].map((i) => ({ instanceId: 'd' + i }));
-  const lines = A.agendaLines({ ratify: items, decide: [], ack: [], merge: [], status: [], done: { 1: 2 }, tally: 'This session so far: 2 ratified' });
+  const lines = A.agendaLines({ ratify: items, reports: [], decide: [], merge: [], status: [], done: { 1: 2 }, tally: 'This session so far: 2 ratified' });
   assert.match(lines[1], /4   2 done · 2 left$/);
   assert.match(lines.at(-1), /This session so far: 2 ratified/);
-  const all = A.agendaLines({ ratify: items, decide: [], ack: [], merge: [], status: [], done: { 1: 4 } });
+  const all = A.agendaLines({ ratify: items, reports: [], decide: [], merge: [], status: [], done: { 1: 4 } });
   assert.match(all[1], /4 done · 0 left  ✓$/);
-  const t = A.tallyLine([{ action: 'ratify', edits: [], comments: [] }, { action: 'setaside', edits: [], comments: [{}] }, { action: 'consider', held: true, edits: [{}], comments: [] }], { ack: 1, merge: 0 });
-  assert.match(t, /1 ratified · 1 set aside · 1 held · 1 edited · 1 comment · 1 acknowledged/);
+  const t = A.tallyLine([{ action: 'ratify', edits: [], comments: [] }, { action: 'setaside', edits: [], comments: [{}] }, { action: 'consider', held: true, edits: [{}], comments: [] }], { merge: 0 });
+  assert.match(t, /1 ratified · 1 set aside · 1 held · 1 edited · 1 comment/);
+  assert.match(A.tallyLine([{ action: 'receive', report: true }]), /1 report received/);
+  assert.match(A.tallyLine([{ action: 'receive' }, { action: 'receive' }]), /2 reports received/);
   assert.equal(A.tallyLine([]), '');
   assert.match(A.choiceLine({ action: 'consider', held: true, note: 'for Mark', edits: [], comments: [] }), /This session: held \(for Mark\)/);
+});
+
+test('agenda follows a meeting: decisions since, reports, decisions for this session, merges', () => {
+  const l = A.agendaLines({ ratify: [1], reports: [1, 2], decide: [], merge: [], status: [], done: { 2: 1 } });
+  assert.match(l[1], /1\. Decisions since the last session/);
+  assert.match(l[2], /2\. Reports from working groups\s+2   1 done · 1 left$/);
+  assert.match(l[3], /3\. Decisions for this session/);
+  assert.match(l[4], /4\. Merges/);
 });
