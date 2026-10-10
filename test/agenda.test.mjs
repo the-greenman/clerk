@@ -66,3 +66,16 @@ test('a decision listed in a parent log is the parent context\'s to ratify', asy
   assert.deepEqual(ratifyItems(records, groupLog, [ownerLog]).map((r) => r.instanceId), ['local']);
   assert.deepEqual(ratifyItems(records, ownerLog).map((r) => r.instanceId), ['escalated']);
 });
+
+test('agenda shows progress per section and a tally of the session so far', () => {
+  const items = [1, 2, 3, 4].map((i) => ({ instanceId: 'd' + i }));
+  const lines = A.agendaLines({ ratify: items, decide: [], ack: [], merge: [], status: [], done: { 1: 2 }, tally: 'This session so far: 2 ratified' });
+  assert.match(lines[1], /4   2 done · 2 left$/);
+  assert.match(lines.at(-1), /This session so far: 2 ratified/);
+  const all = A.agendaLines({ ratify: items, decide: [], ack: [], merge: [], status: [], done: { 1: 4 } });
+  assert.match(all[1], /4 done · 0 left  ✓$/);
+  const t = A.tallyLine([{ action: 'ratify', edits: [], comments: [] }, { action: 'setaside', edits: [], comments: [{}] }, { action: 'consider', held: true, edits: [{}], comments: [] }], { ack: 1, merge: 0 });
+  assert.match(t, /1 ratified · 1 set aside · 1 held · 1 edited · 1 comment · 1 acknowledged/);
+  assert.equal(A.tallyLine([]), '');
+  assert.match(A.choiceLine({ action: 'consider', held: true, note: 'for Mark', edits: [], comments: [] }), /This session: held \(for Mark\)/);
+});

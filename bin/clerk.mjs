@@ -134,7 +134,10 @@ const sections = {
 };
 const g = isOwner ? groupState(repo) : { pause: 'n/a', merged: '-', budget: '-' };
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
-const agenda = () => { header(); show(A.agendaLines({ ratify: sections[1].items, decide: sections[2].items, ack: sections[3].items, merge: sections[4].items,
+const acted = { ack: 0, merge: 0 }; const doneIds = { 3: new Set(), 4: new Set() };
+const doneCount = (n) => (n <= 2 ? sections[n].items.filter((it) => choices.some((c) => c.id === it.instanceId)).length : doneIds[n].size);
+const agenda = () => { header(); show(A.agendaLines({ done: { 1: doneCount(1), 2: doneCount(2), 3: doneCount(3), 4: doneCount(4) }, tally: A.tallyLine(choices, acted),
+  ratify: sections[1].items, decide: sections[2].items, ack: sections[3].items, merge: sections[4].items,
   status: isOwner ? [A.statusLine('WG Third-party ready', g.pause, g.merged, g.budget)] : [] })); };
 
 const choices = [];
@@ -157,7 +160,7 @@ async function walk(n) {
     const it = items[i]; const dec = n <= 2;
     const ref = { instanceId: it.instanceId, title: dec ? A.fv(it).title : '' };
     const choice = (action, text) => take(choices, ref, { action, text });
-    show([`${sections[n].name} ${i + 1}/${items.length}`, ...keys[n].screen(it)]);
+    show([`${sections[n].name} ${i + 1} of ${items.length} · ${doneCount(n)} done in this section`, ...keys[n].screen(it), ...(dec ? [A.choiceLine(choices.find((c) => c.id === it.instanceId))].filter(Boolean) : doneIds[n].has(it.id ?? it.number) ? ['  This session: done'] : [])]);
     for (;;) {
       const k = (await key(keys[n].prompt)).toLowerCase();
       if (k === 'q') return false;
@@ -187,8 +190,8 @@ async function walk(n) {
         if (n === 1 && (k === 'r' || k === 's')) { choice(k === 'r' ? 'ratify' : 'setaside'); console.log('  noted for the session'); break; }
         if (n === 2 && k === 'a') { choice('accept'); console.log('  noted for the session'); break; }
         if (n === 2 && k === 'c') { const t = await ask('resolution text > '); if (t) { choice('other', t); console.log('  noted for the session'); break; } continue; }
-        if (n === 3 && k === 'a') { gh(['api', '-X', 'POST', `repos/${REPORT_ISSUE.split('/issues')[0]}/issues/comments/${it.id}/reactions`, '-f', 'content=+1']); console.log('  acknowledged (+1)'); break; }
-        if (n === 4 && k === 'm') { gh(['pr', 'merge', String(it.number), '-R', `the-greenman/${it.repo}`, '--merge']); console.log('  merged'); break; }
+        if (n === 3 && k === 'a') { gh(['api', '-X', 'POST', `repos/${REPORT_ISSUE.split('/issues')[0]}/issues/comments/${it.id}/reactions`, '-f', 'content=+1']); acted.ack++; doneIds[3].add(it.id); console.log('  acknowledged (+1)'); break; }
+        if (n === 4 && k === 'm') { gh(['pr', 'merge', String(it.number), '-R', `the-greenman/${it.repo}`, '--merge']); acted.merge++; doneIds[4].add(it.number); console.log('  merged'); break; }
       } catch (e) { console.log('  failed: ' + (e.stderr || e.message).toString().trim()); }
     }
   }
@@ -211,6 +214,7 @@ while (go) {
   if (sections[k]) { sections[k].items.length ? (go = await walk(Number(k))) : console.log('  nothing here'); }
 }
 if (needsTranscript(choices) && !transcript) { const f = await ask('a comment cites the transcript; transcript file path > '); if (f) transcript = resolve(f); }
+{ const t = A.tallyLine(choices, acted); if (t) console.log('\n' + t.replace(/ \(recorded when.*$/, '')); }
 if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} decision(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
   endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
 else if (choices.length) console.log('Nothing recorded.');
