@@ -1,0 +1,22 @@
+name: Derive priority
+
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: "15 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: derive-priority
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    uses: the-greenman/clerk/.github/workflows/programme-derive-priority.yml@<clerk-sha>
+    with:
+      clerk-ref: <clerk-sha>
+    secrets: inherit

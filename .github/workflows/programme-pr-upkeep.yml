@@ -1,0 +1,69 @@
+name: Programme PR upkeep
+
+# Reusable. Merge green gate:auto-merge PRs and keep gated PRs up to date across the estate
+# (clerk upkeep); with digest, also post the owner's review digest on the settings digest_issue.
+# Triggers (15-minute cron, daily digest cron, push, workflow_run, dispatch) and the concurrency
+# group stay in the caller. github.event_name and github.event.schedule are the caller's.
+# digest-cron must equal the caller's digest cron expression.
+# clerk-ref: as in programme-validate.yml.
+
+on:
+  workflow_call:
+    inputs:
+      clerk-ref:
+        description: "Commit SHA of the clerk to run; set it to the same SHA as in the caller's uses: line"
+        type: string
+        required: true
+      apply:
+        description: "Act on a manual run (false = dry run); automatic runs always act"
+        type: boolean
+        default: false
+      digest:
+        description: "Post the digest on a manual run"
+        type: boolean
+        default: false
+      digest-cron:
+        description: "The caller's digest cron; a run started by it posts the digest"
+        type: string
+        default: "20 7 * * *"
+    secrets:
+      BOARD_TOKEN:
+        description: "repo scope on every governed repo"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  upkeep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the programme
+        uses: actions/checkout@v4
+
+      # The clerk at the SAME ref the caller pinned in `uses:` (see clerk-ref above).
+      - name: Checkout the clerk
+        uses: actions/checkout@v4
+        with:
+          repository: the-greenman/clerk
+          ref: ${{ inputs.clerk-ref }}
+          path: .clerk
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Upkeep
+        env:
+          GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
+          IS_AUTO: ${{ github.event_name != 'workflow_dispatch' }}
+          APPLY: ${{ inputs.apply }}
+          DIGEST: ${{ inputs.digest }}
+          SCHEDULE: ${{ github.event.schedule }}
+          DIGEST_CRON: ${{ inputs.digest-cron }}
+        run: |
+          export $(node .clerk/bin/clerk.mjs fetch-srs --repo "$GITHUB_WORKSPACE")
+          args=(--repo "$GITHUB_WORKSPACE")
+          if [ "$IS_AUTO" = true ] || [ "$APPLY" = true ]; then args+=(--apply); fi
+          if [ "$SCHEDULE" = "$DIGEST_CRON" ] || [ "$DIGEST" = true ]; then args+=(--digest); fi
+          node .clerk/bin/clerk.mjs upkeep "${args[@]}"
