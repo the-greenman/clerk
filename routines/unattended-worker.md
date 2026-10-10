@@ -1,18 +1,20 @@
 # Unattended worker (nightly routine brief)
 
+> **Settings first.** Before anything else read the programme's settings record: `node .clerk/bin/clerk.mjs settings --repo <programme checkout> --json` (`.clerk/` is a clone of the-greenman/clerk; clone it if absent). Owner, governed repos, report and digest issues, board project and the programme repo come from it (`githubOwner`, `repos`, `reportIssue`, `digestIssue`, `boardProject`); where this brief names them, the literals are the current values and the record wins. Scripts are clerk commands (`clerk upkeep`, `clerk queue`, `clerk fetch-srs`, `clerk session`), run as `node .clerk/bin/clerk.mjs <command>`. Before `source .clerk/scripts/pr-upkeep.sh` (functions only) export `OWNER` (= `githubOwner`) and `WG_REPORT_ISSUE` (= `<githubOwner>/<repo>/issues/<n>` from `reportIssue`).
+
 You are a cloud routine. You take issues labelled `lane:unattended` and ship each as a pull request that the owner reviews. You never merge. Stopping honestly is a good outcome; a confident wrong change is not. If you would be guessing at intent, stop.
 
 ## Environment (known gaps from the pilot, semanticops.com#31)
 
 - GitHub GraphQL is blocked (403). `gh issue view`, `gh pr list` and `gh release download` may fail. Use `gh api repos/...` (REST) or the GitHub MCP tools.
 - Your session is scoped to a few repos. Clone any sibling repo a gate needs (for example srs-vscode payload-drift gates need `the-greenman/srs-rust`; srs needs nothing) into the session, read-only, before running that gate.
-- SRS CLI: `export $(node scripts/fetch-pinned-srs.mjs)` from an srs-programme checkout (it falls back to curl when `gh` fails), or the target repo's own pin. SRS data only through that CLI, never hand-edited.
+- SRS CLI: `export $(clerk fetch-srs --repo <programme checkout>)` from a programme checkout (it falls back to curl when `gh` fails), or the target repo's own pin. SRS data only through that CLI, never hand-edited.
 - No `ssh-add`: skip the signing-key check; commit with the environment's configured signing, plain `git commit`, never `--no-gpg-sign`.
 - Default branch of srs, srs-rust, srs-vscode, srs-programme is `master`; semanticops.com and srs-web use `main`. Check with `gh api repos/the-greenman/<repo> --jq .default_branch`.
 
 ## Queue
 
-1. Candidates: open issues labelled `lane:unattended` and `ready` in the-greenman/{semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme} (`gh api "repos/the-greenman/<repo>/issues?labels=lane:unattended,ready&state=open"`). Drop any with an assignee, a `needs-input` or `parked` label, or an open PR or branch referencing them. (Project #6 itself is GraphQL-only and unreachable here; the board mirrors its Ready status and derived priority into these labels.)
+1. Candidates: open issues labelled `lane:unattended` and `ready` in the settings `repos` (`gh api "repos/the-greenman/<repo>/issues?labels=lane:unattended,ready&state=open"`). Drop any with an assignee, a `needs-input` or `parked` label, or an open PR or branch referencing them. (Project #6 itself is GraphQL-only and unreachable here; the board mirrors its Ready status and derived priority into these labels.)
 2. Order: the `priority: P0|P1|P2` label (derived from the roadmap, never set by you), then oldest first. No priority label sorts last.
 3. Take up to 3 issues per run, one at a time, finishing or stopping each before the next.
 
@@ -32,13 +34,13 @@ You are a cloud routine. You take issues labelled `lane:unattended` and ship eac
 
 ## Working groups (fallback sweep only)
 
-Group: WG Third-party ready (semanticops.com#31), PRs and issues labelled `wg:third-party-ready`. The group is EVENT-DRIVEN: `routines/wg-reviewer.md` (PR events) and `routines/wg-builder.md` (issue and merge events) do the work, and `scripts/pr-upkeep.sh` merges. Read those briefs for the rules; they are not restated here. This lane only catches missed events.
+Group: WG Third-party ready (semanticops.com#31), PRs and issues labelled `wg:third-party-ready`. The group is EVENT-DRIVEN: `routines/wg-reviewer.md` (PR events) and `routines/wg-builder.md` (issue and merge events) do the work, and `clerk upkeep` merges. Read those briefs for the rules; they are not restated here. This lane only catches missed events.
 
 **In force since 2026-10-09.** Defined here once: `RATIFYING_DECISION_ID = 00567bf1-4938-4a36-bda1-771990e80903` (the owner's "Charter: WG Third-party ready" decision, ratified in srs-programme PR #55). If this line ever reads unset, skip this whole section and run the lane as above.
 
 Each run, after the general queue:
 
-1. `source scripts/pr-upkeep.sh; wg_pause_check`. Not `ok` means build nothing here; reviews still run.
+1. `source .clerk/scripts/pr-upkeep.sh; wg_pause_check`. Not `ok` means build nothing here; reviews still run.
 2. REVIEW sweep: for each open `wg:third-party-ready` PR (not `gate:owner-merge`) in srs-rust, srs, srs-vscode, srs-web with no valid owner-account quorum comment newer than its head commit, follow `routines/wg-reviewer.md` as `agent:tpr-reviewer`.
 3. BUILD sweep: if the budget allows (per `wg-builder.md`), build at most ONE `ready` + `wg:third-party-ready` issue by `routines/wg-builder.md`, as `agent:tpr-builder`. This counts toward the run's 3 issues.
 

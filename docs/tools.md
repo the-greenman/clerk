@@ -30,7 +30,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 
 ## Settings
 
-Nothing programme-specific is hard-coded. `lib/adapters/settings.mjs` reads the one `com.semanticops.programme/programme` record (title, github_owner, governed_repos, report_issue, digest_issue, board_project, board_story_repo, owner_actor) from the programme repo; `--repo` picks it. Env wins where CI needs it: `gh-project.mjs` uses `GHP_OWNER`, `GHP_PROJECT`, `GHP_STORY_REPO`, `GHP_MIRROR_REPOS` first and reads settings (from `CLERK_REPO` or the cwd) only for what is unset. The programme repo's own slug, worktree base (`~/dev/.wt/<name>`) and default branch are derived from its git remote. Still hard-coded, as working-group settings for a later step: the four WG repos in `bin/clerk.mjs` and the WG constants at the top of `scripts/pr-upkeep.sh`. `groupState` sources the programme's own copy of `pr-upkeep.sh` until Phase 3.
+Nothing programme-specific is hard-coded. `lib/adapters/settings.mjs` reads the one `com.semanticops.programme/programme` record (title, github_owner, governed_repos, report_issue, digest_issue, board_project, board_story_repo, owner_actor) from the programme repo; `--repo` picks it. Env wins where CI needs it: `gh-project.mjs` uses `GHP_OWNER`, `GHP_PROJECT`, `GHP_STORY_REPO`, `GHP_MIRROR_REPOS` first and reads settings (from `CLERK_REPO` or the cwd) only for what is unset. The programme repo's own slug, worktree base (`~/dev/.wt/<name>`) and default branch are derived from its git remote. Still hard-coded, as working-group settings for a later step: the four WG repos in `bin/clerk.mjs` and the WG constants at the top of `scripts/pr-upkeep.sh`. 
 
 ## Packages
 
@@ -51,26 +51,27 @@ Export a deterministic bundle (not committed; `dist/` is git-ignored):
 
 ## Workflows
 
-Still in srs-programme unless noted; they call these scripts from the programme checkout, and move or repoint in a later phase.
+Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds thin callers (`examples/programme-workflows/`, exactly what to copy) that own the triggers, concurrency and `secrets: inherit`. Each checks out the caller, then the clerk into `.clerk/` at the `clerk-ref` input, which the caller sets to the same SHA as in its `uses:` line (a reusable workflow cannot reliably learn its own pinned ref). Bump both together. The srs CLI pin `SRS_RUST_CLI_TAG` stays in the caller's `validate.yml`.
 
-| Workflow | Purpose | Trigger | Runs | Writes |
-|---|---|---|---|---|
-| validate.yml (programme) | Conformance gate; holds the srs pin `SRS_RUST_CLI_TAG` | push, PR | conformance, roadmap tests | nothing |
-| derive-priority.yml (programme) | Apply roadmap priority | push to master, daily 06:15 | `roadmap --apply --yes` | epic priority, `parked` |
-| pr-upkeep.yml (programme) | Keep PRs moving, daily digest | every 15 min, 07:20 digest, push | `upkeep` | merges, digest |
-| pages.yml (programme) | Publish roadmap JSON | push | `roadmap --json` | Pages |
-| board-sync.yml (srs-rust) | Promote intents, reconcile board and labels | hourly | `board sync` | labels, board |
+| Workflow | Purpose | Caller trigger | Runs | Secrets | Writes |
+|---|---|---|---|---|---|
+| programme-validate.yml | Conformance gate | push, PR | srs `repo validate`, `conformance`, `check`, `roadmap --json` | GITHUB_TOKEN | nothing |
+| programme-derive-priority.yml | Apply roadmap priority; daily steward check | push, daily 06:15, dispatch | `roadmap --apply --yes`; `steward --fix` when not a push | BOARD_TOKEN | epic priority, `parked`, reopened issues |
+| programme-pr-upkeep.yml | Keep PRs moving, daily digest | every 15 min, 07:20 digest, push, workflow_run, dispatch | `upkeep` | BOARD_TOKEN | merges, digest |
+| programme-pages.yml | Publish `roadmap/` with generated roadmap.json | push, dispatch | `roadmap --json` | GITHUB_TOKEN | Pages |
+| programme-board-sync.yml | Promote intents, reconcile board and labels | push, hourly, dispatch | `board sync` (project, story repo, mirror repos from settings) | BOARD_SECRET or BOARD_TOKEN | labels, board |
+| test.yml (clerk) | The clerk's own tests | push, PR | `npm test` | | nothing |
 
-## Routines (cloud, briefs in srs-programme `routines/`)
+## Routines (cloud, briefs in `routines/`; lifecycle in [routines.md](routines.md))
 
 | Routine | Purpose | Trigger | Reads | Writes |
 |---|---|---|---|---|
 | unattended-worker.md | Ship `lane:unattended` issues as PRs | nightly 00:00 UTC, `trig_01GcbJwYyVfVTAekgYkAxFpJ` | issues (`ready` + lane), `queue` rules | branches, PRs, `status: in progress`, `needs-input` |
-| wg-steward.md | Daily cycle close: report, minutes | 11:30 UTC, `trig_015iT3SoLLvJmgADknC7RpfG` | merged PRs, issues | run-report records, a PR, comment on semanticops.com#31 |
-| (wg analyst) | Analyse and feed the group queue | 12:00 UTC, `trig_01M6mtE5wZJg2FeXFFnZjCSk` | issues, programme records | suggestions and issues |
+| wg-steward.md | Daily cycle close: report, minutes | 11:30 UTC, `trig_015iT3SoLLvJmgADknC7RpfG` | merged PRs, issues | run-report records, a PR, comment on the report issue |
+| wg-analyst.md | Analyse and feed the group queue | 12:00 UTC, `trig_01M6mtE5wZJg2FeXFFnZjCSk` | issues, programme records | suggestions and issues |
 | wg-builder.md | Build one `wg:third-party-ready` issue | event: issue labelled `ready` / PR merged | issue | branch, PR |
 | wg-reviewer.md | Review one PR, post quorum | event: PR opened/synchronize/labeled | PR | quorum comment, `gate:auto-merge` |
-| pilot31-ratify.md | Owner-run ratification steps | owner | | owner's records |
+| working-groups.md | Overview of the group's rules | | | |
 
 ## Label contract
 
