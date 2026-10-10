@@ -48,6 +48,12 @@ jobs:
           repository: the-greenman/clerk
           ref: ${{ inputs.clerk-ref }}
           path: .clerk
+          persist-credentials: false
+
+      # srs scans the whole repository root, so a clerk checkout inside it collides with the
+      # programme's installed packages (SRS038-R12-DUPLICATE-ID). Keep it outside the tree.
+      - name: Move the clerk out of the programme tree
+        run: mv .clerk "$RUNNER_TEMP/clerk"
 
       - uses: actions/setup-node@v4
         with:
@@ -62,8 +68,8 @@ jobs:
           SCHEDULE: ${{ github.event.schedule }}
           DIGEST_CRON: ${{ inputs.digest-cron }}
         run: |
-          export $(node .clerk/bin/clerk.mjs fetch-srs --repo "$GITHUB_WORKSPACE")
+          export $(node "$RUNNER_TEMP/clerk/bin/clerk.mjs" fetch-srs --repo "$GITHUB_WORKSPACE")
           args=(--repo "$GITHUB_WORKSPACE")
           if [ "$IS_AUTO" = true ] || [ "$APPLY" = true ]; then args+=(--apply); fi
           if [ "$SCHEDULE" = "$DIGEST_CRON" ] || [ "$DIGEST" = true ]; then args+=(--digest); fi
-          node .clerk/bin/clerk.mjs upkeep "${args[@]}"
+          node "$RUNNER_TEMP/clerk/bin/clerk.mjs" upkeep "${args[@]}"
