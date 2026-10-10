@@ -53,7 +53,7 @@ Export a deterministic bundle (not committed; `dist/` is git-ignored):
 
 ## Workflows
 
-Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds thin callers (`examples/programme-workflows/`, exactly what to copy) that own the triggers, concurrency and `secrets: inherit`. Each checks out the caller, then the clerk into `.clerk/` at the `clerk-ref` input, which the caller sets to the same SHA as in its `uses:` line (a reusable workflow cannot reliably learn its own pinned ref). Bump both together. The srs CLI pin `SRS_RUST_CLI_TAG` stays in the caller's `validate.yml`.
+Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds thin callers (`examples/programme-workflows/`, exactly what to copy) that own the triggers, concurrency and `secrets: inherit`. Each checks out the caller, then the clerk at the `clerk-ref` input, and moves it to `$RUNNER_TEMP/clerk` (outside the programme tree: srs scans the whole repo root, and a clerk inside it collides with the installed packages), which the caller sets to the same SHA as in its `uses:` line (a reusable workflow cannot reliably learn its own pinned ref). Bump both together. The srs CLI pin `SRS_RUST_CLI_TAG` stays in the caller's `validate.yml`.
 
 | Workflow | Purpose | Caller trigger | Runs | Secrets | Writes |
 |---|---|---|---|---|---|

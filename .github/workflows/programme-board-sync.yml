@@ -55,6 +55,12 @@ jobs:
           repository: the-greenman/clerk
           ref: ${{ inputs.clerk-ref }}
           path: .clerk
+          persist-credentials: false
+
+      # srs scans the whole repository root, so a clerk checkout inside it collides with the
+      # programme's installed packages (SRS038-R12-DUPLICATE-ID). Keep it outside the tree.
+      - name: Move the clerk out of the programme tree
+        run: mv .clerk "$RUNNER_TEMP/clerk"
 
       - uses: actions/setup-node@v4
         with:
@@ -71,7 +77,7 @@ jobs:
             echo "::error::Board PAT not set. Add a PAT with 'project' scope as the BOARD_SECRET (or BOARD_TOKEN) secret. A silent skip lets labels drift from the board and routines pick up stale work, so this is a hard failure."
             exit 1
           fi
-          clerk() { node "$GITHUB_WORKSPACE/.clerk/bin/clerk.mjs" "$@"; }
+          clerk() { node "$RUNNER_TEMP/clerk/bin/clerk.mjs" "$@"; }
           # settings are read through the pinned srs CLI, fetched with the default token
           export $(GH_TOKEN=${{ github.token }} clerk fetch-srs --repo "$GITHUB_WORKSPACE")
           S=$(clerk settings --repo "$GITHUB_WORKSPACE" --json)

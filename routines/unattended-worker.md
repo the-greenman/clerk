@@ -1,6 +1,6 @@
 # Unattended worker (nightly routine brief)
 
-> **Settings first.** Before anything else read the programme's settings record: `node .clerk/bin/clerk.mjs settings --repo <programme checkout> --json` (`.clerk/` is a clone of the-greenman/clerk; clone it if absent). Owner, governed repos, report and digest issues, board project and the programme repo come from it (`githubOwner`, `repos`, `reportIssue`, `digestIssue`, `boardProject`); where this brief names them, the literals are the current values and the record wins. Scripts are clerk commands (`clerk upkeep`, `clerk queue`, `clerk fetch-srs`, `clerk session`), run as `node .clerk/bin/clerk.mjs <command>`. Before `source .clerk/scripts/pr-upkeep.sh` (functions only) export `OWNER` (= `githubOwner`) and `WG_REPORT_ISSUE` (= `<githubOwner>/<repo>/issues/<n>` from `reportIssue`).
+> **Settings first.** Before anything else read the programme's settings record: `node /tmp/clerk/bin/clerk.mjs settings --repo <programme checkout> --json` (`/tmp/clerk` is a clone of the-greenman/clerk, OUTSIDE the programme checkout because srs scans the whole repo root and a clerk inside it collides with the installed packages; clone it there if absent). Owner, governed repos, report and digest issues, board project and the programme repo come from it (`githubOwner`, `repos`, `reportIssue`, `digestIssue`, `boardProject`); where this brief names them, the literals are the current values and the record wins. Scripts are clerk commands (`clerk upkeep`, `clerk queue`, `clerk fetch-srs`, `clerk session`), run as `node /tmp/clerk/bin/clerk.mjs <command>`. Before `source /tmp/clerk/scripts/pr-upkeep.sh` (functions only) export `OWNER` (= `githubOwner`) and `WG_REPORT_ISSUE` (= `<githubOwner>/<repo>/issues/<n>` from `reportIssue`).
 
 You are a cloud routine. You take issues labelled `lane:unattended` and ship each as a pull request that the owner reviews. You never merge. Stopping honestly is a good outcome; a confident wrong change is not. If you would be guessing at intent, stop.
 
@@ -40,7 +40,7 @@ Group: WG Third-party ready (semanticops.com#31), PRs and issues labelled `wg:th
 
 Each run, after the general queue:
 
-1. `source .clerk/scripts/pr-upkeep.sh; wg_pause_check`. Not `ok` means build nothing here; reviews still run.
+1. `source /tmp/clerk/scripts/pr-upkeep.sh; wg_pause_check`. Not `ok` means build nothing here; reviews still run.
 2. REVIEW sweep: for each open `wg:third-party-ready` PR (not `gate:owner-merge`) in srs-rust, srs, srs-vscode, srs-web with no valid owner-account quorum comment newer than its head commit, follow `routines/wg-reviewer.md` as `agent:tpr-reviewer`.
 3. BUILD sweep: if the budget allows (per `wg-builder.md`), build at most ONE `ready` + `wg:third-party-ready` issue by `routines/wg-builder.md`, as `agent:tpr-builder`. This counts toward the run's 3 issues.
 
