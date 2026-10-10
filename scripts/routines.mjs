@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+// routines: drift between cloud triggers (a dump), standing-job records and briefs in this repo.
+//   node scripts/routines.mjs --check <dump.json> [--repo <programme>] [--json]    exit 1 on any drift but stale-check-in
+import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { srsCli, srs } from '../lib/adapters/cli.mjs';
+import { checkRoutines } from '../lib/practice/routines.mjs';
+import { repoRoot } from './lib/repo-arg.mjs';
+
+const argv = process.argv.slice(2);
+const dump = argv[argv.indexOf('--check') + 1];
+if (!argv.includes('--check') || !dump) { console.error('usage: clerk routines --check <dump.json> [--repo <programme>] [--json]'); process.exit(2); }
+const raw = JSON.parse(readFileSync(dump, 'utf8'));
+const triggers = Array.isArray(raw) ? raw : raw.triggers ?? raw.data ?? [];
+const repo = repoRoot();
+const cli = srsCli(repo);
+const jobs = srs(cli, repo, ['record', 'list', '--type', 'com.mudemocracy.stewardship/standing-job']).records
+  .map(({ instanceId, record: { fieldValues: f } }) => ({ id: instanceId, title: f.title, routine_id: f.routine_id, brief: f.brief_path }));
+const clerk = fileURLToPath(new URL('..', import.meta.url));
+const briefs = new Set(execFileSync('git', ['ls-files', 'routines/*.md'], { cwd: clerk, encoding: 'utf8' }).split('\n').filter(Boolean));
+
+const drift = checkRoutines({ triggers, jobs, briefs });
+if (argv.includes('--json')) console.log(JSON.stringify(drift, null, 2));
+else {
+  for (const kind of [...new Set(drift.map((d) => d.kind))]) {
+    console.log(kind);
+    for (const d of drift.filter((x) => x.kind === kind)) console.log(`  ${d.subject}  ${d.detail}`);
+  }
+  console.log(`${drift.length} drift (${drift.filter((d) => d.kind !== 'stale-check-in').length} blocking)`);
+}
+process.exit(drift.some((d) => d.kind !== 'stale-check-in') ? 1 : 0);

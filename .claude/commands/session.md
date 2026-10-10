@@ -16,6 +16,8 @@ export SESSION_REPO=$(~/dev/semanticops/clerk/scripts/session --prepare)   # one
 
 Use `--as <role>` only if the owner passed one in `$ARGUMENTS`; the default role is `owner`. Run these as plain foreground commands with a timeout of 300000. Keep that path and pass it as `SESSION_REPO=` on every later call (shell state does not persist between Bash calls), so the briefing, the dry run and the record all use the same copy.
 
+Then run `/routines` and show its drift count in one line (read-only; it never edits a trigger).
+
 ## 2. Brief the owner, at their level
 
 Give the information each item needs to be decided, and nothing more (concept doc section 2: too much information is noise):

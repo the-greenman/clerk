@@ -16,6 +16,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | `check` | Method rules: two poles per tension, one tension per principle, boundaries | CI, human | programme records | nothing | owner |
 | `conformance` | Programme repo is an SRS repo and validates | CI | programme repo | nothing | validate.yml |
 | `board` | Story-driven priority on GitHub Project #5 (`gh-project.mjs`) | Hourly; human | issues, board | board fields, mirror labels, comments | board-sync.yml, roadmap |
+| `routines` | Drift between cloud triggers (a dump from the RemoteTrigger `list`), standing-job records and `routines/*.md`: `routines --check <dump.json> [--repo <programme>] [--json]`; exit 1 on any drift but stale check-ins | Human; `/routines`, `/session` | trigger dump, programme standing-job records, `git ls-files routines/` | nothing | owner |
 | `wt` | Create, list, prune git worktrees | Human | git | worktrees | `scripts/session`, owner |
 | `fetch-srs` | Download the pinned srs CLI, print `SRS_CLI_PATH=` | Human; CI | `.github/workflows/validate.yml` of the programme repo | `/tmp/srs-cli` | every script and workflow needing srs |
 
@@ -26,6 +27,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | roadmap.mjs, queue.mjs, steward-check.mjs, check-method.mjs, check-programme-conformance.mjs, fetch-pinned-srs.mjs, gh-project.mjs, pr-upkeep.sh, wt | Behind the commands above | see above | see above | `clerk <name>` |
 | lib/pinned-srs.mjs, lib/repo-arg.mjs | Pin lookup; `--repo` resolution | programme `validate.yml` | | scripts |
 | session | Fresh programme worktree, pinned srs, then open the clerk | srs-programme master | a worktree | owner, `/session` (`.claude/commands/session.md`) |
+| routines.mjs | Behind `clerk routines` (logic in `lib/practice/routines.mjs`) | see above | nothing | `clerk routines` |
 | *.test.mjs, pr-upkeep.test.sh | Tests (`npm test`) | fixtures | | CI |
 
 ## Settings
@@ -40,7 +42,7 @@ Canonical source of the methodology packages, installed into the programme repo 
 |---|---|---|---|---|
 | `packages/method` | com.semanticops.method | 1.0.0 | problems, remedies, tensions, principles, archetypes | clerk (this copy) |
 | `packages/governance` | com.mudemocracy.governance | 1.1.0 | decisions, roles, logs | muDemocracy.org `muSrs/packages/governance` (same id and version; differs only in key order) |
-| `packages/stewardship` | com.mudemocracy.stewardship | 0.1.0 | agents, standing jobs, run reports | muDemocracy.org `muSrs/packages/stewardship` (the programme's install also carries imported com.thesystem fields) |
+| `packages/stewardship` | com.mudemocracy.stewardship | 0.1.0 | agents, standing jobs (optional `routine_id`, `brief_path`), run reports | muDemocracy.org `muSrs/packages/stewardship` (the programme's install also carries imported com.thesystem fields) |
 | `packages/programme` | com.semanticops.programme `methodology` | 0.1.0 | the `programme` settings type and its fields | clerk (this copy) |
 
 The live methodology types (period, objective, epic, stakeholder, session and the relation types serves, responds-to, ratifies, considers, sets-aside, attended-by, receives) are still defined in srs-programme's primary package (`com.semanticops.programme` `primary`, 1.0.0) and will move into `packages/programme` in a later step.

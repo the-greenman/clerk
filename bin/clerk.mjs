@@ -25,6 +25,7 @@ const TOOLS = {
   check: ['check-method.mjs', 'method structure rules: tensions, principles, boundaries'],
   conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
   board: ['gh-project.mjs', 'story-driven priority on the GitHub Project (many subcommands, see its help)'],
+  routines: ['routines.mjs', 'drift between cloud triggers (a dump), standing-job records and briefs (--check <dump.json>)'],
   wt: ['wt', 'create, list and prune git worktrees'],
   settings: ['settings.mjs', 'print the programme settings record (--json)'],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],

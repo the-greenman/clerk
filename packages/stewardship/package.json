@@ -36,7 +36,9 @@
     "fields/brief-eff125b7.json",
     "fields/overpoweringremedy-f21a7a08.json",
     "fields/linestances-f238315a.json",
-    "fields/missingremedy-f3774d67.json"
+    "fields/missingremedy-f3774d67.json",
+    "fields/routineid-7ae7b17d.json",
+    "fields/briefpath-64ad68fd.json"
   ],
   "types": [
     "types/standing-job-58f0ee7b.json",

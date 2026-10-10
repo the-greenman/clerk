@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Optional. Path of the routine brief this job runs, in the-greenman/clerk on its default branch (e.g. routines/wg-steward.md). The trigger prompt points at this path; `clerk routines --check` verifies the file exists."
+  },
+  "createdAt": "2026-10-10T12:00:00+00:00",
+  "description": "Optional. Path of the routine brief this job runs, in the-greenman/clerk on its default branch (e.g. routines/wg-steward.md). The trigger prompt points at this path; `clerk routines --check` verifies the file exists.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "64ad68fd-5ea8-40ad-9d88-346991c1f6c1",
+  "name": "brief_path",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}
