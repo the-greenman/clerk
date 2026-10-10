@@ -3,14 +3,41 @@
 // Read-only until a key is pressed; Reports' +1 and Merge act at once, Ratify/Decide on end of session.
 import { createInterface } from 'node:readline';
 import { resolve } from 'node:path';
-import { OWNER_LOG, GROUP_LOG, GROUP_NAME } from '../lib/roles.mjs';
-import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/io.mjs';
-import * as A from '../lib/agenda.mjs';
-import * as D from '../lib/discussion.mjs';
-import { endSession, postComments, stamp, take, FIELDS, EX_FIELDS, needsTranscript } from '../lib/session.mjs';
-import { authorise, resolveContext, quorum, quorumText } from '../lib/roles.mjs';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { OWNER_LOG, GROUP_LOG, GROUP_NAME } from '../lib/practice/roles.mjs';
+import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/adapters/cli.mjs';
+import * as A from '../lib/practice/agenda.mjs';
+import * as D from '../lib/practice/discussion.mjs';
+import { stamp, take, FIELDS, EX_FIELDS, needsTranscript } from '../lib/practice/session.mjs';
+import { endSession, postComments } from '../lib/adapters/session.mjs';
+import { authorise, resolveContext, quorum, quorumText } from '../lib/practice/roles.mjs';
 
 const argv = process.argv.slice(2);
+
+// Programme tools: one table, argv forwarded to the script (node for .mjs, bash otherwise).
+const TOOLS = {
+  roadmap: ['roadmap.mjs', 'derive epic priority from the period ranking (--json, --explain, --apply)'],
+  queue: ['queue.mjs', 'report what the unattended lane would take next'],
+  upkeep: ['pr-upkeep.sh', 'keep open PRs moving: merge or update-branch by gate label (--digest, --apply)'],
+  steward: ['steward-check.mjs', 'working-group steward check (--fix acts)'],
+  check: ['check-method.mjs', 'method structure rules: tensions, principles, boundaries'],
+  conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
+  board: ['gh-project.mjs', 'story-driven priority on the GitHub Project (many subcommands, see its help)'],
+  wt: ['wt', 'create, list and prune git worktrees'],
+  'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
+};
+if (argv[0] === 'help' || argv[0] === '--help') {
+  console.log('clerk: act by role on an SRS programme.\n\n  session|comment   hold a session or post comments (clerk session --repo <path> --as <role>)\n  (no subcommand)   the interactive agenda (clerk --repo <path> --as <role>)');
+  for (const [k, [, d]] of Object.entries(TOOLS)) console.log(`  ${k.padEnd(17)} ${d}`);
+  console.log('\nTools take --repo <programme path> (default: current directory). See docs/tools.md.');
+  process.exit(0);
+}
+if (TOOLS[argv[0]]) {
+  const f = fileURLToPath(new URL('../scripts/' + TOOLS[argv[0]][0], import.meta.url));
+  const r = spawnSync(f.endsWith('.mjs') ? process.execPath : 'bash', [f, ...argv.slice(1)], { stdio: 'inherit' });
+  process.exit(r.status ?? 1);
+}
 const sub = argv[0] === 'session' || argv[0] === 'comment';
 const arg = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
 const args = (n) => argv.flatMap((v, i) => (v === n ? [argv[i + 1]] : []));
