@@ -214,4 +214,4 @@ if (needsTranscript(choices) && !transcript) { const f = await ask('a comment ci
 if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} decision(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
   endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
 else if (choices.length) console.log('Nothing recorded.');
-rl.close();
+if (!TTY) process.stdin.destroy(); // piped mode: end the line reader so the process exits
