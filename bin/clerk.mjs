@@ -206,7 +206,7 @@ async function walk(n) {
           const cite = await ask("cite (source-document id, URL, 'transcript', blank = none) > ");
           const role = cite ? (await ask('role of citation [quoted-from/evidence] (blank = default) > ')) || undefined : undefined;
           const note = cite ? (await ask('locator or passage note (optional) > ')) || undefined : undefined;
-          try { D.buildSourceRef(cite, role, { transcriptId: 'x', note }); take(choices, ref, { comment: { text, replyTo: th[to - 1]?.comment.instanceId, cite: cite || undefined, role, note } }); console.log('  comment noted; the session will consider this decision'); }
+          try { D.buildSourceRef(cite, role, { transcriptId: 'x', note }); take(choices, ref, { comment: { text, replyTo: th[to - 1]?.comment.instanceId, cite: cite || undefined, role, note } }); console.log(`  comment noted; the session will consider this ${n === 3 ? 'exercise' : 'item'}`); }
           catch (e) { console.log('  ' + e.message); }
           continue;
         }
