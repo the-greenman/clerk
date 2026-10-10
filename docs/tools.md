@@ -11,7 +11,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | `roadmap` | Derive epic priority from the period ranking | Human; workflows | programme records | with `--apply --yes`: board priority, `parked` label | derive-priority.yml, pages.yml |
 | `queue` | Report what the unattended lane would take next | Human | GitHub issues and PRs (6 repos) | nothing | unattended-worker routine brief |
 | `upkeep` | Merge or update PR branches by gate label | Every 15 min | GitHub PRs | merges, branch updates, digest comment on semanticops.com#33 | pr-upkeep.yml |
-| `steward` | Guard against false closes | Daily | closed issues (6 repos) | with `--fix`: reopen and comment | owner |
+| `steward` | Guard against false closes | Daily | closed issues (6 repos) | with `--fix`: reopen and comment | srs-programme `derive-priority.yml` (daily 06:15, `--fix`); owner |
 | `check` | Method rules: two poles per tension, one tension per principle, boundaries | CI, human | programme records | nothing | owner |
 | `conformance` | Programme repo is an SRS repo and validates | CI | programme repo | nothing | validate.yml |
 | `board` | Story-driven priority on GitHub Project #5 (`gh-project.mjs`) | Hourly; human | issues, board | board fields, mirror labels, comments | board-sync.yml, roadmap |

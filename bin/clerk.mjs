@@ -20,7 +20,7 @@ const TOOLS = {
   roadmap: ['roadmap.mjs', 'derive epic priority from the period ranking (--json, --explain, --apply)'],
   queue: ['queue.mjs', 'report what the unattended lane would take next'],
   upkeep: ['pr-upkeep.sh', 'keep open PRs moving: merge or update-branch by gate label (--digest, --apply)'],
-  steward: ['steward-check.mjs', 'working-group steward check (--fix acts)'],
+  steward: ['steward-check.mjs', 'guard against false closes: reopen issues closed without a merged PR (--fix acts)'],
   check: ['check-method.mjs', 'method structure rules: tensions, principles, boundaries'],
   conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
   board: ['gh-project.mjs', 'story-driven priority on the GitHub Project (many subcommands, see its help)'],
