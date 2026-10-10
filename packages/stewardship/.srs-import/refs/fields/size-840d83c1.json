@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Rough count of records touched per run"
+  },
+  "createdAt": "2026-09-19T12:27:22.907440303+00:00",
+  "description": "Rough count of records touched per run",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "840d83c1-56c4-4598-a870-705130ee56df",
+  "name": "size",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

@@ -1,0 +1,19 @@
+{
+  "id": "2030962b-8279-4345-9826-3e13f01cee4a",
+  "namespace": "com.semanticops.method",
+  "name": "shadow",
+  "version": 1,
+  "description": "What a side turns into when overdone.",
+  "aiGuidance": {
+    "purpose": "The failure shape of leaning too hard on this side (public word: overdone).",
+    "extraction": "One short plain-English sentence on how the side goes wrong when nothing balances it.",
+    "negativeGuidance": "Leave empty if no source says it; do not invent. It is never a reason to drop the side."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "editorHint": "textarea",
+  "createdAt": "2026-10-08T11:04:36.996Z"
+}

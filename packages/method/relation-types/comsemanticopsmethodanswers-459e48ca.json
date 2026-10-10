@@ -1,0 +1,13 @@
+{
+  "id": "459e48ca-4d70-418e-9517-f8dd2200ec8d",
+  "version": 1,
+  "key": "com.semanticops.method/answers",
+  "namespace": "com.semanticops.method",
+  "label": "Answers",
+  "description": "Remedy or epic answers problem.",
+  "category": "association",
+  "createdAt": "2026-10-08T10:44:32.607078529+00:00",
+  "canonicalDirection": "source is the remedy or epic; target is the problem it answers",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

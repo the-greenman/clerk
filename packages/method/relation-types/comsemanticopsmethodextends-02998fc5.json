@@ -1,0 +1,13 @@
+{
+  "id": "02998fc5-18d4-416e-96c3-0364367dc522",
+  "version": 1,
+  "key": "com.semanticops.method/extends",
+  "namespace": "com.semanticops.method",
+  "label": "Extends",
+  "description": "Principle extends another principle. Endpoints: principle -> principle.",
+  "category": "association",
+  "createdAt": "2026-10-08T11:04:58.488Z",
+  "canonicalDirection": "source is the extending principle; target is the principle it builds on",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

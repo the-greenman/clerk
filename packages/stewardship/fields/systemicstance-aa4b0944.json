@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Describes the archetype's characteristic posture toward change in the wider system."
+  },
+  "createdAt": "2026-09-19T12:28:43.046695761+00:00",
+  "description": "A one-sentence statement of how the archetype relates to systemic change.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "aa4b0944-01e8-49d9-a478-5178c7237f54",
+  "name": "systemic_stance",
+  "namespace": "com.thesystem",
+  "version": 1
+}

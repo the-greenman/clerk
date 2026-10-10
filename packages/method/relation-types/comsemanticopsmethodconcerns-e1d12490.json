@@ -1,0 +1,13 @@
+{
+  "id": "e1d12490-53ee-4e58-84ba-b1fef3c7d9c9",
+  "version": 1,
+  "key": "com.semanticops.method/concerns",
+  "namespace": "com.semanticops.method",
+  "label": "Concerns",
+  "description": "Problem concerns a pole (the side whose imbalance it describes; see the imbalance field). Endpoints: problem -> pole.",
+  "category": "association",
+  "createdAt": "2026-10-08T11:04:58.612Z",
+  "canonicalDirection": "source is the problem; target is the pole it concerns",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

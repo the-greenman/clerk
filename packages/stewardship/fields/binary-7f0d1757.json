@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Provides a compact numeric key for the archetype's axis polarities, used for sorting and lookup."
+  },
+  "createdAt": "2026-09-19T12:28:42.727982048+00:00",
+  "description": "The three-digit binary encoding of the archetype's axis positions (e.g. 111, 235).",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "7f0d1757-013d-40e2-8ab2-071c2540036a",
+  "name": "binary",
+  "namespace": "com.thesystem",
+  "version": 1
+}

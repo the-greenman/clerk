@@ -1,0 +1,16 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "Tensions or conflicts surfaced during the exercise."
+  },
+  "createdAt": "2026-06-27T00:00:00Z",
+  "description": "Tensions or conflicts surfaced during the exercise.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "f2e00002-0000-4000-8000-000000000002",
+  "name": "tensions",
+  "namespace": "governance",
+  "version": 1
+}

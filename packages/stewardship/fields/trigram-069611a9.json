@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Anchors the archetype to its symbolic trigram lineage for cross-referencing esoteric materials."
+  },
+  "createdAt": "2026-09-19T12:28:42.795307486+00:00",
+  "description": "The I Ching trigram name associated with this archetype (e.g. Heaven, Lake, Fire).",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "069611a9-5ad1-42cd-b27d-66ba0d494c79",
+  "name": "trigram",
+  "namespace": "com.thesystem",
+  "version": 1
+}

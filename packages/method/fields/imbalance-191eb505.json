@@ -1,0 +1,20 @@
+{
+  "id": "191eb505-cdb3-4b09-ae2b-30585713c0fd",
+  "namespace": "com.semanticops.method",
+  "name": "imbalance",
+  "version": 1,
+  "description": "How a tension has gone out of balance in a problem.",
+  "aiGuidance": {
+    "purpose": "Closed: held-too-long, missing, collapsed. Used on a problem that concerns a pole (public word: side).",
+    "extraction": "Pick the one term that describes the imbalance against the concerned side.",
+    "negativeGuidance": "Do not invent values."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "valueDomain": "closed",
+    "vocabularyRef": "cc6ffec6-3648-4cbf-8d68-21e6e9acd053"
+  },
+  "editorHint": "dropdown",
+  "createdAt": "2026-10-08T11:04:37.191Z"
+}

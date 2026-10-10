@@ -1,0 +1,63 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/package-manifest.json",
+  "title": "governance",
+  "description": "",
+  "status": "active",
+  "createdAt": "2026-10-09T18:16:46.699345360+00:00",
+  "fields": [
+    "fields/protectedstatus-0df40543.json",
+    "fields/friction-1a1c0a5d.json",
+    "fields/amendmentrule-1f01bc6b.json",
+    "fields/rationale-3340532b.json",
+    "fields/boundary-3c39ee1f.json",
+    "fields/nextsteps-4181f210.json",
+    "fields/owner-4b34847c.json",
+    "fields/articlenumber-60be1468.json",
+    "fields/alternativesconsidered-636ce948.json",
+    "fields/decisionquestion-73cd845a.json",
+    "fields/articletext-8aa3eba2.json",
+    "fields/context-9889052c.json",
+    "fields/sourceofauthority-9a32dc01.json",
+    "fields/roleholder-a6c19b95.json",
+    "fields/keyrequirements-a952604c.json",
+    "fields/status-aee7afe9.json",
+    "fields/revisitwhen-c04b7f84.json",
+    "fields/authority-d25da548.json",
+    "fields/title-d7e82557.json",
+    "fields/decisionstatement-de1296e0.json",
+    "fields/thinkingreached-f1e00001.json",
+    "fields/tensions-f2e00002.json",
+    "fields/unresolvedquestions-f3e00003.json",
+    "fields/blocking-f4e00004.json",
+    "fields/nextaction-f5e00005.json",
+    "fields/externallinks-fc434475.json"
+  ],
+  "types": [
+    "types/decision-1fcad6a2.json",
+    "types/decisionlog-5a061505.json",
+    "types/exercise-7f73b83e.json",
+    "types/article-a1142ac3.json",
+    "types/role-e53dce11.json"
+  ],
+  "relationTypes": [
+    "relation-types/delegates-31c82363.json"
+  ],
+  "views": [
+    "views/articles-list-a11c0000.json",
+    "views/roles-list-a11c0000.json",
+    "views/decision-log-faebd240.json"
+  ],
+  "compositions": [
+    "compositions/decision-deliberation-5a3ce87e.json",
+    "compositions/governance-document-732a982b.json",
+    "compositions/decision-log-b5c8d124.json"
+  ],
+  "blueprints": [],
+  "id": "1cd9622e-3d05-4214-a683-4cb81d0c44d9",
+  "namespace": "com.mudemocracy.governance",
+  "name": "governance",
+  "version": "1.1.0",
+  "lifecycles": [
+    "lifecycles/governancelifecycle-3c504040.json"
+  ]
+}

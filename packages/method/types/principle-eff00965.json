@@ -1,0 +1,37 @@
+{
+  "id": "eff00965-e1f5-4da0-bdfd-c7c705c3b8ea",
+  "namespace": "com.semanticops.method",
+  "name": "principle",
+  "version": 1,
+  "description": "A leaning tied to a context: 'this over that', with the case where the other side governs.",
+  "fields": [
+    {
+      "fieldId": "159222a6-8908-4aeb-a8db-64d1afea99b9",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "b681e85e-567c-4309-8b46-16b1dba8cd93",
+      "order": 1,
+      "required": true
+    },
+    {
+      "fieldId": "dc262ba1-7c76-4b04-ae6b-0d20c67d1671",
+      "order": 2,
+      "required": false
+    },
+    {
+      "fieldId": "0c9743ed-1d05-4b07-86c9-9bd89e0d60d1",
+      "order": 3,
+      "required": false
+    }
+  ],
+  "identityFieldId": "159222a6-8908-4aeb-a8db-64d1afea99b9",
+  "aiGuidance": {
+    "purpose": "Public words: leaning is 'default', boundary clause is 'unless'. governs one tension and leans-toward one of that tension's poles; may extend another principle. The boundary clause is required: a bare 'A over B' is not enough.",
+    "extraction": "statement = the default 'X over Y'; boundary_clause = when Y governs; source_ref points to the ratifying record, never copies it.",
+    "negativeGuidance": "Never a replacement for the tension. If no boundary is ratified write 'None ratified yet: to be stated'."
+  },
+  "createdAt": "2026-10-08T11:04:57.957Z",
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json"
+}

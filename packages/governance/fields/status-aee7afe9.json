@@ -1,0 +1,27 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "Current governance status of the record."
+  },
+  "createdAt": "2026-05-25T00:00:00Z",
+  "description": "Current governance status of the record.",
+  "fieldType": {
+    "allowedValues": [
+      "draft",
+      "proposed",
+      "active",
+      "deferred",
+      "superseded",
+      "closed",
+      "rejected",
+      "archived",
+      "abandoned"
+    ],
+    "datatype": "string",
+    "valueDomain": "closed"
+  },
+  "id": "aee7afe9-6650-5fa4-a61a-495c3b88994b",
+  "name": "status",
+  "namespace": "governance",
+  "version": 1
+}

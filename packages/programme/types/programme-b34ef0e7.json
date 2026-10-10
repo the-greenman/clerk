@@ -1,0 +1,57 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json",
+  "id": "b34ef0e7-6f33-4c43-85b8-7a2772f456ef",
+  "namespace": "com.semanticops.programme",
+  "name": "programme",
+  "version": 1,
+  "description": "Settings of one programme: whose it is, which repositories it governs, where it reports.",
+  "fields": [
+    {
+      "fieldId": "f37bceb4-568b-457c-9d3f-31c7e65d88a7",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "07ee0281-2747-4cce-a33f-ab41d210a034",
+      "order": 1,
+      "required": true
+    },
+    {
+      "fieldId": "65ff71e2-902f-4e40-88fc-3022d45f7541",
+      "order": 2,
+      "required": true
+    },
+    {
+      "fieldId": "05e8d8e5-4b0c-4918-bcdd-75e8d0cdccb0",
+      "order": 3,
+      "required": false
+    },
+    {
+      "fieldId": "bb3caa33-3ae0-4b53-9bc7-d7b5556c00af",
+      "order": 4,
+      "required": false
+    },
+    {
+      "fieldId": "851f95cc-a496-433b-811a-c151c33453eb",
+      "order": 5,
+      "required": false
+    },
+    {
+      "fieldId": "141a2ee7-e8c8-4673-9c65-342a9d7b9d89",
+      "order": 6,
+      "required": false
+    },
+    {
+      "fieldId": "44a66dd4-c598-4464-831b-bf2d6874b242",
+      "order": 7,
+      "required": false
+    }
+  ],
+  "identityFieldId": "f37bceb4-568b-457c-9d3f-31c7e65d88a7",
+  "aiGuidance": {
+    "purpose": "The single settings record the clerk reads instead of hard-coded values.",
+    "extraction": "Exactly one record per programme repository. Change a value here, not in code.",
+    "negativeGuidance": "Do not store working-group settings or secrets here."
+  },
+  "createdAt": "2026-10-10T00:00:00Z"
+}

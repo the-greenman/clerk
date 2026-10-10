@@ -1,0 +1,16 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "What is currently blocking the group from moving forward."
+  },
+  "createdAt": "2026-06-27T00:00:00Z",
+  "description": "What is currently blocking the group from moving forward.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "f4e00004-0000-4000-8000-000000000004",
+  "name": "blocking",
+  "namespace": "governance",
+  "version": 1
+}

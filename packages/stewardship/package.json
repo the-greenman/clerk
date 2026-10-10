@@ -1,0 +1,70 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/package-manifest.json",
+  "title": "stewardship",
+  "description": "",
+  "status": "active",
+  "createdAt": "2026-10-09T18:16:46.767560631+00:00",
+  "fields": [
+    "fields/figures-0004d14d.json",
+    "fields/trigram-069611a9.json",
+    "fields/symbol-0b094b7b.json",
+    "fields/trigger-0fbdf29d.json",
+    "fields/usewhen-2178898d.json",
+    "fields/overpoweringsignal-389e7571.json",
+    "fields/landedas-4b60dcec.json",
+    "fields/phrase-4e2b6e38.json",
+    "fields/missingsignal-51f4236a.json",
+    "fields/capacities-58d4b203.json",
+    "fields/networkdescription-60d8e640.json",
+    "fields/chose-6c4590d8.json",
+    "fields/binary-7f0d1757.json",
+    "fields/name-805427d4.json",
+    "fields/size-840d83c1.json",
+    "fields/archetypecode-8bb34f76.json",
+    "fields/shadowdescription-929d300f.json",
+    "fields/rundate-930c4a69.json",
+    "fields/shadowname-983c8914.json",
+    "fields/systemicstance-aa4b0944.json",
+    "fields/networksignal-b1e2311d.json",
+    "fields/activationprompts-b6501140.json",
+    "fields/activities-cb111d6e.json",
+    "fields/donewhen-d83f6280.json",
+    "fields/networkabsence-d9e4c884.json",
+    "fields/description-e7c60942.json",
+    "fields/networkantipattern-ea30bb5c.json",
+    "fields/coreenergy-ece5f93f.json",
+    "fields/brief-eff125b7.json",
+    "fields/overpoweringremedy-f21a7a08.json",
+    "fields/linestances-f238315a.json",
+    "fields/missingremedy-f3774d67.json"
+  ],
+  "types": [
+    "types/standing-job-58f0ee7b.json",
+    "types/run-report-8d355a63.json",
+    "types/agent-f6f2137d.json"
+  ],
+  "relationTypes": [
+    "relation-types/commudemocracystewardshipauthorised-by-92313a41.json",
+    "relation-types/commudemocracystewardshipauthored-by-f942751c.json"
+  ],
+  "views": [
+    "views/archetype-view-0c0e5fbf.json",
+    "views/job-view-81a7ee03.json",
+    "views/agent-prompt-view-a649cd1d.json"
+  ],
+  "compositions": [
+    "compositions/agent-synthesizer-0170916a.json",
+    "compositions/agent-analyst-18c39132.json",
+    "compositions/agent-watcher-21f49374.json",
+    "compositions/agent-challenger-3d7f2cee.json",
+    "compositions/agent-builder-6f68bd42.json",
+    "compositions/agent-steward-89b9d5ce.json",
+    "compositions/agent-rebel-8d994ad2.json",
+    "compositions/agent-initiator-aec08a78.json"
+  ],
+  "blueprints": [],
+  "id": "b64c147f-37c4-414b-8aac-b84202e5d63e",
+  "namespace": "com.mudemocracy.stewardship",
+  "name": "stewardship",
+  "version": "0.1.0"
+}

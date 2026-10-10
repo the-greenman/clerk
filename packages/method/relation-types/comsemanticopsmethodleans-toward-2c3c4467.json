@@ -1,0 +1,13 @@
+{
+  "id": "2c3c4467-20b8-40fe-91d8-9f4cf4ec976a",
+  "version": 1,
+  "key": "com.semanticops.method/leans-toward",
+  "namespace": "com.semanticops.method",
+  "label": "Leans toward",
+  "description": "Source leans toward a pole (public word: default side). Allowed sources: persona, agent, archetype, principle. Target: pole. No weights.",
+  "category": "association",
+  "createdAt": "2026-10-08T11:04:58.366Z",
+  "canonicalDirection": "source is the persona, agent, archetype or principle; target is the pole it leans toward",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

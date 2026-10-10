@@ -1,0 +1,19 @@
+{
+  "id": "50b17985-7eea-4ac5-886a-1408dab5d9e4",
+  "namespace": "com.semanticops.method",
+  "name": "kind",
+  "version": 1,
+  "description": "What sort of thing a problem is.",
+  "aiGuidance": {
+    "purpose": "Classifies a problem as belief, capability, condition, consequence or shift. Aligned with muSrs argument/kind.",
+    "extraction": "Pick the one term that best matches the statement; a consequence follows from other problems, a shift is a change in the world.",
+    "negativeGuidance": "Do not invent values; the domain is closed."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "valueDomain": "closed",
+    "vocabularyRef": "7d21013f-bcc7-41e1-b929-774c7b632319"
+  },
+  "editorHint": "dropdown",
+  "createdAt": "2026-10-08T10:44:21.280501565+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Topic intro prose, set description, or source description."
+  },
+  "createdAt": "2026-09-08T14:37:19Z",
+  "description": "Introductory or descriptive prose.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "e7c60942-7cdf-407e-be1f-bf5f4a648285",
+  "name": "description",
+  "namespace": "com.mudemocracy.argument",
+  "version": 1
+}

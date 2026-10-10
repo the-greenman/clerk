@@ -1,0 +1,42 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "createdAt": "2026-09-19T12:27:52.771271209+00:00",
+  "description": "Compact view of a standing job: what it does, when it counts as done, and what starts it.",
+  "exportConfig": {
+    "format": "markdown"
+  },
+  "fieldViews": [
+    {
+      "displayLabel": "Why it matters",
+      "fieldId": "e7c60942-7cdf-407e-be1f-bf5f4a648285",
+      "order": 0,
+      "required": true,
+      "visible": true
+    },
+    {
+      "displayLabel": "Done when",
+      "fieldId": "d83f6280-c70e-40cb-b794-8a2a5d66c02b",
+      "order": 1,
+      "required": true,
+      "visible": true
+    },
+    {
+      "displayLabel": "Trigger",
+      "fieldId": "0fbdf29d-2968-44c5-bf8b-d8834b647e75",
+      "order": 2,
+      "required": true,
+      "visible": true
+    },
+    {
+      "displayLabel": "Size",
+      "fieldId": "840d83c1-56c4-4598-a870-705130ee56df",
+      "order": 3,
+      "required": false,
+      "visible": true
+    }
+  ],
+  "id": "81a7ee03-4cd6-4065-8599-464aca380250",
+  "name": "job-view",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

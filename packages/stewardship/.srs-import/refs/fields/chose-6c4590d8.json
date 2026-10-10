@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "This over that, in this moment, for these reasons — the decision the run made"
+  },
+  "createdAt": "2026-09-19T12:27:22.971743995+00:00",
+  "description": "This over that, in this moment, for these reasons — the decision the run made",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "6c4590d8-8e8f-4b63-ba8c-de9fa49d9161",
+  "name": "chose",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

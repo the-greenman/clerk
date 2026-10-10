@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Provides ready-to-use prompts a facilitator can ask to invoke this archetype."
+  },
+  "createdAt": "2026-09-19T12:28:43.627423440+00:00",
+  "description": "A markdown bullet list of reflective questions that activate this archetype.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "b6501140-2f8a-4ac7-9eb2-bb02c91ba7bb",
+  "name": "activation_prompts",
+  "namespace": "com.thesystem",
+  "version": 1
+}

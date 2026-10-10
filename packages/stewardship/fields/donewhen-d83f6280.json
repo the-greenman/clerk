@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "A check someone else can run to confirm the job is done: a command or a count"
+  },
+  "createdAt": "2026-09-19T12:27:22.777988292+00:00",
+  "description": "A check someone else can run to confirm the job is done: a command or a count",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "d83f6280-c70e-40cb-b794-8a2a5d66c02b",
+  "name": "done_when",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

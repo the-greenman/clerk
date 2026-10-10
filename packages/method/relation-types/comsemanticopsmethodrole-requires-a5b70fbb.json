@@ -1,0 +1,13 @@
+{
+  "id": "a5b70fbb-c8ef-4248-a990-908ad19a0acd",
+  "version": 1,
+  "key": "com.semanticops.method/role-requires",
+  "namespace": "com.semanticops.method",
+  "label": "Role requires",
+  "description": "Role needs a pole to be held. Allowed sources: persona, agent, archetype. Target: pole.",
+  "category": "association",
+  "createdAt": "2026-10-08T11:04:58.428Z",
+  "canonicalDirection": "source is the persona, agent or archetype; target is the pole it requires",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

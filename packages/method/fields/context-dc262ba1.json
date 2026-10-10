@@ -1,0 +1,19 @@
+{
+  "id": "dc262ba1-7c76-4b04-ae6b-0d20c67d1671",
+  "namespace": "com.semanticops.method",
+  "name": "context",
+  "version": 1,
+  "description": "Where a principle's leaning applies.",
+  "aiGuidance": {
+    "purpose": "The situation in which the principle's default (public word: default) is meant to be applied.",
+    "extraction": "One short sentence.",
+    "negativeGuidance": "Not the boundary clause; that is the reverse case."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "editorHint": "textarea",
+  "createdAt": "2026-10-08T11:04:37.131Z"
+}

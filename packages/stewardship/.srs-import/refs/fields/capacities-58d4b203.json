@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Explains the perceptual and relational capacities this archetype contributes."
+  },
+  "createdAt": "2026-09-19T12:28:43.245297362+00:00",
+  "description": "A markdown description of what the archetype notices and brings to a situation.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "58d4b203-b5fa-47c5-94da-257934b5abaa",
+  "name": "capacities",
+  "namespace": "com.thesystem",
+  "version": 1
+}

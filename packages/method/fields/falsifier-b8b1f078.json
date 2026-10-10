@@ -1,0 +1,18 @@
+{
+  "id": "b8b1f078-5b18-4d23-9015-37a3566e0e38",
+  "namespace": "com.semanticops.method",
+  "name": "falsifier",
+  "version": 1,
+  "description": "What would show a remedy does not work.",
+  "aiGuidance": {
+    "purpose": "An observation that would count against the remedy, so it can be tested. Aligned with muSrs remedy.",
+    "extraction": "Describe a concrete, observable result that would refute the remedy.",
+    "negativeGuidance": "Not a restatement of the move or a vague risk."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-08T10:44:21.579760527+00:00"
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json",
+  "createdAt": "2026-09-19T12:27:41.761568552+00:00",
+  "description": "A standing maintenance job on this repository, bound to one agent and one authority class. One-off backlog jobs close when done_when holds; recurring jobs stay ratified.",
+  "fields": [
+    {
+      "displayLabel": "Title",
+      "fieldId": "d7e82557-9045-5e92-a494-d99112bbec4a",
+      "order": 0,
+      "required": true
+    },
+    {
+      "displayLabel": "Description",
+      "fieldId": "e7c60942-7cdf-407e-be1f-bf5f4a648285",
+      "order": 1,
+      "required": true
+    },
+    {
+      "displayLabel": "Done when",
+      "fieldId": "d83f6280-c70e-40cb-b794-8a2a5d66c02b",
+      "order": 2,
+      "required": true
+    },
+    {
+      "displayLabel": "Trigger",
+      "fieldId": "0fbdf29d-2968-44c5-bf8b-d8834b647e75",
+      "order": 3,
+      "required": true
+    },
+    {
+      "displayLabel": "Size",
+      "fieldId": "840d83c1-56c4-4598-a870-705130ee56df",
+      "order": 4,
+      "required": false
+    }
+  ],
+  "id": "58f0ee7b-8063-4fc7-9b39-af918962c91f",
+  "identityFieldId": "d7e82557-9045-5e92-a494-d99112bbec4a",
+  "lifecycleRef": "3c504040-7920-43aa-8fbd-eda21dc7c07b",
+  "name": "standing-job",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

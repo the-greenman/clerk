@@ -1,0 +1,48 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json",
+  "createdAt": "2026-09-19T12:27:41.839777796+00:00",
+  "description": "Dated record of one agent run: what it chose, why, what it measured, where it landed.",
+  "fields": [
+    {
+      "displayLabel": "Title",
+      "fieldId": "d7e82557-9045-5e92-a494-d99112bbec4a",
+      "order": 0,
+      "required": true
+    },
+    {
+      "displayLabel": "Run date",
+      "fieldId": "930c4a69-9093-4059-ad22-0a20a5a4c8f3",
+      "order": 1,
+      "required": true
+    },
+    {
+      "displayLabel": "Chose",
+      "fieldId": "6c4590d8-8e8f-4b63-ba8c-de9fa49d9161",
+      "order": 2,
+      "required": true
+    },
+    {
+      "displayLabel": "Rationale",
+      "fieldId": "3340532b-d845-5e54-92b3-819ed05365c5",
+      "order": 3,
+      "required": true
+    },
+    {
+      "displayLabel": "Figures",
+      "fieldId": "0004d14d-d8e1-47f1-87a5-0c6b6509a34d",
+      "order": 4,
+      "required": false
+    },
+    {
+      "displayLabel": "Landed as",
+      "fieldId": "4b60dcec-5cf8-44b6-b49f-78bf99ab0754",
+      "order": 5,
+      "required": false
+    }
+  ],
+  "id": "8d355a63-f6f5-4739-80f5-88376ce1e0bd",
+  "identityFieldId": "d7e82557-9045-5e92-a494-d99112bbec4a",
+  "name": "run-report",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

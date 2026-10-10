@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Offers a practical remedy or prompt to restore this archetype's presence."
+  },
+  "createdAt": "2026-09-19T12:28:43.444771789+00:00",
+  "description": "A markdown description of how to call this archetype's energy back in when it is missing.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "f3774d67-8e38-44fc-902a-98bdd7dee2bd",
+  "name": "missing_remedy",
+  "namespace": "com.thesystem",
+  "version": 1
+}

@@ -1,0 +1,32 @@
+{
+  "id": "e3b62684-70d8-403d-ac8f-164fcb4b60a9",
+  "namespace": "com.semanticops.method",
+  "name": "pole",
+  "version": 1,
+  "description": "One side of a tension.",
+  "fields": [
+    {
+      "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "d2f41e5b-e0de-46f5-b8bf-e2ca03155e40",
+      "order": 1,
+      "required": true
+    },
+    {
+      "fieldId": "2030962b-8279-4345-9826-3e13f01cee4a",
+      "order": 2,
+      "required": false
+    }
+  ],
+  "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
+  "aiGuidance": {
+    "purpose": "Public word: side. looks_like is what leaning on it looks like in plain third-person English; shadow (public word: overdone) is how it goes wrong when nothing balances it. Contained by exactly one tension.",
+    "extraction": "Title is the side's short name; copy no first-person or mystical source wording.",
+    "negativeGuidance": "Both sides of a tension stay named and legitimate."
+  },
+  "createdAt": "2026-10-08T11:04:57.889Z",
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json"
+}

@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Gives concrete, actionable behaviours that embody this archetype in practice."
+  },
+  "createdAt": "2026-09-19T12:28:43.314128011+00:00",
+  "description": "A markdown bullet list of concrete actions this archetype takes.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "cb111d6e-2979-47e1-ad15-ef971772677a",
+  "name": "activities",
+  "namespace": "com.thesystem",
+  "version": 1
+}

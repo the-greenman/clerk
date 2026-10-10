@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "The operating brief rendered into the agent's routine file. Written as instructions to the agent."
+  },
+  "createdAt": "2026-09-19T12:24:22.639626971+00:00",
+  "description": "Repo-local mandate of an agent: what it does here, which tools and gates it uses, how it lands output.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "eff125b7-9da3-4a4d-a6ef-7fa435f2cb5e",
+  "name": "brief",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

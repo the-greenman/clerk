@@ -1,0 +1,13 @@
+{
+  "id": "5f121def-cc5e-4d68-9804-621716ef10be",
+  "version": 1,
+  "key": "com.semanticops.method/instantiates",
+  "namespace": "com.semanticops.method",
+  "label": "Instantiates",
+  "description": "Agent instantiates archetype. Endpoints: agent -> archetype.",
+  "category": "association",
+  "createdAt": "2026-10-08T11:04:58.549Z",
+  "canonicalDirection": "source is the agent; target is the archetype whose stance it takes",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

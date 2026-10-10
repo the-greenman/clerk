@@ -1,0 +1,18 @@
+{
+  "id": "c5106dcb-1d8b-4e67-848a-ae8c3dfed702",
+  "namespace": "com.semanticops.method",
+  "name": "needs",
+  "version": 1,
+  "description": "What a persona needs in order to do its jobs.",
+  "aiGuidance": {
+    "purpose": "Short statement of the conditions the persona requires, which problems and remedies are judged against.",
+    "extraction": "One short sentence or a few comma-separated needs.",
+    "negativeGuidance": "Do not describe how a product meets them."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-08T10:44:21.400549498+00:00"
+}

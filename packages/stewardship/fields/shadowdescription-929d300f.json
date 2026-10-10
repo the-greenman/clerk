@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Describes how the shadow form manifests, to help distinguish healthy from distorted expression."
+  },
+  "createdAt": "2026-09-19T12:28:43.745858979+00:00",
+  "description": "A markdown description of the archetype's shadow expression.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "929d300f-c627-4a33-9e3b-6836ccc41faa",
+  "name": "shadow_description",
+  "namespace": "com.thesystem",
+  "version": 1
+}

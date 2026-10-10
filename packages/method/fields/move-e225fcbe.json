@@ -1,0 +1,18 @@
+{
+  "id": "e225fcbe-ed18-4d6c-a917-5826997b73a6",
+  "namespace": "com.semanticops.method",
+  "name": "move",
+  "version": 1,
+  "description": "The single move a remedy proposes.",
+  "aiGuidance": {
+    "purpose": "What someone would do differently if this remedy were adopted: one concrete action or change.",
+    "extraction": "A single action sentence in the imperative or present tense.",
+    "negativeGuidance": "Do not bundle several moves or describe benefits instead of the move."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-08T10:44:21.461993643+00:00"
+}

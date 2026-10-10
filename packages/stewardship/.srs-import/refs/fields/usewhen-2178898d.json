@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Tells the reader what system condition signals this archetype is the one needed."
+  },
+  "createdAt": "2026-09-19T12:28:43.180503755+00:00",
+  "description": "Guidance on the situational trigger for calling on this archetype.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "2178898d-48fe-45aa-9e77-68553fef3ac1",
+  "name": "use_when",
+  "namespace": "com.thesystem",
+  "version": 1
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json",
+  "canonicalDirection": "record authored-by agent|role",
+  "category": "governance",
+  "createdAt": "2026-09-21T23:26:53.883866890+00:00",
+  "description": "Source (any Tier-2 record) was written by the target: an agent record, or the OWNER role. One per record. Corrections written inside a record by someone else do not change its author.",
+  "id": "f942751c-a9a0-4582-93a9-5e3d9463ce95",
+  "irreflexive": true,
+  "key": "com.mudemocracy.stewardship/authored-by",
+  "label": "Authored by",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

@@ -1,0 +1,18 @@
+{
+  "id": "159222a6-8908-4aeb-a8db-64d1afea99b9",
+  "namespace": "com.semanticops.method",
+  "name": "statement",
+  "version": 1,
+  "description": "The claim a record makes: a problem's claim or a principle's default.",
+  "aiGuidance": {
+    "purpose": "For a problem: the claim itself, one sentence or short paragraph, from the persona's point of view. For a principle: the default in 'X over Y' form (public word: default).",
+    "extraction": "State the problem, not the fix. Keep it falsifiable and specific to who is affected.",
+    "negativeGuidance": "Do not include the remedy, facet labels or a persona name as prose; the persona is a held-by relation."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-08T10:44:21.215446825+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Cadence or signal that starts a run: e.g. weekly, after every writing session, orphan sources > 0"
+  },
+  "createdAt": "2026-09-19T12:27:22.846076431+00:00",
+  "description": "Cadence or signal that starts a run: e.g. weekly, after every writing session, orphan sources > 0",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "0fbdf29d-2968-44c5-bf8b-d8834b647e75",
+  "name": "trigger",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

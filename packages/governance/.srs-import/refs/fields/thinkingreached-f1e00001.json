@@ -1,0 +1,16 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "The settled thinking or insight the group has reached through the exercise."
+  },
+  "createdAt": "2026-06-27T00:00:00Z",
+  "description": "The settled thinking or insight the group has reached through the exercise.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "f1e00001-0000-4000-8000-000000000001",
+  "name": "thinking_reached",
+  "namespace": "governance",
+  "version": 1
+}

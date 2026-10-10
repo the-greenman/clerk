@@ -1,0 +1,88 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/composition.json",
+  "createdAt": "2026-09-19T12:33:49.811508475+00:00",
+  "description": "Routine file for the Steward agent, rendered from muSrs.",
+  "exportConfig": {
+    "format": "markdown",
+    "preamble": "<!-- rendered from muSrs; do not edit -->\n"
+  },
+  "id": "89b9d5ce-a9ae-4a01-83b3-3e4d80046db6",
+  "name": "agent-steward",
+  "namespace": "com.mudemocracy.stewardship",
+  "sections": [
+    {
+      "order": 0,
+      "relationsPresentation": {
+        "include": [
+          {
+            "forwardLabel": "Authority",
+            "relationType": "com.mudemocracy.stewardship/authorised-by"
+          }
+        ]
+      },
+      "renderViewId": "a649cd1d-28bd-433f-b1b0-cd811efd3911",
+      "sectionId": "agent",
+      "source": {
+        "containerScope": "repository",
+        "query": {
+          "tag": [
+            "agent:steward"
+          ],
+          "typeName": "agent",
+          "typeNamespace": "com.mudemocracy.stewardship"
+        },
+        "type": "discovery-query"
+      },
+      "titleFieldId": "d7e82557-9045-5e92-a494-d99112bbec4a"
+    },
+    {
+      "order": 1,
+      "renderViewId": "0c0e5fbf-d9e8-48ab-8bde-e2a6d1775af7",
+      "sectionId": "archetype",
+      "source": {
+        "containerScope": "repository",
+        "query": {
+          "tag": [
+            "agent:steward"
+          ],
+          "typeName": "archetype",
+          "typeNamespace": "com.thesystem"
+        },
+        "type": "discovery-query"
+      },
+      "title": "Archetype",
+      "titleFieldId": "805427d4-9234-4926-b202-ed0f8fc5d4c9"
+    },
+    {
+      "order": 2,
+      "relationsPresentation": {
+        "include": [
+          {
+            "forwardLabel": "Authority",
+            "relationType": "com.mudemocracy.stewardship/authorised-by"
+          }
+        ]
+      },
+      "renderViewId": "81a7ee03-4cd6-4065-8599-464aca380250",
+      "sectionId": "standing-jobs",
+      "source": {
+        "containerScope": "repository",
+        "query": {
+          "excludeLifecycleStates": [
+            "closed",
+            "superseded"
+          ],
+          "tag": [
+            "agent:steward"
+          ],
+          "typeName": "standing-job",
+          "typeNamespace": "com.mudemocracy.stewardship"
+        },
+        "type": "discovery-query"
+      },
+      "title": "Standing jobs",
+      "titleFieldId": "d7e82557-9045-5e92-a494-d99112bbec4a"
+    }
+  ],
+  "version": 1
+}

@@ -8,10 +8,11 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 |---|---|---|---|---|---|
 | (none) / `session` / `comment` | Hold a session or post comments, by role | Human or agent | programme repo, GitHub PRs and issues | session/comment records via srs CLI, a signed PR | owner, `scripts/session`, `/session` |
 | `help` | List subcommands | Human | | | |
+| `settings` | Print the programme settings record (`--json`; bash: `clerk settings --json \| jq -r .githubOwner`) | Human; scripts | programme `com.semanticops.programme/programme` record | nothing | every script below |
 | `roadmap` | Derive epic priority from the period ranking | Human; workflows | programme records | with `--apply --yes`: board priority, `parked` label | derive-priority.yml, pages.yml |
-| `queue` | Report what the unattended lane would take next | Human | GitHub issues and PRs (6 repos) | nothing | unattended-worker routine brief |
-| `upkeep` | Merge or update PR branches by gate label | Every 15 min | GitHub PRs | merges, branch updates, digest comment on semanticops.com#33 | pr-upkeep.yml |
-| `steward` | Guard against false closes | Daily | closed issues (6 repos) | with `--fix`: reopen and comment | srs-programme `derive-priority.yml` (daily 06:15, `--fix`); owner |
+| `queue` | Report what the unattended lane would take next | Human | GitHub issues and PRs (settings `governed_repos`) | nothing | unattended-worker routine brief |
+| `upkeep` | Merge or update PR branches by gate label | Every 15 min | GitHub PRs | merges, branch updates, digest comment on the settings `digest_issue` | pr-upkeep.yml |
+| `steward` | Guard against false closes | Daily | closed issues (settings `governed_repos`) | with `--fix`: reopen and comment | srs-programme `derive-priority.yml` (daily 06:15, `--fix`); owner |
 | `check` | Method rules: two poles per tension, one tension per principle, boundaries | CI, human | programme records | nothing | owner |
 | `conformance` | Programme repo is an SRS repo and validates | CI | programme repo | nothing | validate.yml |
 | `board` | Story-driven priority on GitHub Project #5 (`gh-project.mjs`) | Hourly; human | issues, board | board fields, mirror labels, comments | board-sync.yml, roadmap |
@@ -26,6 +27,27 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | lib/pinned-srs.mjs, lib/repo-arg.mjs | Pin lookup; `--repo` resolution | programme `validate.yml` | | scripts |
 | session | Fresh programme worktree, pinned srs, then open the clerk | srs-programme master | a worktree | owner, `/session` (`.claude/commands/session.md`) |
 | *.test.mjs, pr-upkeep.test.sh | Tests (`npm test`) | fixtures | | CI |
+
+## Settings
+
+Nothing programme-specific is hard-coded. `lib/adapters/settings.mjs` reads the one `com.semanticops.programme/programme` record (title, github_owner, governed_repos, report_issue, digest_issue, board_project, board_story_repo, owner_actor) from the programme repo; `--repo` picks it. Env wins where CI needs it: `gh-project.mjs` uses `GHP_OWNER`, `GHP_PROJECT`, `GHP_STORY_REPO`, `GHP_MIRROR_REPOS` first and reads settings (from `CLERK_REPO` or the cwd) only for what is unset. The programme repo's own slug, worktree base (`~/dev/.wt/<name>`) and default branch are derived from its git remote. Still hard-coded, as working-group settings for a later step: the four WG repos in `bin/clerk.mjs` and the WG constants at the top of `scripts/pr-upkeep.sh`. `groupState` sources the programme's own copy of `pr-upkeep.sh` until Phase 3.
+
+## Packages
+
+Canonical source of the methodology packages, installed into the programme repo with `srs package install packages/<name> --repo <programme>` (provenance in `.srs-import/`).
+
+| Package | Namespace | Version | Holds | Upstream |
+|---|---|---|---|---|
+| `packages/method` | com.semanticops.method | 1.0.0 | problems, remedies, tensions, principles, archetypes | clerk (this copy) |
+| `packages/governance` | com.mudemocracy.governance | 1.1.0 | decisions, roles, logs | muDemocracy.org `muSrs/packages/governance` (same id and version; differs only in key order) |
+| `packages/stewardship` | com.mudemocracy.stewardship | 0.1.0 | agents, standing jobs, run reports | muDemocracy.org `muSrs/packages/stewardship` (the programme's install also carries imported com.thesystem fields) |
+| `packages/programme` | com.semanticops.programme `methodology` | 0.1.0 | the `programme` settings type and its fields | clerk (this copy) |
+
+The live methodology types (period, objective, epic, stakeholder, session and the relation types serves, responds-to, ratifies, considers, sets-aside, attended-by, receives) are still defined in srs-programme's primary package (`com.semanticops.programme` `primary`, 1.0.0) and will move into `packages/programme` in a later step.
+
+Export a deterministic bundle (not committed; `dist/` is git-ignored):
+
+    srs package export --repo <programme> --selector packages/<name> --published-at 2026-10-10T00:00:00Z --output dist/<name>.srspkg
 
 ## Workflows
 

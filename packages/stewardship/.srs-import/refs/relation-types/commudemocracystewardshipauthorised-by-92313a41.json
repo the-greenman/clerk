@@ -1,0 +1,12 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json",
+  "canonicalDirection": "standing-job authorised-by role",
+  "category": "governance",
+  "createdAt": "2026-09-19T12:24:22.795052882+00:00",
+  "description": "Source (a standing job or agent) draws its authority class from the target Role.",
+  "id": "92313a41-811e-4ec7-b88e-724fa9264e78",
+  "key": "com.mudemocracy.stewardship/authorised-by",
+  "label": "Authorised by",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}
