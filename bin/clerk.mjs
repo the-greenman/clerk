@@ -80,14 +80,14 @@ if (sub) {
       const reply = arg('--reply-to') && (() => { const m = commentRecs.filter((c) => c.instanceId.startsWith(arg('--reply-to'))); if (m.length !== 1) throw new Error(`no single comment matches "${arg('--reply-to')}"`); return m[0].instanceId; })();
       take(choices, item(find(arg('--on') ?? die('--on <decision id> is required'))), { comment: { text: arg('--text') ?? die('--text is required'), replyTo: reply, cite: arg('--cite'), role: arg('--role-of-cite') } });
     }
-    if (argv[0] === 'comment') { postComments({ cli, now, choices, transcript, dryRun }); process.exit(0); } // discussion between sessions: no session record, no quorum
+    if (argv[0] === 'comment') { postComments({ cli, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by') }); process.exit(0); } // discussion between sessions: no session record, no quorum
     args('--set-aside').forEach((p) => take(choices, item(pick(p)), { action: 'setaside' }));
     args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => take(choices, item(r), { action: 'ratify' }));
     args('--consider').forEach((p) => take(choices, item(find(p)), {}));
     const [fs, ts] = [args('--field'), args('--text')];
     args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); take(choices, item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
     if (dryRun) console.log(quorumText(quorumNow()));
-    endSession({ cli, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices });
+    endSession({ cli, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by') });
   } catch (e) { die(e.message); }
   process.exit(0);
 }
@@ -126,6 +126,12 @@ const keys = {
   3: { prompt: '[a]ck [o]pen in browser [n]ext [q]uit > ', screen: A.reportScreen },
   4: { prompt: '[m]erge [o]pen in browser [n]ext [q]uit > ', screen: A.prScreen },
 };
+
+if (argv[0] === 'agenda') { // read-only: the whole agenda with each item's essentials; no acts
+  agenda();
+  for (const n of [1, 2, 3, 4]) for (const [i, it] of sections[n].items.entries()) show([`${sections[n].name} ${i + 1}/${sections[n].items.length}`, ...keys[n].screen(it)]);
+  process.exit(0);
+}
 
 async function walk(n) {
   const { items } = sections[n];
@@ -188,6 +194,6 @@ while (go) {
 }
 if (needsTranscript(choices) && !transcript) { const f = await ask('a comment cites the transcript; transcript file path > '); if (f) transcript = resolve(f); }
 if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} decision(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
-  endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun });
+  endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
 else if (choices.length) console.log('Nothing recorded.');
 rl.close();
