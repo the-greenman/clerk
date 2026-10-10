@@ -2,7 +2,7 @@
 
 A small terminal tool that lets the owner act **by role** on an SRS programme without getting lost in data. Prototype: rough but working.
 
-Sessions, not meetings: a session has attendees, a date and time (`held_at`, UTC), and is often **ad hoc**. Decisions made *between* sessions are recorded at once as `proposed` and may be acted on, because they fall within the group's remit; they are **ratified at a session**. The rules are the same for humans and AI agents, so the tools are human tools too: authority comes from the **role** held, not the kind of mind.
+A session is sometimes a meeting, sometimes a working session or a review at a desk. It has attendees, a date and time (`held_at`, UTC), and is often **ad hoc**. Decisions made *between* sessions are recorded at once as `proposed` and may be acted on, because they fall within the group's remit. A decision is **ratified in exactly one session**: its attendees are who was involved. Before that it may pass through many sessions as a proposal (needing different human input), each recording `considers`. **Drafts are in-place edits; git keeps the history.** There are no draft records. The rules are the same for humans and AI agents, so the tools are human tools too: authority comes from the **role** held, not the kind of mind.
 
 ```
 # interactive (TUI)
@@ -10,7 +10,7 @@ SRS_ACTOR='{"kind":"human","id":"human:the-greenman"}' clerk --repo <srs-program
 
 # non-interactive (agents, scripts, or a human who knows what they want): same code path as the TUI's end of session
 SRS_ACTOR='{"kind":"ai","id":"agent:tpr-steward"}' \
-  clerk session --repo <srs-programme checkout> --as tpr-steward [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--dry-run]
+  clerk session --repo <srs-programme checkout> --as tpr-steward [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]... [--edit <id> --field <resolution|why|options|review|question> --text <text>]... [--dry-run]
 ```
 
 `--as <role>`: `owner`, `tpr-steward`, `tpr-builder`, `tpr-reviewer` (prototype mapping in `lib/roles.mjs`). The actor in `SRS_ACTOR` must hold that role (owner = `human:the-greenman`; `agent:tpr-*` hold the matching group role) or the clerk refuses, naming role and actor. The owner's session is recorded in the SemanticOps decision log, a group's in its own log. Escalation, report acknowledgement and PR merge sections are owner-only.
@@ -30,12 +30,14 @@ Pick a section and the items come **one at a time**, essentials only. Read-only 
 
 | Section | Keys |
 |---|---|
-| Ratify | `r` ratify, `s` set aside, `o` full record, `n` next, `q` quit |
+| Ratify | `r` ratify, `s` set aside, `e` edit a field in place (decision stays proposed), `h` hold for a later session (optional note), `o` full record, `n` next (skip, nothing recorded), `q` quit |
 | Decide | `a` accept recommendation, `c` choose other (asks for resolution text), `d` defer, `o`, `n`, `q` |
 | Acknowledge | `a` +1 via `gh api` (acts now), `o` open in browser, `n` |
 | Merge | `m` `gh pr merge --merge` (acts now), `o`, `n` |
 
 Ratify and Decide choices are collected. The TUI header reads `Session: <date time UTC> (ad hoc) · attendees: <names>`; attendees default to the acting role and `+` adds more (roles and stewardship agents). On end session the clerk creates ONE `com.semanticops.programme/session` record (title `Session <YYYY-MM-DD HH:MM UTC>: <context>`, status `ended`) as the acting actor in a fresh srs-programme worktree, adds `attended-by` relations to each attendee and `ratifies` / `sets-aside` to each decision, transitions each decision (ratified or abandoned), adds accepted escalations to the SemanticOps log, validates, commits (signed), pushes and opens a `gate:auto-merge` PR, then prints its URL. `--dry-run` prints the summary instead of doing any of it.
+
+**Level and quorum.** A decision is ratified or set aside only in a session at the level of the context that owns it (a decision also in the SemanticOps log is the owner's) and whose attendees meet that context's quorum: SemanticOps needs the Owner role; WG Third-party ready needs two distinct member records, one the reviewer agent (prototype rules in `lib/roles.mjs`). Below quorum `r`/`s` (and `clerk session --ratify/--set-aside`, exit 1) are refused, naming what is missing; `e` and `h` still work. The header shows `quorum: met` or `quorum: not met (needs ...)`. A session records `attended-by` per attendee and `ratifies` / `sets-aside` / `considers` per decision taken up (transitions only for ratify and set aside); a session that ratified nothing is still a valid record. Each decision's screen shows its history: `Considered in N earlier sessions (dates)`.
 
 ## Principles
 

@@ -6,15 +6,15 @@ import { resolve } from 'node:path';
 import { OWNER_LOG, GROUP_LOG } from '../lib/roles.mjs';
 import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/io.mjs';
 import * as A from '../lib/agenda.mjs';
-import { endSession, stamp } from '../lib/session.mjs';
-import { authorise, resolveContext } from '../lib/roles.mjs';
+import { endSession, stamp, take, FIELDS, RATIFYING } from '../lib/session.mjs';
+import { authorise, resolveContext, quorum, quorumText } from '../lib/roles.mjs';
 
 const argv = process.argv.slice(2);
 const sub = argv[0] === 'session';
 const arg = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
 const args = (n) => argv.flatMap((v, i) => (v === n ? [argv[i + 1]] : []));
 const die = (m) => { console.error('clerk: ' + m); process.exit(1); };
-const USAGE = 'usage: clerk [session] --repo <srs-programme path> --as <role> [--dry-run]\n  clerk session ... [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]...';
+const USAGE = 'usage: clerk [session] --repo <srs-programme path> --as <role> [--dry-run]\n  clerk session ... [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]...\n                   [--edit <id> --field <resolution|why|options|review|question> --text <text>]...  (--ratify/--set-aside need the context\'s quorum)';
 if (!arg('--as')) die(USAGE);
 const repo = resolve(arg('--repo') ?? die('--repo is required'));
 let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR); } catch (e) { die(e.message); }
@@ -40,25 +40,41 @@ const mainLog = getLog(role.logId);
 const groupLog = getLog(GROUP_LOG);
 // Parent contexts: the SemanticOps log is the parent of every group log; the owner's log has none.
 const parentLogs = role.logId === ownerLog.containerId ? [] : [ownerLog];
-const attendees = [people.find((p) => p.id === role.roleId) ?? { id: role.roleId, name: arg('--as') }];
+const selfId = role.agentId ?? role.roleId; // a group role attends as its own agent record, so quorum counts distinct members
+const attendees = [people.find((p) => p.id === selfId) ?? { id: selfId, name: arg('--as') }];
 const addAttendee = (idOrPrefix) => {
   const m = people.filter((p) => p.id.startsWith(idOrPrefix));
   if (m.length !== 1) throw new Error(`no single role or agent record matches "${idOrPrefix}"`);
   if (!attendees.some((a) => a.id === m[0].id)) attendees.push(m[0]);
 };
 const now = new Date();
+// Earlier sessions that took each decision up (`considers`); tolerant of a repository without the relation type.
+let consideredRels = [], sessionRecs = [];
+try {
+  consideredRels = S(['relation', 'list', '--type', 'com.semanticops.programme/considers']).relations ?? [];
+  const sl = S(['record', 'list', '--type', 'com.semanticops.programme/session']); sessionRecs = sl.records ?? sl.instances ?? [];
+} catch { /* no considers type yet: no history */ }
+const history = (r) => A.consideredIn(r.instanceId, consideredRels, sessionRecs);
+const quorumNow = () => quorum(role, attendees);
 
 // Non-interactive: the same endSession the TUI ends with.
 if (sub) {
   try {
     args('--attendee').forEach(addAttendee);
+    if ((args('--ratify').length || args('--set-aside').length) && !quorumNow().met) throw new Error(`${quorumText(quorumNow())}: --ratify/--set-aside refused; --consider and --edit are still allowed`);
     const items = A.ratifyItems(records, mainLog, parentLogs);
     const pick = (p) => { const m = items.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single proposed decision matches "${p}"`); return m[0]; };
-    const mk = (r, action) => ({ id: r.instanceId, title: A.fv(r).title, action });
-    const aside = args('--set-aside').map((p) => mk(pick(p), 'setaside'));
-    const asideIds = new Set(aside.map((c) => c.id));
-    const rat = args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !asideIds.has(r.instanceId)).map((r) => mk(r, 'ratify'));
-    endSession({ cli, now, role, attendees, convened: 'ad-hoc', dryRun, choices: [...new Map([...rat, ...aside].map((c) => [c.id, c])).values()] });
+    const pool = [...items, ...(isOwner ? A.escalationItems(records, groupLog, mainLog) : [])];
+    const find = (p) => { const m = pool.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single decision on the agenda matches "${p}"`); return m[0]; };
+    const item = (r) => ({ instanceId: r.instanceId, title: A.fv(r).title });
+    const choices = [];
+    args('--set-aside').forEach((p) => take(choices, item(pick(p)), { action: 'setaside' }));
+    args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => take(choices, item(r), { action: 'ratify' }));
+    args('--consider').forEach((p) => take(choices, item(find(p)), {}));
+    const [fs, ts] = [args('--field'), args('--text')];
+    args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); take(choices, item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
+    if (dryRun) console.log(quorumText(quorumNow()));
+    endSession({ cli, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), dryRun, choices });
   } catch (e) { die(e.message); }
   process.exit(0);
 }
@@ -86,14 +102,14 @@ const sections = {
   4: { name: 'Merge', items: A.mergeItems(prs) },
 };
 const g = isOwner ? groupState(repo) : { pause: 'n/a', merged: '-', budget: '-' };
-const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')}`);
+const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const agenda = () => { header(); show(A.agendaLines({ ratify: sections[1].items, decide: sections[2].items, ack: sections[3].items, merge: sections[4].items,
   status: isOwner ? [A.statusLine('WG Third-party ready', g.pause, g.merged, g.budget)] : [] })); };
 
 const choices = [];
 const keys = {
-  1: { prompt: '[r]atify [s]et aside [o]pen full [n]ext [q]uit > ', screen: A.decisionScreen },
-  2: { prompt: '[a]ccept recommendation [c]hoose other [d]efer [o]pen [n]ext [q]uit > ', screen: A.escalationScreen },
+  1: { prompt: '[r]atify [s]et aside [e]dit [h]old [o]pen full [n]ext [q]uit > ', screen: (r) => A.decisionScreen(r, history(r)) },
+  2: { prompt: '[a]ccept recommendation [c]hoose other [e]dit [h]old [d]efer [o]pen [n]ext [q]uit > ', screen: (r) => A.escalationScreen(r, history(r)) },
   3: { prompt: '[a]ck [o]pen in browser [n]ext [q]uit > ', screen: A.reportScreen },
   4: { prompt: '[m]erge [o]pen in browser [n]ext [q]uit > ', screen: A.prScreen },
 };
@@ -102,7 +118,8 @@ async function walk(n) {
   const { items } = sections[n];
   for (let i = 0; i < items.length; i++) {
     const it = items[i]; const dec = n <= 2;
-    const choice = (action, text) => choices.push({ id: it.instanceId, title: A.fv(it).title, action, text });
+    const ref = { instanceId: it.instanceId, title: dec ? A.fv(it).title : '' };
+    const choice = (action, text) => take(choices, ref, { action, text });
     show([`${sections[n].name} ${i + 1}/${items.length}`, ...keys[n].screen(it)]);
     for (;;) {
       const k = (await ask(keys[n].prompt)).toLowerCase();
@@ -110,6 +127,14 @@ async function walk(n) {
       if (k === 'n' || (k === 'd' && n === 2)) break;
       if (k === 'o') { if (dec) show(A.fullScreen(it)); else openUrl(it.html_url ?? it.url); continue; }
       try {
+        if (dec && (k === 'r' || k === 's' || k === 'a' || k === 'c') && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
+        if (dec && k === 'e') {
+          const f = (await ask(`field (${Object.keys(FIELDS).join('/')}) > `)).toLowerCase();
+          if (!FIELDS[f]) { console.log('  no such field'); continue; }
+          const t = await ask('new text > '); if (!t) continue;
+          take(choices, ref, { edit: { field: f, text: t } }); console.log('  edited in place at the end of the session (decision stays proposed)'); continue;
+        }
+        if (dec && k === 'h') { take(choices, ref, { hold: true, note: await ask('note for later sessions (optional) > ') }); console.log('  held: considered, stays proposed'); break; }
         if (n === 1 && (k === 'r' || k === 's')) { choice(k === 'r' ? 'ratify' : 'setaside'); console.log('  noted for the session'); break; }
         if (n === 2 && k === 'a') { choice('accept'); console.log('  noted for the session'); break; }
         if (n === 2 && k === 'c') { const t = await ask('resolution text > '); if (t) { choice('other', t); console.log('  noted for the session'); break; } continue; }
@@ -134,7 +159,7 @@ while (go) {
   }
   if (sections[k]) { sections[k].items.length ? (go = await walk(k)) : console.log('  nothing here'); }
 }
-if (choices.length && (dryRun || (await ask(`record ${choices.length} act(s) as a session and open the PR? [y/N] `)).toLowerCase() === 'y'))
-  endSession({ cli, now, role, attendees, choices, dryRun });
+if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} decision(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
+  endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), dryRun });
 else if (choices.length) console.log('Nothing recorded.');
 rl.close();
