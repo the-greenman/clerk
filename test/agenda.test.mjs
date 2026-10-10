@@ -56,3 +56,13 @@ test('session title, held_at and summary', () => {
   assert.equal(summarise([{ id: 'abcdef123', title: 'T', action: 'ratify' }], t, [{ id: 'r', name: 'Owner' }]),
     'Session 2026-10-10 14:30 UTC: SemanticOps\nAttendees: Owner\n- Ratified: T [abcdef12]');
 });
+
+test('a decision listed in a parent log is the parent context\'s to ratify', async () => {
+  const { ratifyItems } = await import('../lib/agenda.mjs');
+  const rec = (id) => ({ instanceId: id, record: { lifecycleState: 'proposed', fieldValues: { title: id } } });
+  const records = [rec('local'), rec('escalated')];
+  const groupLog = { memberInstanceIds: [{ instanceId: 'local' }, { instanceId: 'escalated' }] };
+  const ownerLog = { memberInstanceIds: [{ instanceId: 'escalated' }] };
+  assert.deepEqual(ratifyItems(records, groupLog, [ownerLog]).map((r) => r.instanceId), ['local']);
+  assert.deepEqual(ratifyItems(records, ownerLog).map((r) => r.instanceId), ['escalated']);
+});

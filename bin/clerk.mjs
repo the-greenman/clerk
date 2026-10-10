@@ -38,6 +38,8 @@ const people = [...(rolesList.records ?? rolesList.instances), ...(agentsList.re
 const role = resolveContext(roleCfg, rolesList.records ?? rolesList.instances, containers);
 const mainLog = getLog(role.logId);
 const groupLog = getLog(GROUP_LOG);
+// Parent contexts: the SemanticOps log is the parent of every group log; the owner's log has none.
+const parentLogs = role.logId === ownerLog.containerId ? [] : [ownerLog];
 const attendees = [people.find((p) => p.id === role.roleId) ?? { id: role.roleId, name: arg('--as') }];
 const addAttendee = (idOrPrefix) => {
   const m = people.filter((p) => p.id.startsWith(idOrPrefix));
@@ -50,7 +52,7 @@ const now = new Date();
 if (sub) {
   try {
     args('--attendee').forEach(addAttendee);
-    const items = A.ratifyItems(records, mainLog);
+    const items = A.ratifyItems(records, mainLog, parentLogs);
     const pick = (p) => { const m = items.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single proposed decision matches "${p}"`); return m[0]; };
     const mk = (r, action) => ({ id: r.instanceId, title: A.fv(r).title, action });
     const aside = args('--set-aside').map((p) => mk(pick(p), 'setaside'));
@@ -78,7 +80,7 @@ const prs = !isOwner ? [] : REPOS.flatMap((r) => ghJson(['pr', 'list', '-R', `th
   '--json', 'number,title,body,url,isDraft,mergeStateStatus,labels,statusCheckRollup']).map((p) => ({ ...p, repo: r })));
 
 const sections = {
-  1: { name: 'Ratify', items: A.ratifyItems(records, mainLog) },
+  1: { name: 'Ratify', items: A.ratifyItems(records, mainLog, parentLogs) },
   2: { name: 'Decide', items: isOwner ? A.escalationItems(records, groupLog, mainLog) : [] },
   3: { name: 'Acknowledge', items: A.unackedReports(reports, reactions, owner) },
   4: { name: 'Merge', items: A.mergeItems(prs) },
