@@ -93,10 +93,28 @@ if (sub) {
 }
 
 // Lines from stdin, one per prompt; end of input answers q so piped runs terminate.
-const rl = createInterface({ input: process.stdin }); const buf = []; let waiting = null; let ended = false;
-rl.on('line', (l) => { if (waiting) { const w = waiting; waiting = null; w(l); } else buf.push(l); });
-rl.on('close', () => { ended = true; if (waiting) { const w = waiting; waiting = null; w('q'); } });
-const ask = (p) => { process.stdout.write(p); return new Promise((res) => { if (buf.length) res(buf.shift()); else if (ended) res('q'); else waiting = res; }).then((a) => { if (!process.stdin.isTTY) console.log(a); return a.trim(); }); };
+// In a terminal: menu keys act on a single press (raw mode), text answers take a line. Piped (tests, dry runs):
+// one line per prompt, and end of input answers q so piped runs terminate.
+const TTY = process.stdin.isTTY;
+let ask, key;
+if (TTY) {
+  ask = (p) => new Promise((res) => { const r = createInterface({ input: process.stdin, output: process.stdout, terminal: true }); r.question(p, (a) => { r.close(); res(a.trim()); }); });
+  key = (p) => new Promise((res) => {
+    process.stdout.write(p); process.stdin.setRawMode(true); process.stdin.resume();
+    process.stdin.once('data', (d) => {
+      process.stdin.setRawMode(false); process.stdin.pause();
+      const c = d.toString();
+      if (c === '\u0003') { process.stdout.write('\n'); process.exit(130); } // Ctrl-C
+      const k = c.trim().slice(0, 1); process.stdout.write(k + '\n'); res(k.toLowerCase());
+    });
+  });
+} else {
+  const rl = createInterface({ input: process.stdin }); const buf = []; let waiting = null; let ended = false;
+  rl.on('line', (l) => { if (waiting) { const w = waiting; waiting = null; w(l); } else buf.push(l); });
+  rl.on('close', () => { ended = true; if (waiting) { const w = waiting; waiting = null; w('q'); } });
+  ask = (p) => { process.stdout.write(p); return new Promise((res) => { if (buf.length) res(buf.shift()); else if (ended) res('q'); else waiting = res; }).then((a) => { console.log(a); return a.trim(); }); };
+  key = ask;
+}
 const show = (ls) => console.log('\n' + ls.join('\n'));
 
 const owner = isOwner ? gh(['api', 'user', '-q', '.login']).trim() : '';
@@ -141,7 +159,7 @@ async function walk(n) {
     const choice = (action, text) => take(choices, ref, { action, text });
     show([`${sections[n].name} ${i + 1}/${items.length}`, ...keys[n].screen(it)]);
     for (;;) {
-      const k = (await ask(keys[n].prompt)).toLowerCase();
+      const k = (await key(keys[n].prompt)).toLowerCase();
       if (k === 'q') return false;
       if (k === 'n' || (k === 'd' && n === 2)) break;
       if (k === 'o') { if (dec) show(A.fullScreen(it)); else openUrl(it.html_url ?? it.url); continue; }
@@ -181,7 +199,7 @@ let transcript;
 let go = true;
 while (go) {
   agenda();
-  const k = (await ask('section 1-4, [+] add attendee, [t]ranscript, [e]nd session, [q]uit > ')).toLowerCase();
+  const k = (await key('section 1-4, [+] add attendee, [t]ranscript, [e]nd session, [q]uit > ')).toLowerCase();
   if (k === 'q' || k === 'e') break;
   if (k === 't') { const f = await ask('transcript file path > '); if (f) transcript = resolve(f); continue; }
   if (k === '+') {
@@ -190,7 +208,7 @@ while (go) {
     if (people[n - 1]) addAttendee(people[n - 1].id); else console.log('  no such number');
     continue;
   }
-  if (sections[k]) { sections[k].items.length ? (go = await walk(k)) : console.log('  nothing here'); }
+  if (sections[k]) { sections[k].items.length ? (go = await walk(Number(k))) : console.log('  nothing here'); }
 }
 if (needsTranscript(choices) && !transcript) { const f = await ask('a comment cites the transcript; transcript file path > '); if (f) transcript = resolve(f); }
 if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} decision(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
