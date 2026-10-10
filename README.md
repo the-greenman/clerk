@@ -1,6 +1,23 @@
 # clerk
 
-A small terminal tool that lets the owner act **by role** on an SRS programme without getting lost in data. Prototype: rough but working.
+The clerk puts into practice the core practices muDemocracy proposes as essential to human collaboration, and uses them to manage agents of any kind, human or AI. It draws on the practices of guilds, the Quakers and unions, and on learning from ancient China, systems science and cybernetics. It is tooling for muDemocracy's governance, dogfooded at speed on the SemanticOps programme.
+
+The clerk is the prototyping ground for governance: its packages and its practice library (`lib/practice`) define the practice srs-web's governance editors will later adopt, by importing the library, never by reimplementing it. A programme repo (srs-programme is the first) holds only data and settings; programme code lives here.
+
+## Method
+
+The programme is run as a chain, from why to what:
+
+period -> ranked objectives -> epics -> remedies -> problems
+
+- A **period** is a focus span. Its **objectives** are ranked; the ranking alone derives epic priority (rank 1 is P0, 2 is P1, 3 and below P2; an epic serving no ranked objective is parked).
+- **Epics** carry **remedies**; each remedy answers one or more **problems**. Problems group into **clusters** and are held by **personas**.
+- Records live in layers: **Affirmed** (the owner's, with priority), **Suggestions** (agents and others propose problems and remedies, attributed to the actor) and **Set aside**.
+- Work is done by **working groups**: a mandate delegated by the owner, a quorum, a cycle with a budget, and reports back. Groups meet in **sessions**.
+
+## Sessions
+
+A small terminal tool that lets the owner act **by role** on an SRS programme without getting lost in data. 
 
 A session is sometimes a meeting, sometimes a working session or a review at a desk. It has attendees, a date and time (`held_at`, UTC), and is often **ad hoc**. Decisions made *between* sessions are recorded at once as `proposed` and may be acted on, because they fall within the group's remit. A decision is **ratified in exactly one session**: its attendees are who was involved. Before that it may pass through many sessions as a proposal (needing different human input), each recording `considers`. **Drafts are in-place edits; git keeps the history.** There are no draft records. The rules are the same for humans and AI agents, so the tools are human tools too: authority comes from the **role** held, not the kind of mind.
 
@@ -13,9 +30,9 @@ SRS_ACTOR='{"kind":"ai","id":"agent:tpr-steward"}' \
   clerk session --repo <srs-programme checkout> --as tpr-steward [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]... [--edit <id> --field <resolution|why|options|review|question> --text <text>]... [--dry-run]
 ```
 
-`--as <role>`: `owner`, `tpr-steward`, `tpr-builder`, `tpr-reviewer` (prototype mapping in `lib/roles.mjs`). The actor in `SRS_ACTOR` must hold that role (owner = `human:the-greenman`; `agent:tpr-*` hold the matching group role) or the clerk refuses, naming role and actor. The owner's session is recorded in the SemanticOps decision log, a group's in its own log. Reports, escalation and PR merge sections are owner-only.
+`--as <role>`: `owner`, `tpr-steward`, `tpr-builder`, `tpr-reviewer` (prototype mapping in `lib/practice/roles.mjs`). The actor in `SRS_ACTOR` must hold that role (owner = `human:the-greenman`; `agent:tpr-*` hold the matching group role) or the clerk refuses, naming role and actor. The owner's session is recorded in the SemanticOps decision log, a group's in its own log. Reports, escalation and PR merge sections are owner-only.
 
-Needs Node >= 20, `gh` (logged in), and the repo's `scripts/fetch-pinned-srs.mjs`. No dependencies. Requires the `com.semanticops.programme/session` type on srs-programme master.
+Needs Node >= 20 and `gh` (logged in); the pinned srs CLI is fetched by `clerk fetch-srs`. No dependencies. Requires the `com.semanticops.programme/session` type on srs-programme master.
 
 ## What it shows
 
@@ -43,7 +60,7 @@ Pick a section and the items come **one at a time**, essentials only. Read-only 
 
 Decision choices and received reports are collected. The TUI header reads `Session: <date time UTC> (ad hoc) · attendees: <names>`; attendees default to the acting role and `+` adds more (roles and stewardship agents). On end session the clerk creates ONE `com.semanticops.programme/session` record (title `Session <YYYY-MM-DD HH:MM UTC>: <context>`, status `ended`) as the acting actor in a fresh srs-programme worktree, adds `attended-by` relations to each attendee and `ratifies` / `sets-aside` to each decision, transitions each decision (ratified or abandoned), adds accepted escalations to the SemanticOps log, validates, commits (signed), pushes and opens a `gate:auto-merge` PR, then prints its URL. `--dry-run` prints the summary instead of doing any of it.
 
-**Level and quorum.** A decision is ratified or set aside only in a session at the level of the context that owns it (a decision also in the SemanticOps log is the owner's) and whose attendees meet that context's quorum: SemanticOps needs the Owner role; WG Third-party ready needs two distinct member records, one the reviewer agent (prototype rules in `lib/roles.mjs`). Below quorum `r`/`s` (and `clerk session --ratify/--set-aside`, exit 1) are refused, naming what is missing; `e` and `h` still work. The header shows `quorum: met` or `quorum: not met (needs ...)`. A session records `attended-by` per attendee and `ratifies` / `sets-aside` / `considers` per decision taken up (transitions only for ratify and set aside); a session that ratified nothing is still a valid record. Each decision's screen shows its history: `Considered in N earlier sessions (dates)`.
+**Level and quorum.** A decision is ratified or set aside only in a session at the level of the context that owns it (a decision also in the SemanticOps log is the owner's) and whose attendees meet that context's quorum: SemanticOps needs the Owner role; WG Third-party ready needs two distinct member records, one the reviewer agent (prototype rules in `lib/practice/roles.mjs`). Below quorum `r`/`s` (and `clerk session --ratify/--set-aside`, exit 1) are refused, naming what is missing; `e` and `h` still work. The header shows `quorum: met` or `quorum: not met (needs ...)`. A session records `attended-by` per attendee and `ratifies` / `sets-aside` / `considers` per decision taken up (transitions only for ratify and set aside); a session that ratified nothing is still a valid record. Each decision's screen shows its history: `Considered in N earlier sessions (dates)`.
 
 ## Three kinds of minute
 
@@ -61,10 +78,6 @@ Each report screen also shows **Next**: ready group issues (top 3 in the builder
 
 Concept: srs-programme `source-documents/agent-democracy-2026-10-10/concept.md`.
 
-## Test
-
-`node --test test/` (agenda building from fixture JSON; no network).
-
 ## Discussion
 
 Humans and agents comment on proposals the same way: a `com.semanticops.comments/comment` record (`comment_text`) with a `comments-on` relation to the decision, or to another comment for a reply. The author is the comment's `createdBy`, the session actor, whoever holds the role. The item screen shows `Discussion: N comments` and the latest 3 (replies indented); `[v]` shows the whole thread, `[c]omment` adds one (any attendee, no quorum). A comment is the session taking the decision up, so the session records `considers` on it.
@@ -74,3 +87,14 @@ Humans and agents comment on proposals the same way: a `com.semanticops.comments
 - **Agents**: `clerk comment --repo <path> --as <role> --on <id> --text <...> [--reply-to <commentId>] [--cite <docId|url|transcript>] [--role-of-cite quoted-from|evidence] [--transcript <file>] [--dry-run]`. It writes the comment code shared with the TUI, but records no session.
 
 Comments between sessions are discussion: `clerk comment` writes only the comment (and its `comments-on` relation) in its own `gate:auto-merge` PR titled "Comment on <decision>", with no session record and no quorum. Taking a decision up in a session is what counts as considering it.
+
+## Run
+
+```
+git clone git@github.com:the-greenman/clerk && cd clerk
+npm test                      # all tests, no network, no srs CLI needed
+node bin/clerk.mjs help       # every subcommand
+node bin/clerk.mjs roadmap --repo <srs-programme checkout> --json
+```
+
+Programme tools take `--repo <programme path>` and default to the current directory. Every script, workflow, routine and label, with what reads and writes it, is in [docs/tools.md](docs/tools.md).
