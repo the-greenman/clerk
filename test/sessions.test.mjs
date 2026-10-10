@@ -117,3 +117,18 @@ test('receiving a report: receives in the plan, no quorum, no considers; comment
   assert.match(out[0], /relation receives: session -> WG report 2026-10-10 \[rrrrrrrr\]/);
   assert.doesNotMatch(out[0], /comment:7\]|considers it/);
 });
+
+test('a proposal from an exercise plans derived-from plus considers; no quorum; summary names it', () => {
+  const ch = [];
+  const it = { instanceId: 'eeeeeeee1', title: 'Looking ahead', exercise: true };
+  take(ch, it, { comment: { text: 'my input' } });
+  take(ch, it, { edit: { field: 'thinking', text: 'more' } });
+  take(ch, it, { proposal: { question: 'Should we X?', resolution: 'Yes' } });
+  assert.throws(() => take(ch, it, { edit: { field: 'resolution', text: 'x' } }), /unknown field/);
+  assertQuorum(ch, { met: false, needs: 'x' });
+  assert.match(summarise(ch, 'S'), /- Exercise: Looking ahead: input given \/ edited \/ proposal drafted/);
+  const out = [];
+  endSession({ role: owner, choices: ch, attendees: at('x'), quorum: { met: false, needs: 'x' }, dryRun: true, log: (m) => out.push(m) });
+  assert.match(out[0], /proposal: new proposed decision "Should we X\?" derived-from Looking ahead \[eeeeeeee\]; session considers the exercise/);
+  assert.match(out[0], /comment on Looking ahead/);
+});

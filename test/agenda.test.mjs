@@ -98,9 +98,33 @@ test('agenda shows progress per section and a tally of the session so far', () =
 });
 
 test('agenda follows a meeting: decisions since, reports, decisions for this session, merges', () => {
-  const l = A.agendaLines({ ratify: [1], reports: [1, 2], decide: [], merge: [], status: [], done: { 2: 1 } });
+  const l = A.agendaLines({ ratify: [1], reports: [1, 2], exercises: [1], decide: [], merge: [], status: [], done: { 2: 1 } });
   assert.match(l[1], /1\. Decisions since the last session/);
   assert.match(l[2], /2\. Reports from working groups\s+2   1 done · 1 left$/);
-  assert.match(l[3], /3\. Decisions for this session/);
-  assert.match(l[4], /4\. Merges/);
+  assert.match(l[3], /3\. Exercises: open discussions asking for input\s+1$/);
+  assert.match(l[4], /4\. Decisions for this session/);
+  assert.match(l[5], /5\. Merges/);
+});
+
+const ex = (id, state) => ({ instanceId: id, record: { lifecycleState: state, fieldValues: { title: id, thinking_reached: 't', unresolved_questions: 'q?' } } });
+test('exercises: open ones listed in the role log; fed-into counts derived-from', () => {
+  const rs = [ex('a'), ex('b', 'closed'), ex('c', 'abandoned'), ex('d'), ex('e', 'active')];
+  assert.deepEqual(A.exerciseItems(rs, log('a', 'b', 'c', 'e')).map((r) => r.instanceId), ['a', 'e']);
+  assert.equal(A.fedInto('a', [{ targetId: 'a' }, { targetId: 'a' }, { targetId: 'z' }]), 2);
+  const out = A.exerciseScreen(ex('a'), [], [], 2).join('\n');
+  assert.match(out, /Input asked for:\s+q\?[\s\S]*Fed into 2 proposals/);
+  assert.match(A.reportScreen({ text: '', cycle: 'c', group: 'G' }, { exercises: 2 }).join('\n'), /Exercises open: 2 \(asking for input\)/);
+});
+test('queue: builder order, forecast fed vs dry', () => {
+  const i = (n, labels, created_at) => ({ repo: 'srs', number: n, title: 't' + n, labels, created_at });
+  const q = [i(1, [], '2026-01-01'), i(2, ['priority: P1'], '2026-02-01'), i(3, ['priority: P0'], '2026-03-01'), i(4, ['priority: P0'], '2026-01-05')];
+  assert.deepEqual(A.orderQueue(q).map((x) => x.number), [4, 3, 2, 1]);
+  assert.deepEqual(A.orderQueue(q, ['srs#1']).map((x) => x.number), [1, 4, 3, 2]);
+  const lp = (st) => ({ instanceId: 'l', record: { lifecycleState: st, createdAt: 'x', fieldValues: { title: 'Local priorities: x', decision_statement: 'srs-rust#5 then the-greenman/srs#7' } } });
+  assert.deepEqual(A.localPriorities([lp('ratified')]), ['srs-rust#5', 'srs#7']);
+  assert.deepEqual(A.localPriorities([lp('proposed')]), []);
+  assert.equal(A.forecast(25, 10), 'Queue fed for about 2 cycles.');
+  assert.equal(A.forecast(3, 10), 'Queue running dry: 3 ready, budget 10. Needs feeding.');
+  const n = A.nextLines({ ready: q, inFlight: 2, merged: 4, budget: 10 }).join('\n');
+  assert.match(n, /Ready group issues: 4[\s\S]*budget left this cycle: 6 of 10[\s\S]*running dry: 4 ready/);
 });

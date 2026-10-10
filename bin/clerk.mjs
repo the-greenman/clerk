@@ -7,7 +7,7 @@ import { OWNER_LOG, GROUP_LOG, GROUP_NAME } from '../lib/roles.mjs';
 import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/io.mjs';
 import * as A from '../lib/agenda.mjs';
 import * as D from '../lib/discussion.mjs';
-import { endSession, postComments, stamp, take, FIELDS, needsTranscript } from '../lib/session.mjs';
+import { endSession, postComments, stamp, take, FIELDS, EX_FIELDS, needsTranscript } from '../lib/session.mjs';
 import { authorise, resolveContext, quorum, quorumText } from '../lib/roles.mjs';
 
 const argv = process.argv.slice(2);
@@ -34,6 +34,7 @@ const getLog = (id) => S(['container', 'get', id]).container;
 const ownerLog = getLog(containers.find((c) => c.title === OWNER_LOG).containerId);
 const rolesList = S(['record', 'list', '--type', 'governance/role']);
 const agentsList = S(['record', 'list', '--type', 'com.mudemocracy.stewardship/agent']);
+const memberSet = (c) => new Set((c.memberInstanceIds ?? []).map((m) => m.instanceId ?? m));
 const people = [...(rolesList.records ?? rolesList.instances), ...(agentsList.records ?? agentsList.instances)]
   .map((r) => ({ id: r.instanceId, name: r.record.fieldValues?.title ?? r.instanceId }));
 const role = resolveContext(roleCfg, rolesList.records ?? rolesList.instances, containers);
@@ -63,6 +64,11 @@ if (isOwner) try {
   const rl = S(['record', 'list', '--type', 'com.mudemocracy.stewardship/run-report']); const inLog = new Set((groupLog.memberInstanceIds ?? []).map((m) => m.instanceId ?? m));
   runReports = (rl.records ?? rl.instances ?? []).filter((r) => inLog.has(r.instanceId));
 } catch { /* no run-reports */ }
+let exerciseRecs = [], derivedRels = [];
+try { // exercises and the proposals they fed; tolerant of a repository without them
+  const el = S(['record', 'list', '--type', A.EXERCISE_TYPE]); exerciseRecs = el.records ?? el.instances ?? [];
+  derivedRels = S(['relation', 'list', '--type', 'derived-from']).relations ?? [];
+} catch { /* no exercises */ }
 let commentRecs = [], commentRels = [];
 try { // the comments package may be absent: no discussion
   const cl = S(['record', 'list', '--type', D.COMMENT_TYPE]); commentRecs = cl.records ?? cl.instances ?? [];
@@ -139,30 +145,42 @@ const prs = !isOwner ? [] : REPOS.flatMap((r) => ghJson(['pr', 'list', '-R', `th
 const sections = {
   1: { name: 'Decisions since the last session', items: A.ratifyItems(records, mainLog, parentLogs) },
   2: { name: 'Reports', items: isOwner ? A.reportItems(runReports, receivedIds, reports, acked, GROUP_NAME) : [] },
-  3: { name: 'Decisions for this session', items: isOwner ? A.escalationItems(records, groupLog, mainLog) : [] },
-  4: { name: 'Merges', items: A.mergeItems(prs) },
+  3: { name: 'Exercises', items: A.exerciseItems(exerciseRecs, mainLog) },
+  4: { name: 'Decisions for this session', items: isOwner ? A.escalationItems(records, groupLog, mainLog) : [] },
+  5: { name: 'Merges', items: A.mergeItems(prs) },
 };
+// Next: the queue behind the group, live via gh REST (owner only; tolerant of failure).
+let next = null;
+if (isOwner) try {
+  const issues = ['srs-rust', 'srs', 'srs-vscode', 'srs-web'].flatMap((r) => gh(['api', '-X', 'GET', `repos/the-greenman/${r}/issues`, '-f', 'labels=ready,wg:third-party-ready', '-f', 'state=open', '-f', 'per_page=100',
+    '--jq', '.[]|select(.pull_request|not)|{number,title,created_at,assignee:(.assignee!=null),labels:[.labels[].name]}']).trim().split('\n').filter(Boolean).map((l) => ({ ...JSON.parse(l), repo: r })))
+    .filter((i) => !i.assignee && !i.labels.some((l) => ['needs-input', 'parked'].includes(l))); // ponytail: the builder also drops issues with a branch or PR; not checked here
+  const inFlight = Number(gh(['api', '-X', 'GET', 'search/issues', '-f', 'q=user:the-greenman is:pr is:open label:"wg:third-party-ready"', '--jq', '.total_count']).trim());
+  next = { ready: A.orderQueue(issues, A.localPriorities(records.filter((r) => memberSet(groupLog).has(r.instanceId)))), inFlight, merged: 0, budget: 10 };
+} catch { /* queue unknown */ }
 const g = isOwner ? groupState(repo) : { pause: 'n/a', merged: '-', budget: '-' };
+if (next) { next.merged = Number(g.merged) || 0; next.budget = Number(g.budget) || 10; }
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
-const acted = { merge: 0 }; const doneIds = { 4: new Set() };
-const isDec = (n) => n === 1 || n === 3;
-const doneCount = (n) => (n === 4 ? doneIds[4].size : sections[n].items.filter((it) => choices.some((c) => c.id === it.instanceId && (n !== 2 || c.action === 'receive'))).length);
-const agenda = () => { header(); show(A.agendaLines({ done: { 1: doneCount(1), 2: doneCount(2), 3: doneCount(3), 4: doneCount(4) }, tally: A.tallyLine(choices, acted),
-  ratify: sections[1].items, reports: sections[2].items, decide: sections[3].items, merge: sections[4].items,
-  status: isOwner ? [A.statusLine('WG Third-party ready', g.pause, g.merged, g.budget)] : [] })); };
+const acted = { merge: 0 }; const doneIds = { 5: new Set() };
+const isDec = (n) => n === 1 || n === 3 || n === 4; // record-backed items (3 = exercises: never ratified)
+const doneCount = (n) => (n === 5 ? doneIds[5].size : sections[n].items.filter((it) => choices.some((c) => c.id === it.instanceId && (n !== 2 || c.action === 'receive'))).length);
+const agenda = () => { header(); show(A.agendaLines({ done: { 1: doneCount(1), 2: doneCount(2), 3: doneCount(3), 4: doneCount(4), 5: doneCount(5) }, tally: A.tallyLine(choices, acted),
+  ratify: sections[1].items, reports: sections[2].items, exercises: sections[3].items, decide: sections[4].items, merge: sections[5].items,
+  status: isOwner ? [A.statusLine('WG Third-party ready', g.pause, g.merged, g.budget), ...(next && A.isDry(next.ready.length, next.budget) ? [A.forecast(next.ready.length, next.budget)] : [])] : [] })); };
 
 const choices = [];
 const plusOne = (id) => { if (!dryRun) gh(['api', '-X', 'POST', `repos/${REPORT_ISSUE.split('/issues')[0]}/issues/comments/${id}/reactions`, '-f', 'content=+1']); };
 const keys = {
   1: { prompt: '[r]atify [s]et aside [c]omment [v]iew discussion [e]dit [h]old [o]pen full [n]ext [q]uit > ', screen: (r) => A.decisionScreen(r, history(r), D.discussionLines(threadOf(r))) },
-  2: { prompt: '[r]eceive [c]omment [o]pen [n]ext [q]uit > ', screen: (it) => A.reportScreen(it, { pause: g.pause, waiting: sections[3].items.length }) },
-  3: { prompt: '[a]ccept recommendation [c]hoose other co[m]ment [v]iew discussion [e]dit [h]old [d]efer [o]pen [n]ext [q]uit > ', screen: (r) => A.escalationScreen(r, history(r), D.discussionLines(threadOf(r))) },
-  4: { prompt: '[m]erge [o]pen in browser [n]ext [q]uit > ', screen: A.prScreen },
+  2: { prompt: '[r]eceive [c]omment [o]pen [n]ext [q]uit > ', screen: (it) => A.reportScreen(it, { pause: g.pause, waiting: sections[4].items.length, exercises: sections[3].items.length, next }) },
+  3: { prompt: '[c]omment (give input) [v]iew discussion [e]dit [p]ropose a decision [o]pen [n]ext [q]uit > ', screen: (r) => A.exerciseScreen(r, history(r), D.discussionLines(threadOf(r)), A.fedInto(r.instanceId, derivedRels)) },
+  4: { prompt: '[a]ccept recommendation [c]hoose other co[m]ment [v]iew discussion [e]dit [h]old [d]efer [o]pen [n]ext [q]uit > ', screen: (r) => A.escalationScreen(r, history(r), D.discussionLines(threadOf(r))) },
+  5: { prompt: '[m]erge [o]pen in browser [n]ext [q]uit > ', screen: A.prScreen },
 };
 
 if (argv[0] === 'agenda') { // read-only: the whole agenda with each item's essentials; no acts
   agenda();
-  for (const n of [1, 2, 3, 4]) for (const [i, it] of sections[n].items.entries()) show([`${sections[n].name} ${i + 1}/${sections[n].items.length}`, ...keys[n].screen(it)]);
+  for (const n of [1, 2, 3, 4, 5]) for (const [i, it] of sections[n].items.entries()) show([`${sections[n].name} ${i + 1}/${sections[n].items.length}`, ...keys[n].screen(it)]);
   process.exit(0);
 }
 
@@ -170,18 +188,18 @@ async function walk(n) {
   const { items } = sections[n];
   for (let i = 0; i < items.length; i++) {
     const it = items[i]; const dec = isDec(n);
-    const ref = { instanceId: it.instanceId, title: dec ? A.fv(it).title : n === 2 ? A.reportTitle(it) : '' };
+    const ref = { instanceId: it.instanceId, exercise: n === 3, title: dec ? A.fv(it).title : n === 2 ? A.reportTitle(it) : '' };
     const choice = (action, text) => take(choices, ref, { action, text });
     show([`${sections[n].name} ${i + 1} of ${items.length} · ${doneCount(n)} done in this section`, ...keys[n].screen(it), ...(dec ? [A.choiceLine(choices.find((c) => c.id === it.instanceId))].filter(Boolean) : n === 2 ? [A.choiceLine(choices.find((c) => c.id === it.instanceId && c.action === 'receive'))].filter(Boolean) : doneIds[n].has(it.number) ? ['  This session: done'] : [])]);
     for (;;) {
       const k = (await key(keys[n].prompt)).toLowerCase();
       if (k === 'q') return false;
-      if (k === 'n' || (k === 'd' && n === 3)) break;
+      if (k === 'n' || (k === 'd' && n === 4)) break;
       if (k === 'o') { if (dec) show(A.fullScreen(it)); else if (n === 2) show([...it.text.split('\n'), ...(it.comment ? ['  ' + it.comment.html_url] : [])]); else openUrl(it.url); continue; }
       try {
-        if (dec && ((n === 1 && (k === 'r' || k === 's')) || (n === 3 && (k === 'a' || k === 'c'))) && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
+        if (dec && ((n === 1 && (k === 'r' || k === 's')) || (n === 4 && (k === 'a' || k === 'c'))) && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
         if (dec && k === 'v') { show(D.fullDiscussion(threadOf(it))); continue; }
-        if (dec && (k === 'm' || (n === 1 && k === 'c'))) { // any attendee may comment; no quorum needed
+        if (dec && (k === 'm' || ((n === 1 || n === 3) && k === 'c'))) { // any attendee may comment; no quorum needed
           const th = threadOf(it); if (th.length) show(D.fullDiscussion(th));
           const text = await ask('comment (markdown) > '); if (!text) continue;
           const to = th.length ? Number(await ask('reply to comment number (blank = the decision) > ')) : 0;
@@ -192,13 +210,19 @@ async function walk(n) {
           catch (e) { console.log('  ' + e.message); }
           continue;
         }
+        if (n === 3 && k === 'p') { // draft a proposal from the exercise: proposed, same log, derived-from it
+          const question = await ask('decision question > '); if (!question) continue;
+          const resolution = await ask('proposed resolution > '); if (!resolution) continue;
+          take(choices, ref, { proposal: { question, resolution } }); console.log('  proposal noted; created as a proposed decision when the session ends'); continue;
+        }
         if (dec && k === 'e') {
-          const f = (await ask(`field (${Object.keys(FIELDS).join('/')}) > `)).toLowerCase();
-          if (!FIELDS[f]) { console.log('  no such field'); continue; }
+          const F = n === 3 ? EX_FIELDS : FIELDS;
+          const f = (await ask(`field (${Object.keys(F).join('/')}) > `)).toLowerCase();
+          if (!F[f]) { console.log('  no such field'); continue; }
           const t = await ask('new text > '); if (!t) continue;
           take(choices, ref, { edit: { field: f, text: t } }); console.log('  edited in place at the end of the session (decision stays proposed)'); continue;
         }
-        if (dec && k === 'h') { take(choices, ref, { hold: true, note: await ask('note for later sessions (optional) > ') }); console.log('  held: considered, stays proposed'); break; }
+        if (dec && n !== 3 && k === 'h') { take(choices, ref, { hold: true, note: await ask('note for later sessions (optional) > ') }); console.log('  held: considered, stays proposed'); break; }
         if (n === 1 && (k === 'r' || k === 's')) { choice(k === 'r' ? 'ratify' : 'setaside'); console.log('  noted for the session'); break; }
         if (n === 2 && k === 'r') { // receiving needs only the acting role present; the +1 is the mechanical side effect, done now
           take(choices, ref, { action: 'receive', report: true, commentOnly: it.commentOnly });
@@ -217,9 +241,9 @@ async function walk(n) {
           }
           continue;
         }
-        if (n === 3 && k === 'a') { choice('accept'); console.log('  noted for the session'); break; }
-        if (n === 3 && k === 'c') { const t = await ask('resolution text > '); if (t) { choice('other', t); console.log('  noted for the session'); break; } continue; }
-        if (n === 4 && k === 'm') { if (dryRun) console.log('  [dry run] would merge'); else gh(['pr', 'merge', String(it.number), '-R', `the-greenman/${it.repo}`, '--merge']); acted.merge++; doneIds[4].add(it.number); console.log('  merged'); break; }
+        if (n === 4 && k === 'a') { choice('accept'); console.log('  noted for the session'); break; }
+        if (n === 4 && k === 'c') { const t = await ask('resolution text > '); if (t) { choice('other', t); console.log('  noted for the session'); break; } continue; }
+        if (n === 5 && k === 'm') { if (dryRun) console.log('  [dry run] would merge'); else gh(['pr', 'merge', String(it.number), '-R', `the-greenman/${it.repo}`, '--merge']); acted.merge++; doneIds[5].add(it.number); console.log('  merged'); break; }
       } catch (e) { console.log('  failed: ' + (e.stderr || e.message).toString().trim()); }
     }
   }
@@ -230,7 +254,7 @@ let transcript;
 let go = true;
 while (go) {
   agenda();
-  const k = (await key('section 1-4, [+] add attendee, [t]ranscript, [e]nd session, [q]uit > ')).toLowerCase();
+  const k = (await key('section 1-5, [+] add attendee, [t]ranscript, [e]nd session, [q]uit > ')).toLowerCase();
   if (k === 'q' || k === 'e') break;
   if (k === 't') { const f = await ask('transcript file path > '); if (f) transcript = resolve(f); continue; }
   if (k === '+') {
@@ -243,7 +267,7 @@ while (go) {
 }
 if (needsTranscript(choices) && !transcript) { const f = await ask('a comment cites the transcript; transcript file path > '); if (f) transcript = resolve(f); }
 { const t = A.tallyLine(choices, acted); if (t) console.log('\n' + t.replace(/ \(recorded when.*$/, '')); }
-if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} decision(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
+if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} item(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
   endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
 else if (choices.length) console.log('Nothing recorded.');
 if (!TTY) process.stdin.destroy(); // piped mode: end the line reader so the process exits
