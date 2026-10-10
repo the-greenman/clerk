@@ -14,9 +14,9 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 import { repoRoot } from "./lib/repo-arg.mjs";
+import { loadSettings } from "../lib/adapters/settings.mjs";
 const ROOT = repoRoot();
 const NS = "com.semanticops.programme";
-const OWNER = "the-greenman";
 
 const MNS = "com.semanticops.method";
 
@@ -117,6 +117,7 @@ function main(argv) {
       console.log(`${live ? "run" : "dry-run"}: ${cmd} ${args.join(" ")}`);
       if (live) execFileSync(cmd, args, { stdio: "inherit", env: { ...process.env, ...env } });
     };
+    const OWNER = loadSettings(ROOT).githubOwner;
     for (const e of result.epics) {
       if (!e.parked) sh("node", [ghp ?? "$GHP_SCRIPT", "epic", "set", String(e.number), "--priority", e.priority], { GHP_STORY_REPO: e.repo });
       sh("gh", ["issue", "edit", String(e.number), "-R", `${OWNER}/${e.repo}`, e.parked ? "--add-label" : "--remove-label", "parked"]);

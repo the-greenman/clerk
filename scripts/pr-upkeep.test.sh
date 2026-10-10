@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Tests the working-group merge decision in pr-upkeep.sh (wg_verdict). Exit code only.
 set -uo pipefail
+OWNER=the-greenman; WG_REPORT_ISSUE=the-greenman/semanticops.com/issues/31
 source "$(dirname "$0")/pr-upkeep.sh"
 FAIL=0
 t() { local want=$1 got; shift; got=$(wg_verdict "$@"); [ "$got" = "$want" ] && echo "ok   $want" || { echo "FAIL want '$want' got '$got'"; FAIL=1; }; }
