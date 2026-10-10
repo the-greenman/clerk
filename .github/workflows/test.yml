@@ -1,0 +1,14 @@
+name: Test
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # No test needs the srs CLI or a programme checkout: all run on fixtures (checked by running npm test with no srs on PATH).
+      - run: npm test
