@@ -11,6 +11,7 @@ import * as A from '../lib/practice/agenda.mjs';
 import * as D from '../lib/practice/discussion.mjs';
 import { stamp, take, FIELDS, EX_FIELDS, needsTranscript } from '../lib/practice/session.mjs';
 import { endSession, postComments } from '../lib/adapters/session.mjs';
+import { loadSettings, issueRef, programmeRepo } from '../lib/adapters/settings.mjs';
 import { authorise, resolveContext, quorum, quorumText } from '../lib/practice/roles.mjs';
 
 const argv = process.argv.slice(2);
@@ -25,6 +26,7 @@ const TOOLS = {
   conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
   board: ['gh-project.mjs', 'story-driven priority on the GitHub Project (many subcommands, see its help)'],
   wt: ['wt', 'create, list and prune git worktrees'],
+  settings: ['settings.mjs', 'print the programme settings record (--json)'],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
 };
 if (argv[0] === 'help' || argv[0] === '--help') {
@@ -45,14 +47,16 @@ const die = (m) => { console.error('clerk: ' + m); process.exit(1); };
 const USAGE = 'usage: clerk [session] --repo <srs-programme path> --as <role> [--dry-run]\n  clerk session ... [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]... [--transcript <file>]\n                   clerk comment --repo <path> --as <role> --on <id> --text <text> [--reply-to <commentId>] [--cite <docId|url|transcript>] [--role-of-cite quoted-from|evidence]\n                   [--edit <id> --field <resolution|why|options|review|question> --text <text>]...  (--ratify/--set-aside need the context\'s quorum)';
 if (!arg('--as')) die(USAGE);
 const repo = resolve(arg('--repo') ?? die('--repo is required'));
-let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR); } catch (e) { die(e.message); }
+const cli = srsCli(repo);
+let settings; try { settings = loadSettings(repo, cli); } catch (e) { die(e.message); }
+let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR, settings.ownerActor); } catch (e) { die(e.message); }
 const isOwner = arg('--as') === 'owner';
 const dryRun = argv.includes('--dry-run');
 
-const REPOS = ['semanticops.com', 'srs', 'srs-rust', 'srs-web', 'srs-vscode', 'srs-programme', 'srs-context', 'muDemocracy.org'];
-const REPORT_ISSUE = 'the-greenman/semanticops.com/issues/31';
-
-const cli = srsCli(repo);
+const REPOS = settings.repos;
+const GH_OWNER = settings.githubOwner;
+const REPORT_ISSUE = issueRef(settings.reportIssue, GH_OWNER).path;
+const programme = programmeRepo(repo);
 const S = (a, i) => srs(cli, repo, a, i);
 const listed = S(['record', 'list', '--type', 'governance/decision']);
 const records = listed.records ?? listed.instances;
@@ -121,14 +125,14 @@ if (sub) {
       const reply = arg('--reply-to') && (() => { const m = commentRecs.filter((c) => c.instanceId.startsWith(arg('--reply-to'))); if (m.length !== 1) throw new Error(`no single comment matches "${arg('--reply-to')}"`); return m[0].instanceId; })();
       take(choices, item(find(arg('--on') ?? die('--on <decision id> is required'))), { comment: { text: arg('--text') ?? die('--text is required'), replyTo: reply, cite: arg('--cite'), role: arg('--role-of-cite') } });
     }
-    if (argv[0] === 'comment') { postComments({ cli, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by') }); process.exit(0); } // discussion between sessions: no session record, no quorum
+    if (argv[0] === 'comment') { postComments({ cli, programme, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by') }); process.exit(0); } // discussion between sessions: no session record, no quorum
     args('--set-aside').forEach((p) => take(choices, item(pick(p)), { action: 'setaside' }));
     args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => take(choices, item(r), { action: 'ratify' }));
     args('--consider').forEach((p) => take(choices, item(find(p)), {}));
     const [fs, ts] = [args('--field'), args('--text')];
     args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); take(choices, item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
     if (dryRun) console.log(quorumText(quorumNow()));
-    endSession({ cli, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by') });
+    endSession({ cli, programme, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by') });
   } catch (e) { die(e.message); }
   process.exit(0);
 }
@@ -165,7 +169,7 @@ const comments = !isOwner ? [] : gh(['api', `repos/${REPORT_ISSUE}/comments`, '-
 const reports = comments.filter((c) => c.author_association === 'OWNER' && A.reportCycle(c)).slice(-5);
 const reactions = Object.fromEntries(reports.map((c) => [c.id, ghJson(['api', `repos/${REPORT_ISSUE.split('/issues')[0]}/issues/comments/${c.id}/reactions`])]));
 const acked = new Set(reports.filter((c) => reactions[c.id].some((x) => x.content === '+1' && x.user?.login === owner)).map((c) => c.id));
-const prs = !isOwner ? [] : REPOS.flatMap((r) => ghJson(['pr', 'list', '-R', `the-greenman/${r}`, '--state', 'open', '--label', 'gate:owner-merge', '-L', '50',
+const prs = !isOwner ? [] : REPOS.flatMap((r) => ghJson(['pr', 'list', '-R', `${GH_OWNER}/${r}`, '--state', 'open', '--label', 'gate:owner-merge', '-L', '50',
   '--json', 'number,title,body,url,isDraft,mergeStateStatus,labels,statusCheckRollup']).map((p) => ({ ...p, repo: r })));
 
 // Order follows a meeting: decisions since the last session, reports, decisions for this session, merges.
@@ -179,10 +183,10 @@ const sections = {
 // Next: the queue behind the group, live via gh REST (owner only; tolerant of failure).
 let next = null;
 if (isOwner) try {
-  const issues = ['srs-rust', 'srs', 'srs-vscode', 'srs-web'].flatMap((r) => gh(['api', '-X', 'GET', `repos/the-greenman/${r}/issues`, '-f', 'labels=ready,wg:third-party-ready', '-f', 'state=open', '-f', 'per_page=100',
+  const issues = ['srs-rust', 'srs', 'srs-vscode', 'srs-web'].flatMap((r) => gh(['api', '-X', 'GET', `repos/${GH_OWNER}/${r}/issues`, '-f', 'labels=ready,wg:third-party-ready', '-f', 'state=open', '-f', 'per_page=100',
     '--jq', '.[]|select(.pull_request|not)|{number,title,created_at,assignee:(.assignee!=null),labels:[.labels[].name]}']).trim().split('\n').filter(Boolean).map((l) => ({ ...JSON.parse(l), repo: r })))
     .filter((i) => !i.assignee && !i.labels.some((l) => ['needs-input', 'parked'].includes(l))); // ponytail: the builder also drops issues with a branch or PR; not checked here
-  const inFlight = Number(gh(['api', '-X', 'GET', 'search/issues', '-f', 'q=user:the-greenman is:pr is:open label:"wg:third-party-ready"', '--jq', '.total_count']).trim());
+  const inFlight = Number(gh(['api', '-X', 'GET', 'search/issues', '-f', `q=user:${GH_OWNER} is:pr is:open label:"wg:third-party-ready"`, '--jq', '.total_count']).trim());
   next = { ready: A.orderQueue(issues, A.localPriorities(records.filter((r) => memberSet(groupLog).has(r.instanceId)))), inFlight, merged: 0, budget: 10 };
 } catch { /* queue unknown */ }
 const g = isOwner ? groupState(repo) : { pause: 'n/a', merged: '-', budget: '-' };
@@ -270,7 +274,7 @@ async function walk(n) {
         }
         if (n === 4 && k === 'a') { choice('accept'); console.log('  noted for the session'); break; }
         if (n === 4 && k === 'c') { const t = await ask('resolution text > '); if (t) { choice('other', t); console.log('  noted for the session'); break; } continue; }
-        if (n === 5 && k === 'm') { if (dryRun) console.log('  [dry run] would merge'); else gh(['pr', 'merge', String(it.number), '-R', `the-greenman/${it.repo}`, '--merge']); acted.merge++; doneIds[5].add(it.number); console.log('  merged'); break; }
+        if (n === 5 && k === 'm') { if (dryRun) console.log('  [dry run] would merge'); else gh(['pr', 'merge', String(it.number), '-R', `${GH_OWNER}/${it.repo}`, '--merge']); acted.merge++; doneIds[5].add(it.number); console.log('  merged'); break; }
       } catch (e) { console.log('  failed: ' + (e.stderr || e.message).toString().trim()); }
     }
   }
@@ -295,6 +299,6 @@ while (go) {
 if (needsTranscript(choices) && !transcript) { const f = await ask('a comment cites the transcript; transcript file path > '); if (f) transcript = resolve(f); }
 { const t = A.tallyLine(choices, acted); if (t) console.log('\n' + t.replace(/ \(recorded when.*$/, '')); }
 if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} item(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
-  endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
+  endSession({ cli, programme, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
 else if (choices.length) console.log('Nothing recorded.');
 if (!TTY) process.stdin.destroy(); // piped mode: end the line reader so the process exits

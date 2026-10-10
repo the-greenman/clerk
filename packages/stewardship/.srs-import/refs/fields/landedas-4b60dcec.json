@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "PR URL, issue URL, or no-op"
+  },
+  "createdAt": "2026-09-19T12:27:23.095823203+00:00",
+  "description": "PR URL, issue URL, or no-op",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "4b60dcec-5cf8-44b6-b49f-78bf99ab0754",
+  "name": "landed_as",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

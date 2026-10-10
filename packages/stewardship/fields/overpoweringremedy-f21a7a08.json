@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Offers a practical remedy or prompt to rebalance this archetype's overreach."
+  },
+  "createdAt": "2026-09-19T12:28:43.568564018+00:00",
+  "description": "A markdown description of how to rebalance a system where this archetype dominates.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "f21a7a08-f86a-46e8-afa3-7d03863d33fe",
+  "name": "overpowering_remedy",
+  "namespace": "com.thesystem",
+  "version": 1
+}

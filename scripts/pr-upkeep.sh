@@ -12,7 +12,8 @@ set -uo pipefail
 # Budget article c5a8c529-578a-4a34-bee3-3ed073305cee: 10 delegated merges per cycle.
 # Cycle article f65ba0b9-8c5b-4312-9567-7e1b9470264d: close at 11:30 UTC, pause after 2 unacknowledged reports.
 WG_LABEL="wg:third-party-ready"; WG_BUDGET=10; WG_CYCLE_CLOSE="11:30"; WG_MAX_UNACKED=2
-WG_REPORT_ISSUE="the-greenman/semanticops.com/issues/31"
+# OWNER and WG_REPORT_ISSUE (<owner>/<repo>/issues/<n>) come from the programme settings (read below the sourced-guard); the test sets them before sourcing.
+OWNER="${OWNER-}"; WG_REPORT_ISSUE="${WG_REPORT_ISSUE-}"
 
 # wg_cycle_start [now]: the most recent 11:30 UTC at or before now, as ISO (default now).
 wg_cycle_start() {
@@ -23,7 +24,7 @@ wg_cycle_start() {
 }
 
 # wg_budget_query <cycle_start_iso>: delegated merges only; a gate:owner-merge PR was merged by the owner and does not count.
-wg_budget_query() { echo "user:the-greenman is:pr is:merged label:\"$WG_LABEL\" -label:\"gate:owner-merge\" merged:>=$1"; }
+wg_budget_query() { echo "user:$OWNER is:pr is:merged label:\"$WG_LABEL\" -label:\"gate:owner-merge\" merged:>=$1"; }
 
 # wg_reactions <comment_id>: reactions JSON array of a report comment (tests override this).
 wg_reactions() { gh api "repos/${WG_REPORT_ISSUE%/issues/*}/issues/comments/$1/reactions" --paginate 2>/dev/null | jq -s 'add // []' 2>/dev/null; }
@@ -38,7 +39,7 @@ wg_paused() {
   for id in $ids; do
     n=$((n+1))
     r=$(wg_reactions "$id") && [ -n "$r" ] || { echo "paused: reactions unreadable"; return; }
-    jq -e 'any(.[]; .content=="+1" and .user.login=="the-greenman")' <<<"$r" >/dev/null 2>&1 || un=$((un+1))
+    jq -e --arg o "$OWNER" 'any(.[]; .content=="+1" and .user.login==$o)' <<<"$r" >/dev/null 2>&1 || un=$((un+1))
   done
   if [ "$n" -ge "$WG_MAX_UNACKED" ] && [ "$un" -ge "$WG_MAX_UNACKED" ]; then echo "paused: $un reports unacknowledged"; else echo ok; fi
 }
@@ -71,10 +72,13 @@ wg_verdict() {
 }
 [[ "${BASH_SOURCE[0]}" != "$0" ]] && return 0  # sourced by the test: functions only
 
-REPOS="semanticops.com srs srs-rust srs-web srs-vscode srs-programme srs-context muDemocracy.org"
-DIGEST_ISSUE="the-greenman/semanticops.com/issues/33"
-APPLY=0; DIGEST=0
-for a in "$@"; do case $a in --apply) APPLY=1 ;; --digest) DIGEST=1 ;; *) echo "unknown arg $a" >&2; exit 2 ;; esac; done
+APPLY=0; DIGEST=0; PROGRAMME="$PWD"
+while [ $# -gt 0 ]; do case $1 in --apply) APPLY=1 ;; --digest) DIGEST=1 ;; --repo) shift; PROGRAMME="${1:?--repo needs a path}" ;; *) echo "unknown arg $1" >&2; exit 2 ;; esac; shift; done
+# One list, one owner, the issues: the programme settings record (clerk settings), never constants.
+SETTINGS=$(node "$(dirname "${BASH_SOURCE[0]}")/../bin/clerk.mjs" settings --repo "$PROGRAMME" --json) || { echo "FAIL  programme settings unreadable" >&2; exit 1; }
+OWNER=$(jq -r .githubOwner <<<"$SETTINGS"); REPOS=$(jq -r '.repos|join(" ")' <<<"$SETTINGS")
+issue_path() { echo "$OWNER/${1%#*}/issues/${1#*#}"; }
+WG_REPORT_ISSUE=$(issue_path "$(jq -r .reportIssue <<<"$SETTINGS")"); DIGEST_ISSUE=$(issue_path "$(jq -r .digestIssue <<<"$SETTINGS")")
 
 act() { # description, command...
   local what=$1; shift
@@ -91,7 +95,7 @@ WG_PAUSE=$(wg_pause_check)
 case $WG_PAUSE in *unreadable*) echo "FAIL  group pause check"; FAILS=$((FAILS+1)) ;; esac
 for r in $REPOS; do
   # mergeStateStatus is computed lazily; UNKNOWN just waits for the next run.
-  rows=$(gh pr list -R "the-greenman/$r" --state open -L 100 \
+  rows=$(gh pr list -R "$OWNER/$r" --state open -L 100 \
     --json number,title,isDraft,mergeStateStatus,labels,autoMergeRequest \
     -q '.[] | select(.isDraft|not) | [.number, .mergeStateStatus, ([.labels[].name|select(startswith("gate:"))] + (if .autoMergeRequest then ["auto-on"] else [] end) | join(",")), (any(.labels[]; .name=="wg:third-party-ready") | if . then "1" else "0" end), .title[:70]] | map(tostring) | join("\u001f")') \
     || { echo "FAIL  list $r"; FAILS=$((FAILS+1)); continue; }
@@ -102,15 +106,15 @@ for r in $REPOS; do
     if [ "$wg" = 1 ]; then  # group PRs: merge only on a valid quorum within budget; no update-branch (a new commit voids the quorum; the reviewer updates, then re-reviews)
       why="awaiting group review"
       if [[ "$gate" == *gate:auto-merge* ]]; then
-        sha=$(gh api "repos/the-greenman/$r/pulls/$n" --jq .head.sha 2>/dev/null)
-        last=$(gh api "repos/the-greenman/$r/commits/$sha" --jq .commit.committer.date 2>/dev/null)
-        cm=$(gh api "repos/the-greenman/$r/issues/$n/comments" --paginate --jq '.[]|{body,created_at,author_association}' 2>/dev/null | jq -s . 2>/dev/null)
+        sha=$(gh api "repos/$OWNER/$r/pulls/$n" --jq .head.sha 2>/dev/null)
+        last=$(gh api "repos/$OWNER/$r/commits/$sha" --jq .commit.committer.date 2>/dev/null)
+        cm=$(gh api "repos/$OWNER/$r/issues/$n/comments" --paginate --jq '.[]|{body,created_at,author_association}' 2>/dev/null | jq -s . 2>/dev/null)
         if [ -z "$last" ] || [ -z "$cm" ]; then why="could not read commits or comments"
         else why=$(wg_verdict 1 "$cm" "$last" "$WG_MERGED"); fi
       fi
       [ "$why" = ok ] && [ "$WG_PAUSE" != ok ] && why="$WG_PAUSE"
       if [ "$why" = ok ] && [ "$state" = CLEAN ]; then
-        act "merge $pr (group quorum ok, $WG_MERGED of $WG_BUDGET merged this cycle)" gh pr merge "$n" -R "the-greenman/$r" --merge
+        act "merge $pr (group quorum ok, $WG_MERGED of $WG_BUDGET merged this cycle)" gh pr merge "$n" -R "$OWNER/$r" --merge
         WG_MERGED=$((WG_MERGED+1))
       else
         [ "$why" = ok ] && why="quorum ok, waiting for state $state"
@@ -119,9 +123,9 @@ for r in $REPOS; do
     fi
     case "$wg:$gate:$state" in
       1:*) ;;
-      *:*gate:auto-merge*:CLEAN)  act "merge $pr" gh pr merge "$n" -R "the-greenman/$r" --merge ;;
+      *:*gate:auto-merge*:CLEAN)  act "merge $pr" gh pr merge "$n" -R "$OWNER/$r" --merge ;;
       *:*gate:auto-merge*:BEHIND|*:*gate:owner-merge*:BEHIND|*:*auto-on*:BEHIND)
-                                act "update-branch $pr" gh pr update-branch "$n" -R "the-greenman/$r" ;;
+                                act "update-branch $pr" gh pr update-branch "$n" -R "$OWNER/$r" ;;
     esac
     case "$gate:$state" in
       *gate:owner-merge*:CLEAN) READY+="- $pr $title"$'\n' ;;

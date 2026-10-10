@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Describes the observable symptoms of this archetype's absence, for diagnosis."
+  },
+  "createdAt": "2026-09-19T12:28:43.378603482+00:00",
+  "description": "A markdown description of what it looks like when this archetype is absent from a system.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "51f4236a-dbf2-4003-a00c-1d91af1db8a2",
+  "name": "missing_signal",
+  "namespace": "com.thesystem",
+  "version": 1
+}

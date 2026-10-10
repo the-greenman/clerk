@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Names the distorted, shadow form this archetype can collapse into under stress."
+  },
+  "createdAt": "2026-09-19T12:28:43.685789712+00:00",
+  "description": "The name of this archetype's shadow expression (e.g. Tyrant, Martyr).",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "983c8914-b401-4996-ab95-ecf652e81661",
+  "name": "shadow_name",
+  "namespace": "com.thesystem",
+  "version": 1
+}

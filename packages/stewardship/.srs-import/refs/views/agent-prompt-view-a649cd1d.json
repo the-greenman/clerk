@@ -1,0 +1,20 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "createdAt": "2026-09-19T12:24:22.973471082+00:00",
+  "description": "Renders an agent's brief as the body of its routine file.",
+  "exportConfig": {
+    "format": "markdown"
+  },
+  "fieldViews": [
+    {
+      "displayLabel": "Brief",
+      "fieldId": "eff125b7-9da3-4a4d-a6ef-7fa435f2cb5e",
+      "order": 0,
+      "visible": true
+    }
+  ],
+  "id": "a649cd1d-28bd-433f-b1b0-cd811efd3911",
+  "name": "agent-prompt-view",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

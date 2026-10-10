@@ -10,9 +10,9 @@
  */
 import { execFileSync } from "child_process";
 import { fileURLToPath } from "url";
+import { loadSettings } from "../lib/adapters/settings.mjs";
+import { repoRoot } from "./lib/repo-arg.mjs";
 
-const OWNER = "the-greenman";
-const REPOS = ["semanticops.com", "srs", "srs-rust", "srs-web", "srs-vscode", "srs-programme"];
 const LANES = { "lane:unattended": "general", "wg:third-party-ready": "wg" };
 
 /** issues: REST issue objects plus `repo`; prs: open PR objects plus `repo`. Returns ordered queued/held rows. */
@@ -38,7 +38,7 @@ export function classify(issues, prs) {
 
 const api = (path) => JSON.parse(execFileSync("gh", ["api", "--paginate", "--slurp", path], { encoding: "utf8" })).flat();
 
-function fetchAll() {
+function fetchAll(OWNER, REPOS) {
   const issues = new Map(), prs = [];
   for (const repo of REPOS) {
     for (const lane of Object.keys(LANES))
@@ -50,7 +50,8 @@ function fetchAll() {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const r = fetchAll();
+  let s; try { s = loadSettings(repoRoot()); } catch (e) { console.error("queue: " + e.message); process.exit(1); }
+  const r = fetchAll(s.githubOwner, s.repos);
   if (process.argv.includes("--json")) console.log(JSON.stringify(r, null, 2));
   else {
     const line = (x) => `  ${(x.priority ?? "--").padEnd(3)} ${x.ref.padEnd(22)} ${x.created}  [${x.lanes.join(",")}] ${x.title}`;

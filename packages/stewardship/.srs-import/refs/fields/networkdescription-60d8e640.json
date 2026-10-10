@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Extends the archetype's meaning from an individual stance to a network-level pattern."
+  },
+  "createdAt": "2026-09-19T12:28:43.806673228+00:00",
+  "description": "A markdown description of how this archetype shows up at the network (multi-agent) level.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "60d8e640-2163-48e4-9543-76b969b2aebc",
+  "name": "network_description",
+  "namespace": "com.thesystem",
+  "version": 1
+}

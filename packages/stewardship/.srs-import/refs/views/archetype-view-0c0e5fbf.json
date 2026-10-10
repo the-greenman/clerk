@@ -1,0 +1,152 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "createdAt": "2026-09-19T12:33:15.553450357+00:00",
+  "description": "Renders a Systemic Leadership Archetype brief for an agent routine file.",
+  "exportConfig": {
+    "format": "markdown"
+  },
+  "fieldViews": [
+    {
+      "displayLabel": "Name",
+      "fieldId": "805427d4-9234-4926-b202-ed0f8fc5d4c9",
+      "order": 0,
+      "visible": false
+    },
+    {
+      "displayLabel": "Archetype Code",
+      "fieldId": "8bb34f76-ae5c-4616-a9a8-95ac16fb196f",
+      "order": 1,
+      "visible": false
+    },
+    {
+      "displayLabel": "Binary",
+      "fieldId": "7f0d1757-013d-40e2-8ab2-071c2540036a",
+      "order": 2,
+      "visible": false
+    },
+    {
+      "displayLabel": "Trigram",
+      "fieldId": "069611a9-5ad1-42cd-b27d-66ba0d494c79",
+      "order": 3,
+      "visible": false
+    },
+    {
+      "displayLabel": "Symbol",
+      "fieldId": "0b094b7b-517a-4960-90aa-ef83a2d3a28b",
+      "order": 4,
+      "visible": false
+    },
+    {
+      "displayLabel": "Phrase",
+      "fieldId": "4e2b6e38-c5ac-437d-8a54-d769ac688741",
+      "order": 5,
+      "visible": true
+    },
+    {
+      "displayLabel": "Core energy",
+      "fieldId": "ece5f93f-6c42-4094-877d-b49652d7c9e1",
+      "order": 6,
+      "visible": true
+    },
+    {
+      "displayLabel": "Systemic stance",
+      "fieldId": "aa4b0944-01e8-49d9-a478-5178c7237f54",
+      "order": 7,
+      "visible": true
+    },
+    {
+      "displayLabel": "Stance by axis",
+      "fieldId": "f238315a-8bc2-4de8-9524-09917d6fbe75",
+      "order": 8,
+      "visible": true
+    },
+    {
+      "displayLabel": "Invoke when",
+      "fieldId": "2178898d-48fe-45aa-9e77-68553fef3ac1",
+      "order": 9,
+      "visible": true
+    },
+    {
+      "displayLabel": "Capacities",
+      "fieldId": "58d4b203-b5fa-47c5-94da-257934b5abaa",
+      "order": 10,
+      "visible": true
+    },
+    {
+      "displayLabel": "Activities",
+      "fieldId": "cb111d6e-2979-47e1-ad15-ef971772677a",
+      "order": 11,
+      "visible": true
+    },
+    {
+      "displayLabel": "Missing — signal",
+      "fieldId": "51f4236a-dbf2-4003-a00c-1d91af1db8a2",
+      "order": 12,
+      "visible": true
+    },
+    {
+      "displayLabel": "Missing — remedy",
+      "fieldId": "f3774d67-8e38-44fc-902a-98bdd7dee2bd",
+      "order": 13,
+      "visible": true
+    },
+    {
+      "displayLabel": "Overpowering — signal",
+      "fieldId": "389e7571-1135-4441-9256-b2135e9dbdbf",
+      "order": 14,
+      "visible": true
+    },
+    {
+      "displayLabel": "Overpowering — remedy (hand off to)",
+      "fieldId": "f21a7a08-f86a-46e8-afa3-7d03863d33fe",
+      "order": 15,
+      "visible": true
+    },
+    {
+      "displayLabel": "Activation prompts",
+      "fieldId": "b6501140-2f8a-4ac7-9eb2-bb02c91ba7bb",
+      "order": 16,
+      "visible": true
+    },
+    {
+      "displayLabel": "Shadow",
+      "fieldId": "983c8914-b401-4996-ab95-ecf652e81661",
+      "order": 17,
+      "visible": true
+    },
+    {
+      "displayLabel": "Shadow description",
+      "fieldId": "929d300f-c627-4a33-9e3b-6836ccc41faa",
+      "order": 18,
+      "visible": true
+    },
+    {
+      "displayLabel": "As an organisational role",
+      "fieldId": "60d8e640-2163-48e4-9543-76b969b2aebc",
+      "order": 19,
+      "visible": true
+    },
+    {
+      "displayLabel": "Role — signal",
+      "fieldId": "b1e2311d-f351-4139-9487-8dc67f036000",
+      "order": 20,
+      "visible": true
+    },
+    {
+      "displayLabel": "Role — antipattern",
+      "fieldId": "ea30bb5c-030a-4d32-950d-75a15ec2801c",
+      "order": 21,
+      "visible": true
+    },
+    {
+      "displayLabel": "Role — absence",
+      "fieldId": "d9e4c884-192b-465d-a793-91b606a42b6b",
+      "order": 22,
+      "visible": true
+    }
+  ],
+  "id": "0c0e5fbf-d9e8-48ab-8bde-e2a6d1775af7",
+  "name": "archetype-view",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

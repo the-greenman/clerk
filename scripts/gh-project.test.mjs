@@ -4,7 +4,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import {
+// Hermetic: the settings come from env (which wins), not from a programme repo.
+Object.assign(process.env, { GHP_OWNER: "the-greenman", GHP_PROJECT: "6", GHP_STORY_REPO: "semanticops.com",
+  GHP_MIRROR_REPOS: "srs,srs-rust,srs-web,srs-vscode,srs-context,srs-programme,semanticops.com" });
+const {
   MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs,
   STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant,
   planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics,
@@ -13,7 +16,7 @@ import {
   planTopup, TOPUP_TARGET_DEFAULT,
   isWorkItem, isConsumableReady, countConsumableReady,
   hasOpenBlockers, isBlocked, blockedLabelWant,
-} from "./gh-project.mjs";
+} = await import("./gh-project.mjs");
 
 // Blocking via native blocked-by dependencies (#671). Ownership rule: edges present
 // ⇒ the `blocked` label is derived (tool-owned); no edges ⇒ human-owned, left alone.

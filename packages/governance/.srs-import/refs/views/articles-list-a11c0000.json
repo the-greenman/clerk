@@ -1,0 +1,25 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "createdAt": "2026-07-06T00:00:00Z",
+  "description": "Compact article list — number and status.",
+  "fieldViews": [
+    {
+      "displayLabel": "Article №",
+      "fieldId": "60be1468-01bc-5d12-9eea-628f02801893",
+      "order": 0,
+      "required": false,
+      "visible": true
+    },
+    {
+      "displayLabel": "Status",
+      "fieldId": "aee7afe9-6650-5fa4-a61a-495c3b88994b",
+      "order": 1,
+      "required": true,
+      "visible": true
+    }
+  ],
+  "id": "a11c0000-0000-4000-8000-000000000a01",
+  "name": "articles-list",
+  "namespace": "governance",
+  "version": 1
+}

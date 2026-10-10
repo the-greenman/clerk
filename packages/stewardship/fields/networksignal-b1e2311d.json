@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Describes the observable network-level signal that this archetype is active."
+  },
+  "createdAt": "2026-09-19T12:28:43.867235993+00:00",
+  "description": "A markdown description of the signal that this archetype's energy is present in a network.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "b1e2311d-f351-4139-9487-8dc67f036000",
+  "name": "network_signal",
+  "namespace": "com.thesystem",
+  "version": 1
+}

@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Describes the observable network-level symptoms of this archetype's absence."
+  },
+  "createdAt": "2026-09-19T12:28:43.992629277+00:00",
+  "description": "A markdown description of what a network looks like when this archetype's energy is missing.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "d9e4c884-192b-465d-a793-91b606a42b6b",
+  "name": "network_absence",
+  "namespace": "com.thesystem",
+  "version": 1
+}

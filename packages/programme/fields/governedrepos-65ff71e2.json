@@ -1,0 +1,18 @@
+{
+  "id": "65ff71e2-902f-4e40-88fc-3022d45f7541",
+  "namespace": "com.semanticops.programme",
+  "name": "governed_repos",
+  "version": 1,
+  "description": "Every repository the programme governs, bare names under github_owner.",
+  "aiGuidance": {
+    "purpose": "The one list the queue, steward and PR upkeep scan. Adding a repository here widens all of them.",
+    "extraction": "One entry per repository, bare name without owner, e.g. srs-rust."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "list",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-10T00:00:00Z"
+}

@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Describes the observable symptoms of this archetype's overuse, for diagnosis."
+  },
+  "createdAt": "2026-09-19T12:28:43.505769372+00:00",
+  "description": "A markdown description of what it looks like when this archetype dominates a system.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "389e7571-1135-4441-9256-b2135e9dbdbf",
+  "name": "overpowering_signal",
+  "namespace": "com.thesystem",
+  "version": 1
+}

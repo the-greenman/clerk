@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Supplies a compact visual glyph for the archetype, used in UI labels and quick reference."
+  },
+  "createdAt": "2026-09-19T12:28:42.859441615+00:00",
+  "description": "The Unicode trigram glyph for this archetype (e.g. ☰, ☱).",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "0b094b7b-517a-4960-90aa-ef83a2d3a28b",
+  "name": "symbol",
+  "namespace": "com.thesystem",
+  "version": 1
+}

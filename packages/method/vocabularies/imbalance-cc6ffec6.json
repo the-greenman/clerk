@@ -1,0 +1,35 @@
+{
+  "id": "cc6ffec6-3648-4cbf-8d68-21e6e9acd053",
+  "version": 1,
+  "namespace": "com.semanticops.method",
+  "name": "imbalance",
+  "mode": "closed",
+  "terms": [
+    {
+      "id": "23793c25-cba3-4f6f-a254-0ca9b35e926e",
+      "version": 1,
+      "namespace": "com.semanticops.method",
+      "key": "held-too-long",
+      "label": "Held too long",
+      "description": "One side has been held past its useful moment."
+    },
+    {
+      "id": "b4592b7e-52a9-4514-88ff-c7ae1b40c853",
+      "version": 1,
+      "namespace": "com.semanticops.method",
+      "key": "missing",
+      "label": "Missing",
+      "description": "One side is absent from the picture."
+    },
+    {
+      "id": "6cfd4b3e-be50-4c59-8527-d72addc22176",
+      "version": 1,
+      "namespace": "com.semanticops.method",
+      "key": "collapsed",
+      "label": "Collapsed",
+      "description": "The two sides have merged into one, so the trade-off is no longer visible."
+    }
+  ],
+  "description": "How a tension has gone out of balance.",
+  "createdAt": "2026-10-08T11:04:36.679Z"
+}

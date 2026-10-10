@@ -1,0 +1,13 @@
+{
+  "id": "ec88d284-c63c-41af-9331-893a587edb5a",
+  "version": 1,
+  "key": "com.semanticops.method/held-by",
+  "namespace": "com.semanticops.method",
+  "label": "Held by",
+  "description": "Problem is held by persona.",
+  "category": "association",
+  "createdAt": "2026-10-08T10:44:32.544031810+00:00",
+  "canonicalDirection": "source is the problem; target is the persona that holds it",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

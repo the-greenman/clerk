@@ -72,13 +72,18 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { loadSettings } from "../lib/adapters/settings.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
 // ---------------------------------------------------------------------------
-const OWNER = process.env.GHP_OWNER || "the-greenman";
-const PROJECT_NUMBER = Number(process.env.GHP_PROJECT || 6);
-const STORY_REPO = process.env.GHP_STORY_REPO || "semanticops.com";
+// Env wins (CI); otherwise the programme settings record, read from CLERK_REPO or the cwd. Missing => undefined; commands that need a value die in main.
+const SETTINGS = process.env.GHP_OWNER && process.env.GHP_PROJECT && process.env.GHP_STORY_REPO && process.env.GHP_MIRROR_REPOS ? {} : (() => {
+  try { return loadSettings(resolve(process.env.CLERK_REPO || process.cwd())); } catch { return {}; }
+})();
+const OWNER = process.env.GHP_OWNER || SETTINGS.githubOwner;
+const PROJECT_NUMBER = Number(process.env.GHP_PROJECT || SETTINGS.boardProject);
+const STORY_REPO = process.env.GHP_STORY_REPO || SETTINGS.boardStoryRepo;
 const STORY_LABEL = "user-story";
 
 const MOSCOW_TO_P = { Must: "P0", Should: "P1", Could: "P2", "Won't": null };
@@ -127,7 +132,7 @@ const MIRROR_LABELS = [
   { name: NEEDS_INPUT_LABEL, color: "D876E3", description: "Stopped at a human gate — question is in the comments; answer and REMOVE this label to re-feed" },
 ];
 // Repos whose merges/routines depend on the mirror set existing. Overridable for tests/forks.
-const MIRROR_REPOS = (process.env.GHP_MIRROR_REPOS || `srs,srs-rust,srs-web,srs-vscode,srs-context,srs-programme,${STORY_REPO}`)
+const MIRROR_REPOS = (process.env.GHP_MIRROR_REPOS || (SETTINGS.repos ?? []).join(","))
   .split(",").map((s) => s.trim()).filter(Boolean);
 
 // Board Status → plain-label mirror. The routines can't read Projects v2 Status through the
@@ -2217,6 +2222,7 @@ export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [cmd, ...rest] = process.argv.slice(2);
   const dry = rest.includes("--dry-run");
+  if (cmd && cmd !== "help" && !(OWNER && STORY_REPO && PROJECT_NUMBER)) die("no GHP_OWNER/GHP_PROJECT/GHP_STORY_REPO and no programme settings record readable from CLERK_REPO or the cwd");
   try {
     switch (cmd) {
       case "fields": cmdFields(); break;

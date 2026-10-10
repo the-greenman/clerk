@@ -1,0 +1,19 @@
+{
+  "id": "c01b77c8-c1d6-49fe-aa3f-020e469fc267",
+  "namespace": "com.semanticops.method",
+  "name": "out_of_scope",
+  "version": 1,
+  "description": "What a domain deliberately leaves to others.",
+  "aiGuidance": {
+    "purpose": "The matters outside the domain's boundary, so a trade-off is not argued in the wrong domain.",
+    "extraction": "One or two sentences naming the neighbours.",
+    "negativeGuidance": "Do not list everything that is merely unrelated."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "editorHint": "textarea",
+  "createdAt": "2026-10-08T11:04:36.873Z"
+}

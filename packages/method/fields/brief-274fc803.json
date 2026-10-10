@@ -1,0 +1,19 @@
+{
+  "id": "274fc803-3c56-432b-b061-bf24e93fca8c",
+  "namespace": "com.semanticops.method",
+  "name": "brief",
+  "version": 1,
+  "description": "One-line description of an agent's job.",
+  "aiGuidance": {
+    "purpose": "The agent's role in one line.",
+    "extraction": "One line, role only.",
+    "negativeGuidance": "No private content, no run rules."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "editorHint": "textarea",
+  "createdAt": "2026-10-08T11:04:37.433Z"
+}

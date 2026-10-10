@@ -1,0 +1,19 @@
+{
+  "id": "47f51f10-40c3-4ac2-9677-734d10be3701",
+  "namespace": "com.semanticops.method",
+  "name": "in_scope",
+  "version": 1,
+  "description": "What a domain covers.",
+  "aiGuidance": {
+    "purpose": "The matters inside the domain's boundary. Tensions are relative to this boundary.",
+    "extraction": "One or two sentences.",
+    "negativeGuidance": "Do not restate the purpose."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "editorHint": "textarea",
+  "createdAt": "2026-10-08T11:04:36.811Z"
+}

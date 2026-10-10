@@ -1,0 +1,19 @@
+{
+  "id": "fced003b-7144-4746-9f0f-bcbea055f717",
+  "namespace": "com.semanticops.method",
+  "name": "jobs",
+  "version": 1,
+  "description": "Jobs a persona is trying to get done.",
+  "aiGuidance": {
+    "purpose": "The tasks a persona turns to the system for, as short verb phrases. Problems are held when these jobs are blocked.",
+    "extraction": "Three to five short phrases in the persona's own terms, one per entry.",
+    "negativeGuidance": "Do not list features, products or solutions."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "list",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-08T10:44:21.339518994+00:00"
+}

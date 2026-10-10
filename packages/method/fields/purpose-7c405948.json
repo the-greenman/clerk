@@ -1,0 +1,19 @@
+{
+  "id": "7c405948-6db7-492c-ba12-e759c78781ad",
+  "namespace": "com.semanticops.method",
+  "name": "purpose",
+  "version": 1,
+  "description": "What a domain exists to do.",
+  "aiGuidance": {
+    "purpose": "One or two sentences saying what the domain is for; every tension and problem in it is judged against this.",
+    "extraction": "State the point of the domain, not its features.",
+    "negativeGuidance": "Not a list of products or tasks."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "editorHint": "textarea",
+  "createdAt": "2026-10-08T11:04:36.748Z"
+}

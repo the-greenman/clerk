@@ -1,0 +1,17 @@
+{
+  "id": "851f95cc-a496-433b-811a-c151c33453eb",
+  "namespace": "com.semanticops.programme",
+  "name": "board_project",
+  "version": 1,
+  "description": "Number of the GitHub Project (v2) board that carries programme priority.",
+  "aiGuidance": {
+    "purpose": "Board that gh-project reads and writes.",
+    "extraction": "The integer in the project URL, e.g. 6."
+  },
+  "fieldType": {
+    "datatype": "number",
+    "cardinality": "single"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-10T00:00:00Z"
+}

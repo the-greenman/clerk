@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Describes how this archetype's energy misfires when it dominates a network."
+  },
+  "createdAt": "2026-09-19T12:28:43.928485502+00:00",
+  "description": "A markdown description of this archetype's dysfunctional pattern at network scale.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "ea30bb5c-030a-4d32-950d-75a15ec2801c",
+  "name": "network_antipattern",
+  "namespace": "com.thesystem",
+  "version": 1
+}

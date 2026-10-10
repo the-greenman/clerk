@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // steward-check: daily guard against false closes (srs-programme#37, Answers SP-43).
 //   node scripts/steward-check.mjs [--days N] [--since ISO] [--fix]      dry run is the DEFAULT; --fix acts.
-// Rules, over the last N days (default 7), across the six SemanticOps repos:
+// Rules, over the last N days (default 7), across the programme's governed repos (settings governed_repos):
 //   reopen-no-pr   closed COMPLETED, not an epic, no merged closing PR, no `no-code` label -> reopen + comment
 //   reopen-epic    epic (label `epic` or has sub-issues) closed with open sub-issues, unless every open child has a re-homing comment -> reopen + comment
 // Closed by a Commit or a merged PR (timeline closer) also counts as landed; duplicates and bots are skipped.
@@ -12,12 +12,12 @@
 // copied from srs-rust/scripts/gh-project.mjs (separate repo, so a small copy rather than an import).
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { loadSettings } from "../lib/adapters/settings.mjs";
+import { repoRoot } from "./lib/repo-arg.mjs";
 
 // Go-forward only: history before this is never acted on (the weekly audit, srs-programme#38, reports it).
 export const SINCE = "2026-10-09T00:00:00Z";
 const RESET_RE = /Closed in the SemanticOps roadmap reset/;
-export const REPOS = ["semanticops.com", "srs", "srs-rust", "srs-web", "srs-vscode", "srs-programme"];
-const OWNER = "the-greenman";
 const M = { noPr: "<!-- steward-check:reopen-no-pr -->", epic: "<!-- steward-check:reopen-epic -->", answers: "<!-- steward-check:answers -->" };
 const ANSWERS_RE = /^[\s>*_-]*(answers|no affirmed problem yet)\b/im;
 const REHOME_RE = /(re-?hom|moved to|moving to|tracked (in|by)|now (in|under|tracked))/i;
@@ -73,7 +73,7 @@ const ISSUE_Q = `query($q:String!,$after:String){search(query:$q,type:ISSUE,firs
  subIssuesSummary{total} closedByPullRequestsReferences(first:10,includeClosedPrs:true){nodes{merged}}}}}}`;
 const CHILD_Q = `query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n){subIssues(first:100){nodes{number state comments(last:30){nodes{body}}}}}}}`;
 
-export function fetchIssues(repo, days, cutoff = SINCE) {
+export function fetchIssues(repo, days, cutoff = SINCE, OWNER) {
   const since = new Date(Math.max(Date.parse(cutoff), Date.now() - days * 864e5)).toISOString().slice(0, 10);
   const seen = new Map();
   for (const qual of [`closed:>=${since}`, `created:>=${since}`]) {
@@ -96,7 +96,7 @@ export function fetchIssues(repo, days, cutoff = SINCE) {
   });
 }
 
-function apply(a) {
+function apply(a, OWNER) {
   const base = `repos/${OWNER}/${a.repo}/issues/${a.number}`;
   if (a.reopen) gh(["api", "-X", "PATCH", base, "-f", "state=open"]);
   gh(["api", "-X", "POST", `${base}/comments`, "-f", `body=${a.comment}`]);
@@ -111,14 +111,16 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (Number.isNaN(Date.parse(cutoff))) { console.error("--since needs an ISO date"); process.exit(2); }
   const days = di >= 0 ? Number(argv[di + 1]) : 7;
   if (!(days > 0)) { console.error("--days needs a positive number"); process.exit(2); }
+  let settings; try { settings = loadSettings(repoRoot()); } catch (e) { console.error("steward: " + e.message); process.exit(2); }
+  const OWNER = settings.githubOwner;
   let failed = 0, n = 0;
-  for (const repo of REPOS) {
+  for (const repo of settings.repos) {
     let issues;
-    try { issues = fetchIssues(repo, days, cutoff); } catch (e) { console.error(`${repo}: ${e.message}`); failed++; continue; }
+    try { issues = fetchIssues(repo, days, cutoff, OWNER); } catch (e) { console.error(`${repo}: ${e.message}`); failed++; continue; }
     for (const a of plan(issues, { days, since: cutoff })) {
       n++;
       console.log(`${fix ? "ACT " : "WOULD"} ${a.rule.padEnd(12)} ${a.ref}${a.reopen ? " (reopen)" : ""}`);
-      if (fix) try { apply(a); } catch (e) { console.error(`${a.ref}: ${e.message}`); failed++; }
+      if (fix) try { apply(a, OWNER); } catch (e) { console.error(`${a.ref}: ${e.message}`); failed++; }
     }
   }
   console.log(`${n} action(s)${fix ? "" : " (dry run; --fix to act)"}, ${failed} failure(s)`);

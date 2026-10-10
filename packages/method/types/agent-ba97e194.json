@@ -1,0 +1,32 @@
+{
+  "id": "ba97e194-0530-4be3-9fc4-54a9ee81072c",
+  "namespace": "com.semanticops.method",
+  "name": "agent",
+  "version": 1,
+  "description": "A named AI agent role that works from an archetype's stance.",
+  "fields": [
+    {
+      "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "94d587e4-7f40-478b-af61-691fd5221882",
+      "order": 1,
+      "required": true
+    },
+    {
+      "fieldId": "274fc803-3c56-432b-b061-bf24e93fca8c",
+      "order": 2,
+      "required": false
+    }
+  ],
+  "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
+  "aiGuidance": {
+    "purpose": "Ties an SRS session actor id to a stance: the agent instantiates an archetype, so a suggestion's createdBy traces to a stance.",
+    "extraction": "actor_id is exactly the SRS_ACTOR id; brief is one line of role only.",
+    "negativeGuidance": "No run rules or private content in the brief."
+  },
+  "createdAt": "2026-10-08T11:04:58.091Z",
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json"
+}

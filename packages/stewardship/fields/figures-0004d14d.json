@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "JSON blob of measured figures from scripts/measure-musrs.mjs"
+  },
+  "createdAt": "2026-09-19T12:27:23.033173250+00:00",
+  "description": "JSON blob of measured figures from scripts/measure-musrs.mjs",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "0004d14d-d8e1-47f1-87a5-0c6b6509a34d",
+  "name": "figures",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

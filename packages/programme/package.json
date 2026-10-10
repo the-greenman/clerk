@@ -1,0 +1,28 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/package-manifest.json",
+  "id": "a71f013f-0207-439f-8e52-2982baa68e86",
+  "namespace": "com.semanticops.programme",
+  "name": "methodology",
+  "version": "0.1.0",
+  "title": "methodology",
+  "description": "Programme settings. The live methodology types still live in srs-programme's primary package.",
+  "status": "active",
+  "createdAt": "2026-10-10T00:00:00Z",
+  "fields": [
+    "fields/programmetitle-f37bceb4.json",
+    "fields/githubowner-07ee0281.json",
+    "fields/governedrepos-65ff71e2.json",
+    "fields/reportissue-05e8d8e5.json",
+    "fields/digestissue-bb3caa33.json",
+    "fields/boardproject-851f95cc.json",
+    "fields/boardstoryrepo-141a2ee7.json",
+    "fields/owneractor-44a66dd4.json"
+  ],
+  "types": [
+    "types/programme-b34ef0e7.json"
+  ],
+  "relationTypes": [],
+  "views": [],
+  "compositions": [],
+  "blueprints": []
+}

@@ -1,0 +1,19 @@
+{
+  "id": "d2f41e5b-e0de-46f5-b8bf-e2ca03155e40",
+  "namespace": "com.semanticops.method",
+  "name": "looks_like",
+  "version": 1,
+  "description": "What holding one side of a trade-off looks like.",
+  "aiGuidance": {
+    "purpose": "What it looks like in practice to lean on this side (public word: side; the record is a pole).",
+    "extraction": "One plain-English sentence in the third person (a team, a person, a document); rewrite first-person source text.",
+    "negativeGuidance": "Do not use first person, mystical or elemental terms, or praise the side over its opposite; both sides are legitimate."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "editorHint": "textarea",
+  "createdAt": "2026-10-08T11:04:36.936Z"
+}

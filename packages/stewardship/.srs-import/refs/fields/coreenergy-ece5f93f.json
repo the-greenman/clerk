@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Summarizes what the archetype fundamentally does, in a single sentence for quick scanning."
+  },
+  "createdAt": "2026-09-19T12:28:42.981901326+00:00",
+  "description": "A one-sentence summary of the archetype's driving energy.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "ece5f93f-6c42-4094-877d-b49652d7c9e1",
+  "name": "core_energy",
+  "namespace": "com.thesystem",
+  "version": 1
+}

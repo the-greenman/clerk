@@ -1,0 +1,19 @@
+{
+  "id": "8882824d-fe07-418f-aa43-3164356b9f29",
+  "namespace": "com.semanticops.method",
+  "name": "use_when",
+  "version": 1,
+  "description": "When an archetype's stance is the one to bring in.",
+  "aiGuidance": {
+    "purpose": "The situation that calls for this stance.",
+    "extraction": "One sentence beginning 'When ...' or 'The system ...'.",
+    "negativeGuidance": "No mystical or elemental terms."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "markdown"
+  },
+  "editorHint": "textarea",
+  "createdAt": "2026-10-08T11:04:37.373Z"
+}

@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Lists the archetype's stance on each of the three binary axes as separate, scannable bullets."
+  },
+  "createdAt": "2026-09-19T12:28:43.114061599+00:00",
+  "description": "The three axis stances (Action/Change/Perspective) rendered as markdown bullets, one per line.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "f238315a-8bc2-4de8-9524-09917d6fbe75",
+  "name": "line_stances",
+  "namespace": "com.thesystem",
+  "version": 1
+}

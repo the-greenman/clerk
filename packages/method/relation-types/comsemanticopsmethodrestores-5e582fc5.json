@@ -1,0 +1,13 @@
+{
+  "id": "5e582fc5-6ca9-44b2-8d3b-33d0ac37797a",
+  "version": 1,
+  "key": "com.semanticops.method/restores",
+  "namespace": "com.semanticops.method",
+  "label": "Restores",
+  "description": "Remedy restores a pole. Endpoints: remedy -> pole.",
+  "category": "association",
+  "createdAt": "2026-10-08T11:04:58.672Z",
+  "canonicalDirection": "source is the remedy; target is the pole it restores",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

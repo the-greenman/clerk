@@ -1,0 +1,14 @@
+{
+  "aiGuidance": {
+    "purpose": "Date the run happened"
+  },
+  "createdAt": "2026-09-19T12:27:27.123866784+00:00",
+  "description": "Date the run happened",
+  "fieldType": {
+    "datatype": "date"
+  },
+  "id": "930c4a69-9093-4059-ad22-0a20a5a4c8f3",
+  "name": "run_date",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

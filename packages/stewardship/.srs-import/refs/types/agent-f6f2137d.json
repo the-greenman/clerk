@@ -1,0 +1,24 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json",
+  "createdAt": "2026-09-19T12:24:22.719984753+00:00",
+  "description": "An archetype bound to this repository: a stance with a mandate.",
+  "fields": [
+    {
+      "displayLabel": "Title",
+      "fieldId": "d7e82557-9045-5e92-a494-d99112bbec4a",
+      "order": 0,
+      "required": true
+    },
+    {
+      "displayLabel": "Brief",
+      "fieldId": "eff125b7-9da3-4a4d-a6ef-7fa435f2cb5e",
+      "order": 1,
+      "required": true
+    }
+  ],
+  "id": "f6f2137d-3472-4a40-add7-af69581208d6",
+  "identityFieldId": "d7e82557-9045-5e92-a494-d99112bbec4a",
+  "name": "agent",
+  "namespace": "com.mudemocracy.stewardship",
+  "version": 1
+}

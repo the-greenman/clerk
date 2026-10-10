@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Gives a quick emotional handle on the archetype for use in headlines and cards."
+  },
+  "createdAt": "2026-09-19T12:28:42.922495897+00:00",
+  "description": "A short, memorable catchphrase capturing the archetype's essence.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "4e2b6e38-c5ac-437d-8a54-d769ac688741",
+  "name": "phrase",
+  "namespace": "com.thesystem",
+  "version": 1
+}

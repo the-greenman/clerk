@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Identifies which of the eight Systemic Leadership Archetypes this record describes."
+  },
+  "createdAt": "2026-09-19T12:28:01.574729989+00:00",
+  "description": "The archetype's display name (e.g. Initiator, Steward).",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "805427d4-9234-4926-b202-ed0f8fc5d4c9",
+  "name": "name",
+  "namespace": "com.thesystem",
+  "version": 1
+}

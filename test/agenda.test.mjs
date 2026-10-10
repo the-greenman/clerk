@@ -50,9 +50,9 @@ test('screens and status', () => {
 
 const act = (kind, id) => JSON.stringify({ kind, id });
 test('role authority: owner ok; an AI holding tpr-steward ok for that role; mismatches refused', () => {
-  assert.equal(authorise('owner', act('human', 'human:the-greenman')), ROLES.owner);
+  assert.equal(authorise('owner', act('human', 'human:the-greenman'), 'human:the-greenman'), ROLES.owner);
   assert.equal(authorise('tpr-steward', act('ai', 'agent:tpr-steward')), ROLES['tpr-steward']);
-  assert.throws(() => authorise('owner', act('ai', 'agent:tpr-steward')), /agent:tpr-steward does not hold the role "owner"/);
+  assert.throws(() => authorise('owner', act('ai', 'agent:tpr-steward'), 'human:the-greenman'), /agent:tpr-steward does not hold the role "owner"/);
   assert.throws(() => authorise('tpr-builder', act('ai', 'agent:tpr-steward')), /tpr-builder/);
   assert.throws(() => authorise('owner', undefined), /SRS_ACTOR/);
   assert.throws(() => authorise('chair', act('human', 'x')), /unknown role/);

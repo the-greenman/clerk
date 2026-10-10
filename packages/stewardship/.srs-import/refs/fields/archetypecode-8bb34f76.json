@@ -1,0 +1,15 @@
+{
+  "aiGuidance": {
+    "purpose": "Gives a stable short code for referencing the archetype's position on the three binary axes."
+  },
+  "createdAt": "2026-09-19T12:28:42.662304907+00:00",
+  "description": "The three-letter axis code (e.g. ADF, OSZ) built from Action/Observe, Disrupt/Stabilise, Focus/Zoom-out.",
+  "fieldType": {
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "8bb34f76-ae5c-4616-a9a8-95ac16fb196f",
+  "name": "archetype_code",
+  "namespace": "com.thesystem",
+  "version": 1
+}
