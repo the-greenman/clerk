@@ -1,0 +1,10 @@
+{
+  "name": "clerk",
+  "version": "0.0.1",
+  "description": "The clerk: act by role on an SRS programme without getting lost in data.",
+  "type": "module",
+  "private": true,
+  "bin": { "clerk": "bin/clerk.mjs" },
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test test/" }
+}
