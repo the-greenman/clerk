@@ -50,3 +50,11 @@ Concept: srs-programme `source-documents/agent-democracy-2026-10-10/concept.md`.
 ## Test
 
 `node --test test/` (agenda building from fixture JSON; no network).
+
+## Discussion
+
+Humans and agents comment on proposals the same way: a `com.semanticops.comments/comment` record (`comment_text`) with a `comments-on` relation to the decision, or to another comment for a reply. The author is the comment's `createdBy`, the session actor, whoever holds the role. The item screen shows `Discussion: N comments` and the latest 3 (replies indented); `[v]` shows the whole thread, `[c]omment` adds one (any attendee, no quorum). A comment is the session taking the decision up, so the session records `considers` on it.
+
+- **Citations** are `sourceRefs` on the comment, a provenance pointer and not a relation: a source-document id (`repository-document`), a URL (`external-document`) or `transcript`, with `sourceRole` `evidence` (default) or `quoted-from` (default for the transcript); a passage locator goes in the sourceRef `note`.
+- **Transcripts**: `clerk session --transcript <file>` (TUI `[t]`) stores the file as a source document under `sessions/<date>`, links it to the session record (`attaches`), and lets a comment in that session cite `transcript`.
+- **Agents**: `clerk comment --repo <path> --as <role> --on <id> --text <...> [--reply-to <commentId>] [--cite <docId|url|transcript>] [--role-of-cite quoted-from|evidence] [--transcript <file>] [--dry-run]`. It uses the same path as the TUI, so it records a (considers-only) session.

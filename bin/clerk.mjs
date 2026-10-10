@@ -6,15 +6,16 @@ import { resolve } from 'node:path';
 import { OWNER_LOG, GROUP_LOG } from '../lib/roles.mjs';
 import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/io.mjs';
 import * as A from '../lib/agenda.mjs';
-import { endSession, stamp, take, FIELDS, RATIFYING } from '../lib/session.mjs';
+import * as D from '../lib/discussion.mjs';
+import { endSession, stamp, take, FIELDS, needsTranscript } from '../lib/session.mjs';
 import { authorise, resolveContext, quorum, quorumText } from '../lib/roles.mjs';
 
 const argv = process.argv.slice(2);
-const sub = argv[0] === 'session';
+const sub = argv[0] === 'session' || argv[0] === 'comment';
 const arg = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
 const args = (n) => argv.flatMap((v, i) => (v === n ? [argv[i + 1]] : []));
 const die = (m) => { console.error('clerk: ' + m); process.exit(1); };
-const USAGE = 'usage: clerk [session] --repo <srs-programme path> --as <role> [--dry-run]\n  clerk session ... [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]...\n                   [--edit <id> --field <resolution|why|options|review|question> --text <text>]...  (--ratify/--set-aside need the context\'s quorum)';
+const USAGE = 'usage: clerk [session] --repo <srs-programme path> --as <role> [--dry-run]\n  clerk session ... [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]... [--transcript <file>]\n                   clerk comment --repo <path> --as <role> --on <id> --text <text> [--reply-to <commentId>] [--cite <docId|url|transcript>] [--role-of-cite quoted-from|evidence]\n                   [--edit <id> --field <resolution|why|options|review|question> --text <text>]...  (--ratify/--set-aside need the context\'s quorum)';
 if (!arg('--as')) die(USAGE);
 const repo = resolve(arg('--repo') ?? die('--repo is required'));
 let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR); } catch (e) { die(e.message); }
@@ -54,6 +55,12 @@ try {
   consideredRels = S(['relation', 'list', '--type', 'com.semanticops.programme/considers']).relations ?? [];
   const sl = S(['record', 'list', '--type', 'com.semanticops.programme/session']); sessionRecs = sl.records ?? sl.instances ?? [];
 } catch { /* no considers type yet: no history */ }
+let commentRecs = [], commentRels = [];
+try { // the comments package may be absent: no discussion
+  const cl = S(['record', 'list', '--type', D.COMMENT_TYPE]); commentRecs = cl.records ?? cl.instances ?? [];
+  commentRels = S(['relation', 'list', '--type', D.COMMENTS_ON]).relations ?? [];
+} catch { /* no discussion */ }
+const threadOf = (r) => D.thread(r.instanceId, commentRels, commentRecs);
 const history = (r) => A.consideredIn(r.instanceId, consideredRels, sessionRecs);
 const quorumNow = () => quorum(role, attendees);
 
@@ -68,13 +75,18 @@ if (sub) {
     const find = (p) => { const m = pool.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single decision on the agenda matches "${p}"`); return m[0]; };
     const item = (r) => ({ instanceId: r.instanceId, title: A.fv(r).title });
     const choices = [];
+    const transcript = arg('--transcript') && resolve(arg('--transcript'));
+    if (argv[0] === 'comment') { // the same take() + endSession as the TUI's [c]omment
+      const reply = arg('--reply-to') && (() => { const m = commentRecs.filter((c) => c.instanceId.startsWith(arg('--reply-to'))); if (m.length !== 1) throw new Error(`no single comment matches "${arg('--reply-to')}"`); return m[0].instanceId; })();
+      take(choices, item(find(arg('--on') ?? die('--on <decision id> is required'))), { comment: { text: arg('--text') ?? die('--text is required'), replyTo: reply, cite: arg('--cite'), role: arg('--role-of-cite') } });
+    }
     args('--set-aside').forEach((p) => take(choices, item(pick(p)), { action: 'setaside' }));
     args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => take(choices, item(r), { action: 'ratify' }));
     args('--consider').forEach((p) => take(choices, item(find(p)), {}));
     const [fs, ts] = [args('--field'), args('--text')];
     args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); take(choices, item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
     if (dryRun) console.log(quorumText(quorumNow()));
-    endSession({ cli, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), dryRun, choices });
+    endSession({ cli, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices });
   } catch (e) { die(e.message); }
   process.exit(0);
 }
@@ -108,8 +120,8 @@ const agenda = () => { header(); show(A.agendaLines({ ratify: sections[1].items,
 
 const choices = [];
 const keys = {
-  1: { prompt: '[r]atify [s]et aside [e]dit [h]old [o]pen full [n]ext [q]uit > ', screen: (r) => A.decisionScreen(r, history(r)) },
-  2: { prompt: '[a]ccept recommendation [c]hoose other [e]dit [h]old [d]efer [o]pen [n]ext [q]uit > ', screen: (r) => A.escalationScreen(r, history(r)) },
+  1: { prompt: '[r]atify [s]et aside [c]omment [v]iew discussion [e]dit [h]old [o]pen full [n]ext [q]uit > ', screen: (r) => A.decisionScreen(r, history(r), D.discussionLines(threadOf(r))) },
+  2: { prompt: '[a]ccept recommendation [c]hoose other co[m]ment [v]iew discussion [e]dit [h]old [d]efer [o]pen [n]ext [q]uit > ', screen: (r) => A.escalationScreen(r, history(r), D.discussionLines(threadOf(r))) },
   3: { prompt: '[a]ck [o]pen in browser [n]ext [q]uit > ', screen: A.reportScreen },
   4: { prompt: '[m]erge [o]pen in browser [n]ext [q]uit > ', screen: A.prScreen },
 };
@@ -127,7 +139,19 @@ async function walk(n) {
       if (k === 'n' || (k === 'd' && n === 2)) break;
       if (k === 'o') { if (dec) show(A.fullScreen(it)); else openUrl(it.html_url ?? it.url); continue; }
       try {
-        if (dec && (k === 'r' || k === 's' || k === 'a' || k === 'c') && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
+        if (dec && ((n === 1 && (k === 'r' || k === 's')) || (n === 2 && (k === 'a' || k === 'c'))) && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
+        if (dec && k === 'v') { show(D.fullDiscussion(threadOf(it))); continue; }
+        if (dec && (k === 'm' || (n === 1 && k === 'c'))) { // any attendee may comment; no quorum needed
+          const th = threadOf(it); if (th.length) show(D.fullDiscussion(th));
+          const text = await ask('comment (markdown) > '); if (!text) continue;
+          const to = th.length ? Number(await ask('reply to comment number (blank = the decision) > ')) : 0;
+          const cite = await ask("cite (source-document id, URL, 'transcript', blank = none) > ");
+          const role = cite ? (await ask('role of citation [quoted-from/evidence] (blank = default) > ')) || undefined : undefined;
+          const note = cite ? (await ask('locator or passage note (optional) > ')) || undefined : undefined;
+          try { D.buildSourceRef(cite, role, { transcriptId: 'x', note }); take(choices, ref, { comment: { text, replyTo: th[to - 1]?.comment.instanceId, cite: cite || undefined, role, note } }); console.log('  comment noted; the session will consider this decision'); }
+          catch (e) { console.log('  ' + e.message); }
+          continue;
+        }
         if (dec && k === 'e') {
           const f = (await ask(`field (${Object.keys(FIELDS).join('/')}) > `)).toLowerCase();
           if (!FIELDS[f]) { console.log('  no such field'); continue; }
@@ -146,11 +170,13 @@ async function walk(n) {
   return true;
 }
 
+let transcript;
 let go = true;
 while (go) {
   agenda();
-  const k = (await ask('section 1-4, [+] add attendee, [e]nd session, [q]uit > ')).toLowerCase();
+  const k = (await ask('section 1-4, [+] add attendee, [t]ranscript, [e]nd session, [q]uit > ')).toLowerCase();
   if (k === 'q' || k === 'e') break;
+  if (k === 't') { const f = await ask('transcript file path > '); if (f) transcript = resolve(f); continue; }
   if (k === '+') {
     show(people.map((p, i) => `  ${i + 1}. ${p.name}  [${p.id.slice(0, 8)}]`));
     const n = Number(await ask('attendee number > '));
@@ -159,7 +185,8 @@ while (go) {
   }
   if (sections[k]) { sections[k].items.length ? (go = await walk(k)) : console.log('  nothing here'); }
 }
+if (needsTranscript(choices) && !transcript) { const f = await ask('a comment cites the transcript; transcript file path > '); if (f) transcript = resolve(f); }
 if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} decision(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
-  endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), dryRun });
+  endSession({ cli, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun });
 else if (choices.length) console.log('Nothing recorded.');
 rl.close();

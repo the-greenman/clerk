@@ -55,3 +55,37 @@ test('history counts earlier sessions that considered a decision', () => {
   const r = { instanceId: 'd', record: { fieldValues: { title: 'D' }, createdAt: '2026-10-01' } };
   assert.match(A.decisionScreen(r, dates).join('\n'), /History:\s+Considered in 2/);
 });
+
+import * as D from '../lib/discussion.mjs';
+const cm = (id, at, text = id, by = { kind: 'human', id: 'h', name: 'Owner' }) => ({ instanceId: id, record: { createdAt: at, createdBy: by, fieldValues: { comment_text: text } } });
+const on = (s, t) => ({ sourceId: s, targetId: t });
+test('comment threading: top-level by time, replies nested under their parent', () => {
+  const cs = [cm('c2', '2026-10-03'), cm('c1', '2026-10-01', 'first\nmore'), cm('r1', '2026-10-04', 'reply', { kind: 'ai', id: 'agent:x', name: 'Analyst' }), cm('r2', '2026-10-05'), cm('other', '2026-10-02')];
+  const rels = [on('c1', 'd'), on('c2', 'd'), on('r1', 'c1'), on('r2', 'r1'), on('other', 'zzz')];
+  const th = D.thread('d', rels, cs);
+  assert.deepEqual(th.map((t) => [t.comment.instanceId, t.depth]), [['c1', 0], ['r1', 1], ['r2', 2], ['c2', 0]]);
+  const lines = D.discussionLines(th);
+  assert.equal(lines[0], '  Discussion: 4 comments (latest 3; [v] for all)');
+  assert.equal(lines.length, 4);
+  assert.match(lines[1], /^ {4} {2}Analyst 2026-10-04: reply$/); // reply indented once
+  assert.equal(D.discussionLines(th, true).length, 5);
+});
+test('a comment produces considers in the session plan and a sourceRef', () => {
+  const ch = [];
+  take(ch, it, { comment: { text: 'see the meeting\nsecond line', cite: 'transcript', note: 'at 12:40' } });
+  assert.equal(ch[0].action, 'consider');
+  assert.match(summarise(ch, 'S'), /- Commented: T \[abcdef12\] \(1, with citation\)/);
+  const out = [];
+  endSession({ role: owner, choices: ch, attendees: at('x'), quorum: { met: false, needs: 'x' }, transcript: '/tmp/m.md', dryRun: true, log: (m) => out.push(m) });
+  assert.match(out[0], /Transcript: m\.md[\s\S]*sourceRef \{"sourceType":"repository-document","sourceId":"<transcript>","sourceRole":"quoted-from","note":"at 12:40"\}; session considers it/);
+  assert.throws(() => endSession({ role: owner, choices: ch, attendees: [], quorum: { met: true }, dryRun: true, log() {} }), /no transcript/);
+});
+test('citations build correct sourceRefs', () => {
+  const id = '6470ec00-7380-4333-8a28-c1ed1f8bbb5a';
+  assert.deepEqual(D.buildSourceRef(id), { sourceType: 'repository-document', sourceId: id, sourceRole: 'evidence' });
+  assert.deepEqual(D.buildSourceRef('https://x.org/a', 'quoted-from'), { sourceType: 'external-document', sourceId: 'https://x.org/a', sourceRole: 'quoted-from' });
+  assert.equal(D.buildSourceRef('transcript', undefined, { transcriptId: id }).sourceRole, 'quoted-from');
+  assert.equal(D.buildSourceRef(undefined), null);
+  assert.throws(() => D.buildSourceRef('transcript'), /no transcript/);
+  assert.throws(() => D.buildSourceRef('nonsense'), /cite must be/);
+});
