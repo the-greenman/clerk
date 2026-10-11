@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// gh-project — story-driven priority management for the SRS GitHub Project (#5).
+// gh-project — story-driven priority management for the programme's GitHub Project (number from the programme settings record, or GHP_PROJECT).
 //
 // Single file, zero npm dependencies. Normally wraps the `gh` CLI; falls back to
 // direct GitHub API calls via `curl` when `gh` is absent (set GITHUB_TOKEN or
@@ -2156,7 +2156,7 @@ function cmdSync(argv) {
 }
 
 function help() {
-  console.log(`gh-project — story-driven priority for SemanticOps Project #${PROJECT_NUMBER} (${OWNER})
+  console.log(`gh-project — story-driven priority for the programme's Project #${PROJECT_NUMBER || "?"} (${OWNER ?? "no settings"})
 
   fields                          dump project field/option/iteration IDs
   ensure-fields [--dry-run]       create the MoSCoW field if missing
