@@ -28,7 +28,8 @@
     "fields/returnwhen-e7197a59.json",
     "fields/actorid-94d587e4.json",
     "fields/usewhen-8882824d.json",
-    "fields/brief-274fc803.json"
+    "fields/brief-274fc803.json",
+    "fields/goals-812204a1.json"
   ],
   "types": [
     "types/problem-b7d15218.json",
@@ -40,7 +41,8 @@
     "types/pole-e3b62684.json",
     "types/principle-eff00965.json",
     "types/archetype-6ce9e193.json",
-    "types/agent-ba97e194.json"
+    "types/agent-ba97e194.json",
+    "types/persona-in-domain-872fbd42.json"
   ],
   "relationTypes": [
     "relation-types/comsemanticopsmethodheld-by-ec88d284.json",
@@ -53,7 +55,8 @@
     "relation-types/comsemanticopsmethodextends-02998fc5.json",
     "relation-types/comsemanticopsmethodinstantiates-5f121def.json",
     "relation-types/comsemanticopsmethodconcerns-e1d12490.json",
-    "relation-types/comsemanticopsmethodrestores-5e582fc5.json"
+    "relation-types/comsemanticopsmethodrestores-5e582fc5.json",
+    "relation-types/comsemanticopsmethodin-domain-488e264d.json"
   ],
   "views": [],
   "compositions": [],

@@ -1,0 +1,13 @@
+{
+  "id": "488e264d-2b3f-489f-b625-7d48f31bcf6b",
+  "version": 1,
+  "key": "com.semanticops.method/in-domain",
+  "namespace": "com.semanticops.method",
+  "label": "In domain",
+  "description": "Persona-in-domain is in a domain. Endpoints: persona-in-domain -> domain record. Exactly one per persona-in-domain; a problem's domain is derived through held-by then in-domain.",
+  "category": "association",
+  "createdAt": "2026-10-11T18:00:00+00:00",
+  "canonicalDirection": "source is the persona-in-domain; target is the domain record",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}
