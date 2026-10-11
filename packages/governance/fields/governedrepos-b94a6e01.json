@@ -1,0 +1,17 @@
+{
+  "id": "b94a6e01-b2b9-43eb-9023-9a171bb33951",
+  "namespace": "com.mudemocracy.governance",
+  "name": "governed_repos",
+  "version": 1,
+  "description": "Repositories the group's queue is drawn from, bare names under the programme's github owner.",
+  "aiGuidance": {
+    "purpose": "Optional, groups only. One entry per repository, e.g. srs-rust."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "list",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-11T00:00:00Z"
+}

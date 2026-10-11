@@ -38,7 +38,9 @@
     "fields/linestances-f238315a.json",
     "fields/missingremedy-f3774d67.json",
     "fields/routineid-7ae7b17d.json",
-    "fields/briefpath-64ad68fd.json"
+    "fields/briefpath-64ad68fd.json",
+    "fields/actorid-1a28d1d4.json",
+    "fields/seat-b0f8ef66.json"
   ],
   "types": [
     "types/standing-job-58f0ee7b.json",

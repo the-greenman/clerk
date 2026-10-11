@@ -1,0 +1,17 @@
+{
+  "id": "b0f8ef66-ab6e-4940-b7c9-b05be021da7d",
+  "namespace": "com.mudemocracy.stewardship",
+  "name": "seat",
+  "version": 1,
+  "description": "The seat this agent holds in its working group (steward, builder, reviewer, analyst, ...).",
+  "aiGuidance": {
+    "purpose": "Optional. Free-text seat name; the group role's quorum_seats and quorum_required_seat refer to it."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-11T00:00:00Z"
+}

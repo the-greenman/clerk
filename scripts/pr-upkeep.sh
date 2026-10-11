@@ -8,10 +8,9 @@
 # Dry run unless --apply. Never resolves conflicts, never labels, never touches drafts.
 set -uo pipefail
 
-# ponytail: one working group, hard-coded; read from records when a second is chartered (D18).
-# Budget article c5a8c529-578a-4a34-bee3-3ed073305cee: 10 delegated merges per cycle.
-# Cycle article f65ba0b9-8c5b-4312-9567-7e1b9470264d: close at 11:30 UTC, pause after 2 unacknowledged reports.
-WG_LABEL="wg:third-party-ready"; WG_BUDGET=10; WG_CYCLE_CLOSE="11:30"; WG_MAX_UNACKED=2
+# The working group's charter comes from the programme's records (clerk groups): label, budget per cycle, cycle close (HH:MM UTC), max unacknowledged
+# reports. The functions below act on the group set in these variables; the main loop sets them for each group in turn, the tests set them before sourcing.
+WG_LABEL="${WG_LABEL-}"; WG_BUDGET="${WG_BUDGET-}"; WG_CYCLE_CLOSE="${WG_CYCLE_CLOSE-}"; WG_MAX_UNACKED="${WG_MAX_UNACKED-}"
 # OWNER and WG_REPORT_ISSUE (<owner>/<repo>/issues/<n>) come from the programme settings (read below the sourced-guard); the test sets them before sourcing.
 OWNER="${OWNER-}"; WG_REPORT_ISSUE="${WG_REPORT_ISSUE-}"
 
@@ -77,6 +76,7 @@ while [ $# -gt 0 ]; do case $1 in --apply) APPLY=1 ;; --digest) DIGEST=1 ;; --re
 # One list, one owner, the issues: the programme settings record (clerk settings), never constants.
 SETTINGS=$(node "$(dirname "${BASH_SOURCE[0]}")/../bin/clerk.mjs" settings --repo "$PROGRAMME" --json) || { echo "FAIL  programme settings unreadable" >&2; exit 1; }
 OWNER=$(jq -r .githubOwner <<<"$SETTINGS"); REPOS=$(jq -r '.repos|join(" ")' <<<"$SETTINGS")
+GROUPS_JSON=$(node "$(dirname "${BASH_SOURCE[0]}")/../bin/clerk.mjs" groups --repo "$PROGRAMME" --json) || { echo "FAIL  working groups unreadable" >&2; exit 1; }
 issue_path() { echo "$OWNER/${1%#*}/issues/${1#*#}"; }
 WG_REPORT_ISSUE=$(issue_path "$(jq -r .reportIssue <<<"$SETTINGS")"); DIGEST_ISSUE=$(issue_path "$(jq -r .digestIssue <<<"$SETTINGS")")
 
@@ -87,23 +87,31 @@ act() { # description, command...
   else echo "WOULD $what"; fi
 }
 
-FAILS=0; READY=""; CONFLICT=""; UNGATED=""; WGWAIT=""
-# Fail closed: an unreadable count or unreadable reports block group merges.
-WG_MERGED=$(gh api -X GET search/issues -f q="$(wg_budget_query "$(wg_cycle_start)")" --jq .total_count 2>/dev/null) \
-  || { echo "FAIL  group budget count"; FAILS=$((FAILS+1)); WG_MERGED=$WG_BUDGET; }
-WG_PAUSE=$(wg_pause_check)
-case $WG_PAUSE in *unreadable*) echo "FAIL  group pause check"; FAILS=$((FAILS+1)) ;; esac
+FAILS=0; READY=""; CONFLICT=""; UNGATED=""
+# Per group (keyed by its label): budget, cycle close, pause limit, merges this cycle, pause state, waiting list. Fail closed: an unreadable count or unreadable reports block group merges.
+declare -A G_BUDGET G_CLOSE G_UNACKED G_MERGED G_PAUSE G_WAIT; LABELS=()
+while IFS=$'\x1f' read -r WG_LABEL WG_BUDGET WG_CYCLE_CLOSE WG_MAX_UNACKED; do
+  [ -z "$WG_LABEL" ] && continue
+  LABELS+=("$WG_LABEL"); G_BUDGET[$WG_LABEL]=$WG_BUDGET; G_CLOSE[$WG_LABEL]=$WG_CYCLE_CLOSE; G_UNACKED[$WG_LABEL]=$WG_MAX_UNACKED; G_WAIT[$WG_LABEL]=""
+  G_MERGED[$WG_LABEL]=$(gh api -X GET search/issues -f q="$(wg_budget_query "$(wg_cycle_start)")" --jq .total_count 2>/dev/null) \
+    || { echo "FAIL  group budget count"; FAILS=$((FAILS+1)); G_MERGED[$WG_LABEL]=$WG_BUDGET; }
+  G_PAUSE[$WG_LABEL]=$(wg_pause_check)
+  case ${G_PAUSE[$WG_LABEL]} in *unreadable*) echo "FAIL  group pause check"; FAILS=$((FAILS+1)) ;; esac
+done < <(jq -r '.[]|[.label,.budget,.cycleClose,.maxUnacked]|map(tostring)|join("\u001f")' <<<"$GROUPS_JSON")
+LABELS_JSON=$(jq -c "[.[].label]" <<<"$GROUPS_JSON")
 for r in $REPOS; do
   # mergeStateStatus is computed lazily; UNKNOWN just waits for the next run.
   rows=$(gh pr list -R "$OWNER/$r" --state open -L 100 \
     --json number,title,isDraft,mergeStateStatus,labels,autoMergeRequest \
-    -q '.[] | select(.isDraft|not) | [.number, .mergeStateStatus, ([.labels[].name|select(startswith("gate:"))] + (if .autoMergeRequest then ["auto-on"] else [] end) | join(",")), (any(.labels[]; .name=="wg:third-party-ready") | if . then "1" else "0" end), .title[:70]] | map(tostring) | join("\u001f")') \
+    -q '.[] | select(.isDraft|not) | [.number, .mergeStateStatus, ([.labels[].name|select(startswith("gate:"))] + (if .autoMergeRequest then ["auto-on"] else [] end) | join(",")), (([.labels[].name] | map(. as $n | select(any('"$LABELS_JSON"'[]; . == $n))) | first) // ""), .title[:70]] | map(tostring) | join("\u001f")') \
     || { echo "FAIL  list $r"; FAILS=$((FAILS+1)); continue; }
   while IFS=$'\x1f' read -r n state gate wg title; do  # unit separator: keeps empty fields
     [ -z "$n" ] && continue
     pr="$r#$n"
-    [[ "$gate" == *gate:owner-merge* ]] && wg=0  # escalated to the owner: ordinary rules
-    if [ "$wg" = 1 ]; then  # group PRs: merge only on a valid quorum within budget; no update-branch (a new commit voids the quorum; the reviewer updates, then re-reviews)
+    [[ "$gate" == *gate:owner-merge* ]] && wg=""  # escalated to the owner: ordinary rules
+    if [ -n "$wg" ]; then  # group PRs (wg = the group's label)
+      WG_LABEL=$wg; WG_BUDGET=${G_BUDGET[$wg]}; WG_MERGED=${G_MERGED[$wg]}; WG_PAUSE=${G_PAUSE[$wg]}
+      # group PRs: merge only on a valid quorum within budget; no update-branch (a new commit voids the quorum; the reviewer updates, then re-reviews)
       why="awaiting group review"
       if [[ "$gate" == *gate:auto-merge* ]]; then
         sha=$(gh api "repos/$OWNER/$r/pulls/$n" --jq .head.sha 2>/dev/null)
@@ -115,14 +123,14 @@ for r in $REPOS; do
       [ "$why" = ok ] && [ "$WG_PAUSE" != ok ] && why="$WG_PAUSE"
       if [ "$why" = ok ] && [ "$state" = CLEAN ]; then
         act "merge $pr (group quorum ok, $WG_MERGED of $WG_BUDGET merged this cycle)" gh pr merge "$n" -R "$OWNER/$r" --merge
-        WG_MERGED=$((WG_MERGED+1))
+        G_MERGED[$wg]=$((WG_MERGED+1))
       else
         [ "$why" = ok ] && why="quorum ok, waiting for state $state"
-        WGWAIT+="- $pr $title ($why)"$'\n'
+        G_WAIT[$wg]+="- $pr $title ($why)"$'\n'
       fi
     fi
     case "$wg:$gate:$state" in
-      1:*) ;;
+      ?*:*) ;;
       *:*gate:auto-merge*:CLEAN)  act "merge $pr" gh pr merge "$n" -R "$OWNER/$r" --merge ;;
       *:*gate:auto-merge*:BEHIND|*:*gate:owner-merge*:BEHIND|*:*auto-on*:BEHIND)
                                 act "update-branch $pr" gh pr update-branch "$n" -R "$OWNER/$r" ;;
@@ -131,11 +139,18 @@ for r in $REPOS; do
       *gate:owner-merge*:CLEAN) READY+="- $pr $title"$'\n' ;;
     esac
     [ "$state" = DIRTY ] && CONFLICT+="- $pr $title"$'\n'
-    [[ "$gate" != *gate:* && "$wg" != 1 ]] && UNGATED+="- $pr $title"$'\n'
+    [[ "$gate" != *gate:* && -z "$wg" ]] && UNGATED+="- $pr $title"$'\n'
   done <<< "$rows"
 done
 
 if [ $DIGEST = 1 ]; then
+  WGSECTIONS=""
+  for l in "${LABELS[@]}"; do  # one section per working group
+    w=${G_WAIT[$l]}
+    WGSECTIONS+="Working group: $([ "${G_PAUSE[$l]}" = ok ] && echo running || echo "${G_PAUSE[$l]}") - waiting (\`$l\`, ${G_MERGED[$l]} of ${G_BUDGET[$l]} merged this cycle):
+${w:-- none
+}"
+  done
   body="**PR upkeep digest $(date -u +%F)** (srs-programme \`scripts/pr-upkeep.sh\`)
 
 Ready for owner merge (green, up to date):
@@ -147,9 +162,7 @@ ${CONFLICT:-- none
 No gate label (classify as \`gate:auto-merge\` or \`gate:owner-merge\`):
 ${UNGATED:-- none
 }
-Working group: $([ "$WG_PAUSE" = ok ] && echo running || echo "$WG_PAUSE") - waiting (\`$WG_LABEL\`, $WG_MERGED of $WG_BUDGET merged this cycle):
-${WGWAIT:-- none
-}"
+${WGSECTIONS}"
   if [ $APPLY = 1 ]; then
     gh api "repos/$DIGEST_ISSUE/comments" -f body="$body" >/dev/null && echo "DID   digest" || { echo "FAIL  digest"; FAILS=$((FAILS+1)); }
   else echo "WOULD digest:"; echo "$body"; fi

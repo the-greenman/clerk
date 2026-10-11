@@ -7,10 +7,12 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { derive } from '../scripts/roadmap.mjs';
 import { checkMethod, checkGates } from '../scripts/check-method.mjs';
-import { classify } from '../scripts/queue.mjs';
+import { classify, lanesFrom } from '../scripts/queue.mjs';
 import { plan as stewardPlan } from '../scripts/steward-check.mjs';
 import { checkRoutines } from '../lib/practice/routines.mjs';
-import { authorise, quorum, ROLES } from '../lib/practice/roles.mjs';
+import { authorise, quorum, ROLES, rolesFor } from '../lib/practice/roles.mjs';
+import { groups, tprGroup, fxGroup, FX, roles, agents, authorisedBy } from './groups.fixture.mjs';
+import { groupsFrom } from '../lib/practice/groups.mjs';
 import { take, assertQuorum, summarise } from '../lib/practice/session.mjs';
 import * as A from '../lib/practice/agenda.mjs';
 import { endSession } from '../lib/adapters/session.mjs';
@@ -50,10 +52,10 @@ const e1 = derived.epics.find((e) => e.ref === 'fixture#1');
 // ---- 1. Roles and layers ----
 describe('stage 1: roles and layers', () => {
   test('a session member acts under the same rules as a routine: only the held role counts, human or AI', () => {
-    const sessionMember = JSON.stringify({ kind: 'human', id: 'agent:tpr-reviewer' }); // a local session standing in for the reviewer
-    assert.equal(authorise('tpr-reviewer', sessionMember, 'human:ada'), ROLES['tpr-reviewer']);
-    assert.throws(() => authorise('tpr-reviewer', ada, 'human:ada'), /does not hold the role/);
-    assert.throws(() => authorise('tpr-reviewer', JSON.stringify({ kind: 'ai', id: BUILDER }), 'human:ada'), /does not hold the role/);
+    const held = rolesFor(groups), sessionMember = JSON.stringify({ kind: 'human', id: REVIEWER }); // a local session standing in for the reviewer
+    assert.equal(authorise('fx-reviewer', sessionMember, 'human:ada', held).actor, REVIEWER);
+    assert.throws(() => authorise('fx-reviewer', ada, 'human:ada', held), /does not hold the role/);
+    assert.throws(() => authorise('fx-reviewer', JSON.stringify({ kind: 'ai', id: BUILDER }), 'human:ada', held), /does not hold the role/);
   });
   test('an AI actor cannot be a member of the Affirmed layer (agents suggest, the human layer wins)', () => {
     const ai = records.map((r) => (r.instanceId === 'prb' ? { ...r, record: { ...r.record, createdBy: { kind: 'ai', id: 'agent:scout' } } } : r));
@@ -182,8 +184,19 @@ describe('stage 10: working groups', () => {
     const ds = ['mine', 'escalated'].map((id) => ({ instanceId: id, record: { lifecycleState: 'proposed', createdBy: { id: 'agent:fx-steward' }, fieldValues: {} } }));
     assert.deepEqual(A.ratifyItems(ds, log('mine', 'escalated'), [log('escalated')]).map((r) => r.instanceId), ['mine']);
   });
-  test.todo('handbook stage 10: a group is chartered from records (purpose, standing orders, delegation, compass of >=3 tensions, quorum, cycle, budget); quorum() and pr-upkeep read WG Fixture\'s charter, not the hard-coded WG Third-party ready');
-  test.todo('handbook stage 10: a group has its own decision log and a duty to report back, both read from its charter');
+  test('a group is chartered from records: label, members, quorum, cycle, budget, pause limit and repos are read, not hard-coded', () => {
+    assert.deepEqual(groups.map((g) => g.title), ['WG Third-party ready', 'WG Fixture']); // the Owner role has no group_label: not a group
+    assert.deepEqual([fxGroup.label, fxGroup.budget, fxGroup.cycleClose, fxGroup.maxUnacked, fxGroup.repos], ['wg:fixture', 4, '16:00', 3, ['fixture']]);
+    assert.deepEqual(fxGroup.quorum, { min: 3, seats: ['steward', 'builder', 'reviewer', 'scribe'], requiredSeat: 'steward' });
+    assert.deepEqual(fxGroup.members.map((m) => [m.actor, m.role]), [['agent:fx-steward', 'steward'], ['agent:fx-builder', 'builder'], ['agent:fx-reviewer', 'reviewer'], ['agent:fx-scribe', 'scribe']]);
+    assert.equal(tprGroup.members.length, 4, 'members are the agents authorised-by the group role, the analyst included');
+    assert.deepEqual(rolesFor(groups)['fx-scribe'], { actor: 'agent:fx-scribe', roleId: 'fx-role', agentId: FX.scribe, logId: 'c-fx', context: 'WG Fixture' });
+  });
+  test('a group has its own decision log and a duty to report back, both read from its charter', () => {
+    assert.deepEqual([tprGroup.logId, fxGroup.logId], ['c-tpr', 'c-fx']); // each group's own log, found by the group's title
+    assert.ok(fxGroup.cycleClose && fxGroup.maxUnacked, 'the cycle close and the pause limit are the duty, per group');
+    assert.throws(() => groupsFrom(roles, agents, authorisedBy, []), /has no container/);
+  });
 });
 
 // ---- 11. Assignment and claim ----
@@ -206,10 +219,11 @@ describe('stage 12: execution', () => {
 // ---- 13. Review and merge ----
 describe('stage 13: review and merge', () => {
   const upkeep = fileURLToPath(new URL('../scripts/pr-upkeep.sh', import.meta.url));
+  const groupEnv = (g) => ({ ...process.env, WG_LABEL: g.label, WG_BUDGET: String(g.budget), WG_CYCLE_CLOSE: g.cycleClose, WG_MAX_UNACKED: String(g.maxUnacked) });
   const verdict = (builder, reviewer, verdictWord, commentAt, merged) => {
     const body = `<!-- wg-quorum --> builder=${builder} reviewer=${reviewer} gates=green@abc mandate=fixture#10 verdict=${verdictWord}`;
     const comments = JSON.stringify([{ body, created_at: commentAt, author_association: 'OWNER' }]);
-    const r = spawnSync('bash', ['-c', `OWNER=o WG_REPORT_ISSUE=o/r/issues/1; source "${upkeep}"; wg_verdict 1 "$1" 2026-10-11T10:00:00Z ${merged}`, '_', comments], { encoding: 'utf8' });
+    const r = spawnSync('bash', ['-c', `OWNER=o WG_REPORT_ISSUE=o/r/issues/1; source "${upkeep}"; wg_verdict 1 "$1" 2026-10-11T10:00:00Z ${merged}`, '_', comments], { encoding: 'utf8', env: groupEnv(tprGroup) });
     return r.stdout.trim();
   };
   test('a different reviewer approving after the last commit, within budget, is a quorum', () => assert.equal(verdict(BUILDER, REVIEWER, 'approve', '2026-10-11T11:00:00Z', 3), 'ok'));
@@ -220,7 +234,23 @@ describe('stage 13: review and merge', () => {
     assert.match(verdict(BUILDER, REVIEWER, 'approve', '2026-10-11T11:00:00Z', 10), /over budget/);
   });
   test.todo('handbook stage 13 / principle 6: the reviewer\'s quorum makes a group session in which the decision is ratified (wg-reviewer.md moves a decision to ratified directly)');
-  test.todo('handbook stage 13: pr-upkeep recognises WG Fixture\'s PRs (the group label and budget are hard-coded to wg:third-party-ready)');
+  test('pr-upkeep acts on the charter it is given: WG Fixture\'s label, budget, cycle close and pause limit', () => {
+    const sh = (script) => spawnSync('bash', ['-c', `OWNER=o WG_REPORT_ISSUE=o/r/issues/1; source "${upkeep}"; ${script}`], { encoding: 'utf8', env: groupEnv(fxGroup) }).stdout.trim();
+    assert.match(sh('wg_budget_query 2026-10-09T16:00:00Z'), /label:"wg:fixture" .*merged:>=2026-10-09T16:00:00Z/);
+    assert.equal(sh('wg_cycle_start 2026-10-09T15:00:00Z'), '2026-10-08T16:00:00Z'); // closes at 16:00, not 11:30
+    assert.equal(sh('wg_cycle_start 2026-10-09T17:00:00Z'), '2026-10-09T16:00:00Z');
+    const q = JSON.stringify([{ body: `<!-- wg-quorum --> builder=${BUILDER} reviewer=${REVIEWER} gates=green@abc mandate=fixture#10 verdict=approve`, created_at: '2026-10-11T11:00:00Z', author_association: 'OWNER' }]);
+    assert.equal(sh(`wg_verdict 1 '${q}' 2026-10-11T10:00:00Z 3`), 'ok');
+    assert.match(sh(`wg_verdict 1 '${q}' 2026-10-11T10:00:00Z 4`), /over budget \(4 of 4 merged this cycle\)/); // WG Fixture's budget is 4, not 10
+    const rep = (n) => `{"id":${n},"body":"<!-- wg-report cycle=2026-10-0${n} -->","created_at":"2026-10-0${n}T16:00:00Z","author_association":"OWNER"}`;
+    assert.equal(sh(`wg_reactions() { echo '[]'; }; wg_paused '[${rep(6)},${rep(7)}]'`), 'ok'); // limit 3: two unacknowledged reports do not pause
+    assert.match(sh(`wg_reactions() { echo '[]'; }; wg_paused '[${rep(6)},${rep(7)},${rep(8)}]'`), /paused: 3 reports unacknowledged/);
+  });
+  test('the queue lanes are the chartered groups\' labels', () => {
+    const lanes = lanesFrom(groups);
+    assert.deepEqual(Object.keys(lanes), ['lane:unattended', 'wg:third-party-ready', 'wg:fixture']);
+    assert.deepEqual(classify([issue], [], lanes).queued[0].lanes, ['wg']); // issue carries wg:fixture
+  });
 });
 
 // ---- 14. Report, session and ratification ----
@@ -266,7 +296,13 @@ describe('stage 14: report, session and ratification', () => {
     assert.match(summarise(ch, 'S'), /Exercise: Looking ahead: proposal drafted/);
   });
   test.todo('handbook stage 14: endSession records considers, comments and proposals for an exercise (it returns early today: a known bug)');
-  test.todo('handbook stage 14: a group-level session\'s quorum for WG Fixture is read from its charter (quorum() falls through to "the Owner role" for any group but the hard-coded one)');
+  test('a group-level session\'s quorum is read from the group\'s charter', () => {
+    const role = rolesFor(groups)['fx-steward'], at = (...ids) => ids.map((id) => ({ id }));
+    assert.equal(quorum(role, at(FX.steward, FX.builder), groups).needs, 'three distinct group members');
+    assert.equal(quorum(role, at(FX.builder, FX.reviewer, FX.scribe), groups).needs, 'the steward agent'); // WG Fixture requires the steward, not the reviewer
+    assert.equal(quorum(role, at(FX.steward, FX.builder, FX.scribe), groups).met, true); // the scribe counts in this group
+    assert.equal(quorum(rolesFor(groups)['tpr-reviewer'], at('7f34b620', '6e255308'), groups).met, true); // the other group keeps its own rule
+  });
   test.todo('handbook stage 14: the pause rule reads `receives`, not the owner\'s thumbs-up on #31');
 });
 

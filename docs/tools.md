@@ -8,6 +8,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 |---|---|---|---|---|---|
 | (none) / `session` / `comment` | Hold a session or post comments, by role | Human or agent | programme repo, GitHub PRs and issues | session/comment records via srs CLI, a signed PR | owner, `scripts/session`, `/session` |
 | `help` | List subcommands | Human | | | |
+| `groups` | Print the working groups chartered in the records (`--json`; bash: `clerk groups --json \| jq -r '.[].label'`) | Human; `pr-upkeep.sh`; `queue` | `governance/role` records with a `group_label`, the agents `authorised-by` them, the group's log container | nothing | every group-aware script |
 | `settings` | Print the programme settings record (`--json`; bash: `clerk settings --json \| jq -r .githubOwner`) | Human; scripts | programme `com.semanticops.programme/programme` record | nothing | every script below |
 | `roadmap` | Derive epic priority from the period ranking | Human; workflows | programme records | with `--apply --yes`: board priority, `parked` label | derive-priority.yml, pages.yml |
 | `queue` | Report what the unattended lane would take next | Human | GitHub issues and PRs (settings `governed_repos`) | nothing | unattended-worker routine brief |
@@ -32,7 +33,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 
 ## Settings
 
-Nothing programme-specific is hard-coded. `lib/adapters/settings.mjs` reads the one `com.semanticops.programme/programme` record (title, github_owner, governed_repos, report_issue, digest_issue, board_project, board_story_repo, owner_actor) from the programme repo; `--repo` picks it. Env wins where CI needs it: `gh-project.mjs` uses `GHP_OWNER`, `GHP_PROJECT`, `GHP_STORY_REPO`, `GHP_MIRROR_REPOS` first and reads settings (from `CLERK_REPO` or the cwd) only for what is unset. The programme repo's own slug, worktree base (`~/dev/.wt/<name>`) and default branch are derived from its git remote. Still hard-coded, as working-group settings for a later step: the four WG repos in `bin/clerk.mjs` and the WG constants at the top of `scripts/pr-upkeep.sh`. 
+Nothing programme-specific is hard-coded. `lib/adapters/settings.mjs` reads the one `com.semanticops.programme/programme` record (title, github_owner, governed_repos, report_issue, digest_issue, board_project, board_story_repo, owner_actor) from the programme repo; `--repo` picks it. Env wins where CI needs it: `gh-project.mjs` uses `GHP_OWNER`, `GHP_PROJECT`, `GHP_STORY_REPO`, `GHP_MIRROR_REPOS` first and reads settings (from `CLERK_REPO` or the cwd) only for what is unset. The programme repo's own slug, worktree base (`~/dev/.wt/<name>`) and default branch are derived from its git remote. Working-group settings (label, members, quorum, budget, cycle close, pause limit, repos) are not here: they are the charter on each group's role record, read by `lib/adapters/groups.mjs` (`clerk groups`). 
 
 ## Packages
 
@@ -41,8 +42,8 @@ Canonical source of the methodology packages, installed into the programme repo 
 | Package | Namespace | Version | Holds | Upstream |
 |---|---|---|---|---|
 | `packages/method` | com.semanticops.method | 1.0.0 | problems, remedies, tensions, principles, archetypes, domains, personas, clusters, poles, agents | clerk (this copy) |
-| `packages/governance` | com.mudemocracy.governance | 1.1.0 | decisions, roles, logs | muDemocracy.org `muSrs/packages/governance` (same id and version; differs only in key order) |
-| `packages/stewardship` | com.mudemocracy.stewardship | 0.1.0 | agents, standing jobs (optional `routine_id`, `brief_path`), run reports | muDemocracy.org `muSrs/packages/stewardship` (the programme's install also carries imported com.thesystem fields) |
+| `packages/governance` | com.mudemocracy.governance | 1.1.0 | decisions, roles (optional working-group charter: `group_label`, `quorum_*`, `budget_per_cycle`, `cycle_close_utc`, `max_unacked_reports`, `governed_repos`), logs | muDemocracy.org `muSrs/packages/governance` (same id and version; differs only in key order) |
+| `packages/stewardship` | com.mudemocracy.stewardship | 0.1.0 | agents (optional `actor_id`, `seat`), standing jobs (optional `routine_id`, `brief_path`), run reports | muDemocracy.org `muSrs/packages/stewardship` (the programme's install also carries imported com.thesystem fields) |
 | `packages/programme` | com.semanticops.programme `methodology` | 0.1.0 | the `programme` settings type and its fields | clerk (this copy) |
 
 The live methodology types (period, objective, epic, stakeholder, session and the relation types serves, responds-to, ratifies, considers, sets-aside, attended-by, receives) are still defined in srs-programme's primary package (`com.semanticops.programme` `primary`, 1.0.0) and will move into `packages/programme` in a later step.
@@ -92,7 +93,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 
 ## Repo lists
 
-queue.mjs, steward-check.mjs, pr-upkeep.sh, gh-project.mjs (`MIRROR_REPOS`, unless `GHP_MIRROR_REPOS` is set) and the owner-only PR list in `bin/clerk.mjs` all read the settings `governed_repos`, so they agree by construction; the list is whatever the programme's settings record holds. The one exception is the working-group ready count in `bin/clerk.mjs` (the Next forecast), which is fixed to the four WG repos: srs-rust, srs, srs-vscode, srs-web.
+queue.mjs, steward-check.mjs, pr-upkeep.sh, gh-project.mjs (`MIRROR_REPOS`, unless `GHP_MIRROR_REPOS` is set) and the owner-only PR list in `bin/clerk.mjs` all read the settings `governed_repos`, so they agree by construction; the list is whatever the programme's settings record holds. The working-group ready count in `bin/clerk.mjs` (the Next forecast) and the queue's group lane use each group's own `governed_repos` instead.
 
 ## Related tools elsewhere
 

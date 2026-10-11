@@ -1,0 +1,17 @@
+{
+  "id": "9593f4f6-f282-4360-9294-984891b8fd46",
+  "namespace": "com.mudemocracy.governance",
+  "name": "quorum_required_seat",
+  "version": 1,
+  "description": "The seat that must attend for quorum to be met.",
+  "aiGuidance": {
+    "purpose": "Optional, groups only. e.g. reviewer."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-11T00:00:00Z"
+}

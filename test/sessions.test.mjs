@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as A from '../lib/practice/agenda.mjs';
-import { quorum, quorumText, ROLES, GROUP_MEMBERS } from '../lib/practice/roles.mjs';
+import { quorum, quorumText, ROLES, rolesFor } from '../lib/practice/roles.mjs';
+import { groups, TPR as GROUP_MEMBERS } from './groups.fixture.mjs';
 import { take, assertQuorum, summarise } from '../lib/practice/session.mjs';
 import { endSession, postComments } from '../lib/adapters/session.mjs';
 
 const owner = { ...ROLES.owner, roleId: 'owner-role', logId: 'L' };
-const grp = ROLES['tpr-steward'];
+const grp = rolesFor(groups)['tpr-steward'];
 const at = (...ids) => ids.map((id) => ({ id, name: id }));
 
 test('quorum, SemanticOps: the Owner role must attend', () => {
@@ -17,11 +18,11 @@ test('quorum, SemanticOps: the Owner role must attend', () => {
 });
 test('quorum, group: two distinct members, one the reviewer', () => {
   const { steward, builder, reviewer } = GROUP_MEMBERS;
-  assert.equal(quorum(grp, at(steward)).needs, 'two distinct group members and the reviewer agent');
-  assert.equal(quorum(grp, at(steward, builder)).needs, 'the reviewer agent');
-  assert.equal(quorum(grp, at(reviewer)).needs, 'two distinct group members');
-  assert.equal(quorum(grp, at(steward, steward, 'x')).met, false, 'duplicates and non-members do not count');
-  assert.equal(quorum(grp, at(steward, reviewer)).met, true);
+  assert.equal(quorum(grp, at(steward), groups).needs, 'two distinct group members and the reviewer agent');
+  assert.equal(quorum(grp, at(steward, builder), groups).needs, 'the reviewer agent');
+  assert.equal(quorum(grp, at(reviewer), groups).needs, 'two distinct group members');
+  assert.equal(quorum(grp, at(steward, steward, 'x'), groups).met, false, 'duplicates and non-members do not count');
+  assert.equal(quorum(grp, at(steward, reviewer), groups).met, true);
 });
 
 const it = { instanceId: 'abcdef123456', title: 'T' };

@@ -44,6 +44,54 @@
       "fieldId": "aee7afe9-6650-5fa4-a61a-495c3b88994b",
       "order": 7,
       "required": false
+    },
+    {
+      "displayLabel": "Group label",
+      "fieldId": "0a30f012-47e4-4edc-b4e7-1201bda7dece",
+      "order": 8,
+      "required": false
+    },
+    {
+      "displayLabel": "Quorum: minimum members",
+      "fieldId": "ae4b957e-f3d7-4d8f-897e-885667718d60",
+      "order": 9,
+      "required": false
+    },
+    {
+      "displayLabel": "Quorum: seats that count",
+      "fieldId": "9f97e8a5-5f55-4448-9cf5-cc095e3c5f2b",
+      "order": 10,
+      "required": false
+    },
+    {
+      "displayLabel": "Quorum: required seat",
+      "fieldId": "9593f4f6-f282-4360-9294-984891b8fd46",
+      "order": 11,
+      "required": false
+    },
+    {
+      "displayLabel": "Budget per cycle",
+      "fieldId": "bb3dc168-cff6-4196-9824-8c1124037210",
+      "order": 12,
+      "required": false
+    },
+    {
+      "displayLabel": "Cycle close (UTC)",
+      "fieldId": "7431e74f-55ef-4a2c-8bf2-525f028d1c7e",
+      "order": 13,
+      "required": false
+    },
+    {
+      "displayLabel": "Max unacknowledged reports",
+      "fieldId": "0c0e59b9-42a2-4836-a23a-0251f6a5eb60",
+      "order": 14,
+      "required": false
+    },
+    {
+      "displayLabel": "Governed repos",
+      "fieldId": "b94a6e01-b2b9-43eb-9023-9a171bb33951",
+      "order": 15,
+      "required": false
     }
   ],
   "id": "e53dce11-6b83-5714-a8fe-f730edb500fa",

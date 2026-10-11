@@ -1,0 +1,17 @@
+{
+  "id": "0a30f012-47e4-4edc-b4e7-1201bda7dece",
+  "namespace": "com.mudemocracy.governance",
+  "name": "group_label",
+  "version": 1,
+  "description": "The GitHub label that marks this working group's issues and PRs.",
+  "aiGuidance": {
+    "purpose": "Optional. Set only on a role that is a working group. Read by `clerk groups`; pr-upkeep and the queue use it to recognise the group's work. e.g. wg:third-party-ready."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-11T00:00:00Z"
+}

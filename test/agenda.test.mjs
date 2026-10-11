@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as A from '../lib/practice/agenda.mjs';
 import { summarise, sessionTitle, heldAtIso, stamp } from '../lib/practice/session.mjs';
-import { authorise, resolveContext, ROLES } from '../lib/practice/roles.mjs';
+import { authorise, resolveContext, ROLES, rolesFor } from '../lib/practice/roles.mjs';
+import { groups } from './groups.fixture.mjs';
 
 const d = (id, state, by, title = id) => ({ instanceId: id, record: { lifecycleState: state, createdBy: { id: by }, createdAt: '2026-10-10T10:00:00Z', fieldValues: { title } } });
 const log = (...ids) => ({ memberInstanceIds: ids.map((instanceId) => ({ instanceId })) });
@@ -51,9 +52,9 @@ test('screens and status', () => {
 const act = (kind, id) => JSON.stringify({ kind, id });
 test('role authority: owner ok; an AI holding tpr-steward ok for that role; mismatches refused', () => {
   assert.equal(authorise('owner', act('human', 'human:the-greenman'), 'human:the-greenman'), ROLES.owner);
-  assert.equal(authorise('tpr-steward', act('ai', 'agent:tpr-steward')), ROLES['tpr-steward']);
+  assert.equal(authorise('tpr-steward', act('ai', 'agent:tpr-steward'), undefined, rolesFor(groups))['actor'], 'agent:tpr-steward');
   assert.throws(() => authorise('owner', act('ai', 'agent:tpr-steward'), 'human:the-greenman'), /agent:tpr-steward does not hold the role "owner"/);
-  assert.throws(() => authorise('tpr-builder', act('ai', 'agent:tpr-steward')), /tpr-builder/);
+  assert.throws(() => authorise('tpr-builder', act('ai', 'agent:tpr-steward'), undefined, rolesFor(groups)), /tpr-builder/);
   assert.throws(() => authorise('owner', undefined), /SRS_ACTOR/);
   assert.throws(() => authorise('chair', act('human', 'x')), /unknown role/);
 });
