@@ -9,6 +9,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | (none) / `session` / `comment` | Hold a session or post comments, by role | Human or agent | programme repo, GitHub PRs and issues | session/comment records via srs CLI, a signed PR | owner, `scripts/session`, `/session` |
 | `help` | List subcommands | Human | | | |
 | `groups` | Print the working groups chartered in the records (`--json`; bash: `clerk groups --json \| jq -r '.[].label'`) | Human; `pr-upkeep.sh`; `queue` | `governance/role` records with a `group_label`, the agents `authorised-by` them, the group's log container | nothing | every group-aware script |
+| `charter` | Charter a working group as draft/proposed records for the owner to ratify: `charter --repo <programme> --title --epic --label --repos --budget --cycle-close --quorum-seats --required-seat [--quorum-min --max-unacked --prefix --from <role id>] [--dry-run]` (handbook stage 10) | Human or orchestrator session | existing groups, the SemanticOps decision log, Suggestions, the compass of the group it copies | via the srs CLI as `SRS_ACTOR`: log, container, role, 4 articles, agents, boundary, charter decision (proposed, also in the SemanticOps log), relations; never `delegates` | owner session |
 | `settings` | Print the programme settings record (`--json`; bash: `clerk settings --json \| jq -r .githubOwner`) | Human; scripts | programme `com.semanticops.programme/programme` record | nothing | every script below |
 | `roadmap` | Derive epic priority from the period ranking | Human; workflows | programme records | with `--apply --yes`: board priority, `parked` label | derive-priority.yml, pages.yml |
 | `queue` | Report what the unattended lane would take next | Human | GitHub issues and PRs (settings `governed_repos`) | nothing | unattended-worker routine brief |
@@ -25,7 +26,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 
 | Script | Purpose | Reads | Writes | Called by |
 |---|---|---|---|---|
-| roadmap.mjs, queue.mjs, steward-check.mjs, check-method.mjs, check-programme-conformance.mjs, fetch-pinned-srs.mjs, gh-project.mjs, pr-upkeep.sh, wt | Behind the commands above | see above | see above | `clerk <name>` |
+| charter.mjs, roadmap.mjs, queue.mjs, steward-check.mjs, check-method.mjs, check-programme-conformance.mjs, fetch-pinned-srs.mjs, gh-project.mjs, pr-upkeep.sh, wt | Behind the commands above | see above | see above | `clerk <name>` |
 | lib/pinned-srs.mjs, lib/repo-arg.mjs | Pin lookup; `--repo` resolution | programme `validate.yml` | | scripts |
 | session | Fresh programme worktree, pinned srs, then open the clerk | srs-programme master | a worktree | owner, `/session` (`.claude/commands/session.md`) |
 | routines.mjs | Behind `clerk routines` (logic in `lib/practice/routines.mjs`) | see above | nothing | `clerk routines` |

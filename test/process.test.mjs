@@ -192,6 +192,7 @@ describe('stage 10: working groups', () => {
     assert.equal(tprGroup.members.length, 4, 'members are the agents authorised-by the group role, the analyst included');
     assert.deepEqual(rolesFor(groups)['fx-scribe'], { actor: 'agent:fx-scribe', roleId: 'fx-role', agentId: FX.scribe, logId: 'c-fx', context: 'WG Fixture' });
   });
+  test.todo('handbook stage 10: a group is related to its epic by a relation (no relation type fits an epic and a role; clerk charter names the epic in the role text)');
   test('a group has its own decision log and a duty to report back, both read from its charter', () => {
     assert.deepEqual([tprGroup.logId, fxGroup.logId], ['c-tpr', 'c-fx']); // each group's own log, found by the group's title
     assert.ok(fxGroup.cycleClose && fxGroup.maxUnacked, 'the cycle close and the pause limit are the duty, per group');
