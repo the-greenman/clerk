@@ -13,13 +13,13 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
+import { answersOf } from "../lib/practice/grounding.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
 // Go-forward only: history before this is never acted on (the weekly audit, srs-programme#38, reports it).
 export const SINCE = "2026-10-09T00:00:00Z";
 const RESET_RE = /Closed in the SemanticOps roadmap reset/;
 const M = { noPr: "<!-- steward-check:reopen-no-pr -->", epic: "<!-- steward-check:reopen-epic -->", answers: "<!-- steward-check:answers -->" };
-const ANSWERS_RE = /^[\s>*_-]*(answers|no affirmed problem yet)\b/im;
 const REHOME_RE = /(re-?hom|moved to|moving to|tracked (in|by)|now (in|under|tracked))/i;
 const REF_RE = /(?:[\w.-]+\/)?[\w.-]*#(\d+)/g;
 
@@ -53,7 +53,7 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
         out.push({ rule: "reopen-no-pr", ref, repo: i.repo, number: i.number, reopen: true,
           comment: `${M.noPr}\nReopened by steward-check: closed as completed within ${days} days but no merged pull request closes it, so the fix may only exist on a branch. Link the merged PR, or add the \`no-code\` label if no code was needed, then close it again. Re-closing after this comment is respected.` });
     }
-    if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !ANSWERS_RE.test(i.body || "") && !(i.comments || []).some((c) => ANSWERS_RE.test(c)) && !hasMarker(i, M.answers))
+    if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !answersOf(i.body || "").stated && !(i.comments || []).some((c) => answersOf(c).stated) && !hasMarker(i, M.answers))
       out.push({ rule: "answers", ref, repo: i.repo, number: i.number, reopen: false,
         comment: `${M.answers}\nsteward-check: this issue has no \`Answers:\` line. State \`Answers: SP-nn\` or \`No affirmed problem yet: <one-line problem>\` in the description (see srs-programme CLAUDE.md, "Filing issues").` });
   }

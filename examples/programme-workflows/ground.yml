@@ -1,0 +1,20 @@
+name: Ground
+
+on:
+  schedule:
+    - cron: "40 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ground
+  cancel-in-progress: false
+
+jobs:
+  ground:
+    uses: the-greenman/clerk/.github/workflows/programme-ground.yml@<clerk-sha>
+    with:
+      clerk-ref: <clerk-sha>
+    secrets: inherit

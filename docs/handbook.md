@@ -223,6 +223,7 @@ Per domain, agents suggest one to three remedies that answer affirmed problems, 
 **Practice.** *Partial.*
 - GitHub issues on the governed repos. Stories carry MoSCoW.
 - `steward-check` comments on an issue with no `Answers:` line.
+- `clerk ground` (advisory, exit 0) walks a PR to its closing issue, `Answers: SP-nn`, the problem's affirmed persona and domain, a roadmap epic through the sub-issue parent chain, and a working-group label; it reports the level reached. Persona and domain count only when affirmed; suggested ones are named in the reasons.
 - The analyst files issues in the group's issue shape (`routines/wg-analyst.md`).
 - Board model: `docs/board.md`.
 
@@ -380,7 +381,8 @@ Home (ruling D8, 2026-10-11, proposed): I1-I4 are `argument/indicator` records, 
   - The steward report's "What we learned" section.
   - `revisit_when` on decisions, roles and articles. It is displayed but never checked.
   - Remedy falsifiers, never tested.
-- Planned: the I1 script and records (`plans/two-domains-end-to-end.md`, section 6; clerk#22, clerk#25). Nothing is built.
+- I1 is computed by `clerk ground --since <date>` (clerk#22): share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. It is printed or sent to a job summary only (daily workflow `programme-ground.yml`); no `measurement-result` record is written yet.
+- Planned: the indicator and result records, I2-I4 (`plans/two-domains-end-to-end.md`, section 6; clerk#25).
 - `argument/indicator` and `argument/measurement-result` are installed but have no records.
 
 **Initial indicators (proposed, not yet ratified).** These are deliberately few, one per question we want answered.
@@ -400,7 +402,7 @@ Home (ruling D8, 2026-10-11, proposed): I1-I4 are `argument/indicator` records, 
 **Open questions.**
 - Who rules on the retrospective: the owner's session, every time?
 
-**Test:** test/process.test.mjs — stage 15 (pending: indicators I1-I4, revisit_when, falsifier and retrospective loop (only routine drift is checked))
+**Test:** test/process.test.mjs — stage 15 (I1 passing; pending: I2-I4, revisit_when, falsifier and retrospective loop (only routine drift is checked))
 
 ---
 

@@ -20,6 +20,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | `conformance` | Programme repo is an SRS repo and validates | CI | programme repo | nothing | validate.yml |
 | `board` | Story-driven priority on GitHub Project #6 (`gh-project.mjs`; how it works: [board.md](board.md)); slash commands `/roadmap`, `/stories`, `/triage` in `.claude/commands/` are the canonical copies | Hourly; human | issues, board | board fields, mirror labels, comments | board-sync.yml, roadmap |
 | `routines` | Drift between cloud triggers (a dump from the RemoteTrigger `list`), standing-job records and `routines/*.md`: `routines --check <dump.json> [--repo <programme>] [--json]`; exit 1 on any drift but stale check-ins | Human; `/routines`, `/session` | trigger dump, programme standing-job records, `git ls-files routines/` | nothing | owner |
+| `ground` | Advisory PR grounding check and indicator I1: `ground [--repo <programme>] (--pr <repo#n> \| --since YYYY-MM-DD) [--json]`; levels none, issue, problem, problem+persona+domain, epic, group; exit 0 unless input is wrong | Human; daily | merged PRs, closing issues and sub-issue parents (gh), programme records, groups | nothing | ground.yml |
 | `wt` | Create, list, prune git worktrees | Human | git | worktrees | `scripts/session`, owner |
 | `fetch-srs` | Download the pinned srs CLI, print `SRS_CLI_PATH=` | Human; CI | `.github/workflows/validate.yml` of the programme repo | `/tmp/srs-cli` | every script and workflow needing srs |
 
@@ -65,6 +66,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | programme-pr-upkeep.yml | Keep PRs moving, daily digest | every 15 min, 07:20 digest, push, workflow_run, dispatch | `upkeep` | BOARD_TOKEN | merges, digest |
 | programme-pages.yml | Publish `roadmap/` with generated roadmap.json | push, dispatch | `roadmap --json` | GITHUB_TOKEN | Pages |
 | programme-board-sync.yml | Promote intents, reconcile board and labels | push, hourly, dispatch | `board sync` (project, story repo, mirror repos from settings) | BOARD_SECRET or BOARD_TOKEN | labels, board |
+| programme-ground.yml | Grounding report (I1), last 7 days | daily, dispatch | `ground --since` (7 days) to the job summary | GITHUB_TOKEN | nothing |
 | test.yml (clerk) | The clerk's own tests | push, PR | `npm test` | | nothing |
 
 ## Routines (cloud, briefs in `routines/`; lifecycle in [routines.md](routines.md))

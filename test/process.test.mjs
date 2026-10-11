@@ -17,6 +17,7 @@ import { groupsFrom } from '../lib/practice/groups.mjs';
 import { take, assertQuorum, summarise } from '../lib/practice/session.mjs';
 import * as A from '../lib/practice/agenda.mjs';
 import { endSession } from '../lib/adapters/session.mjs';
+import { groundPR, i1 } from '../lib/practice/grounding-check.mjs';
 
 // ---- the fixture: one coherent story ----
 const M = 'com.semanticops.method', P = 'com.semanticops.programme';
@@ -317,7 +318,13 @@ describe('stage 15: measurement and retrospective', () => {
     const d = checkRoutines({ triggers: [{ id: 't1', name: 'X', enabled: true, cron_expression: '0 0 * * *', prompt: 'Read routines/x.md in the-greenman/clerk' }], jobs: [], briefs: new Set(['routines/x.md']) });
     assert.deepEqual(d.map((x) => x.kind), ['trigger-without-record']);
   });
-  test.todo('handbook stage 15, I1: share of merged PRs whose issue answers an affirmed problem with a persona and a domain is computed');
+  test('I1 is computed by clerk ground: share of merged PRs grounded to an affirmed problem, and with persona and domain', () => {
+    const problems = { 'SP-1': { affirmed: true, persona: 'affirmed', domain: 'affirmed' }, 'SP-2': { affirmed: true, persona: null, domain: null } };
+    const is = (body) => ({ ref: 'f#1', body, comments: [], labels: [], parents: [] });
+    const rs = [null, is('x'), is('Answers: SP-2'), is('Answers: SP-1')].map((issue) => groundPR({ pr: { labels: [] }, issue, problems }));
+    const s = i1(rs);
+    assert.deepEqual([s.total, s.grounded, s.full], [4, 2, 1]);
+  });
   test.todo('handbook stage 15, I2: delegated merges against budget, plus ready count at cycle close, are computed');
   test.todo('handbook stage 15, I3: days from proposed to ratified (median), and reports awaiting acknowledgement, are computed');
   test.todo('handbook stage 15, I4: reopened issues, false closes and reverted PRs this cycle are computed');
