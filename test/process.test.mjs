@@ -211,6 +211,12 @@ describe('stage 11: assignment and claim', () => {
     assert.deepEqual(q.queued, []);
     assert.deepEqual(q.held.map((h) => h.held[0]).sort(), [`assigned ${BUILDER}`, 'open PR fixture#50'].sort());
   });
+  test('an issue with open blockers (the board mirrors them as `blocked`) is held, not queued', () => {
+    const blocked = { ...issue, number: 13, labels: [...issue.labels, { name: 'blocked' }] };
+    const q = classify([blocked], []);
+    assert.deepEqual(q.queued, []);
+    assert.deepEqual(q.held[0].held, ['blocked']);
+  });
   test('a clerk command claims an issue: refuses unless free, grounded and the actor holds the seat (clerk claim)', () => {
     assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder' }).ok, true);
     assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), branches: ['10-x'], actor: 'agent:fx-builder', seat: 'builder' }).ok, false);
