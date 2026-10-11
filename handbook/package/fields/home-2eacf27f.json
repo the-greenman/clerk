@@ -1,0 +1,14 @@
+{
+  "id": "2eacf27f-2031-44f7-b1b6-bb813c82dd84",
+  "namespace": "com.semanticops.handbook",
+  "name": "home",
+  "version": 1,
+  "description": "Where the element is defined.",
+  "aiGuidance": {
+    "purpose": "The package (namespace) or repository that defines the element."
+  },
+  "fieldType": {
+    "datatype": "string"
+  },
+  "createdAt": "2026-10-11T18:33:26.850642862+00:00"
+}

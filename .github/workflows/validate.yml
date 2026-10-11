@@ -1,0 +1,20 @@
+name: Validate handbook
+# handbook/ is an SRS repository; docs/handbook.md is rendered from it and must match.
+# SRS_RUST_CLI_TAG is the one pin for the clerk's own SRS data (read by scripts/fetch-pinned-srs.mjs --repo .).
+on:
+  push:
+  pull_request:
+env:
+  SRS_RUST_CLI_TAG: v0.1.0-build.502
+jobs:
+  handbook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: echo "$(node scripts/fetch-pinned-srs.mjs --repo .)" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - run: node scripts/render-handbook.mjs --check

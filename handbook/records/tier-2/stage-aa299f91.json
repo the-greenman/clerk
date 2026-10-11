@@ -1,0 +1,28 @@
+{
+  "instanceId": "aa299f91-4d99-4dcd-a988-2d8e771603d6",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Priority and queue",
+    "theory": "Priority flows down the chain: period rank, then epic, then story MoSCoW, then work item. A group may set local priorities by a ratified decision. The queue is fed before it runs dry.",
+    "status": "working",
+    "practice": "- **Rollup:** `clerk board rollup` writes the `priority: Pn` label.\n- **Promotion:** `topup` and `promote` set Status Ready and the `ready` label, run hourly by `board sync`.\n- **Held work:** the queue and the builders skip issues labelled `blocked` or `needs-input`, and issues already assigned or with an open PR.\n- **Local priorities:** a ratified \"Local priorities: ...\" decision, read by `lib/practice/agenda.mjs`.\n- **Preview:** `clerk queue`. Detail: [board.md](board.md).",
+    "gaps": [
+      "Personas and domains do not affect priority, although no problem may be prioritised without them."
+    ],
+    "open_questions": [
+      "Does the persona and domain rule enter priority as a gate (not ready without them) or as a weight?"
+    ],
+    "test": "Stage 9: 3 passing; pending: persona and domain in priority."
+  },
+  "createdAt": "2026-10-11T18:33:29.471718216+00:00",
+  "updatedAt": "2026-10-11T18:33:29.471727481+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

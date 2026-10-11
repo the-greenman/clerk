@@ -1,441 +1,948 @@
-# Handbook
+<!-- Rendered from handbook/ (an SRS repository) by scripts/render-handbook.mjs. Do not edit: change the records. -->
 
-How a programme run by the clerk works, end to end: from the domain and persona a problem belongs to, through the work that answers it, to the committee that does that work and the measures that tell us whether any of it has value.
+# Clerk handbook
 
-This is a **skeleton** (clerk#17). Each stage says what is known and lists what is still open. Fill a stage in place when one of its questions is answered; do not start a second document.
+### How work is driven
 
-## How to read this
+This part tells the whole story in order. "Stage by stage" then takes each stage of the chain in turn, with what works today and what does not. "Reference" holds the principles, the SRS elements the process depends on, and where everything is written down.
 
-Every stage has the same parts:
+This handbook is itself an SRS repository (`handbook/` in the clerk). `docs/handbook.md` is rendered from it and is never edited by hand. See "How this handbook is made" at the end.
 
-- **Theory**: where we are trying to get to. It is kept even when practice falls short, so we don't lose sight of the aim.
-- **Practice**: what works today. It names the record type, the tool and the doc. `Status` is one of *working*, *partial* or *theory only*.
-- **Gap**: where practice differs from theory, or from itself.
-- **Open questions**: what we don't know yet. Each one is answered by a decision in the decision log, never by editing the text alone.
 
-Records live in srs-programme, and code and briefs live in the clerk. Where a detailed doc already exists, the stage points to it rather than repeating it.
+#### The whole picture
 
-## How we know
+The programme answers one question again and again: **what should we work on next, and why?**
 
-`test/process.test.mjs` runs one full programme cycle as a fixture (domain, persona, problem, remedy, objective, epic, issue, PR, report, session), with one test group per stage below. It is the progress bar. A stage moves from theory to practice when its `test.todo` becomes a passing test; a Practice claim that the test contradicts is a bug in this handbook or in the code, and is fixed under its own issue.
-
-## Principles
-
-These are the owner's standing rulings that every stage must respect.
-
-1. **Theory and practice together.** There is always a working system, and the theory is kept beside it. We build when a trigger fires, not ahead of need. Rulings grow into principles.
-2. **A problem lives in a domain and for a persona.** A problem is only relevant within a domain and to a persona. Without knowing who it is for and when it occurs, it cannot be prioritised and no remedy can be found. (Owner, 2026-10-11.)
-3. **Measure a little, then evaluate as we report.** Start with a few indicators. Each report says whether they still tell us anything. (Owner, 2026-10-11.)
-4. **Authority comes from the role, not the kind of mind.** The same rules and tools apply to humans and AI agents.
-5. **Agents suggest; the human layer wins.** Agents write to *Suggestions*. A human forks a record into *Affirmed*. *Set aside* is a reversible no.
-6. **A decision is ratified in exactly one session, at its own level and with that level's quorum.** Before that it may pass through many sessions as a proposal.
-7. **Rules hold at their boundary.** A rule is valid inside the boundary that made it.
-
-## The chain
+The answer is never "because someone said so". Work is justified by a **problem**, a problem only counts when we know **who** has it (a persona) and **where** it happens (a domain), and the order of work comes from a **ranking** the owner has made. Everything else in this handbook is the machinery that carries that reasoning from a statement of need to a merged pull request, and back again as a report.
 
 ```mermaid
 flowchart LR
-  D[Domain] --> P[Problem]
-  Pe[Persona] --> P
-  P --> R[Remedy]
-  R --> E[Epic]
-  O[Objective] --> E
-  F[Period] -->|ranks| O
-  E --> W[Work item]
-  W --> Q[Queue and claim]
-  Q --> X[Execute]
-  X --> V[Review and merge]
-  V --> Rep[Report]
-  Rep --> S[Session and ratify]
-  S --> M[Measure and retrospect]
-  M -.feeds.-> P
-  M -.feeds.-> F
+  subgraph Meaning["Meaning: SRS records in srs-programme"]
+    D[Domain] --> P[Problem]
+    Pe[Persona in domain] --> P
+    P --> R[Remedy]
+    R --> E[Epic]
+    O[Objective] --> E
+    F[Period] -->|ranks| O
+  end
+  subgraph Execution["Execution: GitHub boards and clerk routines"]
+    W[Issue] --> Q[Queue and claim]
+    Q --> X[Build]
+    X --> V[Review and merge]
+  end
+  subgraph Governance["Governance: sessions and decision logs"]
+    Rep[Report] --> S[Session]
+    S --> M[Measure]
+  end
+  E -->|"sub-issues, Answers: SP-nn"| W
+  V --> Rep
+  M -.->|new problems| P
+  M -.->|re-rank| F
 ```
 
-The chain has two halves. The **meaning half**, from domain to epic, is SRS records in srs-programme. The **execution half**, from work item to merge, is GitHub plus clerk routines. Today they meet only at the epic and at the `Answers: SP-nn` line in an issue. Closing that seam is the main job of this handbook.
+There are three surfaces, each with one job:
 
----
+| Surface | Holds | Lives in |
+|---|---|---|
+| **Meaning** | domains, personas, problems, remedies, objectives, periods, epics, decisions, roles | SRS records in `the-greenman/srs-programme` |
+| **Execution** | issues, stories, epics as issues, board fields, labels, PRs | GitHub Project #6 "SemanticOps" and the governed repos |
+| **Practice** | the code that reads the meaning and drives the execution, and the briefs agents follow | this repository, `the-greenman/clerk` |
 
-## 1. Roles and layers
+The two halves meet in two places only: the epic (a record with an `issue_ref`) and the `Answers: SP-nn` line at the top of every issue. Closing that seam is most of the open work in "Stage by stage".
 
-**Theory.** Every act is done by someone holding a role:
-- **Owner:** the programme's top authority. The owner delegates to working groups.
-- **Working-group members:** the steward, builder, reviewer and analyst.
-- **Scouts:** agents that suggest problems.
+Three rules shape everything that follows:
 
-Records carry who made them (`createdBy`) and sit in one of three layers.
+- **Agents suggest; the human layer wins.** Agents write to Suggestions. The owner forks a record into Affirmed. Only affirmed records carry weight.
+- **Authority comes from the role, not the kind of mind.** Humans and agents claim, review, decide and report through the same commands.
+- **Theory and practice together.** There is always a working system, and the theory stays beside it. We build when a trigger fires, not ahead of need.
 
-**Practice.** *Partial.*
-- **Layers:** the Affirmed, Suggestions and Set aside containers in srs-programme, checked by `scripts/check-method.mjs` (`checkGates`).
-- **Roles:** the owner is built into `lib/practice/roles.mjs`; every working-group member role is read from records (`governance/role` with `delegates`; agents `authorised-by` the group role carry `actor_id` and `seat`; `clerk groups`).
 
-**Gap.**
-- Set aside has never been used.
-- `method/agent` and `stewardship/agent` both exist with no stated difference.
+#### Domains, personas and problems define the work
 
-**Open questions.**
-- Is a role read from records, or kept in code until a second group is chartered?
-- What is the difference between `method/agent` and `stewardship/agent`? Should one go?
+A **domain** says *where* and *when* a problem occurs: an area of work with a purpose, and what is in and out of scope. A **persona** says *who* has it: their jobs and needs. A **problem** is a claim that something is wrong for that persona in that domain.
 
-**Test:** test/process.test.mjs — stage 1 (passing (3), pending: roles read from records; analyst role)
+> A problem lives in a domain and for a persona. Without knowing who it is for and when it occurs, it cannot be prioritised and no remedy can be found. (Owner, 2026-10-11.)
 
-## 2. Domain
+```mermaid
+flowchart TB
+  subgraph DC["Domain container (identity: the domain record)"]
+    C1["Cluster (named meaning)"]
+    C1 --- P1[Problem SP-nn]
+    C1 --- P2[Problem SP-nn]
+  end
+  P1 -->|held-by| PiD[Persona in domain]
+  PiD -->|in-domain, exactly one| DR[Domain record]
+  PiD -->|refines| SP[Shared persona]
+  R[Remedy] -->|answers| P1
+  O[Objective] -->|addresses| C1
+  E[Epic] -->|implements| R
+  E -->|serves| O
+  F[Period] -->|ranks| O
+```
 
-**Theory.** A domain is an area of work with a purpose, and what is in and out of scope. Every problem belongs to at least one domain. The domain tells us *when* a problem occurs.
+**How the pieces fit.**
 
-A domain is a container whose identity is the domain record (`containerType com.semanticops.method/domain`). Its outline holds clusters at depth 0 and their problems at depth 1 (ruling D2a, 2026-10-11, proposed). A problem's domain is derived, never stored: problem `held-by` persona-in-domain, which is `in-domain` of a domain record. Container membership is arrangement only. A problem can reach more than one domain through more than one persona-in-domain (rulings D4 and D5, 2026-10-11, proposed). The owner affirms a domain in the srs-web Method editor (ruling D6).
+1. **Domain container.** A domain is a container whose identity is the domain record. Its outline holds clusters at depth 0 and their problems at depth 1. Membership is arrangement, not meaning.
+2. **Cluster.** A cluster is named meaning: problems are raw ideas, and a synthesiser job groups and names them. The owner affirms the cluster's name and description; which problems sit under it stays fluid.
+3. **Persona in domain.** The same person needs different things in different domains, so each domain gets a persona-in-domain that `refines` the shared persona and points to exactly one domain with `in-domain`.
+4. **Problem.** A problem is `held-by` a persona-in-domain. Its domain is derived through that link and never stored twice.
+5. **Remedy.** A remedy `answers` one or more problems. It carries a **falsifier** (what would show it failed) and a **return_when** (when to look again).
+6. **Objective and period.** An objective `addresses` clusters. A period ranks objectives, and that ranking alone gives priority.
+7. **Epic.** An epic `implements` remedies and `serves` an objective. It is also a GitHub issue, where the execution half begins.
 
-**Practice.** *Theory only.*
+**Suggested, affirmed, set aside.** Every record sits in one of three layer containers.
+
+```mermaid
+flowchart LR
+  A["Anyone, often a scout agent"] -->|record create| S[Suggestions]
+  S -->|"owner forks (derived-from)"| AF[Affirmed]
+  S -->|owner declines| SA[Set aside]
+  SA -.->|reversible| S
+  AF -->|"carries weight: priority, gates, I1"| W[Work]
+```
+
+A scout or any participant writes a suggestion under its own actor (`createdBy`). The owner affirms by forking it into Affirmed, which keeps a `derived-from` link back to the suggestion. Set aside is a reversible no. Readers resolve every link to its affirmed end through `canon()` (follow `derived-from`).
+
+**Where it stands.** Seven domains exist, all still suggestions. The persona-in-domain type and the `in-domain` relation are defined in the clerk's method package (clerk#34) but not yet installed in srs-programme, so today every `held-by` points to a shared persona. The gate that refuses an affirmed problem with no affirmed persona and domain is ruled (decision e3ed9e54) and not yet built (clerk#35). The stages Domain, Persona, Problem and Remedy have the detail.
+
+
+#### How work moves across the boards
+
+The boards are GitHub Project #6 "SemanticOps" and a set of plain labels that mirror it. Priority is **derived, never hand-set**: it flows down from the period ranking.
+
+```mermaid
+flowchart TD
+  F["Period ranks objectives"] -->|"clerk roadmap --apply (daily, and on push)"| EP["Epic Priority<br/>rank 1 = P0, rank 2 = P1, rank 3+ = P2<br/>no ranked objective = parked"]
+  EP --> ST["User story<br/>MoSCoW set by a human"]
+  ST --> IS["Implementation issue<br/>priority: Pn label (rollup)"]
+  IS -->|"topup nominates (promote:ready)"| PR["promote sets Status = Ready<br/>and the ready label"]
+  PR -->|"clerk claim"| IP["In progress<br/>assignee + status: in progress"]
+  IP -->|PR opened| IR[In review]
+  IR -->|merged| DN[Done]
+  IP -.->|"idle 3h (stale-claims)"| PR
+  IP -.->|"human gate: needs-input"| HU[Waits for a human]
+```
+
+**The levels.** An epic lives in the story repo (`the-greenman/semanticops.com`) with the label `epic` and a title `Epic NN: Name`. Stories hang under it as sub-issues, with the label `user-story` and a MoSCoW. Implementation issues hang under stories, across any governed repo. An epic is a release: whatever it reaches through sub-issues.
+
+**Derived priority.** `clerk board rollup` walks each issue up to the stories it serves. Must gives P0, Should P1, Could or blank P2, and Won't excludes. With no story, the issue inherits its epic's Priority one tier down. A bug is never weaker than P1. `critical-path`, `blocks-gate` and `regression` bump one tier.
+
+**The ready queue.** `topup` keeps about six issues Ready. It nominates the top Backlog candidates in implementation order (epic Priority, started epics first, the `NN` in the title, issue priority, sub-issue position) by writing `promote:ready`. `promote` turns that intent into Status Ready. Blocked issues (an open blocked-by edge, or the `blocked` label), `needs-input` issues and bugs are never nominated. Bugs have their own track: `label:bug`, oldest first.
+
+**One hourly pass.** The srs-programme workflow `board-sync.yml` runs `clerk board sync` every hour: stories sync, rollup, topup, promote, stale claims, reconcile. Only this tool writes Projects v2 fields. Cloud routines cannot reach Projects v2, so they read and write the label mirror (`ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`).
+
+**Claiming.** Before anyone starts, `clerk claim <repo#n> --as <seat>` checks that the issue is open, has no branch, PR or assignee, answers an affirmed problem, falls under a group, and that the actor holds the seat. It then assigns, labels and comments. The same command serves humans, local sessions and routines.
+
+**Grounding.** `clerk ground` walks a merged PR back up the chain (issue, `Answers:` problem, affirmed persona and domain, epic, group) and reports how far it got. The daily share of grounded PRs is indicator I1.
+
+Full detail, every command and the API budget: [board.md](board.md).
+
+
+#### Working groups and delegation
+
+The owner cannot judge every merge. So the owner **delegates**: a working group gets a mandate, decides and merges inside it, and reports back. Anything outside the mandate comes back to the owner as one proposed decision. This is how a co-op runs a subcommittee.
+
+```mermaid
+flowchart TD
+  OW["Owner role<br/>(the programme's top authority)"] -->|delegates| GR["Group role<br/>purpose, mandate, charter fields"]
+  CD["Charter decision<br/>ratified in an owner session"] -.->|puts in force| GR
+  GR --> SO["Standing orders<br/>membership and quorum, cycle and report,<br/>budget, reporting and minutes"]
+  GR --> CP["Compass<br/>boundary, tensions, this-over-that leanings"]
+  GR --> MB["Members, each authorised-by the role<br/>steward, builder, reviewer, analyst"]
+  GR --> LOG["The group's own decision log"]
+  MB -->|"cycle report"| OW
+```
+
+**What a group has.** A purpose; standing orders; a delegation order (what it decides, what it escalates); a compass; membership and quorum; a rhythm with a cycle and a budget; its own decision log; and a duty to report. All of it is records in srs-programme. The numbers that code needs (label, quorum seats, budget per cycle, cycle close, pause limit, governed repos) are fields on the group role, read by `clerk groups`. Nothing is hard-coded.
+
+**Inside or outside the mandate.**
+
+```mermaid
+flowchart TD
+  Q["Work or a question<br/>in the group's issues"] --> M{"Inside the mandate?<br/>executes a recorded ruling,<br/>in the group's repos, within budget"}
+  M -->|yes| G["Builder builds, reviewer reviews<br/>quorum comment, pr-upkeep merges"]
+  G --> L["Decision proposed in the group log;<br/>the group's session ratifies it at cycle close"]
+  M -->|"no: new ruling, breaking change,<br/>gate or merge rules, over budget"| X["One proposed decision to the owner<br/>(fact, why it matters, options, recommendation)"]
+  L --> RP[Cycle report]
+  X --> RP
+  RP --> OS["Owner session: receives the report,<br/>ratifies or sets aside the escalation"]
+```
+
+**Quorum and merge.** A group PR merges only when a builder and a *different* reviewer agree after the last commit, the gates are green, the cycle's budget is not spent and the group is not paused. The reviewer posts a `<!-- wg-quorum -->` comment; `pr-upkeep` checks it every 15 minutes and merges. A new commit voids the quorum.
+
+**Pause.** If the owner leaves two cycle reports unacknowledged, the group pauses: no new builds and no group merges, though reviews and escalations continue. Silence slows the group down rather than letting it run unwatched.
+
+**The central group.** Work with no `wg:` label belongs to the central group, SemanticOps, held by the Owner role. Its seats are the owner's builder and reviewer, plus agents `authorised-by` the Owner role, such as the nightly `agent:unattended-worker`. The central group never claims a delegated group's work.
+
+**Groups today.** WG Third-party ready (semanticops.com#31, `wg:third-party-ready`) is in force. WG Agent-supported editor (semanticops.com#29, `wg:agent-editor`) has been chartered as records. A new group is chartered only on a trigger: a steady ready queue that needs delegated merges.
+
+**Chartering.** `clerk charter` writes the whole charter as drafts and a proposed decision; an owner session ratifies it and asserts `delegates`. The steps are in stage 10. The briefs the members follow: [routines/working-groups.md](../routines/working-groups.md).
+
+
+#### Decisions
+
+A decision is **one standing choice that governs later choices**. It is not a task, not a plan and not a diary entry.
+
+**The four tests.** A candidate goes in the decision log only if it passes all four:
+
+1. **Reuse.** Would a later choice be settled by pointing at it?
+2. **One thing.** Can it be said in one sentence without "and"?
+3. **Timeless.** Does it read true with every date, issue number and id removed?
+4. **Testable.** Can someone apply it to a new case and say whether the case conforms? Does it say when to review it?
+
+Anything that fails the first test is still recorded, but as an issue (a task), an application or a plan, linked to the decision it serves.
+
+**Seven kinds**, adopted to test (`decision_kind` on the decision record):
+
+| Kind | Frame | Example |
+|---|---|---|
+| Purpose | We exist to X, for Y. | Deep context for action (f5b4656a) |
+| Boundary | X covers A, not B. | Programme coordination domain (da7877f3) |
+| Premise | We work as if X. | Stance agents are universal (7841bb87) |
+| Preference | X over Y, unless Z. | Convention before enforcement (e337703b) |
+| Policy | Every X must Y; measured by I. | A group's session ratifies (70a05a5c) |
+| Design | We model X as Y, because principle P. | Domain container (a6280447) |
+| Mandate | Group G may X within M. | Charter for WG Third-party ready (00567bf1) |
+
+**How a decision is made.**
+
+```mermaid
+stateDiagram-v2
+  [*] --> proposed: recorded at once, by anyone acting in a role
+  proposed --> proposed: considered in a session, commented on
+  proposed --> ratified: one session, at its own level, with quorum
+  proposed --> abandoned: set aside in a session
+  ratified --> [*]
+  abandoned --> [*]
+```
+
+- **Recorded at once.** A choice made between sessions is written straight away as `proposed` and may be acted on if it falls inside the group's remit.
+- **Ratified once.** A decision is ratified in exactly one session, at the level that owns it (a group's log, or the SemanticOps log for the owner) and with that level's quorum. Before that it may pass through many sessions as a proposal, each recording `considers`.
+- **Sessions.** A session has attendees, a time and an agenda in this order: decisions since the last session, reports, exercises, decisions for this session, merges. `clerk` (a terminal UI) and `clerk session` write one `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives` relations, and open a signed PR that merges itself.
+- **Three kinds of minute.** A *report* is received, not decided. An *exercise* is an open discussion that feeds proposals and is never ratified. A *decision* is ratified or set aside.
+- **Discussion.** Humans and agents comment the same way: a comment record `comments-on` the decision (`clerk comment`). A comment between sessions is discussion, not a session.
+
+**Escalating to the owner.** Information must fit the reader. An escalation is one decision with its stakes, options, consequences and a recommendation, never a flood of technical questions.
+
+Full rules, kinds and the worked re-read of the log: [decision-log.md](decision-log.md).
+
+
+#### Routines review, report and allocate
+
+A **routine** is a cloud agent that runs a brief on a trigger. A **workflow** is a GitHub Action that runs clerk code with no AI. Together they keep the programme moving between sessions.
+
+```mermaid
+flowchart LR
+  subgraph Allocate
+    BS["board-sync<br/>hourly"]
+    RD["roadmap --apply<br/>daily 06:15, on push"]
+    AN["analyst<br/>daily 12:00, if queue dry"]
+  end
+  subgraph Build
+    BU["wg-builder<br/>on ready / on merge"]
+    UW["unattended worker<br/>nightly 00:00"]
+  end
+  subgraph Review
+    RV["wg-reviewer<br/>on PR events"]
+    UP["pr-upkeep<br/>every 15 min"]
+    SC["steward --fix<br/>daily 06:15"]
+    GD["ground (I1)<br/>daily"]
+  end
+  subgraph Report
+    WS["wg-steward<br/>daily 11:30 cycle close"]
+    DG["digest<br/>daily 07:20"]
+    HW["handbook watcher<br/>weekly"]
+  end
+  RD --> BS --> BU
+  AN -->|files ready issues| BS
+  BU --> RV --> UP
+  UW --> UP
+  UP --> WS
+  SC --> WS
+  GD --> WS
+  WS -->|report on semanticops.com#31| OS([Owner session])
+  DG -->|semanticops.com#33| OS
+  HW -->|handbook PR| OS
+```
+
+| Job | Runs | Kind | What it does |
+|---|---|---|---|
+| Allocate | `board-sync` hourly | workflow | rollup, topup, promote, stale claims, reconcile |
+| Allocate | `roadmap --apply` daily and on push | workflow | epic Priority from the period ranking, `parked` label |
+| Allocate | analyst, daily 12:00 | routine | only when the last report says "Queue running dry": files ruling-backed issues as ready |
+| Build | wg-builder, on events | routine | one group issue per run, claimed with `clerk claim` |
+| Build | unattended worker, nightly | routine | up to 3 `lane:unattended` issues, as the central group's builder |
+| Review | wg-reviewer, on PR events | routine | gates, mandate check, quorum comment; never reviews its own work |
+| Review | pr-upkeep, every 15 min | workflow | merges PRs whose gate label and quorum allow it; daily digest |
+| Review | steward check, daily | workflow | reopens false closes; comments on issues with no `Answers:` line |
+| Review | ground, daily | workflow | I1: share of merged PRs grounded to an affirmed problem |
+| Report | wg-steward, daily 11:30 | routine | closes the cycle: run report record, ratifies the group's decisions in one group session, report on #31 |
+| Report | handbook watcher, weekly | routine | re-reads code, data and boards; updates the handbook records; renders; opens a PR |
+
+**Rules for every routine.**
+
+- **Thin prompt.** The trigger only points at its brief in `routines/`. Rules live in the brief, so a change is a pull request.
+- **Record first.** Each routine has a standing-job record in srs-programme (`routine_id`, `brief_path`) and an agent record with its `SRS_ACTOR`. `clerk routines --check` reports drift between records, triggers and briefs.
+- **Never run a brief that is not on the clerk default branch.**
+- **Stop honestly.** A run that hits a human gate comments the exact question, adds `needs-input`, and stops.
+- **Report what you learned.** Every report ends with a short "What we learned": which part of the theory held, which did not.
+
+Lifecycle and drift check: [routines.md](routines.md). Every routine and workflow: [tools.md](tools.md).
+
+
+### Stage by stage
+
+Each stage has the same parts:
+
+- **Theory**: where we are trying to get to. It is kept even when practice falls short.
+- **Status**: *working*, *partial* or *theory only*.
+- **Practice**: what works today, naming the record type, the tool and the doc.
+- **Gap**: where practice differs from theory, or from itself.
+- **Open questions**: what we do not know yet. Each one is answered by a decision in the decision log, never by editing this text alone.
+- **Test**: where `test/process.test.mjs` proves it.
+
+Facts here were checked against clerk and srs-programme on 2026-10-11. The weekly handbook watcher re-checks them.
+
+
+#### Roles and layers
+
+**Theory**: Every act is done by someone holding a role. The **owner** is the programme's top authority and delegates to working groups. **Members** of a group hold seats: steward, builder, reviewer, analyst. **Scouts** suggest problems. Records carry who made them (`createdBy`) and sit in one of three layers: Affirmed, Suggestions, Set aside.
+
+**Status**: partial
+
+**Practice**:
+- **Layers:** the Affirmed, Suggestions and Set aside containers in srs-programme, checked by `scripts/check-method.mjs` (`checkGates`): an AI actor cannot author a record in a human layer.
+- **Roles:** only the owner is built into `lib/practice/roles.mjs`. Every group role is read from records: a `governance/role` with charter fields, the Owner role `delegates` to it, and agents `authorised-by` it carry `actor_id` and `seat` (`clerk groups`).
+- **Agents:** a `method/agent` is a universal stance agent that `instantiates` one of the eight archetypes. A `stewardship/agent` is a seat-holder in a group and is `derived-from` a method agent. The unattended worker (`agent:unattended-worker`) is `authorised-by` the Owner role as the central group's builder.
+
+**Gap**:
+- Set aside has never been used: its only member is its own identity record.
+- The difference between `method/agent` and `stewardship/agent` is practice, not a ruling.
+
+**Open questions**:
+- Should the stance-agent and seat-holder split be ruled, or one type retired?
+
+**Test**: Stage 1: 3 passing. Two todos (roles read from records; the analyst as a member role) describe work already done and should become passing tests.
+
+
+#### Domain
+
+**Theory**: A domain is an area of work with a purpose and what is in and out of scope. It tells us *when* a problem occurs. A domain is a container whose identity is the domain record; its outline holds clusters at depth 0 and their problems at depth 1. A problem's domain is derived (problem `held-by` persona-in-domain `in-domain` domain), never stored. Domains nest by perspective. The owner affirms a domain in the srs-web Method editor.
+
+**Status**: partial
+
+**Practice**:
 - Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).
-- 5 records, all in Suggestions: Agent memory, Stance, Semantic records, Group meaning ownership, Collaborative writing.
-- A domain `contains` clusters and tensions.
-- No code reads domains.
-- Planned: `plans/two-domains-end-to-end.md` (Collaborative writing and Agent memory first). Nothing is built.
+- 7 domain records, all in Suggestions: Deep context, Programme coordination, Semantic records, Agent memory, Group meaning ownership, Evidence-backed writing, Stance.
+- 6 domain containers exist. Deep context nests Semantic records, Group meaning ownership and Agent memory (decision dbaa4716).
+- `clerk ground` reads domains through `contains` (domain to cluster to problem) to compute I1. Nothing else reads them.
+- Plan: [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md), walking Evidence-backed writing and Agent memory first.
 
-**Gap.**
+**Gap**:
 - No domain is affirmed.
-- A problem reaches its domain only indirectly, through a cluster.
+- Clusters still hang off domains by `contains` edges as well as by container outline: two groupings for one goal, until readers switch to the outline (decision a6280447).
 - Nothing checks that a problem has a domain.
-- No domain container exists yet; the old `contains` edges (domain to cluster, cluster to problem) must be deleted once readers switch to the outline (one way per goal).
-- The affirmed domain is a fork, so the container identity still names the original. Readers resolve it with `canon()` (follow `derived-from`) until a non-`canon()` reader needs a core fix (ruling D2b).
+- An affirmed domain is a fork, so its container identity still names the suggestion; readers resolve it with `canon()`.
 
-**Open questions.**
+**Open questions**:
 - How is a domain retired?
 - How does a domain relate to a working group's boundary or compass?
 
-**Test:** test/process.test.mjs — stage 2 (pending: every problem has a domain; domain says when)
+**Test**: Stage 2: pending (every problem has a domain; the domain says when).
 
-## 3. Persona
 
-**Theory.** A persona is someone the work is for: their jobs and needs. Every problem is held by at least one persona. The persona tells us *who* the problem is for.
+#### Persona
 
-The shared persona stays. Each domain adds a **persona-in-domain** (title, goals, jobs, needs) that `refines` the shared persona and points to exactly one domain record with `in-domain`. A problem is `held-by` the persona-in-domain (rulings D3 and D4, 2026-10-11, proposed). The shared persona need not be affirmed (ruling D5).
+**Theory**: A persona is someone the work is for: their jobs and needs. It tells us *who* a problem is for. The shared persona stays general. Each domain adds a **persona-in-domain** (title, goals, jobs, needs) that `refines` the shared persona and points to exactly one domain with `in-domain`. A problem is `held-by` the persona-in-domain.
 
-**Practice.** *Partial (data only).*
-- Type `com.semanticops.method/persona` (title, summary, jobs, needs).
-- 5 records, all in Suggestions.
-- 97 problems are linked by `held-by`.
+**Status**: partial
+
+**Practice**:
+- Type `com.semanticops.method/persona` (title, summary, jobs, needs): 5 records, all in Suggestions.
+- Type `com.semanticops.method/persona-in-domain`, field `goals` and relation `in-domain` are defined in the clerk method package (clerk#34, merged 2026-10-11). They are not yet installed in srs-programme.
+- 110 `held-by` edges, all to shared personas.
 - `clerk roadmap --explain` shows personas as labels, marked "suggested".
-- Planned: `persona-in-domain` type, `goals` field and `in-domain` relation in the method package (`plans/two-domains-end-to-end.md`, step 1). Nothing is built.
 
-**Gap.**
-- No persona is affirmed.
+**Gap**:
+- No persona is affirmed, and no persona-in-domain exists in the data yet.
 - Personas never reach issues, priority or assignment.
-- `held-by` has no type constraint in its definition (description only), so nothing stops it pointing at a shared persona.
-- The `in-domain` exactly-one rule is checked in clerk `check-method`, not in core (standing rule: no core changes until the process is refined).
+- The exactly-one `in-domain` rule will be checked in clerk `check-method`, not in core, until the process settles (decision 071eadb2).
 
-**Open questions.**
+**Open questions**:
 - Do personas weight priority, or only qualify it?
 - How do we hear from a real persona, as opposed to a modelled one?
 
-**Test:** test/process.test.mjs — stage 3 (passing (1), pending: personas reach issues and priority)
+**Test**: Stage 3: 1 passing; pending: personas reach issues and priority.
 
-## 4. Problem
 
-**Theory.** A problem is a claim, held by a person or agent, about something wrong for a persona in a domain. It is suggested by anyone and affirmed by a human. Work is judged by the problem it answers.
+#### Problem
 
-Gate (ruling D5, 2026-10-11, proposed): an affirmed problem must be `held-by` at least one affirmed persona-in-domain whose `in-domain` (exactly one) reaches an affirmed domain record. Ends resolve through `derived-from`. Severity is a warning everywhere until both pilot domains are walked, then an error everywhere.
+**Theory**: A problem is a claim, held by a person or agent, about something wrong for a persona in a domain. Anyone may suggest one; a human affirms it. Work is judged by the problem it answers. Gate (decision e3ed9e54): an affirmed problem must be `held-by` an affirmed persona-in-domain whose `in-domain` reaches an affirmed domain. It warns until both pilot domains are walked, then errors.
 
-**Practice.** *Partial.*
-- Type `com.semanticops.method/problem` (problem_id `SP-nn`, statement, kind, source_ref, imbalance).
-- Scouts suggest problems. The owner forks them into Affirmed: 53 distinct `SP-nn`, 47 affirmed.
+**Status**: partial
+
+**Practice**:
+- Type `com.semanticops.method/problem` (problem_id `SP-nn`, statement, kind, source_ref).
+- SP-01 to SP-66 exist; 47 are affirmed as forks of their suggestions.
 - Problems group into clusters. Parked issues are sources for problems, never bulk imports.
 - **Duplicate guard:** search the trackers and comment rather than file a near-duplicate.
-- Planned: the gate above in `check-method` (`plans/two-domains-end-to-end.md`, step 2). Nothing is built.
+- The gate is ruled and not built (clerk#35, blocked on the package install).
 
-**Gap.**
-- How a suggestion becomes affirmed is undocumented here.
-- A problem can be affirmed with no persona and no domain, which breaks principle 2.
-- Problems link to issues only backwards, as evidence (`source_ref`).
-- When the gate flips to error, the 27 affirmed problems in the other three domains must be grounded or set aside, or the flip must be scoped to walked domains.
-- Five suggested problems have no cluster.
+**Gap**:
+- A problem can be affirmed with no persona and no domain, which breaks the rule above.
+- Problems link to issues only backwards, as text (`source_ref`, `Answers:`).
+- The 27 affirmed problems outside the two pilot domains must be grounded or set aside before the gate errors.
+- Programme coordination's problems (SP-49 to SP-66) have no cluster and none is affirmed.
+- Decision ee59155b (proposed) duplicates the ratified gate e3ed9e54.
 
-**Open questions.**
-- What closes a problem: solved, set aside, or superseded? Who says so?
+**Open questions**:
+- What closes a problem: solved, set aside or superseded? Who says so?
 - How often are suggestions reviewed, and by whom?
 
-**Test:** test/process.test.mjs — stage 4 (passing (2), pending: principle 2 gate (persona and domain); problem closure)
+**Test**: Stage 4: 2 passing; pending: the persona and domain gate; problem closure.
 
-## 5. Remedy
 
-**Theory.** A remedy is a move that answers one or more problems. It carries a **falsifier** (what would show it failed) and a **return_when** (when to look again).
+#### Remedy
 
-Per domain, agents suggest one to three remedies that answer affirmed problems, and the owner affirms them. An existing epic implements each one (ruling D7.4, 2026-10-11, proposed): `abfa5866` (semanticops.com#29) for writing, `5746dee3` (semanticops.com#28) for memory. A new epic is made only if none fits.
+**Theory**: A remedy is a move that answers one or more problems. It carries a **falsifier** (what would show it failed) and a **return_when** (when to look again). Agents suggest one to three remedies per domain; the owner affirms them; an existing epic implements each one.
 
-**Practice.** *Partial.*
+**Status**: partial
+
+**Practice**:
 - Type `com.semanticops.method/remedy`, linked to problems by `answers`.
-- `check-method` requires an affirmed remedy to answer an affirmed problem and to have a falsifier.
-- 5 records, two of them duplicated as fork plus original.
-- Planned: remedy suggestions in the two-domain walk (`plans/two-domains-end-to-end.md`, section 5). Nothing is built.
+- `check-method` requires an affirmed remedy to answer an affirmed problem and to carry a falsifier.
+- 5 records: two affirmed remedies with their suggestions, and one suggested remedy (lenses).
 
-**Gap.** Falsifiers and `return_when` are never evaluated.
+**Gap**:
+- Falsifiers and `return_when` are never evaluated.
 
-**Open questions.**
+**Open questions**:
 - Who checks a falsifier, and when: each report, or period close?
 - What happens when a falsifier fires?
 
-**Test:** test/process.test.mjs — stage 5 (passing (2), pending: falsifiers and return_when evaluated)
+**Test**: Stage 5: 2 passing; pending: falsifiers and return_when evaluated.
 
-## 6. Objective and period
 
-**Theory.** A period is a focus span. It ranks objectives, which are directions that address clusters of problems for stakeholders. `addresses` stays objective to **cluster**: a cluster is named meaning (problems are the raw ideas, a synthesiser job groups and names them), and a domain is too large to address (ruling D7.1, 2026-10-11, proposed). The cluster's name and description are affirmed; which problems sit under it is fluid arrangement, reviewed by the steward (ruling D7.2). Priority is derived from that ranking and never set by hand. A period ends with a retrospective.
+#### Objective and period
 
-**Practice.** *Partial.*
-- **Types:** `programme/period` (objective_rank) and `programme/objective`.
-- **Current period:** "Focus 1: writing and memory", from 2026-10-08 with no end date. It ranks 4 objectives, all still marked "Draft".
-- **Priority:** `clerk roadmap --apply` sets board Priority: rank 1 is P0, rank 2 is P1, rank 3 and below is P2, and anything unranked is parked.
+**Theory**: A period is a focus span. It ranks objectives, which are directions that `addresses` clusters of problems. Priority is derived from that ranking and never set by hand. A period ends with a retrospective.
 
-**Gap.**
+**Status**: partial
+
+**Practice**:
+- Types `programme/period` (objective_rank) and `programme/objective`.
+- Current period "Focus 1: writing and memory", from 2026-10-08, no end date. It ranks five objectives: 1 Keep work moving to done (P0); 2 Agent-supported writing (P1); 3 Agent memory (P2); 4 A public specification that reads as it describes; 5 A reference implementation that honours its contracts.
+- `clerk roadmap --apply` sets epic Priority from the rank and labels unranked epics `parked`.
+
+**Gap**:
 - Objectives have no success criteria.
 - Periods have no end condition and no retrospective.
-- Only one objective `addresses` a cluster. Planned: `0b59ff0b` and `8e561b4c` gain `addresses` edges in the two-domain walk (`plans/two-domains-end-to-end.md`).
+- Only one objective `addresses` a cluster.
 
-**Open questions.**
+**Open questions**:
 - What does an objective need before it can be ranked: a domain, a persona, success criteria?
 - How does a period end: a date, objectives met, or the owner's call?
-- What does the retrospective record (see stage 15)?
 
-**Test:** test/process.test.mjs — stage 6 (passing (2), pending: objective success criteria; period retrospective)
+**Test**: Stage 6: 2 passing; pending: objective success criteria; period retrospective.
 
-## 7. Epic
 
-**Theory.** An epic is tracked work that implements remedies, answers problems and serves an objective. An epic is also a **working group** (stage 10), but only once chartered. Epics semanticops.com#28 and #29 stay plain owner-run epics. A group is chartered on a trigger: a steady ready queue that needs delegated merges (ruling D7.3, 2026-10-11, proposed).
+#### Epic
 
-**Practice.** *Partial.*
-- **Type:** `programme/epic` (issue_ref), linked by `implements`, `answers` and `serves`.
-- **Records:** 10 epics. 4 serve an objective and 6 are parked.
-- **Full chain:** only `8cbb562f` (semanticops.com#31) has the whole chain from persona to epic.
+**Theory**: An epic is tracked work that implements remedies, answers problems and serves an objective. An epic becomes a working group only when chartered, on a trigger: a steady ready queue that needs delegated merges.
 
-**Gap.**
+**Status**: partial
+
+**Practice**:
+- Type `programme/epic` (issue_ref), linked by `implements`, `answers` and `serves`.
+- 12 epic records: 6 serve a ranked objective, 6 are parked.
+- Only Third-party ready (`8cbb562f`, semanticops.com#31) carries the whole chain from persona to epic.
+
+**Gap**:
 - Most epics have no remedy or problem link.
+- Epic `answers` and `implements` edges point at suggestion-layer problems, not their affirmed forks.
 - `6c5cbdde` (muDemocracy.org#159) nearly duplicates `8cbb562f`.
-- Epics `abfa5866` and `5746dee3` have no remedy or problem link yet. Planned: `plans/two-domains-end-to-end.md`.
 
-**Open questions.**
+**Open questions**:
 - Must an epic implement a remedy before it can serve an objective?
 
-**Test:** test/process.test.mjs — stage 7 (passing (2), pending: epic is a working group; remedy before serving an objective)
+**Test**: Stage 7: 2 passing; pending: epic is a working group; remedy before serving an objective.
 
-## 8. Work item
 
-**Theory.** An issue names the problem it answers (`Answers: SP-nn`, or "No affirmed problem yet: …"), sits under a story or epic from the moment it is filed, and is small enough for one session.
+#### Work item
 
-**Practice.** *Partial.*
-- GitHub issues on the governed repos. Stories carry MoSCoW.
-- `steward-check` comments on an issue with no `Answers:` line.
-- `clerk ground` (advisory, exit 0) walks a PR to its closing issue, `Answers: SP-nn`, the problem's affirmed persona and domain, a roadmap epic through the sub-issue parent chain, and a working-group label; it reports the level reached. Persona and domain count only when affirmed; suggested ones are named in the reasons.
-- The analyst files issues in the group's issue shape (`routines/wg-analyst.md`).
-- Board model: `docs/board.md`.
+**Theory**: An issue names the problem it answers (`Answers: SP-nn`, or "No affirmed problem yet: ..."), sits under a story or epic from the moment it is filed, and is small enough for one session.
 
-**Gap.**
+**Status**: partial
+
+**Practice**:
+- GitHub issues on the governed repos; stories carry MoSCoW.
+- `clerk steward` comments on an issue with no `Answers:` line, and reopens false closes.
+- `clerk claim` refuses an issue whose `Answers:` is not an affirmed problem.
+- `clerk ground` walks a merged PR to its issue, problem, persona and domain, epic and group, and reports the level reached.
+- The analyst files issues in the group's issue shape (`routines/wg-analyst.md`). Board model: [board.md](board.md).
+
+**Gap**:
 - The link to the problem is a line of text, not a record.
-- The `steward-check` answers rule is undocumented in `docs/tools.md`.
 
-**Open questions.**
+**Open questions**:
 - Should the problem link become a record or relation? What would it be?
 - Can a work item answer a problem directly, without an epic?
 
-**Test:** test/process.test.mjs — stage 8 (passing (1), pending: problem link as a record)
+**Test**: Stage 8: 1 passing; pending: problem link as a record.
 
-## 9. Priority and queue
 
-**Theory.** Priority flows down the chain: period rank, then epic, then story MoSCoW, then work item. A group may set local priorities by a ratified decision. The queue is fed before it runs dry.
+#### Priority and queue
 
-**Practice.** *Working.*
-- **Rollup:** `gh-project rollup` writes the `priority: Pn` label.
-- **Promotion:** `topup` and `promote` set Status=Ready and the `ready` label, run hourly by `sync`.
-- **Local priorities:** a ratified "Local priorities: …" decision, read by `lib/practice/agenda.mjs`.
-- **Queue preview:** `clerk queue`.
-- Details: `docs/board.md`.
+**Theory**: Priority flows down the chain: period rank, then epic, then story MoSCoW, then work item. A group may set local priorities by a ratified decision. The queue is fed before it runs dry.
 
-**Gap.** Personas and domains do not affect priority, although principle 2 says no problem is prioritised without them.
+**Status**: working
 
-**Open questions.**
-- How does principle 2 enter priority: as a gate (no persona and domain means not ready), or as a weight?
+**Practice**:
+- **Rollup:** `clerk board rollup` writes the `priority: Pn` label.
+- **Promotion:** `topup` and `promote` set Status Ready and the `ready` label, run hourly by `board sync`.
+- **Held work:** the queue and the builders skip issues labelled `blocked` or `needs-input`, and issues already assigned or with an open PR.
+- **Local priorities:** a ratified "Local priorities: ..." decision, read by `lib/practice/agenda.mjs`.
+- **Preview:** `clerk queue`. Detail: [board.md](board.md).
 
-**Test:** test/process.test.mjs — stage 9 (passing (3), pending: principle 2 in priority)
+**Gap**:
+- Personas and domains do not affect priority, although no problem may be prioritised without them.
 
-## 10. Working groups (committees)
+**Open questions**:
+- Does the persona and domain rule enter priority as a gate (not ready without them) or as a weight?
 
-**Theory.** A working group is a delegated authority. It has:
-- a purpose;
-- standing orders;
-- a delegation order: what it decides and what it escalates;
-- a compass: at least 3 tensions, "this over that" leanings, and separate layers;
-- membership and quorum;
-- a rhythm, with a cycle and a budget;
-- its own decision log;
-- a duty to report back.
+**Test**: Stage 9: 3 passing; pending: persona and domain in priority.
 
-Its charter is records, and its rules are read from them.
 
-**Practice.** *Partial.* One group, **WG Third-party ready** (semanticops.com#31):
-- **Charter decision:** `00567bf1`.
-- **Group role:** `834b61fd`.
-- **Standing orders:** quorum, cycle (daily, closing 11:30 UTC), budget (10 delegated merges per cycle), reporting, in prose as articles and as data on the group role: `group_label`, `quorum_min_members`, `quorum_seats`, `quorum_required_seat`, `budget_per_cycle`, `cycle_close_utc`, `max_unacked_reports`, `governed_repos`. `clerk groups` reads them; `quorum()`, `pr-upkeep.sh`, the queue and the Next forecast use them.
-- **Decision log:** `88c32389`.
-- **Members:** steward, builder, reviewer and analyst.
-- **Second group:** **WG Agent-supported editor** (semanticops.com#29, `wg:agent-editor`), chartered by `clerk charter` as drafts and proposals; in force only when the owner ratifies its charter decision (`384a704a`).
+#### Working groups
 
-**How a group is chartered, step by step.**
-1. An orchestrator session (any member or agent, under its own `SRS_ACTOR`) runs `clerk charter --repo <programme> --title "WG ..." --epic <repo#n> --label wg:... --repos a,b --budget N --cycle-close HH:MM --quorum-seats builder,reviewer --required-seat reviewer --prefix <p> --dry-run`, reads the plan, then runs it without `--dry-run`. A duplicate label or title, an unknown required seat or a malformed option is refused before anything is written.
-2. It creates, as drafts and proposals: the group's decision log and container, the group role with its charter fields, four standing-order articles (membership and quorum, cycle and report, budget, reporting and minutes), a member agent per seat (`agent:<prefix>-<seat>`, `authorised-by` the role), a boundary with the compass copied from the first existing group (`narrows` and `holds-tension`; the articles are `within-boundary`), and the charter decision, proposed, listed in the group log and in the SemanticOps decision log (one record, two logs).
-3. The orchestrator validates, commits on a branch and opens a PR for the owner. Nothing is in force: the role and articles stay draft, the charter decision is proposed.
-4. An owner session ratifies the charter decision, then asserts `delegates` from the Owner role to the group role (as the Third-party ready precedent did, in its ratification commit; the command never asserts it), and may move the role and articles out of draft.
-5. Owner steps after that, not done by the command: create the `wg:...` label in each governed repo, create the cloud routines and standing-job records.
-Local Claude Code sessions act as members under the same rules as routines (owner decision `f799b6bc`, proposed), and a group's session ratifies its builders' decisions (`70a05a5c`, proposed).
-- Docs: `routines/working-groups.md`. Concept: srs-programme `source-documents/agent-democracy-2026-10-10/concept.md`. Mapping: `source-documents/boundaries-2026-10-09/proposal.md`.
+**Theory**: A working group is a delegated authority with a purpose, standing orders, a delegation order, a compass (at least three tensions, this-over-that leanings, separate layers), membership and quorum, a rhythm with a cycle and a budget, its own decision log and a duty to report. Its charter is records, and its rules are read from them.
 
-**Gap.**
-- The role and its standing orders are still draft ("agent testimony until ratified"), although the charter was ratified.
-- The charter decision is in neither decision log.
-- The articles' prose and the role's data fields state the same numbers twice; nothing checks they agree.
-- The report issue (#31) is a programme setting, so every group reports to the same issue.
+**Status**: partial
+
+**Practice**:
+- **WG Third-party ready** (semanticops.com#31, `wg:third-party-ready`): in force. Charter decision `00567bf1`, group role `834b61fd` (the Owner role `delegates` to it), decision log `88c32389`. Charter fields on the role: quorum of 2 with the reviewer required, budget 10 delegated merges per cycle, cycle close 11:30 UTC, pause after 2 unacknowledged reports.
+- **WG Agent-supported editor** (semanticops.com#29, `wg:agent-editor`): chartered by `clerk charter`, charter decision `384a704a`, role `1fc9ce85`, log `e509eb61`.
+- **Central group** (SemanticOps, the Owner role) holds all work with no `wg:` label.
+
+**Chartering, step by step.**
+
+1. An orchestrator session runs `clerk charter --repo <programme> --title "WG ..." --epic <repo#n> --label wg:... --repos a,b --budget N --cycle-close HH:MM --quorum-seats builder,reviewer --required-seat reviewer --prefix <p> --dry-run`, reads the plan, then runs it for real. Duplicates and malformed options are refused before anything is written.
+2. It creates, as drafts and proposals: the group's log and container, the group role with its charter fields, four standing-order articles, one member agent per seat, a boundary with a compass copied from the first group, and the charter decision, listed in both the group log and the SemanticOps log.
+3. The orchestrator validates, commits on a branch and opens a PR.
+4. An owner session ratifies the charter decision and asserts `delegates` from the Owner role to the group role.
+5. Then, by hand: the `wg:` label in each governed repo, the cloud routines and their standing-job records.
+
+**Gap**:
+- WG Agent-supported editor has no `delegates` edge yet, so it is not in force.
+- The articles' prose and the role's fields state the same numbers twice; nothing checks they agree.
+- Every group reports to the same issue (#31), a programme setting.
 - The analyst was added before its decision `b447e8ea` was ratified.
 - The compass is all Suggestions.
-- #33 (the unattended lane) is not chartered.
 
-**Open questions.**
-- How is a group dissolved? (Chartering is `clerk charter`; dissolving has no command or rule yet.)
-- Which relation links an epic to its group? None fits (`delegates` is owner to group, `serves` is epic to objective); `clerk charter` names the epic in the role text. A relation type is a spec question, not invented here.
+**Open questions**:
+- How is a group dissolved? There is no command or rule yet.
+- Which relation links an epic to its group? None fits; `clerk charter` names the epic in the role text.
 - Does a group's boundary map to a domain?
 
-**Test:** test/process.test.mjs — stage 10 (passing (3), charter read from records; pending: epic-group relation) and test/charter.test.mjs (the planner)
+**Test**: Stage 10: 3 passing; pending: epic-group relation. Also test/charter.test.mjs.
 
-## 11. Assignment and claim
 
-**Theory.** Before work starts, check that no branch or PR exists, then claim the issue (assignee, In progress, and a comment naming the branch). A dead claim is recovered.
+#### Assignment and claim
 
-**Practice.** *Implemented.*
-- `clerk claim <repo#n> --as <seat>` is the one claim path (humans, local sessions, routines): refuses unless the issue is open, free of branch/PR/assignee, answers an affirmed problem, falls under a group, and the actor holds the seat. Then assigns, sets `status: in progress`, comments. The routine briefs call it. Jurisdiction: an issue with a chartered group's label stays with that group; an issue with no `wg:` label falls to the central group (SemanticOps, the Owner role), whose seats are the owner's builder/reviewer and the agents authorised-by that role with an actor id and seat. The central group never claims a delegated group's work, and a joined group's local practice applies (owner ruling 2026-10-11).
-- `stale-claims` recovers dead claims.
-- `clerk queue` is read-only.
+**Theory**: Before work starts, check that no branch or PR exists, then claim the issue (assignee, In progress, and a comment naming the branch). A dead claim is recovered.
 
-**Gap.** The epic-owned-by-a-group check waits for an epic-group relation (the group label is the binding). The owner holds builder and reviewer seats by convention until humans have seat records.
+**Status**: working
 
-### Claiming work in a local session
-A local Claude Code session acts as a working-group member under the same rules as a routine (owner decision f799b6bc). Before starting an issue: `SRS_ACTOR='{"kind":"human","id":"human:the-greenman"}' clerk claim <repo#n> --as builder --branch <n-slug> --repo <programme>` (add `--dry-run` to see the checks first). Start only if it exits 0.
+**Practice**:
+- `clerk claim <repo#n> --as <seat> [--branch <name>]` is the one claim path. It refuses unless the issue is open and free, answers an affirmed problem and falls under a group, and the actor holds the seat. Exit 2 with the reasons if refused.
+- **Jurisdiction:** an issue with a chartered group's label stays with that group. An issue with no `wg:` label falls to the central group, whose seats are the owner's builder and reviewer and the agents `authorised-by` the Owner role. The central group never claims a delegated group's work.
+- **Local sessions** act as members under the same rules (decision f799b6bc): `SRS_ACTOR='{"kind":"human","id":"human:the-greenman"}' clerk claim <repo#n> --as builder --branch <n-slug> --repo <programme>`. Start only if it exits 0.
+- `clerk board stale-claims` returns claims idle for 3 hours to Ready. `clerk queue` is read-only.
 
-**Test:** test/process.test.mjs — stage 11 (passing (2))
+**Gap**:
+- The epic-owned-by-the-group check waits for an epic-group relation; the label is the binding.
+- The owner holds builder and reviewer seats by convention until humans have seat records.
 
-## 12. Execution
+**Test**: Stage 11: 5 passing, including the central group.
 
-**Theory.** One issue per session, in a fresh worktree, with gates judged by exit code. The ship stages run: plan, design pause, review, docs, dogfood.
 
-**Practice.** *Working.* `routines/wg-builder.md`, `routines/unattended-worker.md`, worktrees via `scripts/wt`.
+#### Execution
 
-**Gap.** none recorded
+**Theory**: One issue per session, in a fresh worktree, with gates judged by exit code. The ship stages run: plan, design pause, review, docs, dogfood.
 
-**Open questions.** none recorded
+**Status**: working
 
-**Test:** test/process.test.mjs — stage 12 (pending: no pure function to assert (briefs and scripts/wt only))
+**Practice**:
+- Briefs: `routines/wg-builder.md`, `routines/unattended-worker.md`. Both call `clerk claim` first; the unattended worker acts as `agent:unattended-worker`.
+- Worktrees only through `scripts/wt new <repo> <issue#-slug>`.
 
-## 13. Review and merge
+**Test**: Stage 12: pending (no pure function to assert; briefs and scripts/wt only).
 
-**Theory.** A group PR merges when its quorum is met: a builder and a different reviewer agree, and the gates are green, within the cycle's budget and while the group is not paused. Anything beyond the mandate escalates.
 
-**Practice.** *Working.*
-- The reviewer posts the `<!-- wg-quorum -->` comment (`routines/wg-reviewer.md`).
-- `pr-upkeep.sh` `wg_verdict` checks the quorum and merges `gate:auto-merge` PRs.
+#### Review and merge
 
-**Gap.** `wg-reviewer.md` moves a decision to `ratified` directly, which breaks principle 6.
+**Theory**: A group PR merges when its quorum is met: a builder and a different reviewer agree, and the gates are green, within the cycle's budget and while the group is not paused. Anything beyond the mandate escalates.
 
-**Open questions.** Does the reviewer's quorum make a *group session*, so that ratification happens there?
+**Status**: working
 
-**Test:** test/process.test.mjs — stage 13 (passing (5), pr-upkeep and the queue read the group's charter; pending: reviewer quorum as a group session)
+**Practice**:
+- The reviewer posts the `<!-- wg-quorum -->` comment and adds `gate:auto-merge` (`routines/wg-reviewer.md`). It assents to a builder's decision and never ratifies it; the group's session at cycle close does (decision 70a05a5c).
+- `pr-upkeep` checks the quorum every 15 minutes and merges.
+- PRs outside any group follow their gate label: `gate:auto-merge` or `gate:owner-merge`.
 
-## 14. Report, session and ratification
+**Gap**:
+- Every agent posts as the owner's GitHub account, so builder and reviewer identities are stated by the routines, not proven by GitHub.
 
-**Theory.** There are three kinds of minute:
-- **Report:** received by the parent's session. It forecasts the next work and whether the queue is fed.
-- **Exercise:** an open discussion with no decision. It is never ratified and feeds proposals.
-- **Decision:** ratified in exactly one session.
+**Test**: Stage 13: 5 passing. The todo about the reviewer ratifying is out of date (decision 70a05a5c settled it) and should be replaced.
 
-A session has attendees, a time, and an agenda in this order: decisions since the last session, reports, exercises, decisions for this session, merges. A comment between sessions is discussion, not a session.
 
-**What a session records as a decision.** A decision is one standing choice that governs later choices. Before recording one, ask four things: would a later choice be settled by pointing at it (reuse), is it one thing with no "and" (one thing), does it read true with every date, issue number and id removed (timeless), and can someone apply it to a new case and say whether the case conforms, with a stated condition for review (testable). If not, record a task (an issue), an application or a plan, linked to the decision it serves. Kinds, frames and the owner's rulings D1 to D5: [decision-log.md](decision-log.md). The recorder warns on these and never blocks (decision e337703b).
+#### Report, session and ratification
 
-**Practice.** *Working, with a bug.*
-- The steward writes a `stewardship/run-report` record and the #31 comment (`routines/wg-steward.md`).
-- `clerk` (TUI) and `clerk session` write a `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives` relations.
-- Details: README "Sessions", `.claude/commands/session.md`.
+**Theory**: There are three kinds of minute: a **report**, received by the parent's session; an **exercise**, an open discussion that feeds proposals and is never ratified; and a **decision**, ratified in exactly one session. A session has attendees, a time, and an agenda: decisions since the last session, reports, exercises, decisions for this session, merges.
 
-**Gap.**
-- `lib/adapters/session.mjs` `endSession` returns early when a session takes up an exercise. The session record is written, but `considers`, comments and proposals are not, and there is no validate or PR.
-- There are 0 exercise records so far.
+**Status**: partial
+
+**Practice**:
+- The group steward writes a `stewardship/run-report` record and the cycle report on #31 (`routines/wg-steward.md`), and ratifies the group's proposed decisions in one group session.
+- `clerk` (terminal UI) and `clerk session` write one `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives`, then open a signed PR with auto-merge enabled. `clerk comment` does the same for a comment between sessions.
+- The recorder warns, never blocks, when a decision fails the framing tests; the kind goes in `decision_kind`.
+- Detail: README "Sessions", `.claude/commands/session.md`, [decision-log.md](decision-log.md).
+
+**Gap**:
+- `endSession` returns from the whole function when a session takes up an exercise: that exercise's `considers`, comments and proposals, every later choice, and the validate, commit and PR are all skipped. The session record is left uncommitted in its worktree.
+- There are no exercise records yet.
 - The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link.
+- Session acts are stamped with the end-of-session time, not when they happened (clerk#43).
 
-**Open questions.**
+**Open questions**:
 - Should the pause rule read `receives` instead of the thumbs-up?
-- Should a group-level session's quorum also be recorded on the session itself?
+- Should a group session's quorum also be recorded on the session itself?
 
-**Test:** test/process.test.mjs — stage 14 (passing (5), quorum from the group's charter; pending: endSession exercise bug; pause rule reads receives)
+**Test**: Stage 14: 5 passing; pending: the endSession exercise bug; pause rule reads `receives`.
 
-## 15. Measurement and retrospective
 
-**Theory.** The process must show whether it has value. Each cycle records a few indicators. Each report reads them and asks whether they still mean anything. Each period closes with a retrospective that keeps, changes or drops practices, and that decision goes in the log.
+#### Measurement and retrospective
 
-Home (ruling D8, 2026-10-11, proposed): I1-I4 are `argument/indicator` records, and each cycle writes an `argument/measurement-result` per indicator that the report links. A clerk script computes I1 and shares `canon()` with the principle 2 gate. The baseline is I1 computed retroactively for the cycle before the walk (about 0%), compared with the next two cycles. I2-I4 get results once their computations exist.
+**Theory**: The process must show whether it has value. Each cycle records a few indicators; each report reads them and asks whether they still mean anything; each period closes with a retrospective that keeps, changes or drops practices. Every governing decision names an indicator (decision f6175b4a).
 
-**Practice.** *Theory only.*
-- What exists:
-  - `run-report.figures`, one line of free text.
-  - The steward report's "What we learned" section.
-  - `revisit_when` on decisions, roles and articles. It is displayed but never checked.
-  - Remedy falsifiers, never tested.
-- I1 is computed by `clerk ground --since <date>` (clerk#22): share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. It is printed or sent to a job summary only (daily workflow `programme-ground.yml`); no `measurement-result` record is written yet.
-- Planned: the indicator and result records, I2-I4 (`plans/two-domains-end-to-end.md`, section 6; clerk#25).
+**Status**: partial
+
+**Practice**:
+- **I1** is computed by `clerk ground --since <date>` and the daily `programme-ground.yml` job summary: the share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. No result record is written yet.
 - `argument/indicator` and `argument/measurement-result` are installed but have no records.
+- `revisit_when` on decisions and roles is displayed but never checked; remedy falsifiers are never tested.
 
-**Initial indicators (proposed, not yet ratified).** These are deliberately few, one per question we want answered.
+| # | Question | Indicator |
+|---|---|---|
+| I1 | Is work grounded? | Share of merged PRs whose issue answers an affirmed problem with an affirmed persona-in-domain and domain |
+| I2 | Does work flow? | Delegated merges against budget, and ready count at cycle close against target |
+| I3 | Does governance keep up? | Median days from proposed to ratified; reports awaiting acknowledgement |
+| I4 | Does done mean done? | Reopened issues, false closes and reverted PRs |
 
-| # | Question | Indicator | Source |
-|---|---|---|---|
-| I1 | Is work grounded? | Share of PRs merged this cycle whose issue answers an affirmed problem that has an affirmed persona-in-domain and domain | merged PRs → `Answers:` → problem → `held-by` persona-in-domain → `in-domain` → domain (via `canon()`) |
-| I2 | Does work flow? | Delegated merges against budget, plus ready count at cycle close against budget (queue fed) | `pr-upkeep`, `clerk queue` |
-| I3 | Does governance keep up? | Days from `proposed` to `ratified`, median across the cycle; reports awaiting acknowledgement | decision lifecycle, sessions `receives` |
-| I4 | Does done mean done? | Reopened issues, false closes and reverted PRs this cycle | `steward-check` |
+Each report records the indicators with one line each: useful, noisy or misleading. At period close a retrospective decision keeps, changes or drops each one.
 
-**Evaluation loop.**
-- **Each report:** the steward records the indicators and adds one line on each: "useful / noisy / misleading".
-- **When `revisit_when` falls due:** the steward lists the due review clauses and remedy falsifiers on the agenda.
-- **At period close:** a retrospective decision records, for each indicator and practice, whether to keep, change or drop it.
+**Gap**:
+- I2 to I4 have no computation, and no indicator writes a result record (clerk#25).
 
-**Open questions.**
+**Open questions**:
 - Who rules on the retrospective: the owner's session, every time?
 
-**Test:** test/process.test.mjs — stage 15 (I1 passing; pending: I2-I4, revisit_when, falsifier and retrospective loop (only routine drift is checked))
+**Test**: Stage 15: 2 passing (routine drift, I1); pending: I2 to I4, revisit_when, the retrospective loop.
 
----
 
-## Known contradictions to fix
+### Reference
 
-Each will be fixed under its own issue. The list is from the 2026-10-11 survey.
+Principles, the SRS elements the process depends on, and where everything else is written down.
 
-1. NEEDS A DECISION. `wg-reviewer.md:22` ratifies outside a session (stage 13); left as is, the choice is the owner's (options in clerk#26).
-2. FIXED. `roles.mjs` has a `tpr-analyst` role, the README role list names it, and the `working-groups.md` diagram and text show four members. The adding decision `b447e8ea` is still `proposed`; the analyst is not in `GROUP_MEMBERS`, so it does not count toward quorum.
-3. FIXED. `wg-analyst.md` runs the srs-programme `board-sync.yml`.
-4. FIXED. `docs/tools.md` now says the scripts all read settings; only the WG ready count in `bin/clerk.mjs` names the four WG repos.
-5. FIXED. `gh-project.mjs` comments name a generic bug-fix routine and say none has a brief yet.
-6. FIXED. `queue.mjs` output now says up to 3 issues per run, a wg build counting among them, as `unattended-worker.md` does.
-7. FIXED. `working-groups.md` says the charter records are in srs-programme.
-8. FIXED. The `figures` field guidance in `packages/stewardship` no longer cites the missing script. srs-programme's installed copy updates at its next package upgrade.
-9. FIXED. `docs/tools.md` lists domain, persona, cluster, pole and agent for the method package.
-10. FIXED. The README key tables match the prompts in `bin/clerk.mjs`, plus a section-menu row.
-11. OTHER REPO. srs-programme `CLAUDE.md` still says consumers read Affirmed only; the change is in clerk#26.
-12. FIXED. No clerk doc says the cycle is weekly; the concept document is a dated source in srs-programme and is not edited.
 
-## Where things are documented
+#### Principles
+
+The owner's standing rulings. Every stage must respect them.
+
+1. **Theory and practice together.** There is always a working system, and the theory is kept beside it. We build when a trigger fires, not ahead of need. Rulings grow into principles.
+2. **A problem lives in a domain and for a persona.** Without knowing who it is for and when it occurs, it cannot be prioritised and no remedy can be found.
+3. **Measure a little, then evaluate as we report.** Start with a few indicators. Each report says whether they still tell us anything.
+4. **Authority comes from the role, not the kind of mind.** The same rules and tools apply to humans and AI agents.
+5. **Agents suggest; the human layer wins.** Agents write to Suggestions. A human forks a record into Affirmed. Set aside is a reversible no.
+6. **A decision is ratified in exactly one session, at its own level and with that level's quorum.** Before that it may pass through many sessions as a proposal.
+7. **Rules hold at their boundary.** A rule is valid inside the boundary that made it.
+8. **Outputs are projections.** Any task is understood within the whole picture. A document, a roadmap or an issue is one projection of the records, never a second source (decision f5b4656a). This handbook is one.
+9. **Dogfood everything.** We run the programme on our own tools, and log every bug and missing feature we hit as an issue.
+
+
+#### The SRS elements behind the process
+
+What the clerk reads and writes in srs-programme. When a stage changes, these are the records to check. Namespaces: `method` is `com.semanticops.method` (clerk `packages/method`), `programme` is `com.semanticops.programme`, `governance` is `com.mudemocracy.governance`, `stewardship` is `com.mudemocracy.stewardship`.
+
+
+#### Layer containers
+
+**Kind**: container
+
+**Defined in**: srs-programme
+
+**Meaning**: Affirmed, Suggestions and Set aside. Which one a record sits in is its standing: affirmed records carry weight, suggestions do not.
+
+**Read by**: `check-method` (`checkGates`), `roadmap`, `ground`, `claim`
+
+
+#### Domain container
+
+**Kind**: container
+
+**Defined in**: srs-programme (containerType method/domain)
+
+**Meaning**: One per domain; identity is the domain record; outline holds clusters at depth 0 and problems at depth 1.
+
+**Read by**: `ground` (through `contains` today), srs-web Method editor
+
+
+#### method/domain
+
+**Kind**: type
+
+**Defined in**: method
+
+**Meaning**: Where and when a problem occurs: purpose, in scope, out of scope.
+
+**Read by**: `ground`; planned: `check-method` gate (clerk#35)
+
+
+#### method/persona and method/persona-in-domain
+
+**Kind**: type
+
+**Defined in**: method
+
+**Meaning**: Who a problem is for. The persona-in-domain refines a shared persona for one domain.
+
+**Read by**: `roadmap --explain`, `ground`
+
+
+#### method/problem
+
+**Kind**: type
+
+**Defined in**: method
+
+**Meaning**: A claim that something is wrong for a persona in a domain; carries `problem_id` SP-nn.
+
+**Read by**: `roadmap`, `claim`, `ground`, `steward`, `check-method`
+
+
+#### method/cluster
+
+**Kind**: type
+
+**Defined in**: method
+
+**Meaning**: Named meaning grouping problems; objectives address clusters.
+
+**Read by**: `roadmap`, srs-web board
+
+
+#### method/remedy
+
+**Kind**: type
+
+**Defined in**: method
+
+**Meaning**: A move that answers problems; carries falsifier and return_when.
+
+**Read by**: `check-method`, `roadmap`
+
+
+#### programme/period and programme/objective
+
+**Kind**: type
+
+**Defined in**: programme
+
+**Meaning**: The period ranks objectives (`objective_rank`); the rank derives priority.
+
+**Read by**: `roadmap`
+
+
+#### programme/epic
+
+**Kind**: type
+
+**Defined in**: programme
+
+**Meaning**: Tracked work, with `issue_ref` to its GitHub issue.
+
+**Read by**: `roadmap --apply`, `ground`
+
+
+#### programme/programme
+
+**Kind**: type
+
+**Defined in**: programme (clerk packages/programme)
+
+**Meaning**: The settings record: owner, governed repos, report and digest issues, board project, story repo.
+
+**Read by**: every clerk command (`clerk settings`)
+
+
+#### governance/decision and governance/decision_log
+
+**Kind**: type
+
+**Defined in**: governance
+
+**Meaning**: Decisions with lifecycle proposed, ratified or abandoned, and an optional `decision_kind`; logs are containers per level.
+
+**Read by**: `clerk session`, the agenda, `wg-steward`
+
+
+#### governance/role
+
+**Kind**: type
+
+**Defined in**: governance
+
+**Meaning**: Owner and group roles; a group role carries the charter fields (`group_label`, `quorum_*`, `budget_per_cycle`, `cycle_close_utc`, `max_unacked_reports`, `governed_repos`).
+
+**Read by**: `clerk groups`, `claim`, `queue`, `pr-upkeep`, `session`
+
+
+#### programme/session
+
+**Kind**: type
+
+**Defined in**: programme
+
+**Meaning**: One per session, with attendees and what it ratified, set aside, considered and received.
+
+**Read by**: `clerk session`, the agenda
+
+
+#### stewardship/agent and method/agent
+
+**Kind**: type
+
+**Defined in**: stewardship, method
+
+**Meaning**: A seat-holding member (`actor_id`, `seat`) derived from a stance agent, which instantiates an archetype.
+
+**Read by**: `clerk groups`, `claim`, `session`
+
+
+#### stewardship/standing-job
+
+**Kind**: type
+
+**Defined in**: stewardship
+
+**Meaning**: A routine's record: `trigger`, `routine_id`, `brief_path`, done_when.
+
+**Read by**: `clerk routines --check`
+
+
+#### stewardship/run-report
+
+**Kind**: type
+
+**Defined in**: stewardship
+
+**Meaning**: One run's minute: chose, rationale, figures, landed_as.
+
+**Read by**: the agenda (Reports), `pr-upkeep` pause rule (with the #31 thumbs-up)
+
+
+#### held-by, in-domain, answers, implements, serves, addresses
+
+**Kind**: relation
+
+**Defined in**: method, programme
+
+**Meaning**: The chain: problem held-by persona-in-domain, in-domain domain; remedy answers problem; epic implements remedy and serves objective; objective addresses cluster.
+
+**Read by**: `roadmap`, `ground`, `check-method`
+
+
+#### delegates, authorised-by
+
+**Kind**: relation
+
+**Defined in**: governance, stewardship
+
+**Meaning**: Owner role delegates to a group role; agents and standing jobs are authorised-by a role.
+
+**Read by**: `clerk groups`, `claim`
+
+
+#### ratifies, sets-aside, considers, receives, attended-by
+
+**Kind**: relation
+
+**Defined in**: programme
+
+**Meaning**: What a session did, one edge per act.
+
+**Read by**: `clerk session`, the agenda, I3 (planned)
+
+
+#### derived-from
+
+**Kind**: relation
+
+**Defined in**: core
+
+**Meaning**: Affirmed fork to its suggestion; resolved by `canon()`.
+
+**Read by**: every reader of affirmed records
+
+
+#### Board labels
+
+**Kind**: label
+
+**Defined in**: GitHub (clerk `gh-project.mjs`)
+
+**Meaning**: `ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `wg:*`, `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.
+
+**Read by**: `board sync`, `queue`, `claim`, `pr-upkeep`, every routine
+
+
+#### How we know
+
+`test/process.test.mjs` runs one full programme cycle as a fixture (domain, persona, problem, remedy, objective, epic, issue, PR, report, session), with one test group per stage. It is the progress bar: a stage moves from theory to practice when its `test.todo` becomes a passing test. A Practice claim that the test contradicts is a bug in this handbook or in the code, fixed under its own issue.
+
+On 2026-10-11 it ran 60 tests: 36 passing, 24 todo, none failing.
+
+
+#### Where things are documented
 
 | Topic | Doc |
 |---|---|
-| Method chain, sessions, minutes | `README.md` |
-| Board, priority rollup, queue | `docs/board.md` |
-| Every command and script | `docs/tools.md` |
-| What goes in the decision log | `docs/decision-log.md` |
-| Routine lifecycle | `docs/routines.md` |
-| Working groups | `routines/working-groups.md` and `routines/wg-*.md` |
-| Unattended lane | `routines/unattended-worker.md` |
+| Method chain, sessions, minutes | [README.md](../README.md) |
+| Board, priority rollup, queue | [board.md](board.md) |
+| Every command, script, workflow, routine and label | [tools.md](tools.md) |
+| What goes in the decision log | [decision-log.md](decision-log.md) |
+| Routine lifecycle | [routines.md](routines.md) |
+| Working groups | [routines/working-groups.md](../routines/working-groups.md) and `routines/wg-*.md` |
+| Unattended lane | [routines/unattended-worker.md](../routines/unattended-worker.md) |
+| Handbook watcher | [routines/handbook-watcher.md](../routines/handbook-watcher.md) |
+| Two-domain walk | [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md) |
 | Clerked owner session | `.claude/commands/session.md` |
 | Programme data rules | srs-programme `CLAUDE.md` |
 | Concept and boundary mapping | srs-programme `source-documents/agent-democracy-2026-10-10/`, `boundaries-2026-10-09/` |
+
+
+#### How this handbook is made
+
+The handbook is an SRS repository in `handbook/`, with its own package `com.semanticops.handbook`: a `chapter` (title, body), a `stage` (theory, status, practice, gaps, open questions, test) and an `element` (kind, home, meaning, read by). The root container's outline is the order of the document. The composition `handbook` renders it.
+
+```mermaid
+flowchart LR
+  R["handbook/ records<br/>(source of truth)"] -->|"srs render composition"| M["docs/handbook.md<br/>(projection)"]
+  W["Weekly handbook watcher"] -->|"srs record update,<br/>container members add/move"| R
+  M -->|"render-handbook.mjs --check<br/>fails on drift"| CI[CI]
+```
+
+- **Edit the records, never the markdown.** Use the srs CLI: `srs record update`, `srs container members add|move|remove`, then `node scripts/render-handbook.mjs` and commit both.
+- **Check:** `node scripts/render-handbook.mjs --check` exits 1 if `docs/handbook.md` differs from the records.
+- **Why it is built this way:** it answers SP-67 (the handbook says things that are no longer true) and SP-68 (no one place tells how work is driven), both suggested in the Programme coordination domain, and SP-65 (the same rule restated in many places drifts apart).
+- **Keep it current:** the weekly handbook watcher (`routines/handbook-watcher.md`) does this as a routine. Anyone may do it in a session.

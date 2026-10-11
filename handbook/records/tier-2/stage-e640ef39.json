@@ -1,0 +1,30 @@
+{
+  "instanceId": "e640ef39-dfa8-46a3-abf6-44424b392780",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Epic",
+    "theory": "An epic is tracked work that implements remedies, answers problems and serves an objective. An epic becomes a working group only when chartered, on a trigger: a steady ready queue that needs delegated merges.",
+    "status": "partial",
+    "practice": "- Type `programme/epic` (issue_ref), linked by `implements`, `answers` and `serves`.\n- 12 epic records: 6 serve a ranked objective, 6 are parked.\n- Only Third-party ready (`8cbb562f`, semanticops.com#31) carries the whole chain from persona to epic.",
+    "gaps": [
+      "Most epics have no remedy or problem link.",
+      "Epic `answers` and `implements` edges point at suggestion-layer problems, not their affirmed forks.",
+      "`6c5cbdde` (muDemocracy.org#159) nearly duplicates `8cbb562f`."
+    ],
+    "open_questions": [
+      "Must an epic implement a remedy before it can serve an objective?"
+    ],
+    "test": "Stage 7: 2 passing; pending: epic is a working group; remedy before serving an objective."
+  },
+  "createdAt": "2026-10-11T18:33:29.229274139+00:00",
+  "updatedAt": "2026-10-11T18:33:29.229279809+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

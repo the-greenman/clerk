@@ -1,0 +1,28 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/composition.json",
+  "id": "4194e973-1473-46e3-900c-cab604a3d582",
+  "namespace": "com.semanticops.handbook",
+  "name": "handbook",
+  "version": 1,
+  "description": "The handbook as one document: the root container's outline, in order.",
+  "sections": [
+    {
+      "sectionId": "handbook",
+      "order": 0,
+      "source": {
+        "type": "container-subset"
+      },
+      "typeDispatch": {
+        "com.semanticops.handbook/chapter": "1db1fffa-388b-4f48-bfa1-b308cac468ba",
+        "com.semanticops.handbook/element": "7a3fc701-97b3-44ce-8ce7-11d8689170ac",
+        "com.semanticops.handbook/stage": "c8c023aa-08ce-4ce0-8836-0873595abaea"
+      },
+      "titleFieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
+      "ordering": {
+        "source": "arranged"
+      },
+      "emptyBehavior": "hide"
+    }
+  ],
+  "createdAt": "2026-10-11T00:00:00Z"
+}

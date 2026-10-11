@@ -1,0 +1,22 @@
+{
+  "instanceId": "68a3e5b2-271e-42a5-ae2f-1d6b2e575e6a",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "method/remedy",
+    "kind": "type",
+    "home": "method",
+    "meaning": "A move that answers problems; carries falsifier and return_when.",
+    "read_by": "`check-method`, `roadmap`"
+  },
+  "createdAt": "2026-10-11T18:33:31.395788761+00:00",
+  "updatedAt": "2026-10-11T18:33:31.395801185+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

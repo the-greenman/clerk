@@ -1,0 +1,20 @@
+{
+  "id": "cb37bd04-e9aa-4504-bc41-d8374ca3a52a",
+  "namespace": "com.semanticops.handbook",
+  "name": "status",
+  "version": 1,
+  "description": "How far practice matches theory.",
+  "aiGuidance": {
+    "purpose": "One word on whether the stage works today."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "valueDomain": "closed",
+    "allowedValues": [
+      "working",
+      "partial",
+      "theory only"
+    ]
+  },
+  "createdAt": "2026-10-11T18:33:26.537356389+00:00"
+}

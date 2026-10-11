@@ -1,0 +1,40 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/package-manifest.json",
+  "id": "67eb9ae0-b898-4949-a2ed-ccbcd3bc4369",
+  "namespace": "com.semanticops.handbook",
+  "name": "primary",
+  "version": "1.0.0",
+  "title": "primary",
+  "description": "",
+  "status": "active",
+  "createdAt": "2026-01-01T00:00:00Z",
+  "fields": [
+    "fields/title-9f37ca46.json",
+    "fields/body-7d919e27.json",
+    "fields/theory-20082e9d.json",
+    "fields/practice-9fe6cc2f.json",
+    "fields/status-cb37bd04.json",
+    "fields/gaps-8901b97c.json",
+    "fields/openquestions-8269c1fc.json",
+    "fields/test-dab59ebd.json",
+    "fields/kind-bb1d6bca.json",
+    "fields/home-2eacf27f.json",
+    "fields/meaning-21641147.json",
+    "fields/readby-1cf6f901.json"
+  ],
+  "types": [
+    "types/chapter-1b1c9741.json",
+    "types/stage-700789ba.json",
+    "types/element-ad49acae.json"
+  ],
+  "relationTypes": [],
+  "views": [
+    "views/chapter-view-1db1fffa.json",
+    "views/stage-view-c8c023aa.json",
+    "views/element-view-7a3fc701.json"
+  ],
+  "compositions": [
+    "compositions/handbook-4194e973.json"
+  ],
+  "blueprints": []
+}

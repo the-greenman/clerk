@@ -1,0 +1,19 @@
+{
+  "instanceId": "8367bca7-6f1f-4cc7-8dc3-467039927c85",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "How work is driven",
+    "body": "This part tells the whole story in order. \"Stage by stage\" then takes each stage of the chain in turn, with what works today and what does not. \"Reference\" holds the principles, the SRS elements the process depends on, and where everything is written down.\n\nThis handbook is itself an SRS repository (`handbook/` in the clerk). `docs/handbook.md` is rendered from it and is never edited by hand. See \"How this handbook is made\" at the end."
+  },
+  "createdAt": "2026-10-11T18:33:27.575664800+00:00",
+  "updatedAt": "2026-10-11T18:33:27.575670601+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

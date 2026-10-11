@@ -1,0 +1,16 @@
+{
+  "id": "8269c1fc-667a-46d6-ba80-54173ad5fd4b",
+  "namespace": "com.semanticops.handbook",
+  "name": "open_questions",
+  "version": 1,
+  "description": "What we do not know yet.",
+  "aiGuidance": {
+    "purpose": "Each question is answered by a decision in the decision log, never by editing the text alone."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "list",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-11T18:33:26.670839751+00:00"
+}

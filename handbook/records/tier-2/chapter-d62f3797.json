@@ -1,0 +1,19 @@
+{
+  "instanceId": "d62f3797-6060-49fb-a862-89ca7ba3f4b8",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "Routines review, report and allocate",
+    "body": "A **routine** is a cloud agent that runs a brief on a trigger. A **workflow** is a GitHub Action that runs clerk code with no AI. Together they keep the programme moving between sessions.\n\n```mermaid\nflowchart LR\n  subgraph Allocate\n    BS[\"board-sync<br/>hourly\"]\n    RD[\"roadmap --apply<br/>daily 06:15, on push\"]\n    AN[\"analyst<br/>daily 12:00, if queue dry\"]\n  end\n  subgraph Build\n    BU[\"wg-builder<br/>on ready / on merge\"]\n    UW[\"unattended worker<br/>nightly 00:00\"]\n  end\n  subgraph Review\n    RV[\"wg-reviewer<br/>on PR events\"]\n    UP[\"pr-upkeep<br/>every 15 min\"]\n    SC[\"steward --fix<br/>daily 06:15\"]\n    GD[\"ground (I1)<br/>daily\"]\n  end\n  subgraph Report\n    WS[\"wg-steward<br/>daily 11:30 cycle close\"]\n    DG[\"digest<br/>daily 07:20\"]\n    HW[\"handbook watcher<br/>weekly\"]\n  end\n  RD --> BS --> BU\n  AN -->|files ready issues| BS\n  BU --> RV --> UP\n  UW --> UP\n  UP --> WS\n  SC --> WS\n  GD --> WS\n  WS -->|report on semanticops.com#31| OS([Owner session])\n  DG -->|semanticops.com#33| OS\n  HW -->|handbook PR| OS\n```\n\n| Job | Runs | Kind | What it does |\n|---|---|---|---|\n| Allocate | `board-sync` hourly | workflow | rollup, topup, promote, stale claims, reconcile |\n| Allocate | `roadmap --apply` daily and on push | workflow | epic Priority from the period ranking, `parked` label |\n| Allocate | analyst, daily 12:00 | routine | only when the last report says \"Queue running dry\": files ruling-backed issues as ready |\n| Build | wg-builder, on events | routine | one group issue per run, claimed with `clerk claim` |\n| Build | unattended worker, nightly | routine | up to 3 `lane:unattended` issues, as the central group's builder |\n| Review | wg-reviewer, on PR events | routine | gates, mandate check, quorum comment; never reviews its own work |\n| Review | pr-upkeep, every 15 min | workflow | merges PRs whose gate label and quorum allow it; daily digest |\n| Review | steward check, daily | workflow | reopens false closes; comments on issues with no `Answers:` line |\n| Review | ground, daily | workflow | I1: share of merged PRs grounded to an affirmed problem |\n| Report | wg-steward, daily 11:30 | routine | closes the cycle: run report record, ratifies the group's decisions in one group session, report on #31 |\n| Report | handbook watcher, weekly | routine | re-reads code, data and boards; updates the handbook records; renders; opens a PR |\n\n**Rules for every routine.**\n\n- **Thin prompt.** The trigger only points at its brief in `routines/`. Rules live in the brief, so a change is a pull request.\n- **Record first.** Each routine has a standing-job record in srs-programme (`routine_id`, `brief_path`) and an agent record with its `SRS_ACTOR`. `clerk routines --check` reports drift between records, triggers and briefs.\n- **Never run a brief that is not on the clerk default branch.**\n- **Stop honestly.** A run that hits a human gate comments the exact question, adds `needs-input`, and stops.\n- **Report what you learned.** Every report ends with a short \"What we learned\": which part of the theory held, which did not.\n\nLifecycle and drift check: [routines.md](routines.md). Every routine and workflow: [tools.md](tools.md)."
+  },
+  "createdAt": "2026-10-11T18:33:28.280263234+00:00",
+  "updatedAt": "2026-10-11T18:33:28.280273557+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

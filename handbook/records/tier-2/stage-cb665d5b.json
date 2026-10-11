@@ -1,0 +1,29 @@
+{
+  "instanceId": "cb665d5b-b412-4293-9830-8952412ae3d0",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Work item",
+    "theory": "An issue names the problem it answers (`Answers: SP-nn`, or \"No affirmed problem yet: ...\"), sits under a story or epic from the moment it is filed, and is small enough for one session.",
+    "status": "partial",
+    "practice": "- GitHub issues on the governed repos; stories carry MoSCoW.\n- `clerk steward` comments on an issue with no `Answers:` line, and reopens false closes.\n- `clerk claim` refuses an issue whose `Answers:` is not an affirmed problem.\n- `clerk ground` walks a merged PR to its issue, problem, persona and domain, epic and group, and reports the level reached.\n- The analyst files issues in the group's issue shape (`routines/wg-analyst.md`). Board model: [board.md](board.md).",
+    "gaps": [
+      "The link to the problem is a line of text, not a record."
+    ],
+    "open_questions": [
+      "Should the problem link become a record or relation? What would it be?",
+      "Can a work item answer a problem directly, without an epic?"
+    ],
+    "test": "Stage 8: 1 passing; pending: problem link as a record."
+  },
+  "createdAt": "2026-10-11T18:33:29.346979062+00:00",
+  "updatedAt": "2026-10-11T18:33:29.346986710+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

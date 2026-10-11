@@ -1,0 +1,26 @@
+{
+  "instanceId": "fca0a5cf-0eeb-4fcc-949f-ed3b39bbf64a",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Assignment and claim",
+    "theory": "Before work starts, check that no branch or PR exists, then claim the issue (assignee, In progress, and a comment naming the branch). A dead claim is recovered.",
+    "status": "working",
+    "practice": "- `clerk claim <repo#n> --as <seat> [--branch <name>]` is the one claim path. It refuses unless the issue is open and free, answers an affirmed problem and falls under a group, and the actor holds the seat. Exit 2 with the reasons if refused.\n- **Jurisdiction:** an issue with a chartered group's label stays with that group. An issue with no `wg:` label falls to the central group, whose seats are the owner's builder and reviewer and the agents `authorised-by` the Owner role. The central group never claims a delegated group's work.\n- **Local sessions** act as members under the same rules (decision f799b6bc): `SRS_ACTOR='{\"kind\":\"human\",\"id\":\"human:the-greenman\"}' clerk claim <repo#n> --as builder --branch <n-slug> --repo <programme>`. Start only if it exits 0.\n- `clerk board stale-claims` returns claims idle for 3 hours to Ready. `clerk queue` is read-only.",
+    "gaps": [
+      "The epic-owned-by-the-group check waits for an epic-group relation; the label is the binding.",
+      "The owner holds builder and reviewer seats by convention until humans have seat records."
+    ],
+    "test": "Stage 11: 5 passing, including the central group."
+  },
+  "createdAt": "2026-10-11T18:33:29.709464671+00:00",
+  "updatedAt": "2026-10-11T18:33:29.709470334+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -15,7 +15,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | `claim` | Claim an issue as a seat of its group (a chartered group by its label; unlabelled work belongs to the central group, SemanticOps): `claim <repo#n> --as <seat> [--repo <programme>] [--branch <name>] [--dry-run]` (handbook stage 11); exit 2 with the reasons if refused | Human, local session or routine | the issue, open PRs and branches (gh), `clerk groups`, the Affirmed problems | assignee, `status: in progress` label, claim comment (via gh) | wg-builder, unattended-worker |
 | `queue` | Report what the unattended lane would take next | Human | GitHub issues and PRs (settings `governed_repos`) | nothing | unattended-worker routine brief |
 | `upkeep` | Merge or update PR branches by gate label | Every 15 min | GitHub PRs | merges, branch updates, digest comment on the settings `digest_issue` | pr-upkeep.yml |
-| `steward` | Guard against false closes | Daily | closed issues (settings `governed_repos`) | with `--fix`: reopen and comment | srs-programme `derive-priority.yml` (daily 06:15, `--fix`); owner |
+| `steward` | Guard against false closes (reopen a completed close with no merged PR, or an epic closed with open children), and comment once on an open issue with no `Answers:` / `No affirmed problem yet` line | Daily | closed issues (settings `governed_repos`) | with `--fix`: reopen and comment | srs-programme `derive-priority.yml` (daily 06:15, `--fix`); owner |
 | `check` | Method rules: two poles per tension, one tension per principle, boundaries | CI, human | programme records | nothing | owner |
 | `conformance` | Programme repo is an SRS repo and validates | CI | programme repo | nothing | validate.yml |
 | `board` | Story-driven priority on GitHub Project #6 (`gh-project.mjs`; how it works: [board.md](board.md)); slash commands `/roadmap`, `/stories`, `/triage` in `.claude/commands/` are the canonical copies | Hourly; human | issues, board | board fields, mirror labels, comments | board-sync.yml, roadmap |
@@ -28,6 +28,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 
 | Script | Purpose | Reads | Writes | Called by |
 |---|---|---|---|---|
+| render-handbook.mjs | Validate `handbook/` (an SRS repository) and render its `handbook` Composition to `docs/handbook.md`; `--check` exits 1 on drift | `handbook/`, `SRS_CLI_PATH` | `docs/handbook.md` | owner, handbook watcher, validate.yml |
 | charter.mjs, roadmap.mjs, queue.mjs, steward-check.mjs, check-method.mjs, check-programme-conformance.mjs, fetch-pinned-srs.mjs, gh-project.mjs, pr-upkeep.sh, wt | Behind the commands above | see above | see above | `clerk <name>` |
 | lib/pinned-srs.mjs, lib/repo-arg.mjs | Pin lookup; `--repo` resolution | programme `validate.yml` | | scripts |
 | session | Fresh programme worktree, pinned srs, then open the clerk | srs-programme master | a worktree | owner, `/session` (`.claude/commands/session.md`) |
@@ -68,6 +69,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | programme-board-sync.yml | Promote intents, reconcile board and labels | push, hourly, dispatch | `board sync` (project, story repo, mirror repos from settings) | BOARD_SECRET or BOARD_TOKEN | labels, board |
 | programme-ground.yml | Grounding report (I1), last 7 days | daily, dispatch | `ground --since` (7 days) to the job summary | GITHUB_TOKEN | nothing |
 | test.yml (clerk) | The clerk's own tests | push, PR | `npm test` | | nothing |
+| validate.yml (clerk) | The handbook is valid and `docs/handbook.md` matches its records; holds the clerk's own pin `SRS_RUST_CLI_TAG` | push, PR | `fetch-pinned-srs --repo .`, `render-handbook --check` | GITHUB_TOKEN | nothing |
 
 ## Routines (cloud, briefs in `routines/`; lifecycle in [routines.md](routines.md))
 
@@ -77,6 +79,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | wg-steward.md | Daily cycle close: report, minutes | 11:30 UTC, `trig_015iT3SoLLvJmgADknC7RpfG` | merged PRs, issues | run-report records, a PR, comment on the report issue |
 | wg-analyst.md | Analyse and feed the group queue | 12:00 UTC, `trig_01M6mtE5wZJg2FeXFFnZjCSk` | issues, programme records | suggestions and issues |
 | wg-builder.md | Build one `wg:third-party-ready` issue | event: issue labelled `ready` / PR merged | issue | branch, PR |
+| handbook-watcher.md | Keep the handbook true to code, data and boards; report drift | weekly, Monday 06:00 UTC (trigger not yet created) | clerk and programme history, tests, boards, programme records | handbook records and render (a PR), run report, issues |
 | wg-reviewer.md | Review one PR, post quorum | event: PR opened/synchronize/labeled | PR | quorum comment, `gate:auto-merge` |
 | working-groups.md | Overview of the group's rules | | | |
 

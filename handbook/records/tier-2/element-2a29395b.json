@@ -1,0 +1,22 @@
+{
+  "instanceId": "2a29395b-e29f-4ce0-b28d-45174ebbb6ea",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "method/domain",
+    "kind": "type",
+    "home": "method",
+    "meaning": "Where and when a problem occurs: purpose, in scope, out of scope.",
+    "read_by": "`ground`; planned: `check-method` gate (clerk#35)"
+  },
+  "createdAt": "2026-10-11T18:33:30.915257754+00:00",
+  "updatedAt": "2026-10-11T18:33:30.915265574+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "9fe6cc2f-ef10-4091-b16a-5580e8f8cc91",
+  "namespace": "com.semanticops.handbook",
+  "name": "practice",
+  "version": 1,
+  "description": "What works today.",
+  "aiGuidance": {
+    "purpose": "What actually runs today for this stage: the record types, tools and docs, as checked against code and data.",
+    "extraction": "Name the command, record type or brief. State counts with the date they were taken.",
+    "negativeGuidance": "Never claim something works unless the code or a passing test shows it."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-11T18:33:26.475503594+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "1cf6f901-9b85-4c36-8e95-5b161e391b53",
+  "namespace": "com.semanticops.handbook",
+  "name": "read_by",
+  "version": 1,
+  "description": "What reads or writes it.",
+  "aiGuidance": {
+    "purpose": "The commands, routines and checks that read or write this element."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-11T18:33:26.967683715+00:00"
+}

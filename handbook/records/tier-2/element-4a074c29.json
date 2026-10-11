@@ -1,0 +1,22 @@
+{
+  "instanceId": "4a074c29-eb7d-496c-8ab9-c4662d3898bd",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "derived-from",
+    "kind": "relation",
+    "home": "core",
+    "meaning": "Affirmed fork to its suggestion; resolved by `canon()`.",
+    "read_by": "every reader of affirmed records"
+  },
+  "createdAt": "2026-10-11T18:33:33.007805938+00:00",
+  "updatedAt": "2026-10-11T18:33:33.007813010+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

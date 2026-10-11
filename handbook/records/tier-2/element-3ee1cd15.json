@@ -1,0 +1,22 @@
+{
+  "instanceId": "3ee1cd15-8139-47ac-9f0d-059d8fa88211",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "stewardship/standing-job",
+    "kind": "type",
+    "home": "stewardship",
+    "meaning": "A routine's record: `trigger`, `routine_id`, `brief_path`, done_when.",
+    "read_by": "`clerk routines --check`"
+  },
+  "createdAt": "2026-10-11T18:33:32.379531214+00:00",
+  "updatedAt": "2026-10-11T18:33:32.379539304+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

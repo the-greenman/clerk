@@ -1,0 +1,35 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "id": "c8c023aa-08ce-4ce0-8836-0873595abaea",
+  "namespace": "com.semanticops.handbook",
+  "name": "stage-view",
+  "version": 1,
+  "description": "A stage renders its five parts with labels.",
+  "fieldViews": [
+    {
+      "fieldId": "20082e9d-6807-474c-a1f1-ad5f809f396a",
+      "order": 0
+    },
+    {
+      "fieldId": "cb37bd04-e9aa-4504-bc41-d8374ca3a52a",
+      "order": 1
+    },
+    {
+      "fieldId": "9fe6cc2f-ef10-4091-b16a-5580e8f8cc91",
+      "order": 2
+    },
+    {
+      "fieldId": "8901b97c-1728-4545-9aad-e89b8682b4e7",
+      "order": 3
+    },
+    {
+      "fieldId": "8269c1fc-667a-46d6-ba80-54173ad5fd4b",
+      "order": 4
+    },
+    {
+      "fieldId": "dab59ebd-e26b-404a-9100-e1fef47236e1",
+      "order": 5
+    }
+  ],
+  "createdAt": "2026-10-11T00:00:00Z"
+}

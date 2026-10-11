@@ -1,0 +1,32 @@
+{
+  "instanceId": "2cfd8ff7-59ed-4554-ba42-a70e287b6a1b",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Domain",
+    "theory": "A domain is an area of work with a purpose and what is in and out of scope. It tells us *when* a problem occurs. A domain is a container whose identity is the domain record; its outline holds clusters at depth 0 and their problems at depth 1. A problem's domain is derived (problem `held-by` persona-in-domain `in-domain` domain), never stored. Domains nest by perspective. The owner affirms a domain in the srs-web Method editor.",
+    "status": "partial",
+    "practice": "- Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).\n- 7 domain records, all in Suggestions: Deep context, Programme coordination, Semantic records, Agent memory, Group meaning ownership, Evidence-backed writing, Stance.\n- 6 domain containers exist. Deep context nests Semantic records, Group meaning ownership and Agent memory (decision dbaa4716).\n- `clerk ground` reads domains through `contains` (domain to cluster to problem) to compute I1. Nothing else reads them.\n- Plan: [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md), walking Evidence-backed writing and Agent memory first.",
+    "gaps": [
+      "No domain is affirmed.",
+      "Clusters still hang off domains by `contains` edges as well as by container outline: two groupings for one goal, until readers switch to the outline (decision a6280447).",
+      "Nothing checks that a problem has a domain.",
+      "An affirmed domain is a fork, so its container identity still names the suggestion; readers resolve it with `canon()`."
+    ],
+    "open_questions": [
+      "How is a domain retired?",
+      "How does a domain relate to a working group's boundary or compass?"
+    ],
+    "test": "Stage 2: pending (every problem has a domain; the domain says when)."
+  },
+  "createdAt": "2026-10-11T18:33:28.636916558+00:00",
+  "updatedAt": "2026-10-11T18:33:28.636923439+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

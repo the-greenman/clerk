@@ -1,0 +1,22 @@
+{
+  "instanceId": "61ab6325-1a86-4eb1-833a-c77a8b53af6a",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "programme/session",
+    "kind": "type",
+    "home": "programme",
+    "meaning": "One per session, with attendees and what it ratified, set aside, considered and received.",
+    "read_by": "`clerk session`, the agenda"
+  },
+  "createdAt": "2026-10-11T18:33:32.128053815+00:00",
+  "updatedAt": "2026-10-11T18:33:32.128061371+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

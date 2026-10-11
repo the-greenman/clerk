@@ -1,0 +1,22 @@
+{
+  "instanceId": "c06c53eb-f67f-4977-9c38-88ed62e32e12",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "Board labels",
+    "kind": "label",
+    "home": "GitHub (clerk `gh-project.mjs`)",
+    "meaning": "`ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `wg:*`, `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.",
+    "read_by": "`board sync`, `queue`, `claim`, `pr-upkeep`, every routine"
+  },
+  "createdAt": "2026-10-11T18:33:33.128085200+00:00",
+  "updatedAt": "2026-10-11T18:33:33.128093327+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

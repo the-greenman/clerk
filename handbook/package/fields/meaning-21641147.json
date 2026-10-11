@@ -1,0 +1,15 @@
+{
+  "id": "21641147-46a0-4343-bdab-4e0a26ed2226",
+  "namespace": "com.semanticops.handbook",
+  "name": "meaning",
+  "version": 1,
+  "description": "What the element means in the process.",
+  "aiGuidance": {
+    "purpose": "One or two sentences on what the element stands for in the process."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-11T18:33:26.909711512+00:00"
+}

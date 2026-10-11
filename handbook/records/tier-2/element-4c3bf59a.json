@@ -1,0 +1,22 @@
+{
+  "instanceId": "4c3bf59a-734e-4f2c-98c3-39bf0df55553",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "governance/decision and governance/decision_log",
+    "kind": "type",
+    "home": "governance",
+    "meaning": "Decisions with lifecycle proposed, ratified or abandoned, and an optional `decision_kind`; logs are containers per level.",
+    "read_by": "`clerk session`, the agenda, `wg-steward`"
+  },
+  "createdAt": "2026-10-11T18:33:31.880104543+00:00",
+  "updatedAt": "2026-10-11T18:33:31.880115180+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

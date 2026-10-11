@@ -1,0 +1,19 @@
+{
+  "instanceId": "371a41cf-abcf-4748-a438-9a59a27514e2",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "The whole picture",
+    "body": "The programme answers one question again and again: **what should we work on next, and why?**\n\nThe answer is never \"because someone said so\". Work is justified by a **problem**, a problem only counts when we know **who** has it (a persona) and **where** it happens (a domain), and the order of work comes from a **ranking** the owner has made. Everything else in this handbook is the machinery that carries that reasoning from a statement of need to a merged pull request, and back again as a report.\n\n```mermaid\nflowchart LR\n  subgraph Meaning[\"Meaning: SRS records in srs-programme\"]\n    D[Domain] --> P[Problem]\n    Pe[Persona in domain] --> P\n    P --> R[Remedy]\n    R --> E[Epic]\n    O[Objective] --> E\n    F[Period] -->|ranks| O\n  end\n  subgraph Execution[\"Execution: GitHub boards and clerk routines\"]\n    W[Issue] --> Q[Queue and claim]\n    Q --> X[Build]\n    X --> V[Review and merge]\n  end\n  subgraph Governance[\"Governance: sessions and decision logs\"]\n    Rep[Report] --> S[Session]\n    S --> M[Measure]\n  end\n  E -->|\"sub-issues, Answers: SP-nn\"| W\n  V --> Rep\n  M -.->|new problems| P\n  M -.->|re-rank| F\n```\n\nThere are three surfaces, each with one job:\n\n| Surface | Holds | Lives in |\n|---|---|---|\n| **Meaning** | domains, personas, problems, remedies, objectives, periods, epics, decisions, roles | SRS records in `the-greenman/srs-programme` |\n| **Execution** | issues, stories, epics as issues, board fields, labels, PRs | GitHub Project #6 \"SemanticOps\" and the governed repos |\n| **Practice** | the code that reads the meaning and drives the execution, and the briefs agents follow | this repository, `the-greenman/clerk` |\n\nThe two halves meet in two places only: the epic (a record with an `issue_ref`) and the `Answers: SP-nn` line at the top of every issue. Closing that seam is most of the open work in \"Stage by stage\".\n\nThree rules shape everything that follows:\n\n- **Agents suggest; the human layer wins.** Agents write to Suggestions. The owner forks a record into Affirmed. Only affirmed records carry weight.\n- **Authority comes from the role, not the kind of mind.** Humans and agents claim, review, decide and report through the same commands.\n- **Theory and practice together.** There is always a working system, and the theory stays beside it. We build when a trigger fires, not ahead of need."
+  },
+  "createdAt": "2026-10-11T18:33:27.692086624+00:00",
+  "updatedAt": "2026-10-11T18:33:27.692093341+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

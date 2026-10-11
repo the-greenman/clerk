@@ -1,0 +1,22 @@
+{
+  "instanceId": "92f6a7ea-d3f3-4ca6-a957-a6d95a240e54",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "method/cluster",
+    "kind": "type",
+    "home": "method",
+    "meaning": "Named meaning grouping problems; objectives address clusters.",
+    "read_by": "`roadmap`, srs-web board"
+  },
+  "createdAt": "2026-10-11T18:33:31.276734043+00:00",
+  "updatedAt": "2026-10-11T18:33:31.276740775+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}
