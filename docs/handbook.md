@@ -260,6 +260,15 @@ Its charter is records, and its rules are read from them.
 - **Standing orders:** quorum, cycle (daily, closing 11:30 UTC), budget (10 delegated merges per cycle), reporting, in prose as articles and as data on the group role: `group_label`, `quorum_min_members`, `quorum_seats`, `quorum_required_seat`, `budget_per_cycle`, `cycle_close_utc`, `max_unacked_reports`, `governed_repos`. `clerk groups` reads them; `quorum()`, `pr-upkeep.sh`, the queue and the Next forecast use them.
 - **Decision log:** `88c32389`.
 - **Members:** steward, builder, reviewer and analyst.
+- **Second group:** **WG Agent-supported editor** (semanticops.com#29, `wg:agent-editor`), chartered by `clerk charter` as drafts and proposals; in force only when the owner ratifies its charter decision (`384a704a`).
+
+**How a group is chartered, step by step.**
+1. An orchestrator session (any member or agent, under its own `SRS_ACTOR`) runs `clerk charter --repo <programme> --title "WG ..." --epic <repo#n> --label wg:... --repos a,b --budget N --cycle-close HH:MM --quorum-seats builder,reviewer --required-seat reviewer --prefix <p> --dry-run`, reads the plan, then runs it without `--dry-run`. A duplicate label or title, an unknown required seat or a malformed option is refused before anything is written.
+2. It creates, as drafts and proposals: the group's decision log and container, the group role with its charter fields, four standing-order articles (membership and quorum, cycle and report, budget, reporting and minutes), a member agent per seat (`agent:<prefix>-<seat>`, `authorised-by` the role), a boundary with the compass copied from the first existing group (`narrows` and `holds-tension`; the articles are `within-boundary`), and the charter decision, proposed, listed in the group log and in the SemanticOps decision log (one record, two logs).
+3. The orchestrator validates, commits on a branch and opens a PR for the owner. Nothing is in force: the role and articles stay draft, the charter decision is proposed.
+4. An owner session ratifies the charter decision, then asserts `delegates` from the Owner role to the group role (as the Third-party ready precedent did, in its ratification commit; the command never asserts it), and may move the role and articles out of draft.
+5. Owner steps after that, not done by the command: create the `wg:...` label in each governed repo, create the cloud routines and standing-job records.
+Local Claude Code sessions act as members under the same rules as routines (owner decision `f799b6bc`, proposed), and a group's session ratifies its builders' decisions (`70a05a5c`, proposed).
 - Docs: `routines/working-groups.md`. Concept: srs-programme `source-documents/agent-democracy-2026-10-10/concept.md`. Mapping: `source-documents/boundaries-2026-10-09/proposal.md`.
 
 **Gap.**
@@ -272,10 +281,11 @@ Its charter is records, and its rules are read from them.
 - #33 (the unattended lane) is not chartered.
 
 **Open questions.**
-- How is a group chartered and dissolved, step by step?
+- How is a group dissolved? (Chartering is `clerk charter`; dissolving has no command or rule yet.)
+- Which relation links an epic to its group? None fits (`delegates` is owner to group, `serves` is epic to objective); `clerk charter` names the epic in the role text. A relation type is a spec question, not invented here.
 - Does a group's boundary map to a domain?
 
-**Test:** test/process.test.mjs — stage 10 (passing (3), charter read from records; pending: none)
+**Test:** test/process.test.mjs — stage 10 (passing (3), charter read from records; pending: epic-group relation) and test/charter.test.mjs (the planner)
 
 ## 11. Assignment and claim
 
