@@ -307,7 +307,7 @@ Local Claude Code sessions act as members under the same rules as routines (owne
 **Theory.** Before work starts, check that no branch or PR exists, then claim the issue (assignee, In progress, and a comment naming the branch). A dead claim is recovered.
 
 **Practice.** *Implemented.*
-- `clerk claim <repo#n> --as <seat>` is the one claim path (humans, local sessions, routines): refuses unless the issue is open, free of branch/PR/assignee, carries a group label, answers an affirmed problem, and the actor holds the seat. Then assigns, sets `status: in progress`, comments. The routine briefs call it.
+- `clerk claim <repo#n> --as <seat>` is the one claim path (humans, local sessions, routines): refuses unless the issue is open, free of branch/PR/assignee, answers an affirmed problem, falls under a group, and the actor holds the seat. Then assigns, sets `status: in progress`, comments. The routine briefs call it. Jurisdiction: an issue with a chartered group's label stays with that group; an issue with no `wg:` label falls to the central group (SemanticOps, the Owner role), whose seats are the owner's builder/reviewer and the agents authorised-by that role with an actor id and seat. The central group never claims a delegated group's work, and a joined group's local practice applies (owner ruling 2026-10-11).
 - `stale-claims` recovers dead claims.
 - `clerk queue` is read-only.
 

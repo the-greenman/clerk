@@ -9,6 +9,7 @@ import { derive } from '../scripts/roadmap.mjs';
 import { checkMethod, checkGates } from '../scripts/check-method.mjs';
 import { classify, lanesFrom } from '../scripts/queue.mjs';
 import { checkClaim } from '../lib/practice/claim.mjs';
+import { centralGroupFrom } from '../lib/practice/groups.mjs';
 import { plan as stewardPlan } from '../scripts/steward-check.mjs';
 import { checkRoutines } from '../lib/practice/routines.mjs';
 import { authorise, quorum, ROLES, rolesFor } from '../lib/practice/roles.mjs';
@@ -220,6 +221,25 @@ describe('stage 11: assignment and claim', () => {
   test('a clerk command claims an issue: refuses unless free, grounded and the actor holds the seat (clerk claim)', () => {
     assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder' }).ok, true);
     assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), branches: ['10-x'], actor: 'agent:fx-builder', seat: 'builder' }).ok, false);
+  });
+});
+
+describe('stage 11: the central group claims work outside any working group', () => {
+  const ca = { instanceId: 'ca', record: { fieldValues: { title: 'c', brief: 'b', actor_id: 'agent:central-builder', seat: 'builder' } } };
+  const central = centralGroupFrom(roles.find((r) => r.instanceId === 'owner-role'), [...agents, ca], [...authorisedBy, { sourceId: 'ca', targetId: 'owner-role' }], 'SemanticOps');
+  const open = { ...issue, state: 'open', labels: [{ name: 'ready' }] };
+  const c = (o) => checkClaim({ issue: open, groups, central, affirmed: new Set(['SP-901']), ...o });
+  test('an unlabelled issue is claimable by the owner and by a central-group agent, under "SemanticOps"', () => {
+    assert.deepEqual(central.members.map((m) => m.actor), ['agent:central-builder']);
+    const o = c({ actor: 'human:owner', seat: 'builder', ownerActor: 'human:owner' });
+    assert.equal(o.ok, true); assert.equal(o.group.title, 'SemanticOps');
+    assert.equal(c({ actor: 'agent:central-builder', seat: 'builder' }).ok, true);
+  });
+  test('a non-member cannot claim via the central group, nor can any central actor claim a delegated group\'s issue', () => {
+    assert.equal(c({ actor: 'agent:fx-builder', seat: 'builder' }).ok, false);
+    const labelled = c({ issue: { ...open, labels: [{ name: 'wg:fixture' }] }, actor: 'agent:central-builder', seat: 'builder', ownerActor: 'human:owner' });
+    assert.equal(labelled.ok, false); assert.equal(labelled.group.title, 'WG Fixture');
+    assert.equal(c({ issue: { ...open, labels: [{ name: 'wg:unknown' }] }, actor: 'human:owner', seat: 'builder', ownerActor: 'human:owner' }).ok, false);
   });
 });
 
