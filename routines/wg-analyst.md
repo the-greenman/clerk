@@ -33,7 +33,7 @@ In the repo where the work happens, in the group's issue shape: `Answers:` (SP-0
 
 **Anything that needs a new or changed ruling is NOT filed as work.** Record ONE minute of exercise (governance `exercise` record in the group container: `title`, `thinking_reached`, `tensions`, `unresolved_questions`, `blocking`, `next_action`) asking for input, or, if clear-cut, one proposed escalation decision as the Steward fills it (see `routines/wg-builder.md`, Escalation). Write it through the CLI as `agent:tpr-analyst`; an exercise asking for the owner is also added to the SemanticOps decision log (`container members add`, never a copy). Open one srs-programme PR for these records (`gate:auto-merge`, `Mode: clear · non-normative`) and do not merge it.
 
-After filing: `gh workflow run board-sync.yml -R the-greenman/srs-rust`.
+After filing: `gh workflow run board-sync.yml -R the-greenman/srs-programme`.
 
 ## 5. Report
 

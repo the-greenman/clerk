@@ -40,7 +40,7 @@ Canonical source of the methodology packages, installed into the programme repo 
 
 | Package | Namespace | Version | Holds | Upstream |
 |---|---|---|---|---|
-| `packages/method` | com.semanticops.method | 1.0.0 | problems, remedies, tensions, principles, archetypes | clerk (this copy) |
+| `packages/method` | com.semanticops.method | 1.0.0 | problems, remedies, tensions, principles, archetypes, domains, personas, clusters, poles, agents | clerk (this copy) |
 | `packages/governance` | com.mudemocracy.governance | 1.1.0 | decisions, roles, logs | muDemocracy.org `muSrs/packages/governance` (same id and version; differs only in key order) |
 | `packages/stewardship` | com.mudemocracy.stewardship | 0.1.0 | agents, standing jobs (optional `routine_id`, `brief_path`), run reports | muDemocracy.org `muSrs/packages/stewardship` (the programme's install also carries imported com.thesystem fields) |
 | `packages/programme` | com.semanticops.programme `methodology` | 0.1.0 | the `programme` settings type and its fields | clerk (this copy) |
@@ -92,7 +92,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 
 ## Repo lists
 
-The scripts disagree on the estate, to be unified from settings in Phase 2: queue.mjs and steward-check.mjs list 6 repos (semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme); gh-project.mjs `MIRROR_REPOS` lists 7 (srs, srs-rust, srs-web, srs-vscode, srs-context, srs-programme, plus the story repo); pr-upkeep.sh lists 8 (the six, srs-context, muDemocracy.org).
+queue.mjs, steward-check.mjs, pr-upkeep.sh, gh-project.mjs (`MIRROR_REPOS`, unless `GHP_MIRROR_REPOS` is set) and the owner-only PR list in `bin/clerk.mjs` all read the settings `governed_repos`, so they agree by construction; the list is whatever the programme's settings record holds. The one exception is the working-group ready count in `bin/clerk.mjs` (the Next forecast), which is fixed to the four WG repos: srs-rust, srs, srs-vscode, srs-web.
 
 ## Related tools elsewhere
 

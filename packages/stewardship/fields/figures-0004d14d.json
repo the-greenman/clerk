@@ -1,9 +1,9 @@
 {
   "aiGuidance": {
-    "purpose": "JSON blob of measured figures from scripts/measure-musrs.mjs"
+    "purpose": "JSON blob of measured figures (for example gate results, counts, sizes)"
   },
   "createdAt": "2026-09-19T12:27:23.033173250+00:00",
-  "description": "JSON blob of measured figures from scripts/measure-musrs.mjs",
+  "description": "JSON blob of measured figures (for example gate results, counts, sizes)",
   "fieldType": {
     "datatype": "string",
     "format": "plain"

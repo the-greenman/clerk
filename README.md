@@ -32,7 +32,7 @@ SRS_ACTOR='{"kind":"ai","id":"agent:tpr-steward"}' \
   clerk session --repo <srs-programme checkout> --as tpr-steward [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]... [--edit <id> --field <resolution|why|options|review|question> --text <text>]... [--dry-run]
 ```
 
-`--as <role>`: `owner`, `tpr-steward`, `tpr-builder`, `tpr-reviewer` (prototype mapping in `lib/practice/roles.mjs`). The actor in `SRS_ACTOR` must hold that role (owner = `human:the-greenman`; `agent:tpr-*` hold the matching group role) or the clerk refuses, naming role and actor. The owner's session is recorded in the SemanticOps decision log, a group's in its own log. Reports, escalation and PR merge sections are owner-only.
+`--as <role>`: `owner`, `tpr-steward`, `tpr-builder`, `tpr-reviewer`, `tpr-analyst` (prototype mapping in `lib/practice/roles.mjs`; the analyst's adding decision b447e8ea is still `proposed`, so it holds a role but does not count toward quorum). The actor in `SRS_ACTOR` must hold that role (owner = `human:the-greenman`; `agent:tpr-*` hold the matching group role) or the clerk refuses, naming role and actor. The owner's session is recorded in the SemanticOps decision log, a group's in its own log. Reports, escalation and PR merge sections are owner-only.
 
 Needs Node >= 20 and `gh` (logged in); the pinned srs CLI is fetched by `clerk fetch-srs`. No dependencies. Requires the `com.semanticops.programme/session` type on srs-programme master.
 
@@ -54,11 +54,12 @@ Pick a section and the items come **one at a time**, essentials only. Read-only 
 
 | Section | Keys |
 |---|---|
-| Decisions since the last session | `r` ratify, `s` set aside, `e` edit a field in place (decision stays proposed), `h` hold for a later session (optional note), `o` full record, `n` next (skip, nothing recorded), `q` quit |
-| Decisions for this session | `a` accept recommendation, `c` choose other (asks for resolution text), `d` defer, `o`, `n`, `q` |
+| Decisions since the last session | `r` ratify, `s` set aside, `c` comment, `v` view discussion, `e` edit a field in place (decision stays proposed), `h` hold for a later session (optional note), `o` full record, `n` next (skip, nothing recorded), `q` quit |
+| Decisions for this session | `a` accept recommendation, `c` choose other (asks for resolution text), `m` comment, `v` view discussion, `e` edit a field, `h` hold, `d` defer, `o`, `n`, `q` |
 | Exercises | `c` comment (input), `v` discussion, `e` edit a field (thinking/tensions/questions/blocking/next), `p` propose a decision, `o`, `n`, `q` |
 | Reports | `r` receive (noted for the session; +1 on the comment at once), `c` comment (on the run-report record when the session ends; a reply on #31 if there is no record), `o` open the whole report, `n`, `q` |
-| Merges | `m` `gh pr merge --merge` (acts now), `o`, `n` |
+| Merges | `m` `gh pr merge --merge` (acts now), `o` open in browser, `n`, `q` |
+| Section menu | `1`-`5` open a section, `+` add attendee, `t` attach transcript, `e` end session, `q` quit |
 
 Decision choices and received reports are collected. The TUI header reads `Session: <date time UTC> (ad hoc) · attendees: <names>`; attendees default to the acting role and `+` adds more (roles and stewardship agents). On end session the clerk creates ONE `com.semanticops.programme/session` record (title `Session <YYYY-MM-DD HH:MM UTC>: <context>`, status `ended`) as the acting actor in a fresh srs-programme worktree, adds `attended-by` relations to each attendee and `ratifies` / `sets-aside` to each decision, transitions each decision (ratified or abandoned), adds accepted escalations to the SemanticOps log, validates, commits (signed), pushes and opens a `gate:auto-merge` PR, then prints its URL. `--dry-run` prints the summary instead of doing any of it.
 
