@@ -83,7 +83,7 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 **Theory.** A domain is an area of work with a purpose, and what is in and out of scope. Every problem belongs to at least one domain. The domain tells us *when* a problem occurs.
 
-A domain is a container whose identity is the domain record (`containerType com.semanticops.method/domain`). Its outline holds clusters at depth 0 and their problems at depth 1 (ruling D2a, 2026-10-11, proposed). A problem's domain is derived, never stored: problem `held-by` persona-in-domain, which is `in-domain` of a domain record. Container membership is arrangement only. A problem can reach more than one domain through more than one persona-in-domain (rulings D4 and D5, 2026-10-11, proposed). The owner affirms a domain in the srs-web Method editor (ruling D6).
+A domain is a container whose identity is the domain record (`containerType com.semanticops.method/domain`). Its outline holds clusters at depth 0 and their problems at depth 1 (ruling D2a, 2026-10-11, proposed). A problem with no cluster sits at depth 0: early in a domain we do not yet know all its parts, so an unclustered problem is valid, never a gap. Where a cluster is required (an objective `addresses` clusters), a cluster holding one problem is valid. Clusters evolve, and problems move between them as understanding changes (owner, 2026-10-11). A problem's domain is derived, never stored: problem `held-by` persona-in-domain, which is `in-domain` of a domain record. Container membership is arrangement only. A problem can reach more than one domain through more than one persona-in-domain (rulings D4 and D5, 2026-10-11, proposed). The owner affirms a domain in the srs-web Method editor (ruling D6).
 
 **Practice.** *Theory only.*
 - Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).
@@ -148,7 +148,6 @@ Gate (ruling D5, 2026-10-11, proposed): an affirmed problem must be `held-by` at
 - A problem can be affirmed with no persona and no domain, which breaks principle 2.
 - Problems link to issues only backwards, as evidence (`source_ref`).
 - When the gate flips to error, the 27 affirmed problems in the other three domains must be grounded or set aside, or the flip must be scoped to walked domains.
-- Five suggested problems have no cluster.
 
 **Open questions.**
 - What closes a problem: solved, set aside, or superseded? Who says so?
