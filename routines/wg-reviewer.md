@@ -19,7 +19,7 @@ Not in force until `RATIFYING_DECISION_ID` (defined in `routines/unattended-work
    `<!-- wg-quorum --> builder=agent:tpr-builder reviewer=agent:tpr-reviewer gates=<green|red>@<sha> mandate=<ruling, no spaces> verdict=<approve|reject>`
    and whose later lines are the findings. Use the builder named in the PR. Red gates or findings mean `reject`: post it and add nothing.
 9. On `approve` only, after posting, add `gate:auto-merge`. `pr-upkeep` merges on a valid quorum within budget.
-10. A within-mandate decision the Builder created `proposed`: move it to `ratified` and add a comment record under your actor.
+10. A within-mandate decision the Builder created `proposed`: leave it `proposed`. Name it in your quorum comment's findings as `decision <id>: assent` (or `decision <id>: dissent, <why>`). The group's next session ratifies it (`routines/wg-steward.md` step 2). Never ratify it yourself: a decision is ratified in exactly one session (handbook principle 6; owner decision 70a05a5c, 2026-10-11).
 
 ## Routine config
 
