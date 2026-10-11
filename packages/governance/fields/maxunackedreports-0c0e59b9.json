@@ -1,0 +1,16 @@
+{
+  "id": "0c0e59b9-42a2-4836-a23a-0251f6a5eb60",
+  "namespace": "com.mudemocracy.governance",
+  "name": "max_unacked_reports",
+  "version": 1,
+  "description": "Consecutive unacknowledged cycle reports after which the group pauses.",
+  "aiGuidance": {
+    "purpose": "Optional, groups only. e.g. 2."
+  },
+  "fieldType": {
+    "datatype": "number",
+    "cardinality": "single"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-11T00:00:00Z"
+}

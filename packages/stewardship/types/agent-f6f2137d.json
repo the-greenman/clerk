@@ -14,6 +14,18 @@
       "fieldId": "eff125b7-9da3-4a4d-a6ef-7fa435f2cb5e",
       "order": 1,
       "required": true
+    },
+    {
+      "displayLabel": "Actor id",
+      "fieldId": "1a28d1d4-8a28-4e07-bc08-2790b5777710",
+      "order": 2,
+      "required": false
+    },
+    {
+      "displayLabel": "Seat",
+      "fieldId": "b0f8ef66-ab6e-4940-b7c9-b05be021da7d",
+      "order": 3,
+      "required": false
     }
   ],
   "id": "f6f2137d-3472-4a40-add7-af69581208d6",

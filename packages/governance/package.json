@@ -30,7 +30,15 @@
     "fields/unresolvedquestions-f3e00003.json",
     "fields/blocking-f4e00004.json",
     "fields/nextaction-f5e00005.json",
-    "fields/externallinks-fc434475.json"
+    "fields/externallinks-fc434475.json",
+    "fields/grouplabel-0a30f012.json",
+    "fields/quorumminmembers-ae4b957e.json",
+    "fields/quorumseats-9f97e8a5.json",
+    "fields/quorumrequiredseat-9593f4f6.json",
+    "fields/budgetpercycle-bb3dc168.json",
+    "fields/cyclecloseutc-7431e74f.json",
+    "fields/maxunackedreports-0c0e59b9.json",
+    "fields/governedrepos-b94a6e01.json"
   ],
   "types": [
     "types/decision-1fcad6a2.json",

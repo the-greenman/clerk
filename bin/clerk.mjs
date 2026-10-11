@@ -6,14 +6,15 @@ import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { OWNER_LOG, GROUP_LOG, GROUP_NAME } from '../lib/practice/roles.mjs';
+import { OWNER_LOG } from '../lib/practice/roles.mjs';
 import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/adapters/cli.mjs';
 import * as A from '../lib/practice/agenda.mjs';
 import * as D from '../lib/practice/discussion.mjs';
 import { stamp, take, FIELDS, EX_FIELDS, needsTranscript } from '../lib/practice/session.mjs';
 import { endSession, postComments } from '../lib/adapters/session.mjs';
 import { loadSettings, issueRef, programmeRepo } from '../lib/adapters/settings.mjs';
-import { authorise, resolveContext, quorum, quorumText } from '../lib/practice/roles.mjs';
+import { authorise, resolveContext, quorum, quorumText, rolesFor } from '../lib/practice/roles.mjs';
+import { loadGroups } from '../lib/adapters/groups.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -29,6 +30,7 @@ const TOOLS = {
   routines: ['routines.mjs', 'drift between cloud triggers (a dump), standing-job records and briefs (--check <dump.json>)'],
   wt: ['wt', 'create, list and prune git worktrees'],
   settings: ['settings.mjs', 'print the programme settings record (--json)'],
+  groups: ['groups.mjs', 'print the working groups chartered in the records (--json)'],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
 };
 if (argv[0] === 'help' || argv[0] === '--help') {
@@ -60,7 +62,8 @@ if (!arg('--as')) die(USAGE);
 const repo = resolve(arg('--repo') ?? die('--repo is required'));
 const cli = srsCli(repo);
 let settings; try { settings = loadSettings(repo, cli); } catch (e) { die(e.message); }
-let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR, settings.ownerActor); } catch (e) { die(e.message); }
+let groups; try { groups = loadGroups(repo, cli); } catch (e) { die(e.message); }
+let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR, settings.ownerActor, rolesFor(groups)); } catch (e) { die(e.message); }
 const isOwner = arg('--as') === 'owner';
 const dryRun = argv.includes('--dry-run');
 
@@ -81,7 +84,7 @@ const people = [...(rolesList.records ?? rolesList.instances), ...(agentsList.re
   .map((r) => ({ id: r.instanceId, name: r.record.fieldValues?.title ?? r.instanceId }));
 const role = resolveContext(roleCfg, rolesList.records ?? rolesList.instances, containers);
 const mainLog = getLog(role.logId);
-const groupLog = getLog(GROUP_LOG);
+const groupLogs = groups.map((g) => ({ ...g, log: getLog(g.logId) })); // each chartered group's own decision log
 // Parent contexts: the SemanticOps log is the parent of every group log; the owner's log has none.
 const parentLogs = role.logId === ownerLog.containerId ? [] : [ownerLog];
 const selfId = role.agentId ?? role.roleId; // a group role attends as its own agent record, so quorum counts distinct members
@@ -103,8 +106,8 @@ if (isOwner) try { // owner-only Reports section; tolerant of a repository witho
   receivedIds = new Set((S(['relation', 'list', '--type', 'com.semanticops.programme/receives']).relations ?? []).map((x) => x.targetId));
 } catch { /* no receives yet */ }
 if (isOwner) try {
-  const rl = S(['record', 'list', '--type', 'com.mudemocracy.stewardship/run-report']); const inLog = new Set((groupLog.memberInstanceIds ?? []).map((m) => m.instanceId ?? m));
-  runReports = (rl.records ?? rl.instances ?? []).filter((r) => inLog.has(r.instanceId));
+  const rl = S(['record', 'list', '--type', 'com.mudemocracy.stewardship/run-report']);
+  runReports = groupLogs.map((g) => ({ group: g.title, records: (rl.records ?? rl.instances ?? []).filter((r) => memberSet(g.log).has(r.instanceId)) }));
 } catch { /* no run-reports */ }
 let exerciseRecs = [], derivedRels = [];
 try { // exercises and the proposals they fed; tolerant of a repository without them
@@ -118,7 +121,7 @@ try { // the comments package may be absent: no discussion
 } catch { /* no discussion */ }
 const threadOf = (r) => D.thread(r.instanceId, commentRels, commentRecs);
 const history = (r) => A.consideredIn(r.instanceId, consideredRels, sessionRecs);
-const quorumNow = () => quorum(role, attendees);
+const quorumNow = () => quorum(role, attendees, groups);
 
 // Non-interactive: the same endSession the TUI ends with.
 if (sub) {
@@ -127,7 +130,7 @@ if (sub) {
     if ((args('--ratify').length || args('--set-aside').length) && !quorumNow().met) throw new Error(`${quorumText(quorumNow())}: --ratify/--set-aside refused; --consider and --edit are still allowed`);
     const items = A.ratifyItems(records, mainLog, parentLogs);
     const pick = (p) => { const m = items.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single proposed decision matches "${p}"`); return m[0]; };
-    const pool = [...items, ...(isOwner ? A.escalationItems(records, groupLog, mainLog) : [])];
+    const pool = [...items, ...(isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog)) : [])];
     const find = (p) => { const m = pool.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single decision on the agenda matches "${p}"`); return m[0]; };
     const item = (r) => ({ instanceId: r.instanceId, title: A.fv(r).title });
     const choices = [];
@@ -186,35 +189,36 @@ const prs = !isOwner ? [] : REPOS.flatMap((r) => ghJson(['pr', 'list', '-R', `${
 // Order follows a meeting: decisions since the last session, reports, decisions for this session, merges.
 const sections = {
   1: { name: 'Decisions since the last session', items: A.ratifyItems(records, mainLog, parentLogs) },
-  2: { name: 'Reports', items: isOwner ? A.reportItems(runReports, receivedIds, reports, acked, GROUP_NAME) : [] },
+  2: { name: 'Reports', items: isOwner ? runReports.flatMap((rr, i) => A.reportItems(rr.records, receivedIds, i ? [] : reports, acked, rr.group)) : [] }, // ponytail: one report issue per programme; its comments are listed under the first group
   3: { name: 'Exercises', items: A.exerciseItems(exerciseRecs, mainLog) },
-  4: { name: 'Decisions for this session', items: isOwner ? A.escalationItems(records, groupLog, mainLog) : [] },
+  4: { name: 'Decisions for this session', items: isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog)) : [] },
   5: { name: 'Merges', items: A.mergeItems(prs) },
 };
-// Next: the queue behind the group, live via gh REST (owner only; tolerant of failure).
-let next = null;
-if (isOwner) try {
-  const issues = ['srs-rust', 'srs', 'srs-vscode', 'srs-web'].flatMap((r) => gh(['api', '-X', 'GET', `repos/${GH_OWNER}/${r}/issues`, '-f', 'labels=ready,wg:third-party-ready', '-f', 'state=open', '-f', 'per_page=100',
-    '--jq', '.[]|select(.pull_request|not)|{number,title,created_at,assignee:(.assignee!=null),labels:[.labels[].name]}']).trim().split('\n').filter(Boolean).map((l) => ({ ...JSON.parse(l), repo: r })))
-    .filter((i) => !i.assignee && !i.labels.some((l) => ['needs-input', 'parked'].includes(l))); // ponytail: the builder also drops issues with a branch or PR; not checked here
-  const inFlight = Number(gh(['api', '-X', 'GET', 'search/issues', '-f', `q=user:${GH_OWNER} is:pr is:open label:"wg:third-party-ready"`, '--jq', '.total_count']).trim());
-  next = { ready: A.orderQueue(issues, A.localPriorities(records.filter((r) => memberSet(groupLog).has(r.instanceId)))), inFlight, merged: 0, budget: 10 };
-} catch { /* queue unknown */ }
-const g = isOwner ? await groupState(repo) : { pause: 'n/a', merged: '-', budget: '-' };
-if (next) { next.merged = Number(g.merged) || 0; next.budget = Number(g.budget) || 10; }
+// Next: the queue behind each group, live via gh REST (owner only; tolerant of failure). State: its pause, merged and budget.
+const next = {}, gstate = {};
+for (const gr of isOwner ? groupLogs : []) {
+  gstate[gr.title] = await groupState(repo, gr);
+  try {
+    const issues = gr.repos.flatMap((r) => gh(['api', '-X', 'GET', `repos/${GH_OWNER}/${r}/issues`, '-f', `labels=ready,${gr.label}`, '-f', 'state=open', '-f', 'per_page=100',
+      '--jq', '.[]|select(.pull_request|not)|{number,title,created_at,assignee:(.assignee!=null),labels:[.labels[].name]}']).trim().split('\n').filter(Boolean).map((l) => ({ ...JSON.parse(l), repo: r })))
+      .filter((i) => !i.assignee && !i.labels.some((l) => ['needs-input', 'parked'].includes(l))); // ponytail: the builder also drops issues with a branch or PR; not checked here
+    const inFlight = Number(gh(['api', '-X', 'GET', 'search/issues', '-f', `q=user:${GH_OWNER} is:pr is:open label:"${gr.label}"`, '--jq', '.total_count']).trim());
+    next[gr.title] = { ready: A.orderQueue(issues, A.localPriorities(records.filter((r) => memberSet(gr.log).has(r.instanceId)))), inFlight, merged: Number(gstate[gr.title].merged) || 0, budget: Number(gstate[gr.title].budget) || gr.budget };
+  } catch { /* queue unknown */ }
+}
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const acted = { merge: 0 }; const doneIds = { 5: new Set() };
 const isDec = (n) => n === 1 || n === 3 || n === 4; // record-backed items (3 = exercises: never ratified)
 const doneCount = (n) => (n === 5 ? doneIds[5].size : sections[n].items.filter((it) => choices.some((c) => c.id === it.instanceId && (n !== 2 || c.action === 'receive'))).length);
 const agenda = () => { header(); show(A.agendaLines({ done: { 1: doneCount(1), 2: doneCount(2), 3: doneCount(3), 4: doneCount(4), 5: doneCount(5) }, tally: A.tallyLine(choices, acted),
   ratify: sections[1].items, reports: sections[2].items, exercises: sections[3].items, decide: sections[4].items, merge: sections[5].items,
-  status: isOwner ? [A.statusLine('WG Third-party ready', g.pause, g.merged, g.budget), ...(next && A.isDry(next.ready.length, next.budget) ? [A.forecast(next.ready.length, next.budget)] : [])] : [] })); };
+  status: groupLogs.filter(() => isOwner).flatMap((gr) => { const g = gstate[gr.title], n = next[gr.title]; return [A.statusLine(gr.title, g.pause, g.merged, g.budget), ...(n && A.isDry(n.ready.length, n.budget) ? [A.forecast(n.ready.length, n.budget)] : [])]; }) })); };
 
 const choices = [];
 const plusOne = (id) => { if (!dryRun) gh(['api', '-X', 'POST', `repos/${REPORT_ISSUE.split('/issues')[0]}/issues/comments/${id}/reactions`, '-f', 'content=+1']); };
 const keys = {
   1: { prompt: '[r]atify [s]et aside [c]omment [v]iew discussion [e]dit [h]old [o]pen full [n]ext [q]uit > ', screen: (r) => A.decisionScreen(r, history(r), D.discussionLines(threadOf(r))) },
-  2: { prompt: '[r]eceive [c]omment [o]pen [n]ext [q]uit > ', screen: (it) => A.reportScreen(it, { pause: g.pause, waiting: sections[4].items.length, exercises: sections[3].items.length, next }) },
+  2: { prompt: '[r]eceive [c]omment [o]pen [n]ext [q]uit > ', screen: (it) => A.reportScreen(it, { pause: gstate[it.group]?.pause, waiting: sections[4].items.length, exercises: sections[3].items.length, next: next[it.group] }) },
   3: { prompt: '[c]omment (give input) [v]iew discussion [e]dit [p]ropose a decision [o]pen [n]ext [q]uit > ', screen: (r) => A.exerciseScreen(r, history(r), D.discussionLines(threadOf(r)), A.fedInto(r.instanceId, derivedRels)) },
   4: { prompt: '[a]ccept recommendation [c]hoose other co[m]ment [v]iew discussion [e]dit [h]old [d]efer [o]pen [n]ext [q]uit > ', screen: (r) => A.escalationScreen(r, history(r), D.discussionLines(threadOf(r))) },
   5: { prompt: '[m]erge [o]pen in browser [n]ext [q]uit > ', screen: A.prScreen },

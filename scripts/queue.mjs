@@ -11,12 +11,14 @@
 import { execFileSync } from "child_process";
 import { fileURLToPath } from "url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
+import { loadGroups } from "../lib/adapters/groups.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
-const LANES = { "lane:unattended": "general", "wg:third-party-ready": "wg" };
+/** Lane label -> lane name: the general lane, plus one label per chartered working group (from the records). */
+export const lanesFrom = (groups) => ({ "lane:unattended": "general", ...Object.fromEntries(groups.map((g) => [g.label, "wg"])) });
 
-/** issues: REST issue objects plus `repo`; prs: open PR objects plus `repo`. Returns ordered queued/held rows. */
-export function classify(issues, prs) {
+/** issues: REST issue objects plus `repo`; prs: open PR objects plus `repo`; lanes: lanesFrom(groups). Returns ordered queued/held rows. */
+export function classify(issues, prs, LANES = lanesFrom([])) {
   const rows = issues.map((i) => {
     const labels = i.labels.map((l) => (typeof l === "string" ? l : l.name));
     const ref = `${i.repo}#${i.number}`;
@@ -38,20 +40,20 @@ export function classify(issues, prs) {
 
 const api = (path) => JSON.parse(execFileSync("gh", ["api", "--paginate", "--slurp", path], { encoding: "utf8" })).flat();
 
-function fetchAll(OWNER, REPOS) {
-  const issues = new Map(), prs = [];
+function fetchAll(OWNER, REPOS, groups) {
+  const LANES = lanesFrom(groups), issues = new Map(), prs = [];
   for (const repo of REPOS) {
-    for (const lane of Object.keys(LANES))
+    for (const lane of Object.keys(LANES).filter((l) => l === "lane:unattended" || groups.some((g) => g.label === l && g.repos.includes(repo))))
       for (const i of api(`repos/${OWNER}/${repo}/issues?labels=${encodeURIComponent(`${lane},ready`)}&state=open&per_page=100`))
         if (!i.pull_request) issues.set(`${repo}#${i.number}`, { ...i, repo });
     prs.push(...api(`repos/${OWNER}/${repo}/pulls?state=open&per_page=100`).map((p) => ({ ...p, repo })));
   }
-  return classify([...issues.values()], prs);
+  return classify([...issues.values()], prs, LANES);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   let s; try { s = loadSettings(repoRoot()); } catch (e) { console.error("queue: " + e.message); process.exit(1); }
-  const r = fetchAll(s.githubOwner, s.repos);
+  const r = fetchAll(s.githubOwner, s.repos, loadGroups(repoRoot()));
   if (process.argv.includes("--json")) console.log(JSON.stringify(r, null, 2));
   else {
     const line = (x) => `  ${(x.priority ?? "--").padEnd(3)} ${x.ref.padEnd(22)} ${x.created}  [${x.lanes.join(",")}] ${x.title}`;

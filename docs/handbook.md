@@ -67,10 +67,9 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 **Practice.** *Partial.*
 - **Layers:** the Affirmed, Suggestions and Set aside containers in srs-programme, checked by `scripts/check-method.mjs` (`checkGates`).
-- **Roles:** the role map in `lib/practice/roles.mjs` (prototype, hard-coded) and `governance/role` records with `delegates` relations.
+- **Roles:** the owner is built into `lib/practice/roles.mjs`; every working-group member role is read from records (`governance/role` with `delegates`; agents `authorised-by` the group role carry `actor_id` and `seat`; `clerk groups`).
 
 **Gap.**
-- `roles.mjs` has no analyst role, though the analyst is a member (see `routines/working-groups.md`).
 - Set aside has never been used.
 - `method/agent` and `stewardship/agent` both exist with no stated difference.
 
@@ -258,7 +257,7 @@ Its charter is records, and its rules are read from them.
 **Practice.** *Partial.* One group, **WG Third-party ready** (semanticops.com#31):
 - **Charter decision:** `00567bf1`.
 - **Group role:** `834b61fd`.
-- **Standing orders:** quorum, cycle (daily, closing 11:30 UTC), budget (10 delegated merges per cycle), reporting.
+- **Standing orders:** quorum, cycle (daily, closing 11:30 UTC), budget (10 delegated merges per cycle), reporting, in prose as articles and as data on the group role: `group_label`, `quorum_min_members`, `quorum_seats`, `quorum_required_seat`, `budget_per_cycle`, `cycle_close_utc`, `max_unacked_reports`, `governed_repos`. `clerk groups` reads them; `quorum()`, `pr-upkeep.sh`, the queue and the Next forecast use them.
 - **Decision log:** `88c32389`.
 - **Members:** steward, builder, reviewer and analyst.
 - Docs: `routines/working-groups.md`. Concept: srs-programme `source-documents/agent-democracy-2026-10-10/concept.md`. Mapping: `source-documents/boundaries-2026-10-09/proposal.md`.
@@ -266,7 +265,8 @@ Its charter is records, and its rules are read from them.
 **Gap.**
 - The role and its standing orders are still draft ("agent testimony until ratified"), although the charter was ratified.
 - The charter decision is in neither decision log.
-- Quorum, cycle and budget are hard-coded in `roles.mjs` and `scripts/pr-upkeep.sh`.
+- The articles' prose and the role's data fields state the same numbers twice; nothing checks they agree.
+- The report issue (#31) is a programme setting, so every group reports to the same issue.
 - The analyst was added before its decision `b447e8ea` was ratified.
 - The compass is all Suggestions.
 - #33 (the unattended lane) is not chartered.
@@ -274,9 +274,8 @@ Its charter is records, and its rules are read from them.
 **Open questions.**
 - How is a group chartered and dissolved, step by step?
 - Does a group's boundary map to a domain?
-- When does the hard-coded charter move into records: now, or at the second group?
 
-**Test:** test/process.test.mjs — stage 10 (passing (1), pending: charter read from records (quorum, cycle, budget, log))
+**Test:** test/process.test.mjs — stage 10 (passing (3), charter read from records; pending: none)
 
 ## 11. Assignment and claim
 
@@ -317,7 +316,7 @@ Its charter is records, and its rules are read from them.
 
 **Open questions.** Does the reviewer's quorum make a *group session*, so that ratification happens there?
 
-**Test:** test/process.test.mjs — stage 13 (passing (3), pending: reviewer quorum as a group session; pr-upkeep not hard-coded to one group)
+**Test:** test/process.test.mjs — stage 13 (passing (5), pr-upkeep and the queue read the group's charter; pending: reviewer quorum as a group session)
 
 ## 14. Report, session and ratification
 
@@ -340,9 +339,9 @@ A session has attendees, a time, and an agenda in this order: decisions since th
 
 **Open questions.**
 - Should the pause rule read `receives` instead of the thumbs-up?
-- What is the quorum for a group-level session?
+- Should a group-level session's quorum also be recorded on the session itself?
 
-**Test:** test/process.test.mjs — stage 14 (passing (4), pending: endSession exercise bug; group quorum from charter; pause rule reads receives)
+**Test:** test/process.test.mjs — stage 14 (passing (5), quorum from the group's charter; pending: endSession exercise bug; pause rule reads receives)
 
 ## 15. Measurement and retrospective
 
