@@ -83,21 +83,24 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 **Theory.** A domain is an area of work with a purpose, and what is in and out of scope. Every problem belongs to at least one domain. The domain tells us *when* a problem occurs.
 
+A domain is a container whose identity is the domain record (`containerType com.semanticops.method/domain`). Its outline holds clusters at depth 0 and their problems at depth 1 (ruling D2a, 2026-10-11, proposed). A problem's domain is derived, never stored: problem `held-by` persona-in-domain, which is `in-domain` of a domain record. Container membership is arrangement only. A problem can reach more than one domain through more than one persona-in-domain (rulings D4 and D5, 2026-10-11, proposed). The owner affirms a domain in the srs-web Method editor (ruling D6).
+
 **Practice.** *Theory only.*
 - Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).
 - 5 records, all in Suggestions: Agent memory, Stance, Semantic records, Group meaning ownership, Collaborative writing.
 - A domain `contains` clusters and tensions.
 - No code reads domains.
+- Planned: `plans/two-domains-end-to-end.md` (Collaborative writing and Agent memory first). Nothing is built.
 
 **Gap.**
 - No domain is affirmed.
 - A problem reaches its domain only indirectly, through a cluster.
 - Nothing checks that a problem has a domain.
+- No domain container exists yet; the old `contains` edges (domain to cluster, cluster to problem) must be deleted once readers switch to the outline (one way per goal).
+- The affirmed domain is a fork, so the container identity still names the original. Readers resolve it with `canon()` (follow `derived-from`) until a non-`canon()` reader needs a core fix (ruling D2b).
 
 **Open questions.**
-- Does a problem link to its domain directly, or always through a cluster?
-- Can a problem belong to more than one domain?
-- Who affirms a domain, and how is one retired?
+- How is a domain retired?
 - How does a domain relate to a working group's boundary or compass?
 
 **Test:** test/process.test.mjs — stage 2 (pending: every problem has a domain; domain says when)
@@ -106,18 +109,22 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 **Theory.** A persona is someone the work is for: their jobs and needs. Every problem is held by at least one persona. The persona tells us *who* the problem is for.
 
+The shared persona stays. Each domain adds a **persona-in-domain** (title, goals, jobs, needs) that `refines` the shared persona and points to exactly one domain record with `in-domain`. A problem is `held-by` the persona-in-domain (rulings D3 and D4, 2026-10-11, proposed). The shared persona need not be affirmed (ruling D5).
+
 **Practice.** *Partial (data only).*
 - Type `com.semanticops.method/persona` (title, summary, jobs, needs).
 - 5 records, all in Suggestions.
 - 97 problems are linked by `held-by`.
 - `clerk roadmap --explain` shows personas as labels, marked "suggested".
+- Planned: `persona-in-domain` type, `goals` field and `in-domain` relation in the method package (`plans/two-domains-end-to-end.md`, step 1). Nothing is built.
 
 **Gap.**
 - No persona is affirmed.
 - Personas never reach issues, priority or assignment.
+- `held-by` has no type constraint in its definition (description only), so nothing stops it pointing at a shared persona.
+- The `in-domain` exactly-one rule is checked in clerk `check-method`, not in core (standing rule: no core changes until the process is refined).
 
 **Open questions.**
-- Is the persona set per programme or shared (for example, from muDemocracy)?
 - Do personas weight priority, or only qualify it?
 - How do we hear from a real persona, as opposed to a modelled one?
 
@@ -127,19 +134,23 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 **Theory.** A problem is a claim, held by a person or agent, about something wrong for a persona in a domain. It is suggested by anyone and affirmed by a human. Work is judged by the problem it answers.
 
+Gate (ruling D5, 2026-10-11, proposed): an affirmed problem must be `held-by` at least one affirmed persona-in-domain whose `in-domain` (exactly one) reaches an affirmed domain record. Ends resolve through `derived-from`. Severity is a warning everywhere until both pilot domains are walked, then an error everywhere.
+
 **Practice.** *Partial.*
 - Type `com.semanticops.method/problem` (problem_id `SP-nn`, statement, kind, source_ref, imbalance).
 - Scouts suggest problems. The owner forks them into Affirmed: 53 distinct `SP-nn`, 47 affirmed.
 - Problems group into clusters. Parked issues are sources for problems, never bulk imports.
 - **Duplicate guard:** search the trackers and comment rather than file a near-duplicate.
+- Planned: the gate above in `check-method` (`plans/two-domains-end-to-end.md`, step 2). Nothing is built.
 
 **Gap.**
 - How a suggestion becomes affirmed is undocumented here.
 - A problem can be affirmed with no persona and no domain, which breaks principle 2.
 - Problems link to issues only backwards, as evidence (`source_ref`).
+- When the gate flips to error, the 27 affirmed problems in the other three domains must be grounded or set aside, or the flip must be scoped to walked domains.
+- Five suggested problems have no cluster.
 
 **Open questions.**
-- Add a `check-method` gate that refuses an affirmed problem with no affirmed persona and domain?
 - What closes a problem: solved, set aside, or superseded? Who says so?
 - How often are suggestions reviewed, and by whom?
 
@@ -149,10 +160,13 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 **Theory.** A remedy is a move that answers one or more problems. It carries a **falsifier** (what would show it failed) and a **return_when** (when to look again).
 
+Per domain, agents suggest one to three remedies that answer affirmed problems, and the owner affirms them. An existing epic implements each one (ruling D7.4, 2026-10-11, proposed): `abfa5866` (semanticops.com#29) for writing, `5746dee3` (semanticops.com#28) for memory. A new epic is made only if none fits.
+
 **Practice.** *Partial.*
 - Type `com.semanticops.method/remedy`, linked to problems by `answers`.
 - `check-method` requires an affirmed remedy to answer an affirmed problem and to have a falsifier.
 - 5 records, two of them duplicated as fork plus original.
+- Planned: remedy suggestions in the two-domain walk (`plans/two-domains-end-to-end.md`, section 5). Nothing is built.
 
 **Gap.** Falsifiers and `return_when` are never evaluated.
 
@@ -164,7 +178,7 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 ## 6. Objective and period
 
-**Theory.** A period is a focus span. It ranks objectives, which are directions that address clusters of problems for stakeholders. Priority is derived from that ranking and never set by hand. A period ends with a retrospective.
+**Theory.** A period is a focus span. It ranks objectives, which are directions that address clusters of problems for stakeholders. `addresses` stays objective to **cluster**: a cluster is named meaning (problems are the raw ideas, a synthesiser job groups and names them), and a domain is too large to address (ruling D7.1, 2026-10-11, proposed). The cluster's name and description are affirmed; which problems sit under it is fluid arrangement, reviewed by the steward (ruling D7.2). Priority is derived from that ranking and never set by hand. A period ends with a retrospective.
 
 **Practice.** *Partial.*
 - **Types:** `programme/period` (objective_rank) and `programme/objective`.
@@ -174,7 +188,7 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 **Gap.**
 - Objectives have no success criteria.
 - Periods have no end condition and no retrospective.
-- Only one objective `addresses` a cluster.
+- Only one objective `addresses` a cluster. Planned: `0b59ff0b` and `8e561b4c` gain `addresses` edges in the two-domain walk (`plans/two-domains-end-to-end.md`).
 
 **Open questions.**
 - What does an objective need before it can be ranked: a domain, a persona, success criteria?
@@ -185,7 +199,7 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 ## 7. Epic
 
-**Theory.** An epic is tracked work that implements remedies, answers problems and serves an objective. An epic is also a **working group** (stage 10).
+**Theory.** An epic is tracked work that implements remedies, answers problems and serves an objective. An epic is also a **working group** (stage 10), but only once chartered. Epics semanticops.com#28 and #29 stay plain owner-run epics. A group is chartered on a trigger: a steady ready queue that needs delegated merges (ruling D7.3, 2026-10-11, proposed).
 
 **Practice.** *Partial.*
 - **Type:** `programme/epic` (issue_ref), linked by `implements`, `answers` and `serves`.
@@ -195,10 +209,10 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 **Gap.**
 - Most epics have no remedy or problem link.
 - `6c5cbdde` (muDemocracy.org#159) nearly duplicates `8cbb562f`.
+- Epics `abfa5866` and `5746dee3` have no remedy or problem link yet. Planned: `plans/two-domains-end-to-end.md`.
 
 **Open questions.**
 - Must an epic implement a remedy before it can serve an objective?
-- Is every epic a working group, or only the chartered ones?
 
 **Test:** test/process.test.mjs — stage 7 (passing (2), pending: epic is a working group; remedy before serving an objective)
 
@@ -357,19 +371,22 @@ A session has attendees, a time, and an agenda in this order: decisions since th
 
 **Theory.** The process must show whether it has value. Each cycle records a few indicators. Each report reads them and asks whether they still mean anything. Each period closes with a retrospective that keeps, changes or drops practices, and that decision goes in the log.
 
+Home (ruling D8, 2026-10-11, proposed): I1-I4 are `argument/indicator` records, and each cycle writes an `argument/measurement-result` per indicator that the report links. A clerk script computes I1 and shares `canon()` with the principle 2 gate. The baseline is I1 computed retroactively for the cycle before the walk (about 0%), compared with the next two cycles. I2-I4 get results once their computations exist.
+
 **Practice.** *Theory only.*
 - What exists:
   - `run-report.figures`, one line of free text.
   - The steward report's "What we learned" section.
   - `revisit_when` on decisions, roles and articles. It is displayed but never checked.
   - Remedy falsifiers, never tested.
+- Planned: the I1 script and records (`plans/two-domains-end-to-end.md`, section 6; clerk#22, clerk#25). Nothing is built.
 - `argument/indicator` and `argument/measurement-result` are installed but have no records.
 
 **Initial indicators (proposed, not yet ratified).** These are deliberately few, one per question we want answered.
 
 | # | Question | Indicator | Source |
 |---|---|---|---|
-| I1 | Is work grounded? | Share of PRs merged this cycle whose issue answers an affirmed problem that has a persona and a domain | merged PRs → `Answers:` → problem → `held-by`, cluster → domain |
+| I1 | Is work grounded? | Share of PRs merged this cycle whose issue answers an affirmed problem that has an affirmed persona-in-domain and domain | merged PRs → `Answers:` → problem → `held-by` persona-in-domain → `in-domain` → domain (via `canon()`) |
 | I2 | Does work flow? | Delegated merges against budget, plus ready count at cycle close against budget (queue fed) | `pr-upkeep`, `clerk queue` |
 | I3 | Does governance keep up? | Days from `proposed` to `ratified`, median across the cycle; reports awaiting acknowledgement | decision lifecycle, sessions `receives` |
 | I4 | Does done mean done? | Reopened issues, false closes and reverted PRs this cycle | `steward-check` |
@@ -380,9 +397,6 @@ A session has attendees, a time, and an agenda in this order: decisions since th
 - **At period close:** a retrospective decision records, for each indicator and practice, whether to keep, change or drop it.
 
 **Open questions.**
-- Is `argument/indicator` plus `measurement-result` the right home, or a field on `run-report`? (Prefer existing types.)
-- Can I1 be computed now, given that personas and domains are not yet affirmed?
-- What baseline do we compare against: the first two cycles?
 - Who rules on the retrospective: the owner's session, every time?
 
 **Test:** test/process.test.mjs — stage 15 (pending: indicators I1-I4, revisit_when, falsifier and retrospective loop (only routine drift is checked))
