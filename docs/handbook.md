@@ -350,18 +350,18 @@ A session has attendees, a time, and an agenda in this order: decisions since th
 
 Each will be fixed under its own issue. The list is from the 2026-10-11 survey.
 
-1. `wg-reviewer.md:22` ratifies outside a session (stage 13).
-2. The analyst is missing from `roles.mjs` and the README role list; the `working-groups.md` diagram shows 3 members.
-3. `wg-analyst.md:36` runs board-sync on srs-rust; `docs/board.md` says it lives in srs-programme.
-4. `docs/tools.md:95` says the repo lists disagree. They now read settings, except `bin/clerk.mjs` and `pr-upkeep.sh`.
-5. `gh-project.mjs` names a "Bug Fixer routine" that has no brief.
-6. `queue.mjs` run size disagrees with `unattended-worker.md`.
-7. `working-groups.md:7` says charter records are in this repo; they are in srs-programme.
-8. The `figures` field cites `scripts/measure-musrs.mjs`, which does not exist.
-9. `docs/tools.md` omits domain, persona, cluster, pole and agent from the method package.
-10. The README key tables are incomplete.
-11. srs-programme `CLAUDE.md` says consumers read Affirmed only; `roadmap.mjs` reads clusters and personas from Suggestions.
-12. The concept's draft cycle (weekly, Sunday 18:00) disagrees with the ratified cycle (daily, 11:30 UTC).
+1. NEEDS A DECISION. `wg-reviewer.md:22` ratifies outside a session (stage 13); left as is, the choice is the owner's (options in clerk#26).
+2. FIXED. `roles.mjs` has a `tpr-analyst` role, the README role list names it, and the `working-groups.md` diagram and text show four members. The adding decision `b447e8ea` is still `proposed`; the analyst is not in `GROUP_MEMBERS`, so it does not count toward quorum.
+3. FIXED. `wg-analyst.md` runs the srs-programme `board-sync.yml`.
+4. FIXED. `docs/tools.md` now says the scripts all read settings; only the WG ready count in `bin/clerk.mjs` names the four WG repos.
+5. FIXED. `gh-project.mjs` comments name a generic bug-fix routine and say none has a brief yet.
+6. FIXED. `queue.mjs` output now says up to 3 issues per run, a wg build counting among them, as `unattended-worker.md` does.
+7. FIXED. `working-groups.md` says the charter records are in srs-programme.
+8. FIXED. The `figures` field guidance in `packages/stewardship` no longer cites the missing script. srs-programme's installed copy updates at its next package upgrade.
+9. FIXED. `docs/tools.md` lists domain, persona, cluster, pole and agent for the method package.
+10. FIXED. The README key tables match the prompts in `bin/clerk.mjs`, plus a section-menu row.
+11. OTHER REPO. srs-programme `CLAUDE.md` still says consumers read Affirmed only; the change is in clerk#26.
+12. FIXED. No clerk doc says the cycle is weekly; the concept document is a dated source in srs-programme and is not edited.
 
 ## Where things are documented
 

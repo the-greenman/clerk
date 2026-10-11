@@ -4,9 +4,9 @@
 
 A working group is an epic run like a co-op subcommittee. The owner delegates a mandate to the group, and the group decides and merges inside it. Anything outside the mandate comes back to the owner as one decision. The first group is **WG Third-party ready** (semanticops.com#31).
 
-The rules live in the group's charter records in this repository: the group role (what it decides, what it escalates) and four standing orders (Membership and quorum, Cycle and report, Budget, Reporting and minutes). The briefs that agents follow are `wg-builder.md`, `wg-reviewer.md`, `wg-steward.md`, `wg-analyst.md` and `unattended-worker.md` (fallback sweep). The merge check is `clerk upkeep`. If this page and those disagree, the records and the script win.
+The rules live in the group's charter records in srs-programme (not in this repository): the group role (what it decides, what it escalates) and four standing orders (Membership and quorum, Cycle and report, Budget, Reporting and minutes). The briefs that agents follow are `wg-builder.md`, `wg-reviewer.md`, `wg-steward.md`, `wg-analyst.md` and `unattended-worker.md` (fallback sweep). The merge check is `clerk upkeep`. If this page and those disagree, the records and the script win.
 
-The group has four members: Steward, Builder, Reviewer and the Analyst (scout), whose standing job is to keep the queue fed. It acts only when the latest cycle report forecasts "Queue running dry", finds ruling-backed work in conformance gaps and unimplemented rulings, and files it as ready issues for the Builder. It never builds, reviews, merges or sets a priority; anything needing a new ruling becomes an exercise, not work.
+The group has four members: Steward, Builder, Reviewer and the Analyst (scout; added by decision b447e8ea, still `proposed`, so not yet ratified), whose standing job is to keep the queue fed. It acts only when the latest cycle report forecasts "Queue running dry", finds ruling-backed work in conformance gaps and unimplemented rulings, and files it as ready issues for the Builder. It never builds, reviews, merges or sets a priority; anything needing a new ruling becomes an exercise, not work.
 
 Current settings: cycle closes daily at 11:30 UTC · budget 10 delegated merges per cycle · pause after 2 unacknowledged reports.
 
@@ -169,7 +169,7 @@ flowchart LR
   RD["Ratifying decision<br/>(owner, signed commit)"] -.->|puts in force| GR
   GR --> SO["Standing orders<br/>quorum, cycle, budget, minutes"]
   GR --> CP["Compass<br/>boundary, tensions, leanings, layers"]
-  GR --> AG["Members<br/>steward, builder, reviewer"]
+  GR --> AG["Members<br/>steward, builder, reviewer, analyst"]
   CP -->|narrows| B2["SRS implementation"]
   B2 -->|narrows| B1["SRS standard"]
   B1 -->|narrows| B0["SemanticOps"]
