@@ -12,6 +12,7 @@ import { execFileSync } from "child_process";
 import { fileURLToPath } from "url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { loadGroups } from "../lib/adapters/groups.mjs";
+import { refersTo } from "../lib/practice/claim.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
 /** Lane label -> lane name: the general lane, plus one label per chartered working group (from the records). */
@@ -22,9 +23,7 @@ export function classify(issues, prs, LANES = lanesFrom([])) {
   const rows = issues.map((i) => {
     const labels = i.labels.map((l) => (typeof l === "string" ? l : l.name));
     const ref = `${i.repo}#${i.number}`;
-    // ponytail: PR match is "#n" in title/body or a branch starting "n-"; a PR in another repo citing repo#n is missed.
-    const pr = prs.find((p) => p.repo === i.repo &&
-      (new RegExp(`#${i.number}\\b`).test(`${p.title} ${p.body ?? ""}`) || p.head?.ref?.startsWith(`${i.number}-`)));
+    const pr = prs.find((p) => refersTo(i.repo, i.number, p));
     const held = [
       ...(i.assignee || i.assignees?.length ? [`assigned ${(i.assignees ?? [i.assignee]).map((a) => a.login).join(",")}`] : []),
       ...labels.filter((l) => l === "needs-input" || l === "parked"),

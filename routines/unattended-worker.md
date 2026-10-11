@@ -20,7 +20,7 @@ You are a cloud routine. You take issues labelled `lane:unattended` and ship eac
 
 ## Per issue
 
-1. CLAIM BEFORE START. Check no branch or PR already exists for it (REST or MCP). If one exists, comment that you found it and move on. Otherwise assign the-greenman and comment "Claimed by routine (semanticops.com#33). Branch: <branch>".
+1. CLAIM BEFORE START. Run `node /tmp/clerk/bin/clerk.mjs claim <repo>#<n> --as builder --branch <branch> --repo <programme checkout>`. It checks the issue is open, free (no branch, PR or assignee), in a group with a grounded `Answers: SP-nn`, and that you hold the seat; then assigns, sets `status: in progress` and comments. If it refuses (exit 2), comment its reason and move on.
 2. GUARDS. If the issue lists a guard or "check first" step, do it before writing code. If it trips, comment your evidence and stop; do not improvise around it.
 3. PLAN, THEN IMPLEMENT in that issue's repo, on a branch off `origin/<default>`. Keep the diff to what "Done when" requires: no drive-by refactors, no new abstractions.
 4. GATES BY EXIT CODE, as listed in that repo's CLAUDE.md "Gates and choreography" section, never a piped tail. A red gate you cannot fix within scope means stop and report; never weaken a test to pass. If a red gate was already red on the last green default-branch commit, say so with evidence rather than fixing it.
