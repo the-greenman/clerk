@@ -2,7 +2,7 @@
 // clerk claim <repo#n> --as <seat> [--repo <programme>] [--branch <name>] [--dry-run]: one claim path for humans and agents (clerk#21).
 import { repoRoot } from './lib/repo-arg.mjs';
 import { loadSettings } from '../lib/adapters/settings.mjs';
-import { loadGroups } from '../lib/adapters/groups.mjs';
+import { loadGroups, loadCentralGroup } from '../lib/adapters/groups.mjs';
 import { affirmedProblemIds, readIssue, writeClaim } from '../lib/adapters/claim.mjs';
 import { checkClaim, claimComment } from '../lib/practice/claim.mjs';
 
@@ -14,7 +14,7 @@ let actor; try { actor = JSON.parse(process.env.SRS_ACTOR ?? '').id; } catch { /
 if (!actor) fail('SRS_ACTOR must be a JSON actor {"kind","id"}');
 const repo = repoRoot(), s = loadSettings(repo), n = Number(m[2]);
 const { issue, prs, branches } = readIssue(s.githubOwner, m[1], n);
-const r = checkClaim({ issue, prs, branches, groups: loadGroups(repo), affirmed: affirmedProblemIds(repo), actor, seat, ownerActor: s.ownerActor });
+const r = checkClaim({ issue, prs, branches, groups: loadGroups(repo), central: loadCentralGroup(repo), affirmed: affirmedProblemIds(repo), actor, seat, ownerActor: s.ownerActor });
 const branch = arg('--branch') ?? `${n}-<slug>`, comment = r.group && claimComment(actor, seat, r.group.title, branch);
 const dry = argv.includes('--dry-run');
 for (const t of r.todo) console.log('todo: ' + t);
