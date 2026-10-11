@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { derive } from '../scripts/roadmap.mjs';
 import { checkMethod, checkGates } from '../scripts/check-method.mjs';
 import { classify, lanesFrom } from '../scripts/queue.mjs';
+import { checkClaim } from '../lib/practice/claim.mjs';
 import { plan as stewardPlan } from '../scripts/steward-check.mjs';
 import { checkRoutines } from '../lib/practice/routines.mjs';
 import { authorise, quorum, ROLES, rolesFor } from '../lib/practice/roles.mjs';
@@ -209,7 +210,10 @@ describe('stage 11: assignment and claim', () => {
     assert.deepEqual(q.queued, []);
     assert.deepEqual(q.held.map((h) => h.held[0]).sort(), [`assigned ${BUILDER}`, 'open PR fixture#50'].sort());
   });
-  test.todo('handbook stage 11: a clerk command claims an issue (check no branch or PR exists, assignee, In progress, comment naming the branch)');
+  test('a clerk command claims an issue: refuses unless free, grounded and the actor holds the seat (clerk claim)', () => {
+    assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder' }).ok, true);
+    assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), branches: ['10-x'], actor: 'agent:fx-builder', seat: 'builder' }).ok, false);
+  });
 });
 
 // ---- 12. Execution ----

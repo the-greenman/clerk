@@ -305,16 +305,17 @@ Local Claude Code sessions act as members under the same rules as routines (owne
 
 **Theory.** Before work starts, check that no branch or PR exists, then claim the issue (assignee, In progress, and a comment naming the branch). A dead claim is recovered.
 
-**Practice.** *Partial (briefs only).*
-- Claiming is done by routine briefs (`routines/wg-builder.md`, `routines/unattended-worker.md`).
+**Practice.** *Implemented.*
+- `clerk claim <repo#n> --as <seat>` is the one claim path (humans, local sessions, routines): refuses unless the issue is open, free of branch/PR/assignee, carries a group label, answers an affirmed problem, and the actor holds the seat. Then assigns, sets `status: in progress`, comments. The routine briefs call it.
 - `stale-claims` recovers dead claims.
 - `clerk queue` is read-only.
 
-**Gap.** No code performs a claim.
+**Gap.** The epic-owned-by-a-group check waits for an epic-group relation (the group label is the binding). The owner holds builder and reviewer seats by convention until humans have seat records.
 
-**Open questions.** Should claiming be a clerk command, so humans and agents claim the same way?
+### Claiming work in a local session
+A local Claude Code session acts as a working-group member under the same rules as a routine (owner decision f799b6bc). Before starting an issue: `SRS_ACTOR='{"kind":"human","id":"human:the-greenman"}' clerk claim <repo#n> --as builder --branch <n-slug> --repo <programme>` (add `--dry-run` to see the checks first). Start only if it exits 0.
 
-**Test:** test/process.test.mjs — stage 11 (passing (1), pending: a clerk command that claims)
+**Test:** test/process.test.mjs — stage 11 (passing (2))
 
 ## 12. Execution
 
