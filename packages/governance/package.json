@@ -38,7 +38,8 @@
     "fields/budgetpercycle-bb3dc168.json",
     "fields/cyclecloseutc-7431e74f.json",
     "fields/maxunackedreports-0c0e59b9.json",
-    "fields/governedrepos-b94a6e01.json"
+    "fields/governedrepos-b94a6e01.json",
+    "fields/decisionkind-de3046c2.json"
   ],
   "types": [
     "types/decision-1fcad6a2.json",

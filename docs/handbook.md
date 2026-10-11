@@ -353,6 +353,8 @@ A local Claude Code session acts as a working-group member under the same rules 
 
 A session has attendees, a time, and an agenda in this order: decisions since the last session, reports, exercises, decisions for this session, merges. A comment between sessions is discussion, not a session.
 
+**What a session records as a decision.** A decision is one standing choice that governs later choices. Before recording one, ask four things: would a later choice be settled by pointing at it (reuse), is it one thing with no "and" (one thing), does it read true with every date, issue number and id removed (timeless), and can someone apply it to a new case and say whether the case conforms, with a stated condition for review (testable). If not, record a task (an issue), an application or a plan, linked to the decision it serves. Kinds, frames and the owner's rulings D1 to D5: [decision-log.md](decision-log.md). The recorder warns on these and never blocks (decision e337703b).
+
 **Practice.** *Working, with a bug.*
 - The steward writes a `stewardship/run-report` record and the #31 comment (`routines/wg-steward.md`).
 - `clerk` (TUI) and `clerk session` write a `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives` relations.
@@ -430,6 +432,7 @@ Each will be fixed under its own issue. The list is from the 2026-10-11 survey.
 | Method chain, sessions, minutes | `README.md` |
 | Board, priority rollup, queue | `docs/board.md` |
 | Every command and script | `docs/tools.md` |
+| What goes in the decision log | `docs/decision-log.md` |
 | Routine lifecycle | `docs/routines.md` |
 | Working groups | `routines/working-groups.md` and `routines/wg-*.md` |
 | Unattended lane | `routines/unattended-worker.md` |

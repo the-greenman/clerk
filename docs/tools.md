@@ -45,7 +45,7 @@ Canonical source of the methodology packages, installed into the programme repo 
 | Package | Namespace | Version | Holds | Upstream |
 |---|---|---|---|---|
 | `packages/method` | com.semanticops.method | 1.0.0 | problems, remedies, tensions, principles, archetypes, domains, personas, clusters, poles, agents | clerk (this copy) |
-| `packages/governance` | com.mudemocracy.governance | 1.1.0 | decisions, roles (optional working-group charter: `group_label`, `quorum_*`, `budget_per_cycle`, `cycle_close_utc`, `max_unacked_reports`, `governed_repos`), logs | muDemocracy.org `muSrs/packages/governance` (same id and version; differs only in key order) |
+| `packages/governance` | com.mudemocracy.governance | 1.1.0 | decisions, roles (optional `decision_kind` on decisions; optional working-group charter: `group_label`, `quorum_*`, `budget_per_cycle`, `cycle_close_utc`, `max_unacked_reports`, `governed_repos`), logs | muDemocracy.org `muSrs/packages/governance` (same id and version; differs only in key order) |
 | `packages/stewardship` | com.mudemocracy.stewardship | 0.1.0 | agents (optional `actor_id`, `seat`), standing jobs (optional `routine_id`, `brief_path`), run reports | muDemocracy.org `muSrs/packages/stewardship` (the programme's install also carries imported com.thesystem fields) |
 | `packages/programme` | com.semanticops.programme `methodology` | 0.1.0 | the `programme` settings type and its fields | clerk (this copy) |
 

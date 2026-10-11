@@ -134,3 +134,13 @@ test('a proposal from an exercise plans derived-from plus considers; no quorum; 
   assert.match(out[0], /proposal: new proposed decision "Should we X\?" derived-from Looking ahead \[eeeeeeee\]; session considers the exercise/);
   assert.match(out[0], /comment on Looking ahead/);
 });
+
+test('framingWarnings: warn-only checks on a recorded decision (D4)', async () => {
+  const { framingWarnings } = await import('../lib/practice/session.mjs');
+  const ok = framingWarnings({ statement: 'We extend at the edge rather than change the core.', revisit_when: 'when another domain is walked', decision_kind: 'preference' });
+  assert.deepEqual(ok, []);
+  for (const bad of ['Decided on 2026-10-11 to do X.', 'We do X (see #548).', 'We do X per a6280447.', 'We do X per the-greenman/clerk#40.'])
+    assert.equal(framingWarnings({ statement: bad, revisit_when: 'r', decision_kind: 'design' })[0]?.text.startsWith('not timeless'), true, bad);
+  const none = framingWarnings({ statement: 'We do X.' });
+  assert.deepEqual(none.map((w) => w.level), ['warn', 'info']);
+});

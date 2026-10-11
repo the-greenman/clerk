@@ -3,21 +3,22 @@
   "aiGuidance": {
     "examples": [
       {
-        "description": "Meeting-frequency decision",
-        "output": "We will meet fortnightly, on Tuesdays at 18:00 UTC, starting from the first Tuesday in July."
+        "description": "Preference decision",
+        "output": "We extend at the edge (packages, clerk) rather than change the core, unless the process has settled."
       }
     ],
     "extraction": "Look for the moment agreement is reached — signalled by so we are agreed, let us go with, or a direct statement of resolution. Extract the commitment itself, not the discussion around it. One sentence.",
-    "purpose": "States the settled commitment in one concise, active-voice sentence. This is the record of what was decided, not why."
+    "purpose": "States one standing choice in one concise, active-voice sentence. It is the record of what was decided, not why. It must be one thing, timeless and testable: it reads true with every date, issue number and id removed, and someone can apply it to a new case and say whether the case conforms.",
+    "negativeGuidance": "Do not include dates, issue numbers, record ids or \"today\" and \"this session\"; those are provenance and belong in relations and context. Do not join two choices with \"and\"; split them into two decisions. Do not record a task or the result of applying a rule (owner ruling D1)."
   },
   "createdAt": "2026-05-25T00:00:00Z",
-  "description": "The settled commitment in one active-voice sentence.",
+  "description": "The one standing, timeless, testable choice, in one active-voice sentence.",
   "fieldType": {
     "datatype": "string",
     "format": "plain"
   },
   "id": "de1296e0-e083-58d9-97a0-cb2b91fec02e",
-  "instructions": "Write the settled commitment as one clear sentence in the active voice — start with “We will…” or “We have decided to…” so the outcome is unmistakable. Capture what was agreed, not the discussion around it, and make it specific enough to act on: name the who, what, and when where they were agreed.",
+  "instructions": "Write the settled commitment as one clear sentence in the active voice. State one standing choice that will still read true next month, and that a later case can be checked against. Leave out dates, issue numbers and ids. If it needs \"and\" to hold two choices, split it.",
   "name": "decision_statement",
   "namespace": "governance",
   "version": 1

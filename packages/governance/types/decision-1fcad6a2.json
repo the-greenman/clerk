@@ -80,6 +80,12 @@
       "fieldId": "fc434475-b25e-46d5-8536-c2cc2e4e5f98",
       "order": 12,
       "required": false
+    },
+    {
+      "displayLabel": "Decision kind",
+      "fieldId": "de3046c2-0909-424b-8044-c296c1709c9d",
+      "order": 13,
+      "required": false
     }
   ],
   "id": "1fcad6a2-9f78-5e41-94ba-d82e88b822f3",
