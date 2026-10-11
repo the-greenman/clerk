@@ -6,6 +6,8 @@ The clerk is the prototyping ground for governance: its packages and its practic
 
 ## Method
 
+The whole process, stage by stage (theory, practice, gaps, open questions, measures): [docs/handbook.md](docs/handbook.md).
+
 The programme is run as a chain, from why to what:
 
 period -> ranked objectives -> epics -> remedies -> problems
