@@ -29,6 +29,7 @@ const TOOLS = {
   conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
   board: ['gh-project.mjs', 'story-driven priority on the GitHub Project (many subcommands, see its help)'],
   routines: ['routines.mjs', 'drift between cloud triggers (a dump), standing-job records and briefs (--check <dump.json>)'],
+  ground: ['ground.mjs', 'advisory PR grounding check and indicator I1: issue -> problem -> persona/domain -> epic -> group (--pr <repo#n> | --since YYYY-MM-DD, --json)'],
   wt: ['wt', 'create, list and prune git worktrees'],
   settings: ['settings.mjs', 'print the programme settings record (--json)'],
   charter: ['charter.mjs', 'charter a working group as draft/proposed records for the owner to ratify (--dry-run prints the plan)'],

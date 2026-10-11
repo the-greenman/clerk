@@ -1,0 +1,52 @@
+name: Programme ground
+
+# Reusable. Advisory grounding report (clerk ground, indicator I1): PRs merged in the last 7 days,
+# written to the job summary. Never fails on ungrounded work. Triggers stay in the caller.
+# clerk-ref: as in programme-validate.yml.
+
+on:
+  workflow_call:
+    inputs:
+      clerk-ref:
+        description: "Commit SHA of the clerk to run; set it to the same SHA as in the caller's uses: line"
+        type: string
+        required: true
+    secrets:
+      BOARD_TOKEN:
+        description: "token that can read the governed repos' PRs and issues (falls back to GITHUB_TOKEN)"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  ground:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the programme
+        uses: actions/checkout@v4
+
+      - name: Checkout the clerk
+        uses: actions/checkout@v4
+        with:
+          repository: the-greenman/clerk
+          ref: ${{ inputs.clerk-ref }}
+          path: .clerk
+          persist-credentials: false
+
+      # srs scans the whole repository root, so keep the clerk outside the programme tree.
+      - name: Move the clerk out of the programme tree
+        run: mv .clerk "$RUNNER_TEMP/clerk"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Grounding report
+        env:
+          GH_TOKEN: ${{ secrets.BOARD_TOKEN || github.token }}
+        run: |
+          clerk() { node "$RUNNER_TEMP/clerk/bin/clerk.mjs" "$@" --repo "$GITHUB_WORKSPACE"; }
+          export $(clerk fetch-srs)
+          since=$(date -u -d '7 days ago' +%F)
+          { echo "### Grounding (I1), PRs merged since $since"; echo '```'; clerk ground --since "$since"; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
