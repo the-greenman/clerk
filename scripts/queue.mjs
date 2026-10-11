@@ -5,7 +5,7 @@
  *   node scripts/queue.mjs [--json]
  *
  * Queued: open issues labelled `ready` plus `lane:unattended` (general lane) or `wg:third-party-ready` (WG lane).
- * Held: an assignee, a `needs-input` or `parked` label, or an open PR referencing the issue.
+ * Held: an assignee, a `needs-input`, `parked` or `blocked` label, or an open PR referencing the issue.
  * Order: `priority: P0|P1|P2` label, then oldest first; no priority sorts last. Read-only.
  */
 import { execFileSync } from "child_process";
@@ -26,7 +26,7 @@ export function classify(issues, prs, LANES = lanesFrom([])) {
     const pr = prs.find((p) => refersTo(i.repo, i.number, p));
     const held = [
       ...(i.assignee || i.assignees?.length ? [`assigned ${(i.assignees ?? [i.assignee]).map((a) => a.login).join(",")}`] : []),
-      ...labels.filter((l) => l === "needs-input" || l === "parked"),
+      ...labels.filter((l) => l === "needs-input" || l === "parked" || l === "blocked"),
       ...(pr ? [`open PR ${pr.repo}#${pr.number}`] : []),
     ];
     const priority = labels.map((l) => l.match(/^priority:\s*(P\d)$/)?.[1]).find(Boolean) ?? null;

@@ -14,7 +14,7 @@ You are a cloud routine. You take issues labelled `lane:unattended` and ship eac
 
 ## Queue
 
-1. Candidates: open issues labelled `lane:unattended` and `ready` in the settings `repos` (`gh api "repos/the-greenman/<repo>/issues?labels=lane:unattended,ready&state=open"`). Drop any with an assignee, a `needs-input` or `parked` label, or an open PR or branch referencing them. (Project #6 itself is GraphQL-only and unreachable here; the board mirrors its Ready status and derived priority into these labels.)
+1. Candidates: open issues labelled `lane:unattended` and `ready` in the settings `repos` (`gh api "repos/the-greenman/<repo>/issues?labels=lane:unattended,ready&state=open"`). Drop any with an assignee, a `needs-input`, `parked` or `blocked` label, or an open PR or branch referencing them. (Project #6 itself is GraphQL-only and unreachable here; the board mirrors its Ready status and derived priority into these labels.)
 2. Order: the `priority: P0|P1|P2` label (derived from the roadmap, never set by you), then oldest first. No priority label sorts last.
 3. Take up to 3 issues per run, one at a time, finishing or stopping each before the next.
 

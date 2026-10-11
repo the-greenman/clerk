@@ -88,6 +88,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | `promote:ready` | `board topup` (intent) or the owner | `board promote`, which sets Status=Ready and the `ready` mirror |
 | `priority: P0` / `P1` / `P2` | `board` (derived from stories and epics; epics from `roadmap`) | queue, unattended-worker (ordering) |
 | `parked` | `roadmap --apply` (epic serves no ranked objective) | queue (held), `board` (excluded) |
+| `blocked` | `board` mirror of open blocked-by edges | queue (held), unattended-worker, wg-builder |
 | `needs-input` | a stopping routine; the human removes it | queue (held), `board` (never reclaimed), wg-steward |
 | `lane:unattended` | owner or filing agent | queue, unattended-worker |
 | `gate:auto-merge` | PR author per repo rule; wg-reviewer on approve | pr-upkeep (merge when clean) |
