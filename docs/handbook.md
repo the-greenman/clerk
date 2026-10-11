@@ -15,6 +15,10 @@ Every stage has the same parts:
 
 Records live in srs-programme, and code and briefs live in the clerk. Where a detailed doc already exists, the stage points to it rather than repeating it.
 
+## How we know
+
+`test/process.test.mjs` runs one full programme cycle as a fixture (domain, persona, problem, remedy, objective, epic, issue, PR, report, session), with one test group per stage below. It is the progress bar. A stage moves from theory to practice when its `test.todo` becomes a passing test; a Practice claim that the test contradicts is a bug in this handbook or in the code, and is fixed under its own issue.
+
 ## Principles
 
 These are the owner's standing rulings that every stage must respect.
@@ -74,6 +78,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 - Is a role read from records, or kept in code until a second group is chartered?
 - What is the difference between `method/agent` and `stewardship/agent`? Should one go?
 
+**Test:** test/process.test.mjs — stage 1 (passing (3), pending: roles read from records; analyst role)
+
 ## 2. Domain
 
 **Theory.** A domain is an area of work with a purpose, and what is in and out of scope. Every problem belongs to at least one domain. The domain tells us *when* a problem occurs.
@@ -95,6 +101,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 - Who affirms a domain, and how is one retired?
 - How does a domain relate to a working group's boundary or compass?
 
+**Test:** test/process.test.mjs — stage 2 (pending: every problem has a domain; domain says when)
+
 ## 3. Persona
 
 **Theory.** A persona is someone the work is for: their jobs and needs. Every problem is held by at least one persona. The persona tells us *who* the problem is for.
@@ -113,6 +121,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 - Is the persona set per programme or shared (for example, from muDemocracy)?
 - Do personas weight priority, or only qualify it?
 - How do we hear from a real persona, as opposed to a modelled one?
+
+**Test:** test/process.test.mjs — stage 3 (passing (1), pending: personas reach issues and priority)
 
 ## 4. Problem
 
@@ -134,6 +144,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 - What closes a problem: solved, set aside, or superseded? Who says so?
 - How often are suggestions reviewed, and by whom?
 
+**Test:** test/process.test.mjs — stage 4 (passing (2), pending: principle 2 gate (persona and domain); problem closure)
+
 ## 5. Remedy
 
 **Theory.** A remedy is a move that answers one or more problems. It carries a **falsifier** (what would show it failed) and a **return_when** (when to look again).
@@ -148,6 +160,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 **Open questions.**
 - Who checks a falsifier, and when: each report, or period close?
 - What happens when a falsifier fires?
+
+**Test:** test/process.test.mjs — stage 5 (passing (2), pending: falsifiers and return_when evaluated)
 
 ## 6. Objective and period
 
@@ -168,6 +182,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 - How does a period end: a date, objectives met, or the owner's call?
 - What does the retrospective record (see stage 15)?
 
+**Test:** test/process.test.mjs — stage 6 (passing (2), pending: objective success criteria; period retrospective)
+
 ## 7. Epic
 
 **Theory.** An epic is tracked work that implements remedies, answers problems and serves an objective. An epic is also a **working group** (stage 10).
@@ -184,6 +200,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 **Open questions.**
 - Must an epic implement a remedy before it can serve an objective?
 - Is every epic a working group, or only the chartered ones?
+
+**Test:** test/process.test.mjs — stage 7 (passing (2), pending: epic is a working group; remedy before serving an objective)
 
 ## 8. Work item
 
@@ -203,6 +221,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 - Should the problem link become a record or relation? What would it be?
 - Can a work item answer a problem directly, without an epic?
 
+**Test:** test/process.test.mjs — stage 8 (passing (1), pending: problem link as a record)
+
 ## 9. Priority and queue
 
 **Theory.** Priority flows down the chain: period rank, then epic, then story MoSCoW, then work item. A group may set local priorities by a ratified decision. The queue is fed before it runs dry.
@@ -218,6 +238,8 @@ Records carry who made them (`createdBy`) and sit in one of three layers.
 
 **Open questions.**
 - How does principle 2 enter priority: as a gate (no persona and domain means not ready), or as a weight?
+
+**Test:** test/process.test.mjs — stage 9 (passing (3), pending: principle 2 in priority)
 
 ## 10. Working groups (committees)
 
@@ -254,6 +276,8 @@ Its charter is records, and its rules are read from them.
 - Does a group's boundary map to a domain?
 - When does the hard-coded charter move into records: now, or at the second group?
 
+**Test:** test/process.test.mjs — stage 10 (passing (1), pending: charter read from records (quorum, cycle, budget, log))
+
 ## 11. Assignment and claim
 
 **Theory.** Before work starts, check that no branch or PR exists, then claim the issue (assignee, In progress, and a comment naming the branch). A dead claim is recovered.
@@ -267,6 +291,8 @@ Its charter is records, and its rules are read from them.
 
 **Open questions.** Should claiming be a clerk command, so humans and agents claim the same way?
 
+**Test:** test/process.test.mjs — stage 11 (passing (1), pending: a clerk command that claims)
+
 ## 12. Execution
 
 **Theory.** One issue per session, in a fresh worktree, with gates judged by exit code. The ship stages run: plan, design pause, review, docs, dogfood.
@@ -276,6 +302,8 @@ Its charter is records, and its rules are read from them.
 **Gap.** none recorded
 
 **Open questions.** none recorded
+
+**Test:** test/process.test.mjs — stage 12 (pending: no pure function to assert (briefs and scripts/wt only))
 
 ## 13. Review and merge
 
@@ -288,6 +316,8 @@ Its charter is records, and its rules are read from them.
 **Gap.** `wg-reviewer.md` moves a decision to `ratified` directly, which breaks principle 6.
 
 **Open questions.** Does the reviewer's quorum make a *group session*, so that ratification happens there?
+
+**Test:** test/process.test.mjs — stage 13 (passing (3), pending: reviewer quorum as a group session; pr-upkeep not hard-coded to one group)
 
 ## 14. Report, session and ratification
 
@@ -311,6 +341,8 @@ A session has attendees, a time, and an agenda in this order: decisions since th
 **Open questions.**
 - Should the pause rule read `receives` instead of the thumbs-up?
 - What is the quorum for a group-level session?
+
+**Test:** test/process.test.mjs — stage 14 (passing (4), pending: endSession exercise bug; group quorum from charter; pause rule reads receives)
 
 ## 15. Measurement and retrospective
 
@@ -343,6 +375,8 @@ A session has attendees, a time, and an agenda in this order: decisions since th
 - Can I1 be computed now, given that personas and domains are not yet affirmed?
 - What baseline do we compare against: the first two cycles?
 - Who rules on the retrospective: the owner's session, every time?
+
+**Test:** test/process.test.mjs — stage 15 (pending: indicators I1-I4, revisit_when, falsifier and retrospective loop (only routine drift is checked))
 
 ---
 
