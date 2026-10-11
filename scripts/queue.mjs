@@ -55,7 +55,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (process.argv.includes("--json")) console.log(JSON.stringify(r, null, 2));
   else {
     const line = (x) => `  ${(x.priority ?? "--").padEnd(3)} ${x.ref.padEnd(22)} ${x.created}  [${x.lanes.join(",")}] ${x.title}`;
-    console.log(`Queued (${r.queued.length}) — the next run takes up to 3 general + 1 wg, top down:`);
+    const n = (lane) => r.queued.filter((x) => x.lanes.includes(lane)).length;
+    console.log(`Queued (${r.queued.length}: ${n("general")} general, ${n("wg")} wg) — the next run takes up to 3 general + 1 wg, top down:`);
     console.log(r.queued.map(line).join("\n") || "  (empty)");
     console.log(`\nHeld (${r.held.length}):`);
     console.log(r.held.map((x) => `${line(x)}\n        held: ${x.held.join("; ")}`).join("\n") || "  (none)");

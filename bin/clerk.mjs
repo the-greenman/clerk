@@ -4,6 +4,7 @@
 import { createInterface } from 'node:readline';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { OWNER_LOG, GROUP_LOG, GROUP_NAME } from '../lib/practice/roles.mjs';
 import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/adapters/cli.mjs';
@@ -37,6 +38,15 @@ if (argv[0] === 'help' || argv[0] === '--help') {
   process.exit(0);
 }
 if (TOOLS[argv[0]]) {
+  // Every tool but wt works on a programme repo (an SRS repo, so it has .srs/). Say so plainly instead of failing deep inside.
+  if (argv[0] !== "wt") {
+    const i = argv.indexOf("--repo");
+    const repo = resolve(argv[0] === "board" ? process.env.CLERK_REPO || "." : i >= 0 ? argv[i + 1] : ".");
+    if (!existsSync(resolve(repo, ".srs"))) {
+      console.error(`${repo} is not a programme repository (no .srs/). Run from a programme checkout or pass --repo <path>${argv[0] === "board" ? " (board: set CLERK_REPO)" : ""}, e.g. ~/dev/semanticops/srs-programme`);
+      process.exit(2);
+    }
+  }
   const f = fileURLToPath(new URL('../scripts/' + TOOLS[argv[0]][0], import.meta.url));
   const r = spawnSync(f.endsWith('.mjs') ? process.execPath : 'bash', [f, ...argv.slice(1)], { stdio: 'inherit' });
   process.exit(r.status ?? 1);
