@@ -1,0 +1,26 @@
+{
+  "id": "de3046c2-0909-424b-8044-c296c1709c9d",
+  "namespace": "com.mudemocracy.governance",
+  "name": "decision_kind",
+  "version": 1,
+  "description": "Which kind of standing choice this decision is; each kind has its own frame.",
+  "aiGuidance": {
+    "purpose": "Optional. The kind of promise the decision makes about the future. Choose one. A kind is worth having only while it differs from the others in how the decision is framed or reviewed; if two kinds read the same in practice, merge them.",
+    "extraction": "Frames, one per kind. purpose: \"We exist to X, for Y.\" Reviewed when each new epic is tested against it. boundary: \"X covers A, not B.\" Reviewed when work keeps landing on the edge. premise: \"We work as if X.\" A belief held true enough to act on. Reviewed when practice keeps contradicting it. preference: \"X over Y, unless Z.\" Reviewed when the unless-case keeps firing. A preference decision ratifies a method principle record rather than restating it. policy: \"Every X must Y; measured by I.\" Reviewed by the indicator each cycle. design: \"We model X as Y, because principle P.\" Reviewed at the next case of the same pattern. mandate: \"Group G may X within M.\" Reviewed at each report. See docs/decision-log.md in the clerk."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "valueDomain": "closed",
+    "allowedValues": [
+      "purpose",
+      "boundary",
+      "premise",
+      "preference",
+      "policy",
+      "design",
+      "mandate"
+    ]
+  },
+  "createdAt": "2026-10-11T00:00:00Z"
+}

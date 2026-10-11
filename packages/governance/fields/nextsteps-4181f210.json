@@ -8,7 +8,8 @@
       }
     ],
     "extraction": "Look for action assignments after the decision point: X will do Y by Z, the first step is..., or concrete commitments. Extract owner and timing if named.",
-    "purpose": "Lists concrete follow-up actions that emerge from the decision, with named owners and timing where stated. May be empty if no follow-up actions were recorded."
+    "purpose": "Legacy field, kept for existing records. Prefer a linked issue for each follow-up action.",
+    "negativeGuidance": "Do not list tasks here; tasks are linked issues (owner ruling D3). A task needs an owner, a due date and a project, and lives where those are tracked."
   },
   "createdAt": "2026-05-26T00:00:00Z",
   "description": "Actions or tasks that emerge from the decision.",
@@ -17,7 +18,7 @@
     "format": "plain"
   },
   "id": "4181f210-f4be-5587-950e-890eda2a5590",
-  "instructions": "List the concrete tasks that follow from the decision, with an owner and a deadline where they were named — who is taking this on, and by when. There may be none, and that is fine; only record follow-up that was actually agreed.",
+  "instructions": "Do not list tasks here. Tasks are linked issues, each with an owner and a due date (owner ruling D3). Use this field only for a short pointer to those issues.",
   "name": "next_steps",
   "namespace": "governance",
   "version": 1
