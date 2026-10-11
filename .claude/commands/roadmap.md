@@ -6,7 +6,7 @@ allowed-tools: Bash, Read
 
 # /roadmap — sequence a program into iterations
 
-Canonical copy (the-greenman/clerk). Board is GitHub Project #6 "SemanticOps"; stories and epics live in `the-greenman/semanticops.com`.
+Canonical copy (the-greenman/clerk). How the board works: [docs/board.md](../../docs/board.md). Board is GitHub Project #6 "SemanticOps"; stories and epics live in `the-greenman/semanticops.com`.
 Program: **$ARGUMENTS** (an epic issue or a milestone).
 
 **Epic priority is never set here.** It is derived by `clerk roadmap` from the srs-programme period/objective ranking (the only writer of epic priority). This command only sequences child issues into iterations.

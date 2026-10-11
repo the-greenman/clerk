@@ -6,7 +6,7 @@ allowed-tools: Bash, Read
 
 # /triage — story-driven priority pass
 
-Canonical copy (the-greenman/clerk). Scope: **$ARGUMENTS** (a story `#N`, a repo name, or `all`; default `all`).
+Canonical copy (the-greenman/clerk). How the board works: [docs/board.md](../../docs/board.md). Scope: **$ARGUMENTS** (a story `#N`, a repo name, or `all`; default `all`).
 
 Board: GitHub Project #6; story repo `the-greenman/semanticops.com`. Implementation priority is **derived from user stories**, never hand-set. Epic priority is derived by `clerk roadmap` from the srs-programme period ranking, never set here. Run the tool; do not re-implement it.
 

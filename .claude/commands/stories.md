@@ -6,7 +6,7 @@ allowed-tools: Bash, Read
 
 # /stories — maintain the story layer
 
-Canonical copy (the-greenman/clerk). User stories (label `user-story`, in `the-greenman/semanticops.com`) are the human value layer that drives implementation priority on GitHub Project #6. Humans set MoSCoW on stories; everything below them is derived. Epic priority is derived by `clerk roadmap` from the srs-programme period ranking and is never set by hand.
+Canonical copy (the-greenman/clerk). How the board works: [docs/board.md](../../docs/board.md). User stories (label `user-story`, in `the-greenman/semanticops.com`) are the human value layer that drives implementation priority on GitHub Project #6. Humans set MoSCoW on stories; everything below them is derived. Epic priority is derived by `clerk roadmap` from the srs-programme period ranking and is never set by hand.
 
 `GHP` = `clerk board` (from a programme checkout) or `node ~/dev/semanticops/clerk/scripts/gh-project.mjs`.
 

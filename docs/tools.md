@@ -15,7 +15,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | `steward` | Guard against false closes | Daily | closed issues (settings `governed_repos`) | with `--fix`: reopen and comment | srs-programme `derive-priority.yml` (daily 06:15, `--fix`); owner |
 | `check` | Method rules: two poles per tension, one tension per principle, boundaries | CI, human | programme records | nothing | owner |
 | `conformance` | Programme repo is an SRS repo and validates | CI | programme repo | nothing | validate.yml |
-| `board` | Story-driven priority on GitHub Project #6 (`gh-project.mjs`); slash commands `/roadmap`, `/stories`, `/triage` in `.claude/commands/` are the canonical copies | Hourly; human | issues, board | board fields, mirror labels, comments | board-sync.yml, roadmap |
+| `board` | Story-driven priority on GitHub Project #6 (`gh-project.mjs`; how it works: [board.md](board.md)); slash commands `/roadmap`, `/stories`, `/triage` in `.claude/commands/` are the canonical copies | Hourly; human | issues, board | board fields, mirror labels, comments | board-sync.yml, roadmap |
 | `routines` | Drift between cloud triggers (a dump from the RemoteTrigger `list`), standing-job records and `routines/*.md`: `routines --check <dump.json> [--repo <programme>] [--json]`; exit 1 on any drift but stale check-ins | Human; `/routines`, `/session` | trigger dump, programme standing-job records, `git ls-files routines/` | nothing | owner |
 | `wt` | Create, list, prune git worktrees | Human | git | worktrees | `scripts/session`, owner |
 | `fetch-srs` | Download the pinned srs CLI, print `SRS_CLI_PATH=` | Human; CI | `.github/workflows/validate.yml` of the programme repo | `/tmp/srs-cli` | every script and workflow needing srs |
