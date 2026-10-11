@@ -8,11 +8,11 @@
     "title": "Persona",
     "theory": "A persona is someone the work is for: their jobs and needs. It tells us *who* a problem is for. The shared persona stays general. Each domain adds a **persona-in-domain** (title, goals, jobs, needs) that `refines` the shared persona and points to exactly one domain with `in-domain`. A problem is `held-by` the persona-in-domain.",
     "status": "partial",
-    "practice": "- Type `com.semanticops.method/persona` (title, summary, jobs, needs): 5 records, all in Suggestions.\n- Type `com.semanticops.method/persona-in-domain`, field `goals` and relation `in-domain` are defined in the clerk method package (clerk#34, merged 2026-10-11). They are not yet installed in srs-programme.\n- 110 `held-by` edges, all to shared personas.\n- `clerk roadmap --explain` shows personas as labels, marked \"suggested\".",
+    "practice": "- Type `com.semanticops.method/persona` (title, summary, jobs, needs): 5 records, all in Suggestions.\n- Type `com.semanticops.method/persona-in-domain`, field `goals` and relation `in-domain`: method package v1 (clerk#34), installed in srs-programme (srs-programme#105).\n- 3 persona-in-domain records, all suggestions, all in Evidence-backed writing: Writer, AI agent, and A person working with AI.\n- 15 `held-by` edges point to a persona-in-domain; the rest still point to shared personas, as domains not yet walked are allowed to (decision e4a9b0ac).\n- `clerk roadmap --explain` shows personas as labels, marked \"suggested\".",
     "gaps": [
-      "No persona is affirmed, and no persona-in-domain exists in the data yet.",
       "Personas never reach issues, priority or assignment.",
-      "The exactly-one `in-domain` rule will be checked in clerk `check-method`, not in core, until the process settles (decision 071eadb2)."
+      "The exactly-one `in-domain` rule will be checked in clerk `check-method`, not in core, until the process settles (decision 071eadb2).",
+      "No persona or persona-in-domain is affirmed, and only Evidence-backed writing has persona-in-domain records."
     ],
     "open_questions": [
       "Do personas weight priority, or only qualify it?",
@@ -21,7 +21,7 @@
     "test": "Stage 3: 1 passing; pending: personas reach issues and priority."
   },
   "createdAt": "2026-10-11T18:33:28.755546973+00:00",
-  "updatedAt": "2026-10-11T18:33:28.755555020+00:00",
+  "updatedAt": "2026-10-11T18:41:02.755624905+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",

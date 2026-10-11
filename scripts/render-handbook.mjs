@@ -18,20 +18,28 @@ const OUT = join(ROOT, "docs", "handbook.md");
 const SRS = process.env.SRS_CLI_PATH || "srs";
 const BANNER = "<!-- Rendered from handbook/ (an SRS repository) by scripts/render-handbook.mjs. Do not edit: change the records. -->\n\n";
 
+const fail = (msg) => { console.error(`handbook: ${msg}`); process.exit(1); };
+
 function srs(...args) {
-  const out = JSON.parse(execFileSync(SRS, [...args, "--repo", REPO], { encoding: "utf8", maxBuffer: 64 << 20 }));
-  if (!out.ok) throw new Error(`srs ${args[0]} ${args[1]}: ${out.diagnostics.join("; ")}`);
+  let out;
+  try {
+    out = JSON.parse(execFileSync(SRS, [...args, "--repo", REPO], { encoding: "utf8", maxBuffer: 64 << 20, stdio: ["ignore", "pipe", "pipe"] }));
+  } catch (error) {
+    fail(`${SRS} ${args.slice(0, 2).join(" ")} failed: ${error.stderr || error.stdout || error.message}`);
+  }
+  if (!out.ok) fail(`srs ${args.slice(0, 2).join(" ")}: ${out.diagnostics.join("; ")}`);
   return out.payload;
 }
 
 const { summary } = srs("repo", "validate");
-if (summary.errors > 0) { console.error(`handbook: ${summary.errors} validation errors (srs repo validate --repo handbook)`); process.exit(1); }
+if (summary.errors > 0) fail(`${summary.errors} validation errors (srs repo validate --repo handbook)`);
 
 const { containerId, identityInstanceId } = JSON.parse(readFileSync(join(REPO, "manifest.json"), "utf8")).container;
 const composition = srs("composition", "list").compositions.find((c) => c.name === "handbook");
+if (!composition) fail("no composition named handbook in handbook/");
 const { rendered, diagnostics } = srs("render", "composition", "--view", composition.id, "--container", containerId,
   "--exclude", identityInstanceId, "--view-format", "markdown");
-if (diagnostics.length) { console.error(`handbook: render diagnostics: ${JSON.stringify(diagnostics)}`); process.exit(1); }
+if (diagnostics.length) fail(`render diagnostics: ${JSON.stringify(diagnostics)}`);
 
 const text = BANNER + rendered.trimEnd() + "\n";
 if (process.argv.includes("--check")) {

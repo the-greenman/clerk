@@ -69,7 +69,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | programme-board-sync.yml | Promote intents, reconcile board and labels | push, hourly, dispatch | `board sync` (project, story repo, mirror repos from settings) | BOARD_SECRET or BOARD_TOKEN | labels, board |
 | programme-ground.yml | Grounding report (I1), last 7 days | daily, dispatch | `ground --since` (7 days) to the job summary | GITHUB_TOKEN | nothing |
 | test.yml (clerk) | The clerk's own tests | push, PR | `npm test` | | nothing |
-| validate.yml (clerk) | The handbook is valid and `docs/handbook.md` matches its records; holds the clerk's own pin `SRS_RUST_CLI_TAG` | push, PR | `fetch-pinned-srs --repo .`, `render-handbook --check` | GITHUB_TOKEN | nothing |
+| validate.yml (clerk) | The handbook is valid and `docs/handbook.md` matches its records; holds the clerk's own pin `SRS_RUST_CLI_TAG`, bumped in the same PR as srs-programme's `validate.yml` pin so the handbook and the programme read with one build | push, PR | `fetch-pinned-srs --repo .`, `render-handbook --check` | GITHUB_TOKEN | nothing |
 
 ## Routines (cloud, briefs in `routines/`; lifecycle in [routines.md](routines.md))
 

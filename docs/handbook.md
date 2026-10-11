@@ -103,7 +103,7 @@ flowchart LR
 
 A scout or any participant writes a suggestion under its own actor (`createdBy`). The owner affirms by forking it into Affirmed, which keeps a `derived-from` link back to the suggestion. Set aside is a reversible no. Readers resolve every link to its affirmed end through `canon()` (follow `derived-from`).
 
-**Where it stands.** Seven domains exist, all still suggestions. The persona-in-domain type and the `in-domain` relation are defined in the clerk's method package (clerk#34) but not yet installed in srs-programme, so today every `held-by` points to a shared persona. The gate that refuses an affirmed problem with no affirmed persona and domain is ruled (decision e3ed9e54) and not yet built (clerk#35). The stages Domain, Persona, Problem and Remedy have the detail.
+**Where it stands** changes week by week. The stages Domain, Persona, Problem and Remedy, in "Stage by stage", hold the current state.
 
 
 #### How work moves across the boards
@@ -174,6 +174,8 @@ flowchart TD
 
 **The central group.** Work with no `wg:` label belongs to the central group, SemanticOps, held by the Owner role. Its seats are the owner's builder and reviewer, plus agents `authorised-by` the Owner role, such as the nightly `agent:unattended-worker`. The central group never claims a delegated group's work.
 
+**Proposed rulings, not yet ratified** (srs-programme#113): SemanticOps is the root decision-making authority for its domain, and other bodies such as muDemocracy are separate (31e40305); the central group undertakes all work no group holds by delegation (4fca091f); anyone working on a group's work joins that group and works within its practices (ccd593c3); a group is chartered only with a known domain, a problem set and standing orders (9a45c0a1).
+
 **Groups today.** WG Third-party ready (semanticops.com#31, `wg:third-party-ready`) is in force. WG Agent-supported editor (semanticops.com#29, `wg:agent-editor`) has been chartered as records. A new group is chartered only on a trigger: a steady ready queue that needs delegated merges.
 
 **Chartering.** `clerk charter` writes the whole charter as drafts and a proposed decision; an owner session ratifies it and asserts `delegates`. The steps are in stage 10. The briefs the members follow: [routines/working-groups.md](../routines/working-groups.md).
@@ -234,24 +236,24 @@ A **routine** is a cloud agent that runs a brief on a trigger. A **workflow** is
 ```mermaid
 flowchart LR
   subgraph Allocate
-    BS["board-sync<br/>hourly"]
-    RD["roadmap --apply<br/>daily 06:15, on push"]
-    AN["analyst<br/>daily 12:00, if queue dry"]
+    BS["board-sync"]
+    RD["roadmap --apply"]
+    AN["analyst<br/>if the queue runs dry"]
   end
   subgraph Build
-    BU["wg-builder<br/>on ready / on merge"]
-    UW["unattended worker<br/>nightly 00:00"]
+    BU["wg-builder"]
+    UW["unattended worker"]
   end
   subgraph Review
-    RV["wg-reviewer<br/>on PR events"]
-    UP["pr-upkeep<br/>every 15 min"]
-    SC["steward --fix<br/>daily 06:15"]
-    GD["ground (I1)<br/>daily"]
+    RV["wg-reviewer"]
+    UP["pr-upkeep"]
+    SC["steward --fix"]
+    GD["ground (I1)"]
   end
   subgraph Report
-    WS["wg-steward<br/>daily 11:30 cycle close"]
-    DG["digest<br/>daily 07:20"]
-    HW["handbook watcher<br/>weekly"]
+    WS["wg-steward<br/>cycle close"]
+    DG["digest"]
+    HW["handbook watcher"]
   end
   RD --> BS --> BU
   AN -->|files ready issues| BS
@@ -264,6 +266,8 @@ flowchart LR
   DG -->|semanticops.com#33| OS
   HW -->|handbook PR| OS
 ```
+
+Exact schedules and triggers live in [tools.md](tools.md); this table says what each one is for.
 
 | Job | Runs | Kind | What it does |
 |---|---|---|---|
@@ -334,7 +338,8 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Practice**:
 - Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).
 - 7 domain records, all in Suggestions: Deep context, Programme coordination, Semantic records, Agent memory, Group meaning ownership, Evidence-backed writing, Stance.
-- 6 domain containers exist. Deep context nests Semantic records, Group meaning ownership and Agent memory (decision dbaa4716).
+- 6 domain containers exist. Evidence-backed writing's outline holds its clusters and their problems (srs-programme#112).
+- Deep context nests Semantic records, Group meaning ownership and Agent memory (decision dbaa4716).
 - `clerk ground` reads domains through `contains` (domain to cluster to problem) to compute I1. Nothing else reads them.
 - Plan: [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md), walking Evidence-backed writing and Agent memory first.
 
@@ -343,6 +348,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - Clusters still hang off domains by `contains` edges as well as by container outline: two groupings for one goal, until readers switch to the outline (decision a6280447).
 - Nothing checks that a problem has a domain.
 - An affirmed domain is a fork, so its container identity still names the suggestion; readers resolve it with `canon()`.
+- Proposed decision a8aabd01 lets a problem sit in a domain with no cluster, or a cluster of its own; the Theory above still puts every problem under a cluster. Until it is ratified, both readings are live.
 
 **Open questions**:
 - How is a domain retired?
@@ -359,14 +365,15 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - Type `com.semanticops.method/persona` (title, summary, jobs, needs): 5 records, all in Suggestions.
-- Type `com.semanticops.method/persona-in-domain`, field `goals` and relation `in-domain` are defined in the clerk method package (clerk#34, merged 2026-10-11). They are not yet installed in srs-programme.
-- 110 `held-by` edges, all to shared personas.
+- Type `com.semanticops.method/persona-in-domain`, field `goals` and relation `in-domain`: method package v1 (clerk#34), installed in srs-programme (srs-programme#105).
+- 3 persona-in-domain records, all suggestions, all in Evidence-backed writing: Writer, AI agent, and A person working with AI.
+- 15 `held-by` edges point to a persona-in-domain; the rest still point to shared personas, as domains not yet walked are allowed to (decision e4a9b0ac).
 - `clerk roadmap --explain` shows personas as labels, marked "suggested".
 
 **Gap**:
-- No persona is affirmed, and no persona-in-domain exists in the data yet.
 - Personas never reach issues, priority or assignment.
 - The exactly-one `in-domain` rule will be checked in clerk `check-method`, not in core, until the process settles (decision 071eadb2).
+- No persona or persona-in-domain is affirmed, and only Evidence-backed writing has persona-in-domain records.
 
 **Open questions**:
 - Do personas weight priority, or only qualify it?
@@ -386,7 +393,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - SP-01 to SP-66 exist; 47 are affirmed as forks of their suggestions.
 - Problems group into clusters. Parked issues are sources for problems, never bulk imports.
 - **Duplicate guard:** search the trackers and comment rather than file a near-duplicate.
-- The gate is ruled and not built (clerk#35, blocked on the package install).
+- The gate is ruled and not built (clerk#35, in the unattended lane).
 
 **Gap**:
 - A problem can be affirmed with no persona and no domain, which breaks the rule above.
