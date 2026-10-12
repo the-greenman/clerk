@@ -42,4 +42,12 @@ ACKED=7; eq "not paused when one is acked" "$(wg_paused "$(rep '[7,8]')")" ok
 ACKED=; eq "not paused with fewer than 2 reports" "$(wg_paused "$(rep '[8]')")" ok
 eq "stranger's report ignored" "$(wg_paused "$(rep '[7,8]' | jq '.[]|=(.author_association="NONE")')")" ok
 wg_reactions() { return 1; }; eq "fail closed on unreadable reactions" "$(wg_paused "$(rep '[7,8]')")" "paused: reactions unreadable"
+# ordinary rules: an empty group label must still route (#61)
+oa() { eq "ordinary: $1" "$(ordinary_action "$2" "$3" "$4")" "$5"; }
+oa "ungrouped auto-merge CLEAN"   ""     "gate:auto-merge"  CLEAN  merge
+oa "ungrouped auto-merge BEHIND"  ""     "gate:auto-merge"  BEHIND update-branch
+oa "ungrouped owner-merge BEHIND" ""     "gate:owner-merge" BEHIND update-branch
+oa "ungrouped auto-on BEHIND"     ""     "auto-on"          BEHIND update-branch
+oa "grouped is left to its group" "wg:x" "gate:auto-merge"  CLEAN  ""
+oa "ungrouped no gate CLEAN"      ""     ""                 CLEAN  ""
 exit $FAIL

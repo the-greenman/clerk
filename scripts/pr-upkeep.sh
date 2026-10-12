@@ -80,6 +80,13 @@ wg_verdict() {
   [ "$q" = ok ] && [ "$4" -ge "$WG_BUDGET" ] && q="over budget ($4 of $WG_BUDGET merged this cycle)"
   echo "$q"
 }
+ordinary_action() { # wg gate state -> merge | update-branch | nothing; a labelled group is handled by its own rules
+  case "$1:$2:$3" in
+    [!:]*:*) ;;  # non-empty group (a bare ? would also match the leading ':' of an empty one)
+    *:*gate:auto-merge*:CLEAN) echo merge ;;
+    *:*gate:auto-merge*:BEHIND|*:*gate:owner-merge*:BEHIND|*:*auto-on*:BEHIND) echo update-branch ;;
+  esac
+}
 [[ "${BASH_SOURCE[0]}" != "$0" ]] && return 0  # sourced by the test: functions only
 
 APPLY=0; DIGEST=0; PROGRAMME="$PWD"
@@ -141,11 +148,9 @@ for r in $REPOS; do
         G_WAIT[$wg]+="- $pr $title ($why)"$'\n'
       fi
     fi
-    case "$wg:$gate:$state" in
-      ?*:*) ;;
-      *:*gate:auto-merge*:CLEAN)  act "merge $pr" gh pr merge "$n" -R "$OWNER/$r" --merge ;;
-      *:*gate:auto-merge*:BEHIND|*:*gate:owner-merge*:BEHIND|*:*auto-on*:BEHIND)
-                                act "update-branch $pr" gh pr update-branch "$n" -R "$OWNER/$r" ;;
+    case $(ordinary_action "$wg" "$gate" "$state") in
+      merge)         act "merge $pr" gh pr merge "$n" -R "$OWNER/$r" --merge ;;
+      update-branch) act "update-branch $pr" gh pr update-branch "$n" -R "$OWNER/$r" ;;
     esac
     case "$gate:$state" in
       *gate:owner-merge*:CLEAN) READY+="- $pr $title"$'\n' ;;
