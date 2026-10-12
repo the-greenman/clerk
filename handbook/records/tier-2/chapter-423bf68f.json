@@ -1,0 +1,19 @@
+{
+  "instanceId": "423bf68f-93f9-4cfe-9db6-a5f801c662ee",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "Templates",
+    "body": "> **Proposed, not in force** (clerk#56). These are the templates for the intake cycle (\"Intake: how a request reaches a group\") and the group's report. Briefs copy them; a template changes here first.\n\nEach step's comment starts with a marker line that tools can find. Fields in *italics* are optional. Write in plain words, and keep one request per issue.\n\n**T1. Request** (anyone; an issue labelled `intake`, in semanticops.com unless the repo is obvious)\n\n```\nKind: bug | friction | feature | question\nWhat happened / what is wanted:\nWhere: repo, command or screen, version or build (e.g. srs v0.1.0-build.502)\nWhile doing: the task you were on (issue, PR or session)\nWho it is for: the persona you think has this problem\nEvidence: output, link, repro steps\n*Guess at domain:*\n```\n\n**T2. Placement** (router; comment on the request)\n\n```\n<!-- intake-placement --> domain=<domain id> group=<wg:label | central | none> confidence=<high|medium|low>\nDomain: <title>, because <the in_scope line it fits>; not <nearest other domain>, because <its out_of_scope line>\nPersona in domain: <title or \"none yet\">\nProblem: SP-nn | \"new: <one-line statement>\"\nDuplicates checked: <searches run>; related: <links or none>\n```\n\n**T3. Assessment** (group analyst; comment on the request)\n\n```\n<!-- intake-assessment --> verdict=<accept|merge-into|return|set-aside|needs-ruling> kind=<bug|friction|feature>\nReproduced: yes | no | not applicable, with how\nCore issue: <one sentence: what is actually wrong, and for whom>\nMandate: inside, under <ruling or charter clause> | outside, because <reason>\nQueue: <ready count> ready against a budget of <n>; local priorities: <decision id or none>\nRecommendation: now | next cycle | later, because <reason>\n*Severity (bugs): data loss | false green | wrong output | inconvenience*\n```\n\n**T4. Proposal** (group synthesizer; comment on the request)\n\n```\n<!-- intake-proposal --> epic=<repo#n | new> escalation=<decision id | none>\nProblem: SP-nn | suggested problem <record id> held-by <persona-in-domain>\nIssues filed: <repo#n: title> (sub-issue of <story or epic>), one line each\nBugs flagged: <repo#n>\nEpic placement: <own epic> | proposed: <other or new epic>, escalated as <decision id>\nThen: request closed | waits on <decision id>\n```\n\n**T5. Bug** (an issue in a governed repo, filed from T4)\n\n```\nAnswers: SP-nn | No affirmed problem yet: <one line>\nFound while: <task, issue or session>\nVersion: <build or commit>\nSteps: 1. ... 2. ...\nExpected: ...\nActual: ...\nSeverity: data loss | false green | wrong output | inconvenience\nDone when: <a check that fails now and passes after the fix>\n```\n\n**T6. Intake section of a cycle report** (steward)\n\n```\nIntake: received R, placed in by the router P, accepted A, merged M, returned (misplaced) X, set aside S, escalated E\nWaiting longer than one cycle: <links>\nI5: median days request to assessment = d; returned share = X/P; useful | noisy | misleading\n```\n\n**T7. Escalation** is the existing one: one proposed decision with the fact, why it matters, the options and their consequences, and a recommendation ([decision-log.md](decision-log.md))."
+  },
+  "createdAt": "2026-10-12T08:53:09.702341497+00:00",
+  "updatedAt": "2026-10-12T08:53:09.702351562+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:clerk-session",
+    "name": "Clerk session (clerk#56)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

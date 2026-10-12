@@ -138,6 +138,59 @@ flowchart TD
 Full detail, every command and the API budget: [board.md](board.md).
 
 
+#### Intake: how a request reaches a group
+
+> **Proposed, not in force** (clerk#56, `plans/wg-srs-operations.md`). This chapter is Theory until the owner's session ratifies decisions D2 to D4.
+
+Work should never start as a finished `ready` issue that nobody assessed. A bug, a piece of friction or a feature idea first enters as a **request**. It is **placed** in a domain, and through the domain in a group. That group **assesses** it against its own priorities and queue, **proposes** what it becomes, **decides** inside its mandate (or escalates), and **reports** up.
+
+**The same shape at every level.** The programme, a working group and any future sub-group each run the same six steps. Only what the level looks across changes. A level places work one level down, and never decides for the level above.
+
+```mermaid
+flowchart TB
+  subgraph Programme["Programme: the central group (owner's session)"]
+    R0[Receive] --> P0["Place: across all domains"] --> A0["Assess: period ranking"] --> Pr0[Propose] --> D0["Decide: owner's session"]
+  end
+  subgraph Group["Working group (for example WG SRS operations)"]
+    R1[Receive] --> P1["Place: across its epics"] --> A1["Assess: queue, budget, local priorities"] --> Pr1[Propose] --> D1["Decide: group session"] --> Rep1[Report up]
+  end
+  P0 -->|"wg: label: the group's input queue"| R1
+  A1 -.->|misplaced: returned| P0
+  Pr1 -.->|"new epic, other group's epic, new ruling: escalate"| D0
+  Rep1 --> D0
+```
+
+**The steps, and who takes them.**
+
+1. **Receive.** Anyone, human or agent, files a request while doing work (the Request template, in Reference). Label `intake`. A session that hits friction files it at once and carries on; it does not fix it in passing.
+2. **Place.** The programme's router reads the domain records (purpose, in and out of scope) and the problem register. It runs the duplicate guard and posts a Placement. When a group's domain fits, it adds that group's `wg:` label, and the request is now in the group's **input queue**. When no group holds the domain, the request stays with the central group. When no domain fits, it adds `needs-input`, and the request becomes an exercise for the owner's session: perhaps a new domain.
+3. **Assess.** The group's analyst reproduces the request and posts an Assessment. The verdict is *accept*, *merge into* an existing issue, *return* (misplaced: the `wg:` label is removed and the request goes back to step 2), *set aside* (with a reason) or *needs a ruling* (an exercise, never work). The analyst judges against the group's mandate, its ready queue against its budget, and its local priorities. It never sets a priority.
+4. **Propose.** For an accepted request, the group's synthesizer posts a Proposal and files the issues in the governed repos, each with `Answers:` and as a sub-issue of the group's epic or story. Placement under a story is what gives the issue its priority, through the rollup. Bugs get the `bug` label and the bug track. If no affirmed problem fits, it writes a **suggested problem `held-by` a persona-in-domain** in srs-programme. That record is the durable form of the domain estimate: the domain is derived through it, never stored.
+5. **Decide.** Inside the mandate, the filed issues flow through the board as usual, and any group decision is ratified at the group's session. A new epic, a placement in another group's epic, or anything needing a new ruling goes up as one proposed decision.
+6. **Report.** The request is closed with links to what it became. The steward's cycle report carries an Intake section, and the router's misplacements are counted there.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Received: intake
+  Received --> Placed: Placement, wg label
+  Received --> Central: Placement, no group holds the domain
+  Received --> Exercise: Placement, no domain fits (needs-input)
+  Placed --> Received: Assessment returns it (misplaced)
+  Placed --> Accepted: Assessment accepts
+  Placed --> SetAside: Assessment sets it aside
+  Placed --> Exercise: needs a ruling
+  Accepted --> Done: Proposal filed issues, request closed
+  Accepted --> Escalated: new epic or other group's epic
+  Escalated --> Done: owner's session decides
+  SetAside --> [*]
+  Done --> [*]
+```
+
+**What is new.** One label (`intake`) and three comment markers (`<!-- intake-placement -->`, `<!-- intake-assessment -->`, `<!-- intake-proposal -->`), on the pattern of `<!-- wg-quorum -->`. Everything else is existing practice: domains, persona-in-domain, problems in Suggestions, the duplicate guard, the board, escalation. There is deliberately no intake record type, no board status and no command: `label:intake` is enough until intake regularly exceeds about ten items a week.
+
+**Measure.** Indicator I5, "Does intake flow?": the median days from Request to Assessment, and the share of placements returned as misplaced.
+
+
 #### Working groups and delegation
 
 The owner cannot judge every merge. So the owner **delegates**: a working group gets a mandate, decides and merges inside it, and reports back. Anything outside the mandate comes back to the owner as one proposed decision. This is how a co-op runs a subcommittee.
@@ -176,9 +229,54 @@ flowchart TD
 
 **Proposed rulings, not yet ratified** (srs-programme#113): SemanticOps is the root decision-making authority for its domain, and other bodies such as muDemocracy are separate (31e40305); the central group undertakes all work no group holds by delegation (4fca091f); anyone working on a group's work joins that group and works within its practices (ccd593c3); a group is chartered only with a known domain, a problem set and standing orders (9a45c0a1).
 
-**Groups today.** WG Third-party ready (semanticops.com#31, `wg:third-party-ready`) is in force. WG Agent-supported editor (semanticops.com#29, `wg:agent-editor`) has been chartered as records. A new group is chartered only on a trigger: a steady ready queue that needs delegated merges.
+**Groups today.** WG Third-party ready (semanticops.com#31, `wg:third-party-ready`) is in force. WG Agent-supported editor (semanticops.com#29, `wg:agent-editor`) has been chartered as records. WG SRS operations (`wg:srs-ops`) is proposed in `plans/wg-srs-operations.md` (clerk#56), with an input queue fed by intake (chapter "Intake"). A new group is chartered only on a trigger: a steady ready queue that needs delegated merges.
 
 **Chartering.** `clerk charter` writes the whole charter as drafts and a proposed decision; an owner session ratifies it and asserts `delegates`. The steps are in stage 10. The briefs the members follow: [routines/working-groups.md](../routines/working-groups.md).
+
+
+#### Stances: members built on eight archetypes
+
+> **Proposed, not in force** (clerk#56, decision D5). This chapter is Theory until the owner's session ratifies it.
+
+A group brings in members according to its purpose, and each member is built on one of **eight stances**. A stance is a position on three trade-offs:
+
+| Line | One pole | The other pole |
+|---|---|---|
+| 1 | **Observe**: how we work | **Act**: what we do |
+| 2 | **Stabilise**: consistency, care, reliability | **Disrupt**: drive forward, change |
+| 3 | **Focus**: projects and specific goals | **Zoom out**: open up and align systems |
+
+| Stance | Lines | Brings | Watch for (shadow) |
+|---|---|---|---|
+| Initiator | Act · Disrupt · Focus | starts what needs to begin | overdrive, blind to nuance |
+| Challenger | Act · Disrupt · Zoom out | questions what needs examining | constant friction |
+| Builder | Act · Stabilise · Zoom out | gives form to what needs it | over-engineering |
+| Synthesizer | Act · Stabilise · Focus | weaves what needs connecting | overdesign, rigidity |
+| Analyst | Observe · Disrupt · Focus | clarifies the core issue | paralysis by insight |
+| Rebel | Observe · Disrupt · Zoom out | exposes what needs revealing | destruction without direction |
+| Steward | Observe · Stabilise · Focus | protects what needs care | resistance to change |
+| Watcher | Observe · Stabilise · Zoom out | holds space for what needs time | passivity, delay |
+
+**Stances are relative to a boundary.** The labels are coordinates inside the boundary we have drawn, not fixed traits. A group has a stance relative to the programme, and its members have stances relative to the group. Draw a different boundary and the same agent may sit at a different point. So the same eight stances describe a domain, a group and a single agent: the process is fractal.
+
+**Seats are jobs; stances are archetypes.** A seat (steward, analyst, synthesizer, builder, reviewer, router) says what the member does. A stance says how it leans while doing it. Seat names and archetype names often coincide, but they need not: a reviewer is a **Challenger**. Some stances need no seat. Anyone who hits friction and files a request acts as an **Initiator**. Anyone who asks "why are we doing this at all?" acts as a **Rebel**, and that question becomes an exercise, never work.
+
+**Composition.** A group checks that every stance is present or reachable, pairs stances with their listed complements, and names its own shadow in its compass. Example (proposed): **WG SRS operations** is a *Steward* relative to the programme (Observe · Stabilise · Focus: how we work, kept reliable, for our current goals). Its complements are the Challenger (its reviewer) and the Initiator (everyone who files a request). Its shadow, hoarding the queue or turning requests away, is what indicator I5 watches.
+
+```mermaid
+flowchart LR
+  subgraph Programme["Programme boundary"]
+    W["Router: Watcher"]
+    subgraph G["WG SRS operations: a Steward in the programme"]
+      An["analyst: Analyst"] --> Sy["synthesizer: Synthesizer"] --> Bu["builder: Builder"] --> Rv["reviewer: Challenger"]
+      St["steward: Steward"]
+    end
+    Q["anyone filing a request: Initiator"] --> W --> An
+    Rv --> St
+  end
+```
+
+**In records.** A seat-holder (`stewardship/agent`, with `seat` and `actor_id`) is `derived-from` a stance agent (`method/agent`), which `instantiates` its archetype (`method/archetype`). No new type is needed; today only these links are missing.
 
 
 #### Decisions
@@ -409,6 +507,29 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Test**: Stage 4: 2 passing; pending: the persona and domain gate; problem closure.
 
 
+#### Intake
+
+**Theory**: A request (a bug, friction, a feature idea) enters a level's input queue, is placed in a domain and so in a group, is assessed by that group against its priorities and queue, and becomes proposed issues, flagged bugs and an epic placement. The same six steps (receive, place, assess, propose, decide, report) run at every level; a level never decides for the level above. Proposed, not in force (clerk#56, decisions D2 to D4).
+
+**Status**: theory only
+
+**Practice**:
+- Nothing implements intake. Work enters a group only as `ready` issues with its `wg:` label.
+- The nearest practice is the WG Third-party ready analyst (`routines/wg-analyst.md`), which files ruling-backed issues when the queue runs dry, with a duplicate guard and a fixed issue shape.
+- Proposed design, templates and charter: `plans/wg-srs-operations.md`; templates T1 to T6 in Reference.
+
+**Gap**:
+- No `intake` label, no Request issue form, no router or group-intake brief.
+- Domain estimates are never written: no persona-in-domain exists outside Evidence-backed writing.
+- `clerk charter` writes only steward, builder and reviewer seats, so an analyst or synthesizer seat must be added by hand.
+
+**Open questions**:
+- Who acts as the programme router before a routine exists: the owner's session, or any session under its own actor?
+- Should a request with no fitting domain wait for a new domain, or be held by the central group meanwhile?
+
+**Test**: Stage Intake: pending: placed before assessed; input queue is label plus wg label; seat stance read from records.
+
+
 #### Remedy
 
 **Theory**: A remedy is a move that answers one or more problems. It carries a **falsifier** (what would show it failed) and a **return_when** (when to look again). Agents suggest one to three remedies per domain; the owner affirms them; an existing epic implements each one.
@@ -529,6 +650,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Practice**:
 - **WG Third-party ready** (semanticops.com#31, `wg:third-party-ready`): in force. Charter decision `00567bf1`, group role `834b61fd` (the Owner role `delegates` to it), decision log `88c32389`. Charter fields on the role: quorum of 2 with the reviewer required, budget 10 delegated merges per cycle, cycle close 11:30 UTC, pause after 2 unacknowledged reports.
 - **WG Agent-supported editor** (semanticops.com#29, `wg:agent-editor`): chartered by `clerk charter`, charter decision `384a704a`, role `1fc9ce85`, log `e509eb61`.
+- **WG SRS operations** (`wg:srs-ops`): proposed only, not chartered (clerk#56, `plans/wg-srs-operations.md`). Domain SRS operations, five seats (steward, analyst, synthesizer, builder, reviewer), each seat built on a stance (chapter "Stances").
 - **Central group** (SemanticOps, the Owner role) holds all work with no `wg:` label.
 
 **Chartering, step by step.**
@@ -545,11 +667,13 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - Every group reports to the same issue (#31), a programme setting.
 - The analyst was added before its decision `b447e8ea` was ratified.
 - The compass is all Suggestions.
+- `clerk charter` hard-codes the steward, builder and reviewer seat briefs (`lib/practice/charter.mjs`) and links no seat to a stance.
 
 **Open questions**:
 - How is a group dissolved? There is no command or rule yet.
 - Which relation links an epic to its group? None fits; `clerk charter` names the epic in the role text.
 - Does a group's boundary map to a domain?
+- Where two groups work in the same repos (Third-party ready and the proposed SRS operations), which placement rule separates them? Proposed: a request naming a ruling, RFC requirement or invariant the tool breaks goes to Third-party ready; the rest goes to SRS operations.
 
 **Test**: Stage 10: 3 passing; pending: epic-group relation. Also test/charter.test.mjs.
 
@@ -675,6 +799,81 @@ The owner's standing rulings. Every stage must respect them.
 7. **Rules hold at their boundary.** A rule is valid inside the boundary that made it.
 8. **Outputs are projections.** Any task is understood within the whole picture. A document, a roadmap or an issue is one projection of the records, never a second source (decision f5b4656a). This handbook is one.
 9. **Dogfood everything.** We run the programme on our own tools, and log every bug and missing feature we hit as an issue.
+
+
+#### Templates
+
+> **Proposed, not in force** (clerk#56). These are the templates for the intake cycle ("Intake: how a request reaches a group") and the group's report. Briefs copy them; a template changes here first.
+
+Each step's comment starts with a marker line that tools can find. Fields in *italics* are optional. Write in plain words, and keep one request per issue.
+
+**T1. Request** (anyone; an issue labelled `intake`, in semanticops.com unless the repo is obvious)
+
+```
+Kind: bug | friction | feature | question
+What happened / what is wanted:
+Where: repo, command or screen, version or build (e.g. srs v0.1.0-build.502)
+While doing: the task you were on (issue, PR or session)
+Who it is for: the persona you think has this problem
+Evidence: output, link, repro steps
+*Guess at domain:*
+```
+
+**T2. Placement** (router; comment on the request)
+
+```
+<!-- intake-placement --> domain=<domain id> group=<wg:label | central | none> confidence=<high|medium|low>
+Domain: <title>, because <the in_scope line it fits>; not <nearest other domain>, because <its out_of_scope line>
+Persona in domain: <title or "none yet">
+Problem: SP-nn | "new: <one-line statement>"
+Duplicates checked: <searches run>; related: <links or none>
+```
+
+**T3. Assessment** (group analyst; comment on the request)
+
+```
+<!-- intake-assessment --> verdict=<accept|merge-into|return|set-aside|needs-ruling> kind=<bug|friction|feature>
+Reproduced: yes | no | not applicable, with how
+Core issue: <one sentence: what is actually wrong, and for whom>
+Mandate: inside, under <ruling or charter clause> | outside, because <reason>
+Queue: <ready count> ready against a budget of <n>; local priorities: <decision id or none>
+Recommendation: now | next cycle | later, because <reason>
+*Severity (bugs): data loss | false green | wrong output | inconvenience*
+```
+
+**T4. Proposal** (group synthesizer; comment on the request)
+
+```
+<!-- intake-proposal --> epic=<repo#n | new> escalation=<decision id | none>
+Problem: SP-nn | suggested problem <record id> held-by <persona-in-domain>
+Issues filed: <repo#n: title> (sub-issue of <story or epic>), one line each
+Bugs flagged: <repo#n>
+Epic placement: <own epic> | proposed: <other or new epic>, escalated as <decision id>
+Then: request closed | waits on <decision id>
+```
+
+**T5. Bug** (an issue in a governed repo, filed from T4)
+
+```
+Answers: SP-nn | No affirmed problem yet: <one line>
+Found while: <task, issue or session>
+Version: <build or commit>
+Steps: 1. ... 2. ...
+Expected: ...
+Actual: ...
+Severity: data loss | false green | wrong output | inconvenience
+Done when: <a check that fails now and passes after the fix>
+```
+
+**T6. Intake section of a cycle report** (steward)
+
+```
+Intake: received R, placed in by the router P, accepted A, merged M, returned (misplaced) X, set aside S, escalated E
+Waiting longer than one cycle: <links>
+I5: median days request to assessment = d; returned share = X/P; useful | noisy | misleading
+```
+
+**T7. Escalation** is the existing one: one proposed decision with the fact, why it matters, the options and their consequences, and a recommendation ([decision-log.md](decision-log.md)).
 
 
 #### The SRS elements behind the process
@@ -908,7 +1107,7 @@ What the clerk reads and writes in srs-programme. When a stage changes, these ar
 
 **Defined in**: GitHub (clerk `gh-project.mjs`)
 
-**Meaning**: `ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `wg:*`, `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.
+**Meaning**: `ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `wg:*`, `intake` (proposed, clerk#56: a request in a level's input queue), `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.
 
 **Read by**: `board sync`, `queue`, `claim`, `pr-upkeep`, every routine
 
