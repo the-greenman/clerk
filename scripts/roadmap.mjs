@@ -113,14 +113,16 @@ function main(argv) {
     const live = argv.includes("--yes") && !argv.includes("--dry-run");
     const ghp = process.env.GHP_SCRIPT;
     if (live && !ghp) throw new Error("GHP_SCRIPT (path to gh-project.mjs) is required with --yes");
-    const sh = (cmd, args, env = {}) => {
+    const sh = (cmd, args, env = {}, soft = false) => {
       console.log(`${live ? "run" : "dry-run"}: ${cmd} ${args.join(" ")}`);
-      if (live) execFileSync(cmd, args, { stdio: "inherit", env: { ...process.env, ...env } });
+      try { if (live) execFileSync(cmd, args, { stdio: soft ? "pipe" : "inherit", env: { ...process.env, ...env } }); }
+      catch (e) { if (!(soft && /HTTP 404|Label does not exist/.test(String(e.stderr)))) throw e; } // soft: a label the issue or repo lacks (clerk#42)
     };
     const OWNER = loadSettings(ROOT).githubOwner;
     for (const e of result.epics) {
       if (!e.parked) sh("node", [ghp ?? "$GHP_SCRIPT", "epic", "set", String(e.number), "--priority", e.priority], { GHP_STORY_REPO: e.repo });
-      sh("gh", ["issue", "edit", String(e.number), "-R", `${OWNER}/${e.repo}`, e.parked ? "--add-label" : "--remove-label", "parked"]);
+      sh("gh", e.parked ? ["api", "-X", "POST", `repos/${OWNER}/${e.repo}/issues/${e.number}/labels`, "-f", "labels[]=parked"]
+        : ["api", "-X", "DELETE", `repos/${OWNER}/${e.repo}/issues/${e.number}/labels/parked`], {}, !e.parked); // REST, not `gh issue edit` (GraphQL); removing an absent label is a 404, not a failure
     }
   } else console.log(JSON.stringify(result, null, 2));
 }

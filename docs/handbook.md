@@ -331,7 +331,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 #### Domain
 
-**Theory**: A domain is an area of work with a purpose and what is in and out of scope. It tells us *when* a problem occurs. A domain is a container whose identity is the domain record; its outline holds clusters at depth 0 and their problems at depth 1. A problem's domain is derived (problem `held-by` persona-in-domain `in-domain` domain), never stored. Domains nest by perspective. The owner affirms a domain in the srs-web Method editor.
+**Theory**: A domain is an area of work with a purpose and what is in and out of scope. It tells us *when* a problem occurs. A domain is a container whose identity is the domain record; its outline holds clusters at depth 0 and their problems at depth 1. A problem with no cluster sits at depth 0: early in a domain we do not yet know all its parts, so an unclustered problem is valid, never a gap. Where a cluster is required (an objective `addresses` clusters), a cluster holding one problem is valid. Clusters evolve, and problems move between them as understanding changes (owner, 2026-10-11). A problem's domain is derived (problem `held-by` persona-in-domain `in-domain` domain), never stored. Domains nest by perspective. The owner affirms a domain in the srs-web Method editor.
 
 **Status**: partial
 
@@ -348,7 +348,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - Clusters still hang off domains by `contains` edges as well as by container outline: two groupings for one goal, until readers switch to the outline (decision a6280447).
 - Nothing checks that a problem has a domain.
 - An affirmed domain is a fork, so its container identity still names the suggestion; readers resolve it with `canon()`.
-- Proposed decision a8aabd01 lets a problem sit in a domain with no cluster, or a cluster of its own; the Theory above still puts every problem under a cluster. Until it is ratified, both readings are live.
+- Decision a8aabd01 (unclustered problems and one-problem clusters are valid) is proposed, not yet ratified.
 
 **Open questions**:
 - How is a domain retired?

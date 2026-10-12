@@ -8,12 +8,12 @@
 //   answers        OPEN and opened without an `Answers:` / `No affirmed problem yet` line -> one comment
 // Every comment carries a hidden marker, so reruns are idempotent; an issue that already carries our
 // marker is never reopened again (a human who re-closes it has overruled us).
-// plan() is pure (rows in, actions out); the gh I/O is the thin layer below. The gh helper pattern is
-// copied from srs-rust/scripts/gh-project.mjs (separate repo, so a small copy rather than an import).
+// plan() is pure (rows in, actions out); the GitHub I/O is the thin REST layer below (lib/adapters/github.mjs).
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { answersOf } from "../lib/practice/grounding.mjs";
+import { issuesSince, list, closers } from "../lib/adapters/github.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
 // Go-forward only: history before this is never acted on (the weekly audit, srs-programme#38, reports it).
@@ -66,33 +66,24 @@ function gh(args, input) {
   if (r.status !== 0) throw new Error(`gh ${args.slice(0, 3).join(" ")} failed: ${r.stderr || r.error}`);
   return r.stdout;
 }
-const gql = (query, vars) => JSON.parse(gh(["api", "graphql", "--input", "-"], JSON.stringify({ query, variables: vars }))).data;
-
-const ISSUE_Q = `query($q:String!,$after:String){search(query:$q,type:ISSUE,first:50,after:$after){pageInfo{hasNextPage endCursor}
- nodes{... on Issue{number title body author{__typename} timelineItems(itemTypes:[CLOSED_EVENT],last:1){nodes{... on ClosedEvent{closer{__typename ... on PullRequest{merged}}}}} state stateReason createdAt closedAt labels(first:30){nodes{name}} comments(last:100){nodes{body}}
- subIssuesSummary{total} closedByPullRequestsReferences(first:10,includeClosedPrs:true){nodes{merged}}}}}}`;
-const CHILD_Q = `query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n){subIssues(first:100){nodes{number state comments(last:30){nodes{body}}}}}}}`;
+// Repo-scoped REST only (cloud sessions refuse GraphQL and search): the window's issues, then per closed issue its timeline
+// (closing PRs, commit closer) and, for epics, its sub-issues. Shapes match what plan() reads.
+const comments = (OWNER, repo, n) => list(`repos/${OWNER}/${repo}/issues/${n}/comments?per_page=100`).map((c) => c.body);
 
 export function fetchIssues(repo, days, cutoff = SINCE, OWNER) {
   const since = new Date(Math.max(Date.parse(cutoff), Date.now() - days * 864e5)).toISOString().slice(0, 10);
-  const seen = new Map();
-  for (const qual of [`closed:>=${since}`, `created:>=${since}`]) {
-    let after = null;
-    do {
-      const { search } = gql(ISSUE_Q, { q: `repo:${OWNER}/${repo} is:issue ${qual}`, after });
-      for (const n of search.nodes) if (n.number) seen.set(n.number, n);
-      after = search.pageInfo.hasNextPage ? search.pageInfo.endCursor : null;
-    } while (after);
-  }
-  return [...seen.values()].map((n) => {
-    const labels = names(n.labels.nodes);
-    let openChildren = [];
-    if (n.state === "CLOSED" && (labels.includes("epic") || n.subIssuesSummary.total > 0))
-      openChildren = gql(CHILD_Q, { o: OWNER, r: repo, n: n.number }).repository.issue.subIssues.nodes
-        .filter((c) => c.state === "OPEN").map((c) => ({ number: c.number, comments: c.comments.nodes.map((x) => x.body) }));
-    return { repo, number: n.number, title: n.title, body: n.body, state: n.state, stateReason: n.stateReason,
-      createdAt: n.createdAt, closedAt: n.closedAt, labels, comments: n.comments.nodes.map((c) => c.body),
-      closingPrs: n.closedByPullRequestsReferences.nodes, closer: n.timelineItems.nodes[0]?.closer || null, bot: n.author?.__typename === "Bot", openChildren };
+  const inWindow = (t) => t && t.slice(0, 10) >= since;
+  return issuesSince(`${OWNER}/${repo}`, since).filter((n) => inWindow(n.closed_at) || inWindow(n.created_at)).map((n) => {
+    const labels = names(n.labels), state = n.state.toUpperCase();
+    const subTotal = n.sub_issues_summary?.total ?? 0;
+    const openChildren = state === "CLOSED" && (labels.includes("epic") || subTotal > 0)
+      ? list(`repos/${OWNER}/${repo}/issues/${n.number}/sub_issues?per_page=100`).filter((c) => c.state === "open")
+        .map((c) => ({ number: c.number, comments: comments(OWNER, repo, c.number) }))
+      : [];
+    const { closingPrs, closer } = state === "CLOSED" ? closers(OWNER, repo, n.number) : { closingPrs: [], closer: null };
+    return { repo, number: n.number, title: n.title, body: n.body, state, stateReason: n.state_reason?.toUpperCase() ?? null,
+      createdAt: n.created_at, closedAt: n.closed_at, labels, comments: n.comments ? comments(OWNER, repo, n.number) : [],
+      closingPrs, closer, bot: n.user?.type === "Bot", openChildren };
   });
 }
 

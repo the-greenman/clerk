@@ -37,7 +37,18 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 
 ## Settings
 
-Nothing programme-specific is hard-coded. `lib/adapters/settings.mjs` reads the one `com.semanticops.programme/programme` record (title, github_owner, governed_repos, report_issue, digest_issue, board_project, board_story_repo, owner_actor) from the programme repo; `--repo` picks it. Env wins where CI needs it: `gh-project.mjs` uses `GHP_OWNER`, `GHP_PROJECT`, `GHP_STORY_REPO`, `GHP_MIRROR_REPOS` first and reads settings (from `CLERK_REPO` or the cwd) only for what is unset. The programme repo's own slug, worktree base (`~/dev/.wt/<name>`) and default branch are derived from its git remote. Working-group settings (label, members, quorum, budget, cycle close, pause limit, repos) are not here: they are the charter on each group's role record, read by `lib/adapters/groups.mjs` (`clerk groups`). 
+Nothing programme-specific is hard-coded. `lib/adapters/settings.mjs` reads the one `com.semanticops.programme/programme` record (title, github_owner, governed_repos, report_issue, digest_issue, board_project, board_story_repo, owner_actor) from the programme repo; `--repo` picks it. Env wins where CI needs it: `gh-project.mjs` uses `GHP_OWNER`, `GHP_PROJECT`, `GHP_STORY_REPO`, `GHP_MIRROR_REPOS` first and reads settings (from `CLERK_REPO` or the cwd) only for what is unset. The programme repo's own slug, worktree base (`$WT_ROOT/<name>`, default `~/dev/.wt/<name>`) and default branch are derived from its git remote. Working-group settings (label, members, quorum, budget, cycle close, pause limit, repos) are not here: they are the charter on each group's role record, read by `lib/adapters/groups.mjs` (`clerk groups`). 
+
+## Cloud sessions
+
+The clerk runs unchanged in a Claude Code cloud session (claude.ai/code, cloud routines). Such a session refuses GitHub GraphQL and the search API, so every GitHub call the clerk makes from a session is repo-scoped REST, through `lib/adapters/github.mjs` (bash: `wg_budget_count`, `wg_open_count` in `pr-upkeep.sh`). Closing PRs are read from the issue timeline's cross-references and the PR body's closing keywords (`Closes #n`), which is what GitHub links on merge; a PR linked only by hand in the sidebar is not seen.
+
+- **Works in a session:** `settings`, `groups`, `roadmap` (read), `check`, `conformance`, `queue`, `claim`, `session`, `comment`, the agenda (TUI), `steward`, `ground`, `charter`, `routines`, `wt`, `fetch-srs`.
+- **Actions only:** `board` (GitHub Projects v2 is GraphQL-only) and `upkeep` (lists PRs with `gh pr list`). `roadmap --apply` also calls `board`. Their workflows run them; nothing in a session needs them.
+- **Repositories:** attach every settings `governed_repos` entry to the cloud environment, with write access (`add_repo` with `access: push` in a session). A public repo with read-only git access still refuses API calls. A repo the session cannot reach is skipped with a warning (`queue` prints "this queue is partial"; `steward` and `ground` name it).
+- **Paths:** checkouts sit side by side (`/home/user/<repo>`); `wt` finds siblings next to the clerk's own checkout, and worktrees go to `$WT_ROOT` (default `~/dev/.wt`), which `session` reads too.
+- **srs CLI:** fetched on first use from the programme's pin (`fetch-srs`, cached in `/tmp/srs-cli`); no setup step.
+- **Signing:** commits use the environment's configured signing; there is no `ssh-add` in a session.
 
 ## Packages
 
