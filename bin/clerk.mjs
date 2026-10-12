@@ -15,6 +15,7 @@ import { endSession, postComments } from '../lib/adapters/session.mjs';
 import { loadSettings, issueRef, programmeRepo } from '../lib/adapters/settings.mjs';
 import { authorise, resolveContext, quorum, quorumText, rolesFor } from '../lib/practice/roles.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
+import { openPRsLabelled, mergePR } from '../lib/adapters/github.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -186,8 +187,7 @@ const comments = !isOwner ? [] : gh(['api', `repos/${REPORT_ISSUE}/comments`, '-
 const reports = comments.filter((c) => c.author_association === 'OWNER' && A.reportCycle(c)).slice(-5);
 const reactions = Object.fromEntries(reports.map((c) => [c.id, ghJson(['api', `repos/${REPORT_ISSUE.split('/issues')[0]}/issues/comments/${c.id}/reactions`])]));
 const acked = new Set(reports.filter((c) => reactions[c.id].some((x) => x.content === '+1' && x.user?.login === owner)).map((c) => c.id));
-const prs = !isOwner ? [] : REPOS.flatMap((r) => ghJson(['pr', 'list', '-R', `${GH_OWNER}/${r}`, '--state', 'open', '--label', 'gate:owner-merge', '-L', '50',
-  '--json', 'number,title,body,url,isDraft,mergeStateStatus,labels,statusCheckRollup']).map((p) => ({ ...p, repo: r })));
+const prs = !isOwner ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, 'gate:owner-merge'); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
 
 // Order follows a meeting: decisions since the last session, reports, decisions for this session, merges.
 const sections = {
@@ -205,7 +205,7 @@ for (const gr of isOwner ? groupLogs : []) {
     const issues = gr.repos.flatMap((r) => gh(['api', '-X', 'GET', `repos/${GH_OWNER}/${r}/issues`, '-f', `labels=ready,${gr.label}`, '-f', 'state=open', '-f', 'per_page=100',
       '--jq', '.[]|select(.pull_request|not)|{number,title,created_at,assignee:(.assignee!=null),labels:[.labels[].name]}']).trim().split('\n').filter(Boolean).map((l) => ({ ...JSON.parse(l), repo: r })))
       .filter((i) => !i.assignee && !i.labels.some((l) => ['needs-input', 'parked'].includes(l))); // ponytail: the builder also drops issues with a branch or PR; not checked here
-    const inFlight = Number(gh(['api', '-X', 'GET', 'search/issues', '-f', `q=user:${GH_OWNER} is:pr is:open label:"${gr.label}"`, '--jq', '.total_count']).trim());
+    const inFlight = gr.repos.reduce((n, r) => n + openPRsLabelled(GH_OWNER, r, gr.label, { light: true }).length, 0);
     next[gr.title] = { ready: A.orderQueue(issues, A.localPriorities(records.filter((r) => memberSet(gr.log).has(r.instanceId)))), inFlight, merged: Number(gstate[gr.title].merged) || 0, budget: Number(gstate[gr.title].budget) || gr.budget };
   } catch { /* queue unknown */ }
 }
@@ -292,7 +292,7 @@ async function walk(n) {
         }
         if (n === 4 && k === 'a') { choice('accept'); console.log('  noted for the session'); break; }
         if (n === 4 && k === 'c') { const t = await ask('resolution text > '); if (t) { choice('other', t); console.log('  noted for the session'); break; } continue; }
-        if (n === 5 && k === 'm') { if (dryRun) console.log('  [dry run] would merge'); else gh(['pr', 'merge', String(it.number), '-R', `${GH_OWNER}/${it.repo}`, '--merge']); acted.merge++; doneIds[5].add(it.number); console.log('  merged'); break; }
+        if (n === 5 && k === 'm') { if (dryRun) console.log('  [dry run] would merge'); else mergePR(`${GH_OWNER}/${it.repo}`, it.number); acted.merge++; doneIds[5].add(it.number); console.log('  merged'); break; }
       } catch (e) { console.log('  failed: ' + (e.stderr || e.message).toString().trim()); }
     }
   }

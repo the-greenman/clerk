@@ -34,7 +34,7 @@ SRS_ACTOR='{"kind":"ai","id":"agent:tpr-steward"}' \
 
 `--as <role>`: `owner`, `tpr-steward`, `tpr-builder`, `tpr-reviewer`, `tpr-analyst` (owner built in; the group roles are read from the records, `clerk groups`; the analyst's adding decision b447e8ea is still `proposed`, so it holds a role but does not count toward quorum). The actor in `SRS_ACTOR` must hold that role (owner = `human:the-greenman`; `agent:tpr-*` hold the matching group role) or the clerk refuses, naming role and actor. The owner's session is recorded in the SemanticOps decision log, a group's in its own log. Reports, escalation and PR merge sections are owner-only.
 
-Needs Node >= 20 and `gh` (logged in); the pinned srs CLI is fetched by `clerk fetch-srs`. No dependencies. Requires the `com.semanticops.programme/session` type on srs-programme master.
+Needs Node >= 20 and `gh` (logged in); the pinned srs CLI is fetched by `clerk fetch-srs`. Runs in a Claude Code cloud session too (REST only; see [docs/tools.md](docs/tools.md#cloud-sessions)). No dependencies. Requires the `com.semanticops.programme/session` type on srs-programme master.
 
 ## What it shows
 
