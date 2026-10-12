@@ -17,10 +17,10 @@ The existing domains do not cover the second gap. *Semantic records* (5f433971) 
 |---|---|
 | title | SRS operations |
 | purpose | Keep our day-to-day practice with SRS working: the implementation, tools and spec run reliably and serve the goals and projects we are pursuing now. |
-| in_scope | Bugs and reliability in srs-rust, srs-vscode and srs-web; friction found while dogfooding (CLI, MCP, WASM, release assets, pins, worktrees); agent-facing usage docs (`srs-usage.md`, CLAUDE.md sections, srs-context traps); refinements to the spec that make it usable without changing what it means (Door 1 only). |
+| in_scope | Bugs and reliability in srs-rust, srs-vscode and srs-web; friction found while dogfooding (CLI, MCP, WASM, release assets, pins, worktrees); agent-facing usage docs (`srs-usage.md`, CLAUDE.md sections, srs-context traps); refinements to the spec that make it usable without changing what it means (Door 1 only: carrying out an existing ruling, never a new RFC or a revision). |
 | out_of_scope | What the spec should mean (Semantic records); new rulings and RFCs; editor product features (WG Agent-supported editor); programme and governance tooling (Programme coordination, the clerk). |
 
-**Stance.** Relative to the programme's boundary, the domain is a **Steward**: Observe · Stabilise · Focus. It looks at *how we work*, keeps it *stable and reliable*, and serves *our current goals*. The Steward's listed complements are the Challenger and the Initiator. The group therefore needs someone who challenges every change (the reviewer) and a steady flow of drive from outside (anyone who hits friction and files it). The Steward's shadow is resistance to change and overprotection: a group that hoards its queue or turns requests away. The intake indicator (section 7) watches for that shadow.
+**Stance.** Relative to the programme's boundary, the domain is a **Steward**: Observe · Stabilise · Focus. It looks at *how we work*, keeps it *stable and reliable*, and serves *our current goals*. The Steward's listed complements are the Challenger and the Initiator. The group therefore needs someone who challenges every change (the reviewer) and a steady flow of drive from outside (anyone who hits friction and files it). The Steward's shadow is resistance to change and overprotection: a group that hoards its queue or turns requests away. The intake indicator (section 7) counts the requests it sets aside or leaves waiting, which is where that shadow would show. The group's own stance is Steward; one of its seats is also called steward (the member who closes the cycle). The seat is a job inside the group, the stance describes the whole group seen from the programme.
 
 **Personas in this domain** (each `refines` a shared persona and is `in-domain` SRS operations):
 
@@ -36,6 +36,8 @@ The existing domains do not cover the second gap. *Semantic records* (5f433971) 
 5. A client pinned to an older build renders a newer corpus as empty, with no error.
 
 ## 3. The intake cycle: the same shape at every level
+
+A **request** is something someone ran into or wants. Work a scout files from a recorded ruling (for example the WG Third-party ready analyst filling its queue) is not a request: it already has its ruling and its group, and keeps its own path.
 
 ```mermaid
 flowchart LR
@@ -65,7 +67,7 @@ Seats are named by the job; stances are named by archetype. A stance is read **r
 | Step | Who | Seat | Stance (relative to the boundary) |
 |---|---|---|---|
 | Receive | anyone, human or agent, while doing work | none | **Initiator** (Act · Disrupt · Focus): it was doing something, it broke |
-| Place | programme router | central group `router` | **Watcher** (Observe · Stabilise · Zoom out): reads across every domain, places without pushing |
+| Place | programme router | `router`, a seat of the central group, not of the working group | **Watcher** (Observe · Stabilise · Zoom out): reads across every domain, places without pushing |
 | Assess | group analyst | `analyst` | **Analyst** (Observe · Disrupt · Focus): reproduces, names the core issue, flags bugs |
 | Propose | group synthesizer | `synthesizer` | **Synthesizer** (Act · Stabilise · Focus): shapes accepted items into issues and epic placements |
 | Build | group builder | `builder` | **Builder** (Act · Stabilise · Zoom out) |
@@ -98,6 +100,10 @@ sequenceDiagram
   An->>An: reproduce, judge against mandate and queue
   alt misplaced
     An-->>W: return with reason, wg label removed
+  else duplicate
+    An->>An: merge into the existing issue, intake closed
+  else needs a ruling
+    An->>O: an exercise, never work
   else set aside
     An->>St: reason recorded, intake closed
   else accepted
@@ -134,19 +140,26 @@ Skipped on purpose: an intake record type, a board status "Triage", and a `clerk
 | Cycle and budget | daily, closing 11:45 UTC (after Third-party ready); 10 delegated merges per cycle; pause after 2 unacknowledged reports |
 | Decides | fixes and reliability work that change no ruling and no public contract; placement of accepted intake under its own epic; its local priorities; agent-facing docs |
 | Escalates | any spec change beyond Door 1; breaking CLI, payload or WASM contracts; a new epic or work in another group's epic; gate and merge rules; anything over budget |
-| Compass | **Core once over a client workaround**, unless the workaround unblocks a ranked objective today and an issue tracks the core fix (reuses tension *Core once and adapter convenience*). **Our ranked goals over general polish**, unless the defect corrupts data or gives a false green (new tension *Our goals and the tool's general good*). **Reliable over new**: at equal priority a bug goes first (reuses *Reviewable and fast*). **Strict and repairable**: refuse clearly, then offer the repair (reuses the parent boundary's tension). |
+| Compass | **Core once over a client workaround**, unless the workaround unblocks a ranked objective today and an issue tracks the core fix (reuses tension *Core once and adapter convenience*). **Our ranked goals over general polish** when choosing among issues of the same derived priority, unless the defect corrupts data or gives a false green (new tension *Our goals and the tool's general good*; it orders work inside the group's queue and never sets a priority). **Reliable over new**: at equal derived priority a bug goes first, on top of the bug floor (a bug is never weaker than P1) (new tension *Reliable and new*). **Strict and repairable**: refuse clearly, then offer the repair (reuses the parent boundary's tension). |
 | Boundary | `narrows` SRS implementation (b3bcd516), like the two existing groups |
 
 **Placement rule between the two SRS groups.** If the request names a ruling, RFC requirement or invariant that the tool breaks, it goes to WG Third-party ready. Otherwise it goes to WG SRS operations. The groups sit side by side. Revisit after two cycles whether Third-party ready should become a sub-group of SRS operations.
 
-After ratification, `clerk charter` writes the charter as drafts (the exact command is in section 9; `--dry-run` first).
+**When to charter: the trigger.** A group is chartered only on a trigger, a steady ready queue that needs delegated merges. That queue does not exist yet. So the order is:
+
+1. Ratify the domain and the intake decisions (section 8). Intake starts at once, with the **central group** holding SRS-operations requests: the router places them in the domain, and the owner's session (or any session acting as the central group's analyst and synthesizer) assesses and proposes.
+2. **Trigger:** two consecutive cycles in which intake yields at least five accepted SRS-operations issues per cycle. The steward of the central group (or the owner) then proposes the charter.
+3. `clerk charter` writes the charter in this section as drafts and a proposed charter decision (the exact command is in section 9; `--dry-run` first). The owner's session ratifies it as usual.
+
+If the trigger never fires, the domain is still useful and the group is not needed.
 
 ## 7. Measure: one indicator
 
-**I5, "Does intake flow?"** Two numbers per cycle, read by the steward:
+**I5, "Does intake flow?"** (proposed; it joins I1 to I4 in stage Measurement only when ratified). Three numbers per cycle, read by the steward:
 
 - the median days from Request to Assessment;
-- the share of placements returned as misplaced.
+- the share of placements returned as misplaced;
+- the requests set aside or waiting longer than one cycle (where a Steward's shadow, hoarding the queue, would show).
 
 **Falsifier for the whole proposal:** after two cycles, either of these shows it failed:
 
@@ -162,14 +175,17 @@ Each one is framed to pass the four tests: reuse, one thing, timeless, testable.
 | # | Kind | Statement | Review when |
 |---|---|---|---|
 | D1 | Boundary | SRS operations covers how we use, run and repair SRS in our own work, not what the spec should mean. | a request is placed in it that its scope cannot judge |
-| D2 | Premise | The same intake cycle (receive, place, assess, propose, decide, report) runs at every level, and a level never decides for the level above it. | a level needs a step the others do not |
-| D3 | Policy | Every request reaches a group through that group's input queue, placed in a domain first and never filed straight as ready work; measured by I5. | the falsifier in section 7 fires |
-| D4 | Design | A group's input queue is its `wg:` label plus `intake`, and an accepted domain estimate is recorded as a suggested problem `held-by` a persona-in-domain, because a domain is derived, never stored. | intake exceeds about ten items a week |
-| D5 | Design | A seat-holder is `derived-from` a stance agent that `instantiates` one of the eight archetypes, and its stance is read relative to its group's boundary. | a seat fits no archetype |
-| D6 | Preference | Groups sit beside each other rather than nested, unless an overlap has been observed and a recorded decision nests them. | two cycles of WG SRS operations |
-| D7 | Mandate | WG SRS operations may decide and merge within the charter in section 6. | the charter's own revisit clause |
+| D2 | Premise | We work as if every level (programme, group, sub-group) runs the same intake cycle: receive, place, assess, propose, decide, report. | a level needs a step the others do not |
+| D3 | Policy | A level never decides a request for the level above it; it escalates one proposed decision instead. | an escalation is overturned as within the lower level's mandate |
+| D4 | Policy | Every request is placed in a domain before any group assesses it. | I5's returned share stays high for two cycles |
+| D5 | Policy | A request reaches a group only through that group's input queue, never filed straight as ready work. | the falsifier in section 7 fires |
+| D6 | Design | We model a group's input queue as its `wg:` label plus `intake`, because labels are the execution surface every routine already reads. | intake exceeds about ten items a week |
+| D7 | Design | We model an accepted domain estimate as a suggested problem `held-by` a persona-in-domain, because a domain is derived, never stored. | a request is accepted that no persona holds |
+| D8 | Design | We model a member's stance as its seat-holder `derived-from` a stance agent that `instantiates` an archetype, because those types and relations already exist. | a seat fits no archetype |
+| D9 | Premise | We work as if a stance is read relative to the boundary it acts in. | the same agent's stance needs to be fixed across groups |
+| D10 | Preference | Groups sit beside each other rather than nested, unless an observed overlap is recorded in a decision that nests them. | two cycles after a second group shares repos with another |
 
-D1 to D6 stand without D7. Recommended order: D1, D2, D3, D4, D5, D6, then D7 once its epic exists.
+Each statement passes the four tests in [decision-log.md](../docs/decision-log.md): reuse, one thing, timeless, testable. The charter itself is not on this list: `clerk charter` writes it as its own proposed decision once the trigger in section 6 fires. Recommended order: D1, then D2 and D3, then D4 to D7 (intake can start), then D8 to D10.
 
 ## 9. On ratification (filed then, not now)
 
@@ -178,7 +194,7 @@ D1 to D6 stand without D7. Recommended order: D1, D2, D3, D4, D5, D6, then D7 on
 3. clerk: `clerk charter` accepts the analyst and synthesizer seats (seat briefs are hard-coded to three today, `lib/practice/charter.mjs`) and a stance per seat that writes `derived-from`.
 4. clerk: briefs `routines/intake-router.md` and `routines/wg-srs-ops-intake.md`, holding the templates in the handbook; the steward brief gains the Intake section of the report.
 5. clerk: the three intake `test.todo`s in `test/process.test.mjs` become tests.
-6. The charter itself:
+6. The charter itself, only when the trigger in section 6 fires:
 
 ```
 clerk charter --repo <srs-programme> --title "WG SRS operations" --epic semanticops.com#NN \

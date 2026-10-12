@@ -140,9 +140,11 @@ Full detail, every command and the API budget: [board.md](board.md).
 
 #### Intake: how a request reaches a group
 
-> **Proposed, not in force** (clerk#56, `plans/wg-srs-operations.md`). This chapter is Theory until the owner's session ratifies decisions D2 to D4.
+> **Proposed, not in force** (clerk#56, `plans/wg-srs-operations.md`). This chapter is Theory until the owner's session ratifies decisions D2 to D7.
 
 Work should never start as a finished `ready` issue that nobody assessed. A bug, a piece of friction or a feature idea first enters as a **request**. It is **placed** in a domain, and through the domain in a group. That group **assesses** it against its own priorities and queue, **proposes** what it becomes, **decides** inside its mandate (or escalates), and **reports** up.
+
+A scout's ruling-backed work (for example the WG Third-party ready analyst filling its queue) is not a request: it already has its ruling and its group, and keeps its own path.
 
 **The same shape at every level.** The programme, a working group and any future sub-group each run the same six steps. Only what the level looks across changes. A level places work one level down, and never decides for the level above.
 
@@ -174,8 +176,10 @@ stateDiagram-v2
   [*] --> Received: intake
   Received --> Placed: Placement, wg label
   Received --> Central: Placement, no group holds the domain
+  Central --> Escalated: assessed and proposed by the central group, decided in the owner's session
   Received --> Exercise: Placement, no domain fits (needs-input)
-  Placed --> Received: Assessment returns it (misplaced)
+  Placed --> Received: returned as misplaced, to be placed again
+  Placed --> Done: merged into an existing issue
   Placed --> Accepted: Assessment accepts
   Placed --> SetAside: Assessment sets it aside
   Placed --> Exercise: needs a ruling
@@ -188,7 +192,7 @@ stateDiagram-v2
 
 **What is new.** One label (`intake`) and three comment markers (`<!-- intake-placement -->`, `<!-- intake-assessment -->`, `<!-- intake-proposal -->`), on the pattern of `<!-- wg-quorum -->`. Everything else is existing practice: domains, persona-in-domain, problems in Suggestions, the duplicate guard, the board, escalation. There is deliberately no intake record type, no board status and no command: `label:intake` is enough until intake regularly exceeds about ten items a week.
 
-**Measure.** Indicator I5, "Does intake flow?": the median days from Request to Assessment, and the share of placements returned as misplaced.
+**Measure.** Indicator I5, "Does intake flow?" (proposed): the median days from Request to Assessment, the share of placements returned as misplaced, and the requests set aside or waiting longer than one cycle.
 
 
 #### Working groups and delegation
@@ -229,14 +233,14 @@ flowchart TD
 
 **Proposed rulings, not yet ratified** (srs-programme#113): SemanticOps is the root decision-making authority for its domain, and other bodies such as muDemocracy are separate (31e40305); the central group undertakes all work no group holds by delegation (4fca091f); anyone working on a group's work joins that group and works within its practices (ccd593c3); a group is chartered only with a known domain, a problem set and standing orders (9a45c0a1).
 
-**Groups today.** WG Third-party ready (semanticops.com#31, `wg:third-party-ready`) is in force. WG Agent-supported editor (semanticops.com#29, `wg:agent-editor`) has been chartered as records. WG SRS operations (`wg:srs-ops`) is proposed in `plans/wg-srs-operations.md` (clerk#56), with an input queue fed by intake (chapter "Intake"). A new group is chartered only on a trigger: a steady ready queue that needs delegated merges.
+**Groups today.** WG Third-party ready (semanticops.com#31, `wg:third-party-ready`) is in force. WG Agent-supported editor (semanticops.com#29, `wg:agent-editor`) has been chartered as records. WG SRS operations (`wg:srs-ops`) is proposed in `plans/wg-srs-operations.md` (clerk#56), with an input queue fed by intake (chapter "Intake"); it is chartered only when that queue becomes steady, the usual trigger. A new group is chartered only on a trigger: a steady ready queue that needs delegated merges.
 
 **Chartering.** `clerk charter` writes the whole charter as drafts and a proposed decision; an owner session ratifies it and asserts `delegates`. The steps are in stage 10. The briefs the members follow: [routines/working-groups.md](../routines/working-groups.md).
 
 
 #### Stances: members built on eight archetypes
 
-> **Proposed, not in force** (clerk#56, decision D5). This chapter is Theory until the owner's session ratifies it.
+> **Proposed, not in force** (clerk#56, decisions D8 and D9). This chapter is Theory until the owner's session ratifies it.
 
 A group brings in members according to its purpose, and each member is built on one of **eight stances**. A stance is a position on three trade-offs:
 
@@ -261,7 +265,7 @@ A group brings in members according to its purpose, and each member is built on 
 
 **Seats are jobs; stances are archetypes.** A seat (steward, analyst, synthesizer, builder, reviewer, router) says what the member does. A stance says how it leans while doing it. Seat names and archetype names often coincide, but they need not: a reviewer is a **Challenger**. Some stances need no seat. Anyone who hits friction and files a request acts as an **Initiator**. Anyone who asks "why are we doing this at all?" acts as a **Rebel**, and that question becomes an exercise, never work.
 
-**Composition.** A group checks that every stance is present or reachable, pairs stances with their listed complements, and names its own shadow in its compass. Example (proposed): **WG SRS operations** is a *Steward* relative to the programme (Observe · Stabilise · Focus: how we work, kept reliable, for our current goals). Its complements are the Challenger (its reviewer) and the Initiator (everyone who files a request). Its shadow, hoarding the queue or turning requests away, is what indicator I5 watches.
+**Composition.** A group checks that every stance is present or reachable, pairs stances with their listed complements, and names its own shadow in its compass. Example (proposed): **WG SRS operations** is a *Steward* relative to the programme (Observe · Stabilise · Focus: how we work, kept reliable, for our current goals). Its complements are the Challenger (its reviewer) and the Initiator (everyone who files a request). Its shadow, hoarding the queue or turning requests away, would show in the requests it sets aside or leaves waiting, which the proposed indicator I5 counts. The group's stance (Steward, seen from the programme) and its steward seat (the member who closes the cycle) are different things that share a name.
 
 ```mermaid
 flowchart LR
@@ -509,7 +513,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 #### Intake
 
-**Theory**: A request (a bug, friction, a feature idea) enters a level's input queue, is placed in a domain and so in a group, is assessed by that group against its priorities and queue, and becomes proposed issues, flagged bugs and an epic placement. The same six steps (receive, place, assess, propose, decide, report) run at every level; a level never decides for the level above. Proposed, not in force (clerk#56, decisions D2 to D4).
+**Theory**: A request (a bug, friction, a feature idea) enters a level's input queue, is placed in a domain and so in a group, is assessed by that group against its priorities and queue, and becomes proposed issues, flagged bugs and an epic placement. The same six steps (receive, place, assess, propose, decide, report) run at every level; a level never decides for the level above. Proposed, not in force (clerk#56, decisions D2 to D7).
 
 **Status**: theory only
 
