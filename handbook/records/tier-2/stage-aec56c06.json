@@ -13,7 +13,9 @@
       "`endSession` returns from the whole function when a session takes up an exercise: that exercise's `considers`, comments and proposals, every later choice, and the validate, commit and PR are all skipped. The session record is left uncommitted in its worktree.",
       "There are no exercise records yet.",
       "The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link.",
-      "Session acts are stamped with the end-of-session time, not when they happened (clerk#43)."
+      "Session acts are stamped with the end-of-session time, not when they happened (clerk#43).",
+      "There is one kind of meeting. Affirmation, unblocking and triage happen ad hoc or not at all, and what waits for the owner is assembled by hand (clerk#59).",
+      "`agenda.mjs` reads a `Decision asked:` line from each owner-merge PR, but no PR writes one, so every merge shows \"(none stated)\"."
     ],
     "open_questions": [
       "Should the pause rule read `receives` instead of the thumbs-up?",
@@ -22,7 +24,7 @@
     "test": "Stage 14: 5 passing; pending: the endSession exercise bug; pause rule reads `receives`."
   },
   "createdAt": "2026-10-11T18:33:30.071071390+00:00",
-  "updatedAt": "2026-10-11T18:33:30.071078453+00:00",
+  "updatedAt": "2026-10-12T09:53:11.224240334+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",

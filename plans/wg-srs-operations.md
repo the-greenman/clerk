@@ -64,6 +64,20 @@ Every level runs the same six steps. Only *what it looks across* changes:
 
 A level never decides for the level above. Anything outside its mandate goes up as one proposed decision. Anything that belongs below is placed into the lower level's queue, never done in its place.
 
+## 3b. Kinds of meeting
+
+Different questions need different meetings. Each kind has its own agenda, and every kind writes the same session record, with its kind (clerk#59):
+
+| Kind | What it handles | How often |
+|---|---|---|
+| Decision | ratify or set aside decisions, receive reports, merges | weekly, or when the agenda fills |
+| Affirmation review | walk Suggestions (domains, personas in domain, clusters, problems, remedies) in the srs-web Method editor | when a domain is walked |
+| Unblock | parked decisions, `needs-input` issues, approved PRs that have not merged, PRs stating `Decision asked:` | daily, minutes long |
+| Intake triage | requests at the programme level waiting for placement | with Unblock until volume grows |
+| Retrospective | keep, change or drop practices and indicators | at period close |
+
+An Unblock meeting keeps working windows from being lost: whatever needs the owner is a short list, and every PR that needs the owner says what it asks (template T9).
+
 ## 4. Who acts: stances read relative to the boundary
 
 Seats are named by the job; stances are named by archetype. A stance is read **relative to the boundary** it acts in, so the same agent can sit at a different point of the cube in another group.
@@ -189,8 +203,10 @@ Each one is framed to pass the four tests: reuse, one thing, timeless, testable.
 | D9 | Premise | We work as if a stance is read relative to the boundary it acts in. | the same agent's stance needs to be fixed across groups |
 | D10 | Preference | Groups sit beside each other rather than nested, unless an observed overlap is recorded in a decision that nests them. | two cycles after a second group shares repos with another |
 | D11 | Policy | A decision that cannot be made in the moment is parked as an exercise on the agenda of the level that owns it. | an exercise waits longer than two sessions |
+| D12 | Premise | We work as if a meeting's kind sets its agenda: decision, affirmation review, unblock, intake triage or retrospective. | a meeting is held that fits no kind |
+| D13 | Design | We model every kind of meeting as one session record with a kind, because one way per goal. | a kind needs a field the session record cannot hold |
 
-Each statement passes the four tests in [decision-log.md](../docs/decision-log.md): reuse, one thing, timeless, testable. The charter itself is not on this list: `clerk charter` writes it as its own proposed decision once the trigger in section 6 fires. Recommended order: D1, then D2 and D3, then D4 to D7 (intake can start), then D8 to D10. D11 stands alone and can be taken first: parking needs no other decision.
+Each statement passes the four tests in [decision-log.md](../docs/decision-log.md): reuse, one thing, timeless, testable. The charter itself is not on this list: `clerk charter` writes it as its own proposed decision once the trigger in section 6 fires. Recommended order: D1, then D2 and D3, then D4 to D7 (intake can start), then D8 to D10. D11 stands alone and can be taken first: parking needs no other decision. D12 and D13 also stand alone, and clerk#59 builds them.
 
 ## 9. On ratification (filed then, not now)
 
@@ -199,8 +215,9 @@ Each statement passes the four tests in [decision-log.md](../docs/decision-log.m
 3. clerk: `clerk charter` accepts the analyst and synthesizer seats (seat briefs are hard-coded to three today, `lib/practice/charter.mjs`) and a stance per seat that writes `derived-from`.
 4. clerk: briefs `routines/intake-router.md` and `routines/wg-srs-ops-intake.md`, holding the templates in the handbook; the steward brief gains the Intake section of the report.
 5. clerk: the three intake `test.todo`s in `test/process.test.mjs` become tests.
-6. clerk: `clerk park`, a one-step way to write a parked decision (an exercise in the owning log, T8) and mark the blocked issue `needs-input`. This is the one item that can be built before the rest: clerk#58.
-7. The charter itself, only when the trigger in section 6 fires:
+6. clerk: `clerk park`, a one-step way to write a parked decision (an exercise in the owning log, T8) and mark the blocked issue `needs-input`. This is one of two items that can be built before the rest: clerk#58.
+7. clerk: `clerk agenda --kind` and the Unblock sections, plus the `Decision asked:` line (T9) in PR conventions: clerk#59.
+8. The charter itself, only when the trigger in section 6 fires:
 
 ```
 clerk charter --repo <srs-programme> --title "WG SRS operations" --epic semanticops.com#NN \

@@ -335,6 +335,18 @@ stateDiagram-v2
 - **Three kinds of minute.** A *report* is received, not decided. An *exercise* is an open discussion that feeds proposals and is never ratified. A *decision* is ratified or set aside.
 - **Discussion.** Humans and agents comment the same way: a comment record `comments-on` the decision (`clerk comment`). A comment between sessions is discussion, not a session.
 
+**Kinds of meeting** (proposed, clerk#56 decisions D12 and D13, clerk#59). Different questions need different meetings. Each kind has its own agenda, and every kind writes the same `programme/session` record, with its kind.
+
+| Kind | What it handles | How often | Tool today |
+|---|---|---|---|
+| **Decision** | ratify or set aside decisions, receive reports, merges | weekly, or when the agenda fills | `clerk session` (works) |
+| **Affirmation review** | walk Suggestions: domains, personas in domain, clusters, problems, remedies; affirm, edit and affirm, or set aside | when a domain is walked | srs-web Method editor: problems now; remedies, clusters and personas with srs-web#548; domains with srs-web#562 |
+| **Unblock** | short and frequent: parked decisions (exercises), `needs-input` issues, approved PRs that have not merged, PRs stating a `Decision asked:` | daily, minutes long | partly: exercises and owner-merge PRs only |
+| **Intake triage** | requests at the programme level waiting for placement | with Unblock until volume grows | proposed (chapter "Intake") |
+| **Retrospective** | period close: keep, change or drop practices and indicators | once a period | theory only |
+
+An Unblock meeting is the cheapest way to keep a working window: anything that needs you is a short list, and every PR says what it asks (template T9).
+
 **Escalating to the owner.** Information must fit the reader. An escalation is one decision with its stakes, options, consequences and a recommendation, never a flood of technical questions.
 
 Full rules, kinds and the worked re-read of the log: [decision-log.md](decision-log.md).
@@ -758,6 +770,8 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - There are no exercise records yet.
 - The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link.
 - Session acts are stamped with the end-of-session time, not when they happened (clerk#43).
+- There is one kind of meeting. Affirmation, unblocking and triage happen ad hoc or not at all, and what waits for the owner is assembled by hand (clerk#59).
+- `agenda.mjs` reads a `Decision asked:` line from each owner-merge PR, but no PR writes one, so every merge shows "(none stated)".
 
 **Open questions**:
 - Should the pause rule read `receives` instead of the thumbs-up?
@@ -896,6 +910,14 @@ thinking_reached: what is known; the options seen so far, each with its main con
 tensions: the trade-off that makes it hard (name a compass tension if one fits)
 unresolved_questions: what the decider needs that is not here
 next_action: what happens, and who does it, once it is decided
+```
+
+**T9. Decision asked** (first lines of any PR that needs the owner: `gate:owner-merge` or a proposal)
+
+```
+Decision asked: <one sentence the owner can answer yes or no, or choose between>
+Unblocks: <what proceeds once it is answered>
+If not now: <what waits, and the cost of waiting>
 ```
 
 **T7. Escalation** is the existing one: one proposed decision with the fact, why it matters, the options and their consequences, and a recommendation ([decision-log.md](decision-log.md)).
