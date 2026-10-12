@@ -27,7 +27,7 @@ The existing domains do not cover the second gap. *Semantic records* (5f433971) 
 - *AI agent in SRS operations*: runs the CLI and MCP all day. Needs tools that refuse clearly rather than pass silently, and errors it can branch on.
 - *A person working with AI in SRS operations*: the owner or any human builder. Needs a green check to mean green, and a fix to land once, in the core.
 
-**Seed problem set** (for the charter rule that a group needs a known domain and a problem set, 9a45c0a1), drawn from srs-context traps. Each is evidence-backed:
+**Seed problem set** (for the proposed rule that a group needs a known domain and a problem set, 9a45c0a1, not yet ratified), drawn from srs-context traps. Each is evidence-backed:
 
 1. A check passes locally against a stale sibling checkout or binary and fails in CI (false green).
 2. A tool accepts an input that a later validate rejects (for example srs-rust#1396).
@@ -38,6 +38,8 @@ The existing domains do not cover the second gap. *Semantic records* (5f433971) 
 ## 3. The intake cycle: the same shape at every level
 
 A **request** is something someone ran into or wants. Work a scout files from a recorded ruling (for example the WG Third-party ready analyst filling its queue) is not a request: it already has its ruling and its group, and keeps its own path.
+
+An srs-context **finding** is memory: the trap, so the next agent avoids it. The work to remove the trap is a request. The srs-context dream cycle (srs-context#15) files a Request for each new finding with no issue, and the finding links to it. So the same friction has one home for memory and one for work.
 
 ```mermaid
 flowchart LR
