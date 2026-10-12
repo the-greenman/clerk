@@ -115,7 +115,8 @@ function main(argv) {
     if (live && !ghp) throw new Error("GHP_SCRIPT (path to gh-project.mjs) is required with --yes");
     const sh = (cmd, args, env = {}, soft = false) => {
       console.log(`${live ? "run" : "dry-run"}: ${cmd} ${args.join(" ")}`);
-      try { if (live) execFileSync(cmd, args, { stdio: soft ? "pipe" : "inherit", env: { ...process.env, ...env } }); } catch (e) { if (!soft) throw e; }
+      try { if (live) execFileSync(cmd, args, { stdio: soft ? "pipe" : "inherit", env: { ...process.env, ...env } }); }
+      catch (e) { if (!(soft && /HTTP 404|Label does not exist/.test(String(e.stderr)))) throw e; } // soft: a label the issue or repo lacks (clerk#42)
     };
     const OWNER = loadSettings(ROOT).githubOwner;
     for (const e of result.epics) {
