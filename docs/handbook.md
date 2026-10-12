@@ -140,7 +140,7 @@ Full detail, every command and the API budget: [board.md](board.md).
 
 #### Intake: how a request reaches a group
 
-> **Proposed, not in force** (clerk#56, `plans/wg-srs-operations.md`). This chapter is Theory until the owner's session ratifies decisions D2 to D7.
+> **Proposed, not in force** (clerk#56, `plans/wg-srs-operations.md`). This chapter is Theory until the owner's session ratifies decisions D2 to D7 and D11.
 
 Work should never start as a finished `ready` issue that nobody assessed. A bug, a piece of friction or a feature idea first enters as a **request**. It is **placed** in a domain, and through the domain in a group. That group **assesses** it against its own priorities and queue, **proposes** what it becomes, **decides** inside its mandate (or escalates), and **reports** up.
 
@@ -189,6 +189,15 @@ stateDiagram-v2
   SetAside --> [*]
   Done --> [*]
 ```
+
+**Parking a decision.** A decision someone cannot make in the moment is a request too, of kind *decision*. It is the commonest way a working window is lost: the work stops on a question, and the question is never asked anywhere it would be answered. So the question is parked, never held in the head of whoever is stuck:
+
+1. Whoever is stuck, human or agent, writes it as an **exercise** in the decision log of the level that owns it. The exercise records what is blocked, the options seen so far, and the next action once it is decided (template T8). If you do not know which level owns it, use the SemanticOps log: the router moves it.
+2. The blocked issue gets `needs-input` and a comment linking the exercise. Work moves to something else, or stops cleanly with a run report.
+3. The exercise appears on that level's agenda (section 3, Exercises), where the session turns it into a proposed decision (`p`) and ratifies it, or sets it aside.
+4. When the decision is ratified, `needs-input` comes off and the work resumes under it.
+
+Nothing new is needed but a one-step way to write the exercise; today it takes two srs CLI calls with the right container ids.
 
 **What is new.** One label (`intake`) and three comment markers (`<!-- intake-placement -->`, `<!-- intake-assessment -->`, `<!-- intake-proposal -->`), on the pattern of `<!-- wg-quorum -->`. Everything else is existing practice: domains, persona-in-domain, problems in Suggestions, the duplicate guard, the board, escalation. There is deliberately no intake record type, no board status and no command: `label:intake` is enough until intake regularly exceeds about ten items a week.
 
@@ -526,6 +535,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - No `intake` label, no Request issue form, no router or group-intake brief.
 - Domain estimates are never written: no persona-in-domain exists outside Evidence-backed writing.
 - `clerk charter` writes only steward, builder and reviewer seats, so an analyst or synthesizer seat must be added by hand.
+- No one-step way to park a decision: writing an exercise into a log takes two srs CLI calls, and no exercise record exists yet.
 
 **Open questions**:
 - Who acts as the programme router before a routine exists: the owner's session, or any session under its own actor?
@@ -814,7 +824,7 @@ Each step's comment starts with a marker line that tools can find. Fields in *it
 **T1. Request** (anyone; an issue labelled `intake`, in semanticops.com unless the repo is obvious)
 
 ```
-Kind: bug | friction | feature | question
+Kind: bug | friction | feature | question | decision (use T8 instead)
 What happened / what is wanted:
 Where: repo, command or screen, version or build (e.g. srs v0.1.0-build.502)
 While doing: the task you were on (issue, PR or session)
@@ -875,6 +885,17 @@ Done when: <a check that fails now and passes after the fix>
 Intake: received R, placed in by the router P, accepted A, merged M, returned (misplaced) X, set aside S, escalated E
 Waiting longer than one cycle: <links>
 I5: median days request to assessment = d; returned share = X/P; useful | noisy | misleading
+```
+
+**T8. Parked decision** (anyone who is stuck; an `exercise` record in the owning level's decision log, fields as named)
+
+```
+title: <the question, as one line ending in "?">
+blocking: <repo#n or session> and what cannot continue until it is decided
+thinking_reached: what is known; the options seen so far, each with its main consequence
+tensions: the trade-off that makes it hard (name a compass tension if one fits)
+unresolved_questions: what the decider needs that is not here
+next_action: what happens, and who does it, once it is decided
 ```
 
 **T7. Escalation** is the existing one: one proposed decision with the fact, why it matters, the options and their consequences, and a recommendation ([decision-log.md](decision-log.md)).

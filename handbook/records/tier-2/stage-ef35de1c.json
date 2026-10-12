@@ -12,7 +12,8 @@
     "gaps": [
       "No `intake` label, no Request issue form, no router or group-intake brief.",
       "Domain estimates are never written: no persona-in-domain exists outside Evidence-backed writing.",
-      "`clerk charter` writes only steward, builder and reviewer seats, so an analyst or synthesizer seat must be added by hand."
+      "`clerk charter` writes only steward, builder and reviewer seats, so an analyst or synthesizer seat must be added by hand.",
+      "No one-step way to park a decision: writing an exercise into a log takes two srs CLI calls, and no exercise record exists yet."
     ],
     "open_questions": [
       "Who acts as the programme router before a routine exists: the owner's session, or any session under its own actor?",
@@ -21,7 +22,7 @@
     "test": "Stage Intake: pending: placed before assessed; input queue is label plus wg label; seat stance read from records."
   },
   "createdAt": "2026-10-12T08:53:09.759333534+00:00",
-  "updatedAt": "2026-10-12T08:56:42.674925980+00:00",
+  "updatedAt": "2026-10-12T09:33:58.575957622+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:clerk-session",

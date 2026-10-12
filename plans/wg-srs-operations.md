@@ -41,6 +41,8 @@ A **request** is something someone ran into or wants. Work a scout files from a 
 
 An srs-context **finding** is memory: the trap, so the next agent avoids it. The work to remove the trap is a request. The srs-context dream cycle (srs-context#15) files a Request for each new finding with no issue, and the finding links to it. So the same friction has one home for memory and one for work.
 
+**A decision you cannot make in the moment is a request too** (kind *decision*). This is how working windows get lost: the work stops on a question, and the question is never asked anywhere it would be answered. It is parked as an **exercise** in the decision log of the level that owns it, using template T8 in the handbook. If you are not sure which level owns it, use the SemanticOps log and the router moves it. The blocked issue gets `needs-input` with a link to the exercise, and work moves on. The exercise appears on that level's agenda (Exercises), where the session proposes and ratifies a decision or sets the question aside. The clerk agenda already shows exercises. What is missing is a one-step way to write one (see section 9).
+
 ```mermaid
 flowchart LR
   R[Receive] --> P[Place]
@@ -186,8 +188,9 @@ Each one is framed to pass the four tests: reuse, one thing, timeless, testable.
 | D8 | Design | We model a member's stance as its seat-holder `derived-from` a stance agent that `instantiates` an archetype, because those types and relations already exist. | a seat fits no archetype |
 | D9 | Premise | We work as if a stance is read relative to the boundary it acts in. | the same agent's stance needs to be fixed across groups |
 | D10 | Preference | Groups sit beside each other rather than nested, unless an observed overlap is recorded in a decision that nests them. | two cycles after a second group shares repos with another |
+| D11 | Policy | A decision that cannot be made in the moment is parked as an exercise on the agenda of the level that owns it. | an exercise waits longer than two sessions |
 
-Each statement passes the four tests in [decision-log.md](../docs/decision-log.md): reuse, one thing, timeless, testable. The charter itself is not on this list: `clerk charter` writes it as its own proposed decision once the trigger in section 6 fires. Recommended order: D1, then D2 and D3, then D4 to D7 (intake can start), then D8 to D10.
+Each statement passes the four tests in [decision-log.md](../docs/decision-log.md): reuse, one thing, timeless, testable. The charter itself is not on this list: `clerk charter` writes it as its own proposed decision once the trigger in section 6 fires. Recommended order: D1, then D2 and D3, then D4 to D7 (intake can start), then D8 to D10. D11 stands alone and can be taken first: parking needs no other decision.
 
 ## 9. On ratification (filed then, not now)
 
@@ -196,7 +199,8 @@ Each statement passes the four tests in [decision-log.md](../docs/decision-log.m
 3. clerk: `clerk charter` accepts the analyst and synthesizer seats (seat briefs are hard-coded to three today, `lib/practice/charter.mjs`) and a stance per seat that writes `derived-from`.
 4. clerk: briefs `routines/intake-router.md` and `routines/wg-srs-ops-intake.md`, holding the templates in the handbook; the steward brief gains the Intake section of the report.
 5. clerk: the three intake `test.todo`s in `test/process.test.mjs` become tests.
-6. The charter itself, only when the trigger in section 6 fires:
+6. clerk: `clerk park`, a one-step way to write a parked decision (an exercise in the owning log, T8) and mark the blocked issue `needs-input`. This is the one item that can be built before the rest: clerk#58.
+7. The charter itself, only when the trigger in section 6 fires:
 
 ```
 clerk charter --repo <srs-programme> --title "WG SRS operations" --epic semanticops.com#NN \
