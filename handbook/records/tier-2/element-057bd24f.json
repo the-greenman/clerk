@@ -1,0 +1,22 @@
+{
+  "instanceId": "057bd24f-e0ce-458b-b827-5899ec00528f",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "Layer containers",
+    "kind": "container",
+    "home": "srs-programme",
+    "meaning": "Affirmed, Suggestions and Set aside. Which one a record sits in is its standing: affirmed records carry weight, suggestions do not.",
+    "read_by": "`check-method` (`checkGates`), `roadmap`, `ground`, `claim`"
+  },
+  "createdAt": "2026-10-11T18:33:30.676811538+00:00",
+  "updatedAt": "2026-10-11T18:33:30.676819126+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

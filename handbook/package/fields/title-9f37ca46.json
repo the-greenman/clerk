@@ -1,0 +1,15 @@
+{
+  "id": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
+  "namespace": "com.semanticops.handbook",
+  "name": "title",
+  "version": 1,
+  "description": "Heading of a handbook entry.",
+  "aiGuidance": {
+    "purpose": "The heading the reader sees for this entry.",
+    "extraction": "Plain words, sentence case, no numbering: order comes from the container outline."
+  },
+  "fieldType": {
+    "datatype": "string"
+  },
+  "createdAt": "2026-10-11T18:33:26.293095991+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "20082e9d-6807-474c-a1f1-ad5f809f396a",
+  "namespace": "com.semanticops.handbook",
+  "name": "theory",
+  "version": 1,
+  "description": "Where the stage is trying to get to.",
+  "aiGuidance": {
+    "purpose": "The aim of a stage, kept even when practice falls short."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-11T18:33:26.415022169+00:00"
+}

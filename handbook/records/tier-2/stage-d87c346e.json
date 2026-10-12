@@ -1,0 +1,31 @@
+{
+  "instanceId": "d87c346e-454e-49bf-965f-92a68a789bd5",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Objective and period",
+    "theory": "A period is a focus span. It ranks objectives, which are directions that `addresses` clusters of problems. Priority is derived from that ranking and never set by hand. A period ends with a retrospective.",
+    "status": "partial",
+    "practice": "- Types `programme/period` (objective_rank) and `programme/objective`.\n- Current period \"Focus 1: writing and memory\", from 2026-10-08, no end date. It ranks five objectives: 1 Keep work moving to done (P0); 2 Agent-supported writing (P1); 3 Agent memory (P2); 4 A public specification that reads as it describes; 5 A reference implementation that honours its contracts.\n- `clerk roadmap --apply` sets epic Priority from the rank and labels unranked epics `parked`.",
+    "gaps": [
+      "Objectives have no success criteria.",
+      "Periods have no end condition and no retrospective.",
+      "Only one objective `addresses` a cluster."
+    ],
+    "open_questions": [
+      "What does an objective need before it can be ranked: a domain, a persona, success criteria?",
+      "How does a period end: a date, objectives met, or the owner's call?"
+    ],
+    "test": "Stage 6: 2 passing; pending: objective success criteria; period retrospective."
+  },
+  "createdAt": "2026-10-11T18:33:29.112733583+00:00",
+  "updatedAt": "2026-10-11T18:33:29.112739675+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -49,7 +49,7 @@ Most decisions are settled by the group's compass inside its mandate. Only what 
 flowchart TD
   Q["A question or piece of work<br/>(an issue in the group)"] --> M{"Inside the mandate?<br/>executes a recorded ruling,<br/>mode clear or complicated,<br/>in the group's repos"}
   M -->|yes| G["Group decides<br/>Builder builds, Reviewer checks quorum"]
-  G --> L["Recorded in the group's decision log<br/>(Builder proposes, Reviewer ratifies;<br/>plain tasks need no record)"]
+  G --> L["Recorded in the group's decision log<br/>(Builder proposes, Reviewer assents;<br/>the group's session at cycle close ratifies;<br/>plain tasks need no record)"]
   L --> RP["Listed in the next cycle report"]
   M -->|no: new or changed ruling, Door 2/3,<br/>complex mode, breaking contract,<br/>cross-repo pin, gate or merge rules,<br/>over budget| X["Steward writes ONE proposed decision<br/>(fact, why it matters, action needed, urgency)"]
   X --> RP

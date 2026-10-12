@@ -1,0 +1,25 @@
+{
+  "instanceId": "476048f5-50c6-468c-8010-1bf37d6ca82f",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Review and merge",
+    "theory": "A group PR merges when its quorum is met: a builder and a different reviewer agree, and the gates are green, within the cycle's budget and while the group is not paused. Anything beyond the mandate escalates.",
+    "status": "working",
+    "practice": "- The reviewer posts the `<!-- wg-quorum -->` comment and adds `gate:auto-merge` (`routines/wg-reviewer.md`). It assents to a builder's decision and never ratifies it; the group's session at cycle close does (decision 70a05a5c).\n- `pr-upkeep` checks the quorum every 15 minutes and merges.\n- PRs outside any group follow their gate label: `gate:auto-merge` or `gate:owner-merge`.",
+    "gaps": [
+      "Every agent posts as the owner's GitHub account, so builder and reviewer identities are stated by the routines, not proven by GitHub."
+    ],
+    "test": "Stage 13: 5 passing. The todo about the reviewer ratifying is out of date (decision 70a05a5c settled it) and should be replaced."
+  },
+  "createdAt": "2026-10-11T18:33:29.947671628+00:00",
+  "updatedAt": "2026-10-11T18:33:29.947681738+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

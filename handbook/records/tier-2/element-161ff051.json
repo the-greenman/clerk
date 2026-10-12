@@ -1,0 +1,22 @@
+{
+  "instanceId": "161ff051-74fd-4e29-b238-61af3184cf8a",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "Domain container",
+    "kind": "container",
+    "home": "srs-programme (containerType method/domain)",
+    "meaning": "One per domain; identity is the domain record; outline holds clusters at depth 0 and problems at depth 1.",
+    "read_by": "`ground` (through `contains` today), srs-web Method editor"
+  },
+  "createdAt": "2026-10-11T18:33:30.794144324+00:00",
+  "updatedAt": "2026-10-11T18:33:30.794152415+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

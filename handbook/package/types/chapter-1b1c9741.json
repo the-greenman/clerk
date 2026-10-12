@@ -1,0 +1,25 @@
+{
+  "id": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "namespace": "com.semanticops.handbook",
+  "name": "chapter",
+  "version": 1,
+  "description": "A part or chapter of the handbook: a heading and prose.",
+  "fields": [
+    {
+      "fieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "7d919e27-5e4b-43ee-8df1-63b1f9998ed4",
+      "order": 1,
+      "required": true
+    }
+  ],
+  "identityFieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
+  "aiGuidance": {
+    "purpose": "A part (depth 0) or a chapter inside a part (depth 1). Its place comes from the root container outline."
+  },
+  "createdAt": "2026-10-11T18:33:27.026076551+00:00",
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json"
+}

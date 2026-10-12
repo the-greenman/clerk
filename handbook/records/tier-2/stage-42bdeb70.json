@@ -1,0 +1,29 @@
+{
+  "instanceId": "42bdeb70-434d-43ac-a18b-9ae9e1c25123",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Remedy",
+    "theory": "A remedy is a move that answers one or more problems. It carries a **falsifier** (what would show it failed) and a **return_when** (when to look again). Agents suggest one to three remedies per domain; the owner affirms them; an existing epic implements each one.",
+    "status": "partial",
+    "practice": "- Type `com.semanticops.method/remedy`, linked to problems by `answers`.\n- `check-method` requires an affirmed remedy to answer an affirmed problem and to carry a falsifier.\n- 5 records: two affirmed remedies with their suggestions, and one suggested remedy (lenses).",
+    "gaps": [
+      "Falsifiers and `return_when` are never evaluated."
+    ],
+    "open_questions": [
+      "Who checks a falsifier, and when: each report, or period close?",
+      "What happens when a falsifier fires?"
+    ],
+    "test": "Stage 5: 2 passing; pending: falsifiers and return_when evaluated."
+  },
+  "createdAt": "2026-10-11T18:33:28.993925583+00:00",
+  "updatedAt": "2026-10-11T18:33:28.993937024+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

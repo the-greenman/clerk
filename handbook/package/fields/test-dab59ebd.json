@@ -1,0 +1,15 @@
+{
+  "id": "dab59ebd-e26b-404a-9100-e1fef47236e1",
+  "namespace": "com.semanticops.handbook",
+  "name": "test",
+  "version": 1,
+  "description": "Which test proves the stage.",
+  "aiGuidance": {
+    "purpose": "Where test/process.test.mjs proves the stage, and what is still pending."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-11T18:33:26.732780445+00:00"
+}

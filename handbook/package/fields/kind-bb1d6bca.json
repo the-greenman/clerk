@@ -1,0 +1,22 @@
+{
+  "id": "bb1d6bca-fb77-4daf-ac47-2d53105475b0",
+  "namespace": "com.semanticops.handbook",
+  "name": "kind",
+  "version": 1,
+  "description": "What sort of SRS element this is.",
+  "aiGuidance": {
+    "purpose": "Whether the element is a type, a relation type, a container or a label."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "valueDomain": "closed",
+    "allowedValues": [
+      "type",
+      "relation",
+      "container",
+      "label",
+      "record"
+    ]
+  },
+  "createdAt": "2026-10-11T18:33:26.791801577+00:00"
+}

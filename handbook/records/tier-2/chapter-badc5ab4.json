@@ -1,0 +1,19 @@
+{
+  "instanceId": "badc5ab4-ef80-447b-ad7f-57cf3828411c",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "Principles",
+    "body": "The owner's standing rulings. Every stage must respect them.\n\n1. **Theory and practice together.** There is always a working system, and the theory is kept beside it. We build when a trigger fires, not ahead of need. Rulings grow into principles.\n2. **A problem lives in a domain and for a persona.** Without knowing who it is for and when it occurs, it cannot be prioritised and no remedy can be found.\n3. **Measure a little, then evaluate as we report.** Start with a few indicators. Each report says whether they still tell us anything.\n4. **Authority comes from the role, not the kind of mind.** The same rules and tools apply to humans and AI agents.\n5. **Agents suggest; the human layer wins.** Agents write to Suggestions. A human forks a record into Affirmed. Set aside is a reversible no.\n6. **A decision is ratified in exactly one session, at its own level and with that level's quorum.** Before that it may pass through many sessions as a proposal.\n7. **Rules hold at their boundary.** A rule is valid inside the boundary that made it.\n8. **Outputs are projections.** Any task is understood within the whole picture. A document, a roadmap or an issue is one projection of the records, never a second source (decision f5b4656a). This handbook is one.\n9. **Dogfood everything.** We run the programme on our own tools, and log every bug and missing feature we hit as an issue."
+  },
+  "createdAt": "2026-10-11T18:33:30.441206480+00:00",
+  "updatedAt": "2026-10-11T18:33:30.441212177+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

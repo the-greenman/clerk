@@ -1,0 +1,14 @@
+{
+  "instanceId": "9cabd30d-073c-4e13-97dd-586e68e4f12f",
+  "typeId": "3c000001-0000-4000-a000-000000000001",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.core",
+  "typeName": "purpose",
+  "fieldValues": {
+    "statement": "How a programme run by the clerk works, end to end: how domains, personas and problems define the work, how working groups take it on under delegated authority, how decisions are recorded, and how routines review, report on and allocate the work. Written for anyone who acts in the programme, human or agent.",
+    "title": "Clerk handbook"
+  },
+  "createdAt": "2026-10-11T18:33:26.233081581+00:00",
+  "updatedAt": "2026-10-11T18:33:27.571044626+00:00",
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

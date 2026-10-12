@@ -1,0 +1,22 @@
+{
+  "instanceId": "4c9d6fb2-ad30-4c47-9000-b58147a21e6b",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "method/problem",
+    "kind": "type",
+    "home": "method",
+    "meaning": "A claim that something is wrong for a persona in a domain; carries `problem_id` SP-nn.",
+    "read_by": "`roadmap`, `claim`, `ground`, `steward`, `check-method`"
+  },
+  "createdAt": "2026-10-11T18:33:31.155805263+00:00",
+  "updatedAt": "2026-10-11T18:33:31.155812901+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

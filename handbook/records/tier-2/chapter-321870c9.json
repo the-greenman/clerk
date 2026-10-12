@@ -1,0 +1,19 @@
+{
+  "instanceId": "321870c9-d3f4-4c83-bc19-5041be41a65a",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "Decisions",
+    "body": "A decision is **one standing choice that governs later choices**. It is not a task, not a plan and not a diary entry.\n\n**The four tests.** A candidate goes in the decision log only if it passes all four:\n\n1. **Reuse.** Would a later choice be settled by pointing at it?\n2. **One thing.** Can it be said in one sentence without \"and\"?\n3. **Timeless.** Does it read true with every date, issue number and id removed?\n4. **Testable.** Can someone apply it to a new case and say whether the case conforms? Does it say when to review it?\n\nAnything that fails the first test is still recorded, but as an issue (a task), an application or a plan, linked to the decision it serves.\n\n**Seven kinds**, adopted to test (`decision_kind` on the decision record):\n\n| Kind | Frame | Example |\n|---|---|---|\n| Purpose | We exist to X, for Y. | Deep context for action (f5b4656a) |\n| Boundary | X covers A, not B. | Programme coordination domain (da7877f3) |\n| Premise | We work as if X. | Stance agents are universal (7841bb87) |\n| Preference | X over Y, unless Z. | Convention before enforcement (e337703b) |\n| Policy | Every X must Y; measured by I. | A group's session ratifies (70a05a5c) |\n| Design | We model X as Y, because principle P. | Domain container (a6280447) |\n| Mandate | Group G may X within M. | Charter for WG Third-party ready (00567bf1) |\n\n**How a decision is made.**\n\n```mermaid\nstateDiagram-v2\n  [*] --> proposed: recorded at once, by anyone acting in a role\n  proposed --> proposed: considered in a session, commented on\n  proposed --> ratified: one session, at its own level, with quorum\n  proposed --> abandoned: set aside in a session\n  ratified --> [*]\n  abandoned --> [*]\n```\n\n- **Recorded at once.** A choice made between sessions is written straight away as `proposed` and may be acted on if it falls inside the group's remit.\n- **Ratified once.** A decision is ratified in exactly one session, at the level that owns it (a group's log, or the SemanticOps log for the owner) and with that level's quorum. Before that it may pass through many sessions as a proposal, each recording `considers`.\n- **Sessions.** A session has attendees, a time and an agenda in this order: decisions since the last session, reports, exercises, decisions for this session, merges. `clerk` (a terminal UI) and `clerk session` write one `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives` relations, and open a signed PR that merges itself.\n- **Three kinds of minute.** A *report* is received, not decided. An *exercise* is an open discussion that feeds proposals and is never ratified. A *decision* is ratified or set aside.\n- **Discussion.** Humans and agents comment the same way: a comment record `comments-on` the decision (`clerk comment`). A comment between sessions is discussion, not a session.\n\n**Escalating to the owner.** Information must fit the reader. An escalation is one decision with its stakes, options, consequences and a recommendation, never a flood of technical questions.\n\nFull rules, kinds and the worked re-read of the log: [decision-log.md](decision-log.md)."
+  },
+  "createdAt": "2026-10-11T18:33:28.161760140+00:00",
+  "updatedAt": "2026-10-11T18:33:28.161769615+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

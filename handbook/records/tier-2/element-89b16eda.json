@@ -1,0 +1,22 @@
+{
+  "instanceId": "89b16eda-ea22-44de-998a-fc9ef3a04f13",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "stewardship/agent and method/agent",
+    "kind": "type",
+    "home": "stewardship, method",
+    "meaning": "A seat-holding member (`actor_id`, `seat`) derived from a stance agent, which instantiates an archetype.",
+    "read_by": "`clerk groups`, `claim`, `session`"
+  },
+  "createdAt": "2026-10-11T18:33:32.257687259+00:00",
+  "updatedAt": "2026-10-11T18:33:32.257696370+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

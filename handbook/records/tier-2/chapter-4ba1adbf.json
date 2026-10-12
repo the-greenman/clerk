@@ -1,0 +1,19 @@
+{
+  "instanceId": "4ba1adbf-ad8c-4214-8c11-0102c162dd48",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "How this handbook is made",
+    "body": "The handbook is an SRS repository in `handbook/`, with its own package `com.semanticops.handbook`: a `chapter` (title, body), a `stage` (theory, status, practice, gaps, open questions, test) and an `element` (kind, home, meaning, read by). The root container's outline is the order of the document. The composition `handbook` renders it.\n\n```mermaid\nflowchart LR\n  R[\"handbook/ records<br/>(source of truth)\"] -->|\"srs render composition\"| M[\"docs/handbook.md<br/>(projection)\"]\n  W[\"Weekly handbook watcher\"] -->|\"srs record update,<br/>container members add/move\"| R\n  M -->|\"render-handbook.mjs --check<br/>fails on drift\"| CI[CI]\n```\n\n- **Edit the records, never the markdown.** Use the srs CLI: `srs record update`, `srs container members add|move|remove`, then `node scripts/render-handbook.mjs` and commit both.\n- **Check:** `node scripts/render-handbook.mjs --check` exits 1 if `docs/handbook.md` differs from the records.\n- **Why it is built this way:** it answers SP-67 (the handbook says things that are no longer true) and SP-68 (no one place tells how work is driven), both suggested in the Programme coordination domain, and SP-65 (the same rule restated in many places drifts apart).\n- **Keep it current:** the weekly handbook watcher (`routines/handbook-watcher.md`) does this as a routine. Anyone may do it in a session."
+  },
+  "createdAt": "2026-10-11T18:33:33.489622441+00:00",
+  "updatedAt": "2026-10-11T18:37:03.138725513+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -1,0 +1,22 @@
+{
+  "instanceId": "54c3dc2f-cfc4-4a2b-aa53-561ec80707a3",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "programme/period and programme/objective",
+    "kind": "type",
+    "home": "programme",
+    "meaning": "The period ranks objectives (`objective_rank`); the rank derives priority.",
+    "read_by": "`roadmap`"
+  },
+  "createdAt": "2026-10-11T18:33:31.512982423+00:00",
+  "updatedAt": "2026-10-11T18:33:31.512994133+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

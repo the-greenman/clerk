@@ -8,6 +8,8 @@ Programme and governance code lives here; programme data never does (srs-program
 
 Every script, workflow, routine and label: `docs/tools.md`. Add to it when you add one.
 
+The handbook is an SRS repository, `handbook/`; `docs/handbook.md` is rendered from it by `scripts/render-handbook.mjs`. Never edit the markdown: change the records with the srs CLI, render, and commit both (`validate.yml` fails on drift).
+
 ## Gates and git
 
 - `npm test`, judged by exit code, never a piped tail.

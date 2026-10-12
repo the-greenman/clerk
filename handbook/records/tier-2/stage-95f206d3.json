@@ -1,0 +1,33 @@
+{
+  "instanceId": "95f206d3-daa9-4d0a-9a82-4c90e1817108",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Problem",
+    "theory": "A problem is a claim, held by a person or agent, about something wrong for a persona in a domain. Anyone may suggest one; a human affirms it. Work is judged by the problem it answers. Gate (decision e3ed9e54): an affirmed problem must be `held-by` an affirmed persona-in-domain whose `in-domain` reaches an affirmed domain. It warns until both pilot domains are walked, then errors.",
+    "status": "partial",
+    "practice": "- Type `com.semanticops.method/problem` (problem_id `SP-nn`, statement, kind, source_ref).\n- SP-01 to SP-66 exist; 47 are affirmed as forks of their suggestions.\n- Problems group into clusters. Parked issues are sources for problems, never bulk imports.\n- **Duplicate guard:** search the trackers and comment rather than file a near-duplicate.\n- The gate is ruled and not built (clerk#35, in the unattended lane).",
+    "gaps": [
+      "A problem can be affirmed with no persona and no domain, which breaks the rule above.",
+      "Problems link to issues only backwards, as text (`source_ref`, `Answers:`).",
+      "The 27 affirmed problems outside the two pilot domains must be grounded or set aside before the gate errors.",
+      "Programme coordination's problems (SP-49 to SP-66) have no cluster and none is affirmed.",
+      "Decision ee59155b (proposed) duplicates the ratified gate e3ed9e54."
+    ],
+    "open_questions": [
+      "What closes a problem: solved, set aside or superseded? Who says so?",
+      "How often are suggestions reviewed, and by whom?"
+    ],
+    "test": "Stage 4: 2 passing; pending: the persona and domain gate; problem closure."
+  },
+  "createdAt": "2026-10-11T18:33:28.874359062+00:00",
+  "updatedAt": "2026-10-11T18:41:02.818267825+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

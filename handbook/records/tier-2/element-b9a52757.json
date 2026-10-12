@@ -1,0 +1,22 @@
+{
+  "instanceId": "b9a52757-473c-4d09-9f99-0d95e07b643a",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "held-by, in-domain, answers, implements, serves, addresses",
+    "kind": "relation",
+    "home": "method, programme",
+    "meaning": "The chain: problem held-by persona-in-domain, in-domain domain; remedy answers problem; epic implements remedy and serves objective; objective addresses cluster.",
+    "read_by": "`roadmap`, `ground`, `check-method`"
+  },
+  "createdAt": "2026-10-11T18:33:32.649125660+00:00",
+  "updatedAt": "2026-10-11T18:33:32.649134527+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

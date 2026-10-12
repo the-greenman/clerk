@@ -1,0 +1,17 @@
+{
+  "id": "8901b97c-1728-4545-9aad-e89b8682b4e7",
+  "namespace": "com.semanticops.handbook",
+  "name": "gaps",
+  "version": 1,
+  "description": "Where practice differs from theory, or from itself.",
+  "aiGuidance": {
+    "purpose": "Each gap is one observable difference, one per entry.",
+    "extraction": "One gap per entry. Remove an entry when it is fixed; git keeps the history."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "list",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-11T18:33:26.601434051+00:00"
+}

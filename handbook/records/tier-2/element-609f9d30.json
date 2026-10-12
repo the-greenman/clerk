@@ -1,0 +1,22 @@
+{
+  "instanceId": "609f9d30-c2fd-4e7d-9246-7ae27897220d",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "programme/programme",
+    "kind": "type",
+    "home": "programme (clerk packages/programme)",
+    "meaning": "The settings record: owner, governed repos, report and digest issues, board project, story repo.",
+    "read_by": "every clerk command (`clerk settings`)"
+  },
+  "createdAt": "2026-10-11T18:33:31.757529435+00:00",
+  "updatedAt": "2026-10-11T18:33:31.757537162+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

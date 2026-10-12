@@ -1,0 +1,19 @@
+{
+  "instanceId": "9ea1e5b4-3584-4636-9ba8-05a51a984702",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "Stage by stage",
+    "body": "Each stage has the same parts:\n\n- **Theory**: where we are trying to get to. It is kept even when practice falls short.\n- **Status**: *working*, *partial* or *theory only*.\n- **Practice**: what works today, naming the record type, the tool and the doc.\n- **Gap**: where practice differs from theory, or from itself.\n- **Open questions**: what we do not know yet. Each one is answered by a decision in the decision log, never by editing this text alone.\n- **Test**: where `test/process.test.mjs` proves it.\n\nFacts here were checked against clerk and srs-programme on 2026-10-11. The weekly handbook watcher re-checks them."
+  },
+  "createdAt": "2026-10-11T18:33:28.399163237+00:00",
+  "updatedAt": "2026-10-11T18:33:28.399170526+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

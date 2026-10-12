@@ -1,0 +1,22 @@
+{
+  "instanceId": "015dbe31-9992-4711-8b0a-ff5ca2efd877",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "governance/role",
+    "kind": "type",
+    "home": "governance",
+    "meaning": "Owner and group roles; a group role carries the charter fields (`group_label`, `quorum_*`, `budget_per_cycle`, `cycle_close_utc`, `max_unacked_reports`, `governed_repos`).",
+    "read_by": "`clerk groups`, `claim`, `queue`, `pr-upkeep`, `session`"
+  },
+  "createdAt": "2026-10-11T18:33:32.007653736+00:00",
+  "updatedAt": "2026-10-11T18:33:32.007661670+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

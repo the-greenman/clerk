@@ -1,0 +1,27 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "id": "7a3fc701-97b3-44ce-8ce7-11d8689170ac",
+  "namespace": "com.semanticops.handbook",
+  "name": "element-view",
+  "version": 1,
+  "description": "An element renders as a short labelled entry.",
+  "fieldViews": [
+    {
+      "fieldId": "bb1d6bca-fb77-4daf-ac47-2d53105475b0",
+      "order": 0
+    },
+    {
+      "fieldId": "2eacf27f-2031-44f7-b1b6-bb813c82dd84",
+      "order": 1
+    },
+    {
+      "fieldId": "21641147-46a0-4343-bdab-4e0a26ed2226",
+      "order": 2
+    },
+    {
+      "fieldId": "1cf6f901-9b85-4c36-8e95-5b161e391b53",
+      "order": 3
+    }
+  ],
+  "createdAt": "2026-10-11T00:00:00Z"
+}

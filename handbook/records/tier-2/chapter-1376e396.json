@@ -1,0 +1,19 @@
+{
+  "instanceId": "1376e396-77f6-4e7b-b691-ed6775ba9557",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "How we know",
+    "body": "`test/process.test.mjs` runs one full programme cycle as a fixture (domain, persona, problem, remedy, objective, epic, issue, PR, report, session), with one test group per stage. It is the progress bar: a stage moves from theory to practice when its `test.todo` becomes a passing test. A Practice claim that the test contradicts is a bug in this handbook or in the code, fixed under its own issue.\n\nOn 2026-10-11 it ran 60 tests: 36 passing, 24 todo, none failing."
+  },
+  "createdAt": "2026-10-11T18:33:33.247203600+00:00",
+  "updatedAt": "2026-10-11T18:33:33.247212157+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -1,0 +1,28 @@
+{
+  "instanceId": "ba0efeed-6e6a-447a-91ed-b33637aa8ac7",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Measurement and retrospective",
+    "theory": "The process must show whether it has value. Each cycle records a few indicators; each report reads them and asks whether they still mean anything; each period closes with a retrospective that keeps, changes or drops practices. Every governing decision names an indicator (decision f6175b4a).",
+    "status": "partial",
+    "practice": "- **I1** is computed by `clerk ground --since <date>` and the daily `programme-ground.yml` job summary: the share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. No result record is written yet.\n- `argument/indicator` and `argument/measurement-result` are installed but have no records.\n- `revisit_when` on decisions and roles is displayed but never checked; remedy falsifiers are never tested.\n\n| # | Question | Indicator |\n|---|---|---|\n| I1 | Is work grounded? | Share of merged PRs whose issue answers an affirmed problem with an affirmed persona-in-domain and domain |\n| I2 | Does work flow? | Delegated merges against budget, and ready count at cycle close against target |\n| I3 | Does governance keep up? | Median days from proposed to ratified; reports awaiting acknowledgement |\n| I4 | Does done mean done? | Reopened issues, false closes and reverted PRs |\n\nEach report records the indicators with one line each: useful, noisy or misleading. At period close a retrospective decision keeps, changes or drops each one.",
+    "gaps": [
+      "I2 to I4 have no computation, and no indicator writes a result record (clerk#25)."
+    ],
+    "open_questions": [
+      "Who rules on the retrospective: the owner's session, every time?"
+    ],
+    "test": "Stage 15: 2 passing (routine drift, I1); pending: I2 to I4, revisit_when, the retrospective loop."
+  },
+  "createdAt": "2026-10-11T18:33:30.188986791+00:00",
+  "updatedAt": "2026-10-11T18:33:30.188995529+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -1,0 +1,44 @@
+{
+  "id": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "namespace": "com.semanticops.handbook",
+  "name": "element",
+  "version": 1,
+  "description": "An SRS element the process reads or writes.",
+  "fields": [
+    {
+      "fieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "bb1d6bca-fb77-4daf-ac47-2d53105475b0",
+      "order": 1,
+      "required": true,
+      "displayLabel": "Kind"
+    },
+    {
+      "fieldId": "2eacf27f-2031-44f7-b1b6-bb813c82dd84",
+      "order": 2,
+      "required": true,
+      "displayLabel": "Defined in"
+    },
+    {
+      "fieldId": "21641147-46a0-4343-bdab-4e0a26ed2226",
+      "order": 3,
+      "required": true,
+      "displayLabel": "Meaning"
+    },
+    {
+      "fieldId": "1cf6f901-9b85-4c36-8e95-5b161e391b53",
+      "order": 4,
+      "required": false,
+      "displayLabel": "Read by"
+    }
+  ],
+  "identityFieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
+  "aiGuidance": {
+    "purpose": "A type, relation, container or label that the programme process depends on, with what reads it."
+  },
+  "createdAt": "2026-10-11T18:33:27.144844326+00:00",
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json"
+}

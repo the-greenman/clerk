@@ -1,0 +1,17 @@
+{
+  "id": "7d919e27-5e4b-43ee-8df1-63b1f9998ed4",
+  "namespace": "com.semanticops.handbook",
+  "name": "body",
+  "version": 1,
+  "description": "Prose of a chapter, in markdown.",
+  "aiGuidance": {
+    "purpose": "What the reader needs to know, in clear words. May hold mermaid diagrams as fenced blocks.",
+    "extraction": "Short paragraphs and lists. Diagrams as ```mermaid blocks. Point to the canonical doc or record instead of repeating it.",
+    "negativeGuidance": "No em dashes. No restating rules that live in a brief or a record; name where they live."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-11T18:33:26.354465938+00:00"
+}

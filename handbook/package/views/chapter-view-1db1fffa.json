@@ -1,0 +1,16 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "id": "1db1fffa-388b-4f48-bfa1-b308cac468ba",
+  "namespace": "com.semanticops.handbook",
+  "name": "chapter-view",
+  "version": 1,
+  "description": "A chapter renders as its prose directly under its heading.",
+  "fieldViews": [
+    {
+      "fieldId": "7d919e27-5e4b-43ee-8df1-63b1f9998ed4",
+      "order": 0,
+      "labelMode": "none"
+    }
+  ],
+  "createdAt": "2026-10-11T00:00:00Z"
+}

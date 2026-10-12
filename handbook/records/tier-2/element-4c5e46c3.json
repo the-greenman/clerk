@@ -1,0 +1,22 @@
+{
+  "instanceId": "4c5e46c3-f673-47bc-8330-ebdeb85ae517",
+  "typeId": "ad49acae-d74d-4856-a64f-2e74ee024d69",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "element",
+  "fieldValues": {
+    "title": "method/persona and method/persona-in-domain",
+    "kind": "type",
+    "home": "method",
+    "meaning": "Who a problem is for. The persona-in-domain refines a shared persona for one domain.",
+    "read_by": "`roadmap --explain`, `ground`"
+  },
+  "createdAt": "2026-10-11T18:33:31.034800161+00:00",
+  "updatedAt": "2026-10-11T18:33:31.034812747+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:handbook-watcher",
+    "name": "Handbook watcher"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}
