@@ -5,6 +5,9 @@
 //   reopen-no-pr   closed COMPLETED, not an epic, no merged closing PR, no `no-code` label -> reopen + comment
 //   reopen-epic    epic (label `epic` or has sub-issues) closed with open sub-issues, unless every open child has a re-homing comment -> reopen + comment
 // Closed by a Commit or a merged PR (timeline closer) also counts as landed; duplicates and bots are skipped.
+// So does a comment naming a MERGED PR after "Landed" (clerk#68): "Landed: srs-web#548 ...", "Landed via srs-programme#44, #45".
+// The refs run to the end of that line; a bare #n takes the repo of the ref before it on the line, else the issue's own repo.
+// Each is checked as a merged PR (REST pulls/{n}); a named issue or an unmerged PR is no evidence.
 //   answers        OPEN and opened without an `Answers:` / `No affirmed problem yet` line -> one comment
 // Every comment carries a hidden marker, so reruns are idempotent; an issue that already carries our
 // marker is never reopened again (a human who re-closes it has overruled us).
@@ -13,7 +16,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { answersOf } from "../lib/practice/grounding.mjs";
-import { issuesSince, list, closers } from "../lib/adapters/github.mjs";
+import { issuesSince, list, get, closers } from "../lib/adapters/github.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
 // Go-forward only: history before this is never acted on (the weekly audit, srs-programme#38, reports it).
@@ -22,6 +25,22 @@ const RESET_RE = /Closed in the SemanticOps roadmap reset/;
 const M = { noPr: "<!-- steward-check:reopen-no-pr -->", epic: "<!-- steward-check:reopen-epic -->", answers: "<!-- steward-check:answers -->" };
 const REHOME_RE = /(re-?hom|moved to|moving to|tracked (in|by)|now (in|under|tracked))/i;
 const REF_RE = /(?:[\w.-]+\/)?[\w.-]*#(\d+)/g;
+
+const LANDED_RE = /\bLanded\b([^\n]*)/g;
+const LANDED_REF_RE = /(?:([\w.-]+)\/)?([\w.-]+)?#(\d+)/g;
+
+// Refs named after "Landed" in any comment -> [{repo, number}], deduped. repo: the issue's own repo, for a bare #n with no repo before it.
+export function landedRefs(comments, repo) {
+  const out = new Map();
+  for (const c of comments || []) for (const [, tail] of c.matchAll(LANDED_RE)) {
+    let last = repo;
+    for (const m of tail.matchAll(LANDED_REF_RE)) {
+      last = m[2] ?? last;
+      out.set(`${last}#${m[3]}`, { repo: last, number: Number(m[3]) });
+    }
+  }
+  return [...out.values()];
+}
 
 const names = (xs) => (xs || []).map((l) => l.name);
 const hasMarker = (issue, m) => (issue.comments || []).some((c) => c.includes(m));
@@ -35,7 +54,7 @@ export function rehomed(child) {
 }
 
 // issue: {repo, number, title, body, state, stateReason, createdAt, closedAt, labels:[name], comments:[body],
-//         closingPrs:[{merged}], openChildren:[{number, comments:[body]}]}
+//         closingPrs:[{merged}], landedPrs:[{repo, number, merged}] (from landedRefs), openChildren:[{number, comments:[body]}]}
 export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE } = {}) {
   const since = Math.max(Date.parse(cutoff), now - days * 864e5);
   const out = [];
@@ -49,7 +68,7 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
         if (orphans.length && !hasMarker(i, M.epic))
           out.push({ rule: "reopen-epic", ref, repo: i.repo, number: i.number, reopen: true,
             comment: `${M.epic}\nReopened by steward-check: this epic was closed while sub-issues are still open and not re-homed: ${orphans.map((c) => "#" + c.number).join(", ")}. Close it again once each is finished, or comment on each child saying where it moved (e.g. "re-homed to #123"). Re-closing after this comment is respected.` });
-      } else if (i.stateReason === "COMPLETED" && !(i.comments || []).some((c) => RESET_RE.test(c)) && !i.labels.includes("no-code") && !(i.closingPrs || []).some((p) => p.merged) && i.closer?.__typename !== "Commit" && !i.closer?.merged && !i.labels.includes("duplicate") && !hasMarker(i, M.noPr))
+      } else if (i.stateReason === "COMPLETED" && !(i.comments || []).some((c) => RESET_RE.test(c)) && !i.labels.includes("no-code") && !(i.closingPrs || []).some((p) => p.merged) && !(i.landedPrs || []).some((p) => p.merged) && i.closer?.__typename !== "Commit" && !i.closer?.merged && !i.labels.includes("duplicate") && !hasMarker(i, M.noPr))
         out.push({ rule: "reopen-no-pr", ref, repo: i.repo, number: i.number, reopen: true,
           comment: `${M.noPr}\nReopened by steward-check: closed as completed within ${days} days but no merged pull request closes it, so the fix may only exist on a branch. Link the merged PR, or add the \`no-code\` label if no code was needed, then close it again. Re-closing after this comment is respected.` });
     }
@@ -70,6 +89,11 @@ function gh(args, input) {
 // (closing PRs, commit closer) and, for epics, its sub-issues. Shapes match what plan() reads.
 const comments = (OWNER, repo, n) => list(`repos/${OWNER}/${repo}/issues/${n}/comments?per_page=100`).map((c) => c.body);
 
+// A named ref is evidence only as a merged PR; an issue number (404 on pulls) or any read failure is not.
+function mergedPr(OWNER, { repo, number }) {
+  try { return Boolean(get(`repos/${OWNER}/${repo}/pulls/${number}`)?.merged_at); } catch { return false; }
+}
+
 export function fetchIssues(repo, days, cutoff = SINCE, OWNER) {
   const since = new Date(Math.max(Date.parse(cutoff), Date.now() - days * 864e5)).toISOString().slice(0, 10);
   const inWindow = (t) => t && t.slice(0, 10) >= since;
@@ -81,9 +105,11 @@ export function fetchIssues(repo, days, cutoff = SINCE, OWNER) {
         .map((c) => ({ number: c.number, comments: comments(OWNER, repo, c.number) }))
       : [];
     const { closingPrs, closer } = state === "CLOSED" ? closers(OWNER, repo, n.number) : { closingPrs: [], closer: null };
+    const cs = n.comments ? comments(OWNER, repo, n.number) : [];
+    const landedPrs = state === "CLOSED" ? landedRefs(cs, repo).map((r) => ({ ...r, merged: mergedPr(OWNER, r) })) : [];
     return { repo, number: n.number, title: n.title, body: n.body, state, stateReason: n.state_reason?.toUpperCase() ?? null,
-      createdAt: n.created_at, closedAt: n.closed_at, labels, comments: n.comments ? comments(OWNER, repo, n.number) : [],
-      closingPrs, closer, bot: n.user?.type === "Bot", openChildren };
+      createdAt: n.created_at, closedAt: n.closed_at, labels, comments: cs,
+      closingPrs, landedPrs, closer, bot: n.user?.type === "Bot", openChildren };
   });
 }
 
