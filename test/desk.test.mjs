@@ -40,3 +40,24 @@ test('a report comment is listed under the group its second line names', () => {
   assert.equal(rows.length, 1);
   assert.match(rows[0], /unreceived:\*\* B/);
 });
+
+test('a PR stating a decision is in Needs you; "Decision asked: none" asks nothing', () => {
+  const pr = (number, body) => ({ repo: 'clerk', number, title: `pr ${number}`, body, labels: [], chain: [] });
+  const body = deskBody({ now: NOW, prs: [pr(57, 'Decision asked: take D11 in the next session.\nmore'), pr(120, 'Decision asked: none to merge.')] });
+  assert.match(needsYou(body), /Decision asked in clerk#57:\*\* pr 57 \| take D11 in the next session \|/);
+  assert.doesNotMatch(needsYou(body), /#120/);
+  assert.match(unthreaded(body), /clerk#57 pr 57 \| waiting on you/);
+});
+
+test('a group paused by another group\'s reports says so', () => {
+  const body = deskBody({ now: NOW, reportIssue: { ref: 'semanticops.com#31' }, groups: [group('A', 'paused: 2 reports unacknowledged'), group('B', 'paused: 2 reports unacknowledged')],
+    reportComments: [report(1, '2026-10-13'), report(2, '2026-10-14')] });
+  assert.match(body, /\| B \| \*\*paused\*\* \| - \| Paused by the unreceived reports on semanticops\.com#31; receiving them un-pauses it \(Needs you\)/);
+});
+
+test('a PR belongs to the nearest epic up its chain', () => {
+  const pr = { repo: 'clerk', number: 57, title: 'p', labels: [], chain: ['clerk#56', 'clerk#19', 'semanticops.com#33'] };
+  const body = deskBody({ now: NOW, prs: [pr], epics: [{ ref: 'semanticops.com#33', title: 'Ledger', rank: 1 }, { ref: 'clerk#19', title: 'Committees', rank: 2 }] });
+  assert.match(body, /\| Committees \(clerk#19\) \| running \|/);
+  assert.match(body, /\| Ledger \(semanticops\.com#33\) \| idle \|/);
+});

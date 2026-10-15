@@ -1,7 +1,8 @@
 name: Programme PR upkeep
 
 # Reusable. Merge green gate:auto-merge PRs and keep gated PRs up to date across the estate
-# (clerk upkeep); with digest, also post the owner's review digest on the settings digest_issue.
+# (clerk upkeep); with digest, also post the review digest on the settings digest_issue and
+# rewrite the owner's desk (clerk desk --post, the one open `desk` issue in that repo).
 # Triggers (15-minute cron, daily digest cron, push, workflow_run, dispatch) and the concurrency
 # group stay in the caller. github.event_name and github.event.schedule are the caller's.
 # digest-cron must equal the caller's digest cron expression.
@@ -73,3 +74,12 @@ jobs:
           if [ "$IS_AUTO" = true ] || [ "$APPLY" = true ]; then args+=(--apply); fi
           if [ "$SCHEDULE" = "$DIGEST_CRON" ] || [ "$DIGEST" = true ]; then args+=(--digest); fi
           node "$RUNNER_TEMP/clerk/bin/clerk.mjs" upkeep "${args[@]}"
+
+      # The owner's desk (clerk#64): rewrite the pinned desk issue's body, on the digest run only.
+      - name: Desk
+        if: github.event.schedule == inputs.digest-cron || inputs.digest
+        env:
+          GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
+        run: |
+          export $(node "$RUNNER_TEMP/clerk/bin/clerk.mjs" fetch-srs --repo "$GITHUB_WORKSPACE")
+          node "$RUNNER_TEMP/clerk/bin/clerk.mjs" desk --repo "$GITHUB_WORKSPACE" --post
