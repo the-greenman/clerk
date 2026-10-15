@@ -8,13 +8,14 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 |---|---|---|---|---|---|
 | (none) / `session` / `comment` | Hold a session or post comments, by role | Human or agent | programme repo, GitHub PRs and issues | session/comment records via srs CLI, a signed PR | owner, `scripts/session`, `/session` |
 | `help` | List subcommands | Human | | | |
+| `desk` | The owner's desk: `desk --repo <programme> [--post [--dry-run]]` prints the body of the one pinned issue labelled `desk` (Needs you, Threads, Running fine); `--post` rewrites that issue's body in place (REST PATCH, never a comment), `--dry-run` prints what it would write. Exit 1 when the settings `digest_issue` repo has no open `desk` issue or more than one; it never creates one. No role needed (logic in `lib/practice/desk.mjs`) | Daily; human | decision log, run reports, exercises, groups and their pause state, roadmap epics (programme records); open PRs, quorum comments, sub-issue parents, issues assigned to the owner or labelled `needs-input`, the report issue (gh REST) | with `--post`: the `desk` issue body | owner; the daily upkeep run once its `desk --post` step is added (clerk#64) |
 | `groups` | Print the working groups chartered in the records (`--json`; bash: `clerk groups --json \| jq -r '.[].label'`) | Human; `pr-upkeep.sh`; `queue` | `governance/role` records with a `group_label`, the agents `authorised-by` them, the group's log container | nothing | every group-aware script |
 | `charter` | Charter a working group as draft/proposed records for the owner to ratify: `charter --repo <programme> --title --epic --label --repos --budget --cycle-close --quorum-seats --required-seat [--quorum-min --max-unacked --prefix --from <role id>] [--dry-run]` (handbook stage 10) | Human or orchestrator session | existing groups, the SemanticOps decision log, Suggestions, the compass of the group it copies | via the srs CLI as `SRS_ACTOR`: log, container, role, 4 articles, agents, boundary, charter decision (proposed, also in the SemanticOps log), relations; never `delegates` | owner session |
 | `settings` | Print the programme settings record (`--json`; bash: `clerk settings --json \| jq -r .githubOwner`) | Human; scripts | programme `com.semanticops.programme/programme` record | nothing | every script below |
 | `roadmap` | Derive epic priority from the period ranking | Human; workflows | programme records | with `--apply --yes`: board priority, `parked` label | derive-priority.yml, pages.yml |
 | `claim` | Claim an issue as a seat of its group (a chartered group by its label; unlabelled work belongs to the central group, SemanticOps): `claim <repo#n> --as <seat> [--repo <programme>] [--branch <name>] [--dry-run]` (handbook stage 11); exit 2 with the reasons if refused | Human, local session or routine | the issue, open PRs and branches (gh), `clerk groups`, the Affirmed problems | assignee, `status: in progress` label, claim comment (via gh) | wg-builder, unattended-worker |
 | `queue` | Report what the unattended lane would take next | Human | GitHub issues and PRs (settings `governed_repos`) | nothing | unattended-worker routine brief |
-| `upkeep` | Merge or update PR branches by gate label | Every 15 min | GitHub PRs | merges, branch updates, digest comment on the settings `digest_issue` | pr-upkeep.yml |
+| `upkeep` | Merge or update PR branches by gate label; the digest lists conflicts, ungated PRs and group waits (owner merges are on the desk) | Every 15 min | GitHub PRs | merges, branch updates, digest comment on the settings `digest_issue` | pr-upkeep.yml |
 | `steward` | Guard against false closes (reopen a completed close with no merged PR, or an epic closed with open children), and comment once on an open issue with no `Answers:` / `No affirmed problem yet` line | Daily | closed issues (settings `governed_repos`) | with `--fix`: reopen and comment | srs-programme `derive-priority.yml` (daily 06:15, `--fix`); owner |
 | `check` | Method rules: two poles per tension, one tension per principle, boundaries | CI, human | programme records | nothing | owner |
 | `conformance` | Programme repo is an SRS repo and validates | CI | programme repo | nothing | validate.yml |
@@ -43,7 +44,7 @@ Nothing programme-specific is hard-coded. `lib/adapters/settings.mjs` reads the 
 
 The clerk runs unchanged in a Claude Code cloud session (claude.ai/code, cloud routines). Such a session refuses GitHub GraphQL and the search API, so every GitHub call the clerk makes from a session is repo-scoped REST, through `lib/adapters/github.mjs` (bash: `wg_budget_count`, `wg_open_count` in `pr-upkeep.sh`). Closing PRs are read from the issue timeline's cross-references and the PR body's closing keywords (`Closes #n`), which is what GitHub links on merge; a PR linked only by hand in the sidebar is not seen.
 
-- **Works in a session:** `settings`, `groups`, `roadmap` (read), `check`, `conformance`, `queue`, `claim`, `session`, `comment`, the agenda (TUI), `steward`, `ground`, `charter`, `routines`, `wt`, `fetch-srs`.
+- **Works in a session:** `settings`, `groups`, `desk`, `roadmap` (read), `check`, `conformance`, `queue`, `claim`, `session`, `comment`, the agenda (TUI), `steward`, `ground`, `charter`, `routines`, `wt`, `fetch-srs`.
 - **Actions only:** `board` (GitHub Projects v2 is GraphQL-only) and `upkeep` (lists PRs with `gh pr list`). `roadmap --apply` also calls `board`. Their workflows run them; nothing in a session needs them.
 - **Repositories:** attach every settings `governed_repos` entry to the cloud environment, with write access (`add_repo` with `access: push` in a session). A public repo with read-only git access still refuses API calls. A repo the session cannot reach is skipped with a warning (`queue` prints "this queue is partial"; `steward` and `ground` name it).
 - **Paths:** checkouts sit side by side (`/home/user/<repo>`); `wt` finds siblings next to the clerk's own checkout, and worktrees go to `$WT_ROOT` (default `~/dev/.wt`), which `session` reads too.
@@ -106,9 +107,10 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | `needs-input` | a stopping routine; the human removes it | queue (held), `board` (never reclaimed), wg-steward |
 | `lane:unattended` | owner or filing agent | queue, unattended-worker |
 | `gate:auto-merge` | PR author per repo rule; wg-reviewer on approve | pr-upkeep (merge when clean) |
-| `gate:owner-merge` | PR author or owner | pr-upkeep (keep up to date, never merge), clerk Merges section, wg budget (not counted) |
+| `gate:owner-merge` | PR author or owner | pr-upkeep (keep up to date, never merge), clerk Merges section, `desk` (Needs you), wg budget (not counted) |
 | `wg:third-party-ready` | owner or steward on issues; builder on PRs | queue (wg lane), wg-builder, wg-reviewer, pr-upkeep (quorum and budget), wg-steward |
 | `status: in progress` | routine claiming an issue (mirror of board Status) | `board` reclaim, unattended-worker |
+| `desk` | the owner, on exactly one pinned issue in the settings `digest_issue` repo (semanticops.com#35) | `desk --post` (rewrites that issue's body) |
 
 ## Repo lists
 
