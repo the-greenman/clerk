@@ -627,3 +627,19 @@ test("derivePriority: parked epic excludes descendants like Won't; bug floor hol
   assert.equal(derivePriority(prow(), null, stories, epic).p, null); // no epic fallback either
   assert.equal(derivePriority(prow(["bug"]), new Set([21]), stories, epic).p, "P1");
 });
+
+// clerk#68: an agent claim ran under the owner's account; reclaiming it must not leave the owner assigned.
+test("planStaleClaims: a reclaimed agent claim unassigns the owner; the owner's own claim and fresh claims do not", () => {
+  const who = { owner: "ada", ownerActor: "human:ada" };
+  const rows = [
+    srow({ num: 60, claimedAtMs: 0, assignees: ["ada"], claimActor: "agent:unattended-worker" }),
+    srow({ num: 61, claimedAtMs: 0, assignees: ["ada"], claimActor: "human:ada" }),
+    srow({ num: 62, claimedAtMs: 0, assignees: ["ada"], claimActor: null }),        // no claim comment: unknown, left alone
+    srow({ num: 63, claimedAtMs: 0, assignees: [], claimActor: "agent:x" }),         // never assigned
+    srow({ num: 64, claimedAtMs: 99 * HOUR, assignees: ["ada"], claimActor: "agent:x" }), // fresh
+  ];
+  const plan = planStaleClaims(rows, 100 * HOUR, 3 * HOUR, who);
+  assert.deepEqual(plan.map((p) => [p.num, p.action, p.unassign ?? null]),
+    [[60, "reclaim", "ada"], [61, "reclaim", null], [62, "reclaim", null], [63, "reclaim", null], [64, "fresh", null]]);
+  assert.equal(planStaleClaims(rows.slice(0, 1), 100 * HOUR, 3 * HOUR, { owner: "ada" })[0].unassign, undefined); // ownerActor unknown
+});

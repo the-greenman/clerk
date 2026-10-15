@@ -73,6 +73,7 @@ import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
+import { claimActorOf } from "../lib/practice/claim.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
@@ -82,6 +83,8 @@ const SETTINGS = process.env.GHP_OWNER && process.env.GHP_PROJECT && process.env
   try { return loadSettings(resolve(process.env.CLERK_REPO || process.cwd())); } catch { return {}; }
 })();
 const OWNER = process.env.GHP_OWNER || SETTINGS.githubOwner;
+// The owner's human actor (settings owner_actor): a reclaimed claim by anyone else had no business assigning OWNER (clerk#68).
+const OWNER_ACTOR = process.env.GHP_OWNER_ACTOR || SETTINGS.ownerActor;
 const PROJECT_NUMBER = Number(process.env.GHP_PROJECT || SETTINGS.boardProject);
 const STORY_REPO = process.env.GHP_STORY_REPO || SETTINGS.boardStoryRepo;
 const STORY_LABEL = "user-story";
@@ -333,14 +336,15 @@ function ghHttpIssue(args) {
     })));
   }
 
-  // issue edit N --repo O/R [--add-label L] [--remove-label L] [--milestone M]
+  // issue edit N --repo O/R [--add-label L] [--remove-label L] [--remove-assignee U] [--milestone M]
   if (args[0] === "edit") {
     const num = args[1];
-    let repo, addLabels = [], removeLabels = [], milestone;
+    let repo, addLabels = [], removeLabels = [], removeAssignees = [], milestone;
     for (let i = 2; i < args.length; i++) {
       if      (args[i] === "--repo")         repo = args[++i];
       else if (args[i] === "--add-label")    addLabels.push(args[++i]);
       else if (args[i] === "--remove-label") removeLabels.push(args[++i]);
+      else if (args[i] === "--remove-assignee") removeAssignees.push(args[++i]);
       else if (args[i] === "--milestone")    milestone = args[++i];
     }
     const base = `https://api.github.com/repos/${repo}/issues/${num}`;
@@ -350,6 +354,7 @@ function ghHttpIssue(args) {
       curlMutate("PATCH", base, { milestone: found?.number ?? null });
     }
     if (addLabels.length) curlMutate("POST", `${base}/labels`, { labels: addLabels });
+    if (removeAssignees.length) curlMutate("DELETE", `${base}/assignees`, { assignees: removeAssignees });
     for (const label of removeLabels) {
       try { curlMutate("DELETE", `${base}/labels/${encodeURIComponent(label)}`); } catch { /* ok */ }
     }
@@ -470,6 +475,7 @@ function board() {
         content{ ... on Issue {
           number state title repository { name }
           labels(first:30){ nodes{ name } }
+          assignees(first:10){ nodes{ login } }
           blockedBy(first:20){ nodes{ number state repository{ name } } }
         } }
       }
@@ -500,6 +506,7 @@ function board() {
         state: c.state,
         title: c.title,
         labels: c.labels.nodes.map((l) => l.name),
+        assignees: (c.assignees?.nodes ?? []).map((a) => a.login),
         // Native "blocked by" dependency edges (#671), with each blocker's live state —
         // enough to derive blockedness without any further lookups. first:20 above is a
         // practical cap; >20 blockers on one issue is a modelling problem, not a real case.
@@ -789,9 +796,13 @@ function planPromotions(rows) {
 // cmdStaleClaims) is finished work awaiting review, whose silence is expected: `in-review`,
 // never reclaimed, regardless of age (#1375). A PR closed unmerged is not annotated, so the
 // claim ages out as before.
-// Returns [{ repo, num, key, itemId, claimedAtMs, action, ageMs, openClosingPr? }] —
+// A reclaim also names `unassign` (the owner's login) when the issue is assigned to the owner and its
+// latest claim comment names an actor other than the owner's (`claimActor`, from claimTimes): an agent
+// claim under the owner's account must not leave a permanent owner assignment (clerk#68). No claim
+// comment, or no known ownerActor, leaves the assignee alone.
+// Returns [{ repo, num, key, itemId, claimedAtMs, action, ageMs, openClosingPr?, unassign? }] —
 // action: reclaim|fresh|needs-input|in-review|unknown.
-function planStaleClaims(rows, nowMs, thresholdMs) {
+function planStaleClaims(rows, nowMs, thresholdMs, { owner, ownerActor } = {}) {
   const out = [];
   const inProgLabel = STATUS_LABEL_MAP["In progress"];
   for (const row of rows) {
@@ -807,7 +818,9 @@ function planStaleClaims(rows, nowMs, thresholdMs) {
     if (row.claimedAtMs == null) { out.push({ ...base, action: "unknown" }); continue; }
     const freshAsOf = Math.max(row.claimedAtMs, row.lastActivityMs ?? 0);
     const ageMs = nowMs - freshAsOf;
-    out.push({ ...base, action: ageMs >= thresholdMs ? "reclaim" : "fresh", ageMs });
+    const reclaim = ageMs >= thresholdMs;
+    const agentClaim = ownerActor && row.claimActor && row.claimActor !== ownerActor;
+    out.push({ ...base, action: reclaim ? "reclaim" : "fresh", ageMs, ...(reclaim && agentClaim && row.assignees?.includes(owner) ? { unassign: owner } : {}) });
   }
   return out;
 }
@@ -1872,7 +1885,8 @@ const TOPUP_TARGET_DEFAULT = 6;
 //                    (humans talking, or commits & PRs mentioning the issue). Label events are
 //                    deliberately EXCLUDED — the hourly sync's label churn would otherwise
 //                    refresh every claim forever and nothing would ever look stale.
-// Returns { claimedAtMs: ms|null, lastActivityMs: ms|null }; claimedAtMs null means the
+//   claimActor     — the actor named by the latest "Claimed by <actor>" comment (clerk claim's marker), or null.
+// Returns { claimedAtMs: ms|null, lastActivityMs: ms|null, claimActor }; claimedAtMs null means the
 // timeline was unreadable or carried no claim event (caller reports it as `unknown`).
 // (Uses /timeline, not /issues/{n}/events: the events endpoint 404s for some issues.)
 const ACTIVITY_EVENTS = new Set(["commented", "cross-referenced", "referenced"]);
@@ -1882,17 +1896,19 @@ function claimTimes(repo, num) {
     events = ghJson(["api", "--paginate", `repos/${OWNER}/${repo}/issues/${num}/timeline`]) || [];
   } catch (e) {
     console.error(`gh-project: warning: could not read events for ${repo}#${num}: ${(e.stderr ? String(e.stderr) : e.message).trim()}`);
-    return { claimedAtMs: null, lastActivityMs: null };
+    return { claimedAtMs: null, lastActivityMs: null, claimActor: null };
   }
   let claimedAtMs = null;
   let lastActivityMs = null;
+  let claimActor = null;
   for (const e of events) {
     const ts = Date.parse(e.created_at ?? e.updated_at ?? "");
     if (isNaN(ts)) continue;
     if (e.event === "labeled" && e.label?.name === "status: in progress") claimedAtMs = Math.max(claimedAtMs ?? 0, ts);
     else if (ACTIVITY_EVENTS.has(e.event)) lastActivityMs = Math.max(lastActivityMs ?? 0, ts);
+    if (e.event === "commented") claimActor = claimActorOf(e.body) ?? claimActor;
   }
-  return { claimedAtMs, lastActivityMs };
+  return { claimedAtMs, lastActivityMs, claimActor };
 }
 
 // Number of an OPEN pull request that will close the issue (GraphQL closedByPullRequestsReferences,
@@ -1937,10 +1953,10 @@ function cmdStaleClaims(argv) {
     // PR lookup failed: force `unknown` (no reclaim) instead of guessing "no PR".
     return { ...r, ...claimTimes(r.repo, r.num), ...(pr === undefined ? { claimedAtMs: null } : { openClosingPr: pr }) };
   });
-  const plan = planStaleClaims(annotated, Date.now(), thresholdMs);
+  const plan = planStaleClaims(annotated, Date.now(), thresholdMs, { owner: OWNER, ownerActor: OWNER_ACTOR });
   for (const p of plan) {
     const ageStr = p.ageMs != null ? `${(p.ageMs / 3600000).toFixed(1)}h` : "—";
-    console.log(`${dryRun ? "[dry-run] " : ""}${p.action}: ${p.key} (age ${ageStr})`);
+    console.log(`${dryRun ? "[dry-run] " : ""}${p.action}: ${p.key} (age ${ageStr})${p.unassign ? ` · ${dryRun ? "would unassign" : "unassign"} ${p.unassign} (agent claim)` : ""}`);
     if (p.action === "in-review") console.log(`  open closing PR #${p.openClosingPr}`);
     if (dryRun) continue;
     if (p.action === "in-review") {
@@ -1960,6 +1976,11 @@ function cmdStaleClaims(argv) {
     if (p.action !== "reclaim") continue;
     setSingleSelect(p.itemId, "Status", "Ready", false);
     setStatusLabel(p.repo, p.num, "ready", false); // mirror immediately; reconcile also keeps it in sync
+    if (p.unassign) try {
+      gh(["issue", "edit", String(p.num), "--repo", `${OWNER}/${p.repo}`, "--remove-assignee", p.unassign]);
+    } catch (e) {
+      console.error(`gh-project: warning: could not unassign ${p.unassign} from ${p.key}: ${(e.stderr ? String(e.stderr) : e.message).trim()}`);
+    }
     try {
       gh(["issue", "comment", String(p.num), "--repo", `${OWNER}/${p.repo}`,
         "--body", `Auto-reclaimed: this issue's \`status: in progress\` claim showed no activity for >${hours}h (no comments, commits, or PR references) and has been reset to **Ready** for re-pickup. If work is still genuinely in flight, re-claim it — activity on the issue refreshes the claim. If it stopped because a human decision is needed, add \`needs-input\` with the question instead.`]);

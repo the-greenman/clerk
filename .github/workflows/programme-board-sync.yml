@@ -82,6 +82,7 @@ jobs:
           export $(GH_TOKEN=${{ github.token }} clerk fetch-srs --repo "$GITHUB_WORKSPACE")
           S=$(clerk settings --repo "$GITHUB_WORKSPACE" --json)
           export GHP_OWNER=$(jq -r .githubOwner <<<"$S")
+          export GHP_OWNER_ACTOR=$(jq -r '.ownerActor // empty' <<<"$S")
           export GHP_PROJECT=${IN_PROJECT:-$(jq -r .boardProject <<<"$S")}
           export GHP_STORY_REPO=${IN_STORY_REPO:-$(jq -r .boardStoryRepo <<<"$S")}
           export GHP_MIRROR_REPOS=${IN_MIRROR_REPOS:-$(jq -r '.repos|join(",")' <<<"$S")}

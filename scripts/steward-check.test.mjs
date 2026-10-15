@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { plan, rehomed } from "./steward-check.mjs";
+import { plan, rehomed, landedRefs } from "./steward-check.mjs";
 
 const now = Date.parse("2026-10-09T00:00:00Z");
 const recent = "2026-10-07T00:00:00Z", old = "2026-09-01T00:00:00Z";
@@ -53,4 +53,18 @@ test("go-forward cutoff, reset closes and DUPLICATE are never acted on", () => {
   assert.equal(p({ comments: ["Closed in the SemanticOps roadmap reset (2026-10-08)"] }).length, 0);
   assert.equal(p({ stateReason: "DUPLICATE" }).length, 0);
   assert.equal(plan([{ ...base }], { now }).length, 0); // default cutoff 2026-10-09 > closedAt
+});
+
+test("Landed: a named MERGED PR counts as landed; a named unmerged PR or issue does not", () => {
+  assert.equal(p({ landedPrs: [{ repo: "srs-web", number: 548, merged: true }] }).length, 0);
+  assert.equal(p({ landedPrs: [{ repo: "srs-web", number: 548, merged: false }] })[0].rule, "reopen-no-pr");
+});
+test("landedRefs reads repo#n, bare #n after a repo ref, and only text after Landed", () => {
+  const key = (rs) => rs.map((r) => `${r.repo}#${r.number}`);
+  assert.deepEqual(key(landedRefs(["Landed: srs-web#548 (the affirm UI) merged on 2026-10-12."], "srs-web")), ["srs-web#548"]);
+  assert.deepEqual(key(landedRefs(["Done since #12. Landed via srs-programme#44, #45, #46 and #47. Closed."], "srs-programme")),
+    ["srs-programme#44", "srs-programme#45", "srs-programme#46", "srs-programme#47"]);
+  assert.deepEqual(key(landedRefs(["Landed: method (srs-programme#17), visualiser (#23), srs#921 and #923."], "x")),
+    ["srs-programme#17", "srs-programme#23", "srs#921", "srs#923"]);
+  assert.deepEqual(key(landedRefs(["Landed in #7", "- landed_as: https://github.com/o/r/pull/118", "see #9"], "r")), ["r#7"]);
 });

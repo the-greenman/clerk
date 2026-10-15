@@ -61,3 +61,11 @@ test('a PR belongs to the nearest epic up its chain', () => {
   assert.match(body, /\| Committees \(clerk#19\) \| running \|/);
   assert.match(body, /\| Ledger \(semanticops\.com#33\) \| idle \|/);
 });
+
+test('an assigned issue labelled status: in progress is claimed by someone, not listed as assigned to you', () => {
+  const row = (number, labels) => ({ repo: 'r', number, title: 't', url: `https://x/${number}`, createdAt: '2026-10-05T07:00:00Z', labels });
+  const body = needsYou(deskBody({ now: NOW, assigned: [row(1, [{ name: 'status: in progress' }]), row(2, ['bug'])] }));
+  assert.match(body, /r#2/);
+  assert.doesNotMatch(body, /r#1\b/);
+  assert.doesNotMatch(needsYou(deskBody({ now: NOW, assigned: [row(1, ['status: in progress'])] })), /assigned to you/);
+});

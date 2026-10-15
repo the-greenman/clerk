@@ -4,7 +4,7 @@ import { repoRoot } from './lib/repo-arg.mjs';
 import { loadSettings } from '../lib/adapters/settings.mjs';
 import { loadGroups, loadCentralGroup } from '../lib/adapters/groups.mjs';
 import { affirmedProblemIds, readIssue, writeClaim } from '../lib/adapters/claim.mjs';
-import { checkClaim, claimComment } from '../lib/practice/claim.mjs';
+import { checkClaim, claimComment, claimAssigns } from '../lib/practice/claim.mjs';
 
 const argv = process.argv.slice(2), arg = (k) => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : undefined);
 const fail = (m) => { console.error('claim: ' + m); process.exit(2); };
@@ -20,5 +20,6 @@ const dry = argv.includes('--dry-run');
 for (const t of r.todo) console.log('todo: ' + t);
 if (!r.ok) { console.error(`claim refused for ${m[1]}#${n}:\n` + r.reasons.map((x) => '  - ' + x).join('\n')); process.exit(2); }
 console.log(`checks passed for ${m[1]}#${n} as ${seat} of ${r.group.title}`);
-console.log(`${dry ? 'would' : 'will'}: assign ${s.githubOwner}; add label "status: in progress"; comment: ${comment}`);
-if (!dry) { writeClaim(s.githubOwner, m[1], n, s.githubOwner, comment); console.log('claimed'); }
+const assignee = claimAssigns(actor, s.ownerActor) ? s.githubOwner : null;
+console.log(`${dry ? 'would' : 'will'}: ${assignee ? `assign ${assignee}` : `not assign (${actor} is not the owner's actor)`}; add label "status: in progress"; comment: ${comment}`);
+if (!dry) { writeClaim(s.githubOwner, m[1], n, assignee, comment); console.log('claimed'); }
