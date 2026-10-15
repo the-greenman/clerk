@@ -129,3 +129,10 @@ test('queue: builder order, forecast fed vs dry', () => {
   const n = A.nextLines({ ready: q, inFlight: 2, merged: 4, budget: 10 }).join('\n');
   assert.match(n, /Ready group issues: 4[\s\S]*budget left this cycle: 6 of 10[\s\S]*running dry: 4 ready/);
 });
+
+test('a run-report whose comment was received (+1) before the record landed stays received', () => {
+  const run = { instanceId: 'r9', record: { fieldValues: { run_date: '2026-10-14T11:30:00Z' } } };
+  const c = { id: 9, body: '<!-- wg-report cycle=2026-10-14 -->\nreport' };
+  assert.equal(A.reportItems([run], new Set(), [c], new Set([9]), 'WG').length, 0);
+  assert.equal(A.reportItems([run], new Set(), [c], new Set(), 'WG').length, 1);
+});
