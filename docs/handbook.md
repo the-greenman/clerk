@@ -283,6 +283,8 @@ Exact schedules and triggers live in [tools.md](tools.md); this table says what 
 | Report | wg-steward, daily 11:30 | routine | closes the cycle: run report record, ratifies the group's decisions in one group session, report on #31 |
 | Report | handbook watcher, weekly | routine | re-reads code, data and boards; updates the handbook records; renders; opens a PR |
 
+**The desk.** Everything that needs the owner is on one pinned issue, semanticops.com#35 (label `desk`). `clerk desk --post` rewrites its body in place, never as a comment, in three parts: **Needs you** (unreceived reports first when a group is paused, decisions to ratify, open exercises, owner merges with their `Decision asked:` line, approved PRs that have not merged and why, issues assigned to the owner with their age, `needs-input` issues oldest first), **Threads** (one line per ranked epic, working group and unthreaded PR: state, last moved, next step, who) and **Running fine** (counts only). If it is not on the desk, it does not need the owner; #31 and #33 are history.
+
 **Rules for every routine.**
 
 - **Thin prompt.** The trigger only points at its brief in `routines/`. Rules live in the brief, so a change is a pull request.

@@ -3,7 +3,7 @@
 #   gate:auto-merge  CLEAN -> merge;  BEHIND -> update branch
 #   gate:owner-merge BEHIND -> update branch, so it is always ready for the owner
 #   GitHub auto-merge on, BEHIND -> update branch (auto-merge then lands it)
-#   --digest         one comment on semanticops.com#33: ready for owner, conflicts, no gate label
+#   --digest         one comment on semanticops.com#33: conflicts, no gate label, group waits (owner merges are on the desk, clerk desk)
 #   wg:third-party-ready  working-group PRs (semanticops.com#31) merge only with a valid quorum comment and budget left
 # Dry run unless --apply. Never resolves conflicts, never labels, never touches drafts.
 set -uo pipefail
@@ -105,7 +105,7 @@ act() { # description, command...
   else echo "WOULD $what"; fi
 }
 
-FAILS=0; READY=""; CONFLICT=""; UNGATED=""
+FAILS=0; CONFLICT=""; UNGATED=""
 # Per group (keyed by its label): budget, cycle close, pause limit, merges this cycle, pause state, waiting list. Fail closed: an unreadable count or unreadable reports block group merges.
 declare -A G_BUDGET G_CLOSE G_UNACKED G_MERGED G_PAUSE G_WAIT; LABELS=()
 while IFS=$'\x1f' read -r WG_LABEL WG_BUDGET WG_CYCLE_CLOSE WG_MAX_UNACKED WG_REPOS; do
@@ -152,9 +152,6 @@ for r in $REPOS; do
       merge)         act "merge $pr" gh pr merge "$n" -R "$OWNER/$r" --merge ;;
       update-branch) act "update-branch $pr" gh pr update-branch "$n" -R "$OWNER/$r" ;;
     esac
-    case "$gate:$state" in
-      *gate:owner-merge*:CLEAN) READY+="- $pr $title"$'\n' ;;
-    esac
     [ "$state" = DIRTY ] && CONFLICT+="- $pr $title"$'\n'
     [[ "$gate" != *gate:* && -z "$wg" ]] && UNGATED+="- $pr $title"$'\n'
   done <<< "$rows"
@@ -170,9 +167,6 @@ ${w:-- none
   done
   body="**PR upkeep digest $(date -u +%F)** (srs-programme \`scripts/pr-upkeep.sh\`)
 
-Ready for owner merge (green, up to date):
-${READY:-- none
-}
 Conflicts (need a person or agent):
 ${CONFLICT:-- none
 }

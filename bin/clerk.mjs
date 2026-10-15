@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { OWNER_LOG } from '../lib/practice/roles.mjs';
-import { srsCli, srs, gh, ghJson, groupState, openUrl } from '../lib/adapters/cli.mjs';
+import { srsCli, srs, gh, groupState, openUrl } from '../lib/adapters/cli.mjs';
 import * as A from '../lib/practice/agenda.mjs';
 import * as D from '../lib/practice/discussion.mjs';
 import { stamp, take, FIELDS, EX_FIELDS, needsTranscript } from '../lib/practice/session.mjs';
@@ -16,6 +16,7 @@ import { loadSettings, issueRef, programmeRepo } from '../lib/adapters/settings.
 import { authorise, resolveContext, quorum, quorumText, rolesFor } from '../lib/practice/roles.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
 import { openPRsLabelled, mergePR } from '../lib/adapters/github.mjs';
+import { loadReports, loadReportComments, groupQueue } from '../lib/adapters/agenda.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -38,12 +39,12 @@ const TOOLS = {
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
 };
 if (argv[0] === 'help' || argv[0] === '--help') {
-  console.log('clerk: act by role on an SRS programme.\n\n  session|comment   hold a session or post comments (clerk session --repo <path> --as <role>)\n  (no subcommand)   the interactive agenda (clerk --repo <path> --as <role>)');
+  console.log('clerk: act by role on an SRS programme.\n\n  session|comment   hold a session or post comments (clerk session --repo <path> --as <role>)\n  (no subcommand)   the interactive agenda (clerk --repo <path> --as <role>)\n  desk              print the owner\'s desk; --post rewrites the pinned `desk` issue in place (--dry-run prints what it would write)');
   for (const [k, [, d]] of Object.entries(TOOLS)) console.log(`  ${k.padEnd(17)} ${d}`);
   console.log('\nTools take --repo <programme path> (default: current directory). See docs/tools.md.');
   process.exit(0);
 }
-if (TOOLS[argv[0]]) {
+if (TOOLS[argv[0]] || argv[0] === 'desk') {
   // Every tool but wt works on a programme repo (an SRS repo, so it has .srs/). Say so plainly instead of failing deep inside.
   if (argv[0] !== "wt") {
     const i = argv.indexOf("--repo");
@@ -52,6 +53,21 @@ if (TOOLS[argv[0]]) {
       console.error(`${repo} is not a programme repository (no .srs/). Run from a programme checkout or pass --repo <path>${argv[0] === "board" ? " (board: set CLERK_REPO)" : ""}, e.g. ~/dev/semanticops/srs-programme`);
       process.exit(2);
     }
+  }
+  if (argv[0] === 'desk') { // read-only unless --post; reading needs no role
+    const repo = resolve(argv.includes('--repo') ? argv[argv.indexOf('--repo') + 1] : '.');
+    try {
+      const { gatherDesk, findDeskIssue, postDesk } = await import('../lib/adapters/desk.mjs');
+      const { deskBody } = await import('../lib/practice/desk.mjs');
+      const post = argv.includes('--post'), dry = argv.includes('--dry-run');
+      let issue;
+      if (post) { const { loadSettings, issueRef } = await import('../lib/adapters/settings.mjs'); const st = loadSettings(repo); issue = { owner: st.githubOwner, repo: issueRef(st.digestIssue, st.githubOwner).repo }; issue.n = findDeskIssue(issue.owner, issue.repo).number; }
+      const body = deskBody(await gatherDesk(repo));
+      if (!post) console.log(body);
+      else if (dry) console.log(`[dry run] would rewrite the body of ${issue.owner}/${issue.repo}#${issue.n} with:\n\n${body}`);
+      else { postDesk(issue.owner, issue.repo, issue.n, body); console.log(`rewrote ${issue.owner}/${issue.repo}#${issue.n}`); }
+    } catch (e) { console.error('clerk desk: ' + e.message); process.exit(1); }
+    process.exit(0);
   }
   const f = fileURLToPath(new URL('../scripts/' + TOOLS[argv[0]][0], import.meta.url));
   const r = spawnSync(f.endsWith('.mjs') ? process.execPath : 'bash', [f, ...argv.slice(1)], { stdio: 'inherit' });
@@ -83,7 +99,6 @@ const getLog = (id) => S(['container', 'get', id]).container;
 const ownerLog = getLog(containers.find((c) => c.title === OWNER_LOG).containerId);
 const rolesList = S(['record', 'list', '--type', 'governance/role']);
 const agentsList = S(['record', 'list', '--type', 'com.mudemocracy.stewardship/agent']);
-const memberSet = (c) => new Set((c.memberInstanceIds ?? []).map((m) => m.instanceId ?? m));
 const people = [...(rolesList.records ?? rolesList.instances), ...(agentsList.records ?? agentsList.instances)]
   .map((r) => ({ id: r.instanceId, name: r.record.fieldValues?.title ?? r.instanceId }));
 const role = resolveContext(roleCfg, rolesList.records ?? rolesList.instances, containers);
@@ -105,14 +120,7 @@ try {
   consideredRels = S(['relation', 'list', '--type', 'com.semanticops.programme/considers']).relations ?? [];
   const sl = S(['record', 'list', '--type', 'com.semanticops.programme/session']); sessionRecs = sl.records ?? sl.instances ?? [];
 } catch { /* no considers type yet: no history */ }
-let receivedIds = new Set(), runReports = [];
-if (isOwner) try { // owner-only Reports section; tolerant of a repository without the receives type or run-reports
-  receivedIds = new Set((S(['relation', 'list', '--type', 'com.semanticops.programme/receives']).relations ?? []).map((x) => x.targetId));
-} catch { /* no receives yet */ }
-if (isOwner) try {
-  const rl = S(['record', 'list', '--type', 'com.mudemocracy.stewardship/run-report']);
-  runReports = groupLogs.map((g) => ({ group: g.title, records: (rl.records ?? rl.instances ?? []).filter((r) => memberSet(g.log).has(r.instanceId)) }));
-} catch { /* no run-reports */ }
+const { receivedIds, runReports } = isOwner ? loadReports(S, groupLogs) : { receivedIds: new Set(), runReports: [] }; // owner-only Reports section
 let exerciseRecs = [], derivedRels = [];
 try { // exercises and the proposals they fed; tolerant of a repository without them
   const el = S(['record', 'list', '--type', A.EXERCISE_TYPE]); exerciseRecs = el.records ?? el.instances ?? [];
@@ -181,12 +189,7 @@ if (TTY) {
 const show = (ls) => console.log('\n' + ls.join('\n'));
 
 const owner = isOwner ? gh(['api', 'user', '-q', '.login']).trim() : '';
-const comments = !isOwner ? [] : gh(['api', `repos/${REPORT_ISSUE}/comments`, '--paginate', '--jq', '.[]|{id,body,created_at,author_association,html_url}'])
-  .trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
-// ponytail: only the latest 5 reports are checked for a +1; older ones are history.
-const reports = comments.filter((c) => c.author_association === 'OWNER' && A.reportCycle(c)).slice(-5);
-const reactions = Object.fromEntries(reports.map((c) => [c.id, ghJson(['api', `repos/${REPORT_ISSUE.split('/issues')[0]}/issues/comments/${c.id}/reactions`])]));
-const acked = new Set(reports.filter((c) => reactions[c.id].some((x) => x.content === '+1' && x.user?.login === owner)).map((c) => c.id));
+const { reports, acked } = isOwner ? loadReportComments(REPORT_ISSUE, owner) : { reports: [], acked: new Set() };
 const prs = !isOwner ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, 'gate:owner-merge'); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
 
 // Order follows a meeting: decisions since the last session, reports, decisions for this session, merges.
@@ -201,13 +204,7 @@ const sections = {
 const next = {}, gstate = {};
 for (const gr of isOwner ? groupLogs : []) {
   gstate[gr.title] = await groupState(repo, gr);
-  try {
-    const issues = gr.repos.flatMap((r) => gh(['api', '-X', 'GET', `repos/${GH_OWNER}/${r}/issues`, '-f', `labels=ready,${gr.label}`, '-f', 'state=open', '-f', 'per_page=100',
-      '--jq', '.[]|select(.pull_request|not)|{number,title,created_at,assignee:(.assignee!=null),labels:[.labels[].name]}']).trim().split('\n').filter(Boolean).map((l) => ({ ...JSON.parse(l), repo: r })))
-      .filter((i) => !i.assignee && !i.labels.some((l) => ['needs-input', 'parked'].includes(l))); // ponytail: the builder also drops issues with a branch or PR; not checked here
-    const inFlight = gr.repos.reduce((n, r) => n + openPRsLabelled(GH_OWNER, r, gr.label, { light: true }).length, 0);
-    next[gr.title] = { ready: A.orderQueue(issues, A.localPriorities(records.filter((r) => memberSet(gr.log).has(r.instanceId)))), inFlight, merged: Number(gstate[gr.title].merged) || 0, budget: Number(gstate[gr.title].budget) || gr.budget };
-  } catch { /* queue unknown */ }
+  const q = groupQueue(GH_OWNER, gr, records, gstate[gr.title]); if (q) next[gr.title] = q;
 }
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const acted = { merge: 0 }; const doneIds = { 5: new Set() };
