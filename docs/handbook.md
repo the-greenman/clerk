@@ -69,7 +69,7 @@ One table for the whole flow: what moves each stage, what it needs before it mov
 | 4 | Remedy | agents suggest 1 to 3 per domain; the owner affirms | `answers` affirmed problems, a falsifier | suggested in two domains |
 | 5 | Objective, period, epic | the owner ranks; `roadmap --apply` (daily) derives priority | an epic `implements` a remedy and `serves` a ranked objective | working |
 | 6 | **Issue admission** | the filer (analyst, scout, owner) | `Answers: SP-nn` naming an affirmed problem whose persona and domain are affirmed | `claim` checks the affirmed problem only |
-| 7 | **Routing to a group** | the filer, then topup | the group whose charter holds the problem's domain gets its `wg:` label; a domain no group holds goes to `lane:unattended` | not yet: proposed as D4, D5 and D15 (2026-10-16) |
+| 7 | **Routing to a group** | the filer, then topup | the group whose charter holds the problem's domain (`holds-domain`, role to domain) gets its `wg:` label; a domain no group holds goes to `lane:unattended` | ruled (D4, D5, D15, ratified 2026-10-16); charters name domains (`clerk groups`); topup does not route yet |
 | 8 | Ready | `board sync` hourly: topup writes `promote:ready`, promote sets `ready` | not blocked, not `needs-input`, on the board; target about six | working, lane-blind |
 | 9 | Claim and build | nightly worker (00:00, up to 3, `lane:unattended`); WG builder (hourly at :10, one `wg:` issue) | `ready` + a lane, no assignee, no open PR or branch; within budget, group not paused | nightly working; WG builder live from 2026-10-16 |
 | 10 | Review | central lane: a self-review subagent; WG: the reviewer (hourly at :40) posts the quorum | gates green by exit code, within the mandate | WG reviewer live from 2026-10-16 |
@@ -79,10 +79,10 @@ One table for the whole flow: what moves each stage, what it needs before it mov
 
 #### How an issue reaches a group
 
-**Proposed, not yet in force** (decisions D4, D5 and D15 in the SemanticOps log, recorded 2026-10-16; `claim` already enforces the affirmed problem). An issue is not work until it is grounded and routed. Before any routine may take it:
+**Ruled** (decisions D4, D5 and D15, ratified in the owner's session of 2026-10-16; `claim` already enforces the affirmed problem, routing is not yet automatic). An issue is not work until it is grounded and routed. Before any routine may take it:
 
 1. **Grounded.** Its first line is `Answers: SP-nn`, naming an affirmed problem. The problem is `held-by` an affirmed persona-in-domain, and that persona's `in-domain` reaches an affirmed domain. An issue that reveals a problem nobody has recorded yields a problem *suggestion* in the domain, and stays parked against it until the problem is affirmed.
-2. **Routed.** The problem's domain decides the group: the group whose charter names that domain takes it through its input queue (its `wg:` label); a domain no group holds goes to the central group (`lane:unattended`).
+2. **Routed.** The problem's domain decides the group: the group whose charter names that domain (a `com.semanticops.method/holds-domain` relation from the group's role to the domain record) takes it through its input queue (its `wg:` label); a domain no group holds goes to the central group (`lane:unattended`).
 3. **Ranked.** Its epic serves a ranked objective, which gives its priority. An issue under no ranked objective stays `parked`.
 
 `parked` means "waiting for meaning", not "rejected": the 2026-10 backlog was parked so that domains, problems and personas are established first. Issues come out of parking only by passing steps 1 to 3, a domain at a time, never in bulk.
