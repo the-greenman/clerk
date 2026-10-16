@@ -313,7 +313,13 @@ while (go) {
 }
 if (needsTranscript(choices) && !transcript) { const f = await ask('a comment cites the transcript; transcript file path > '); if (f) transcript = resolve(f); }
 { const t = A.tallyLine(choices, acted); if (t) console.log('\n' + t.replace(/ \(recorded when.*$/, '')); }
-if (choices.length && (dryRun || (await ask(`record a session covering ${choices.length} item(s) and open the PR? [y/N] `)).toLowerCase() === 'y'))
+// Enter records: a session's choices live only in memory, so losing them must take a deliberate word, not a stray key.
+const keep = async () => {
+  const a = (await ask(`record a session covering ${choices.length} item(s) and open the PR? [Y/n] `)).trim().toLowerCase();
+  if (a !== 'n' && a !== 'no') return true;
+  return (await ask(`type "discard" to drop all ${choices.length} item(s), anything else records them > `)).trim().toLowerCase() !== 'discard';
+};
+if (choices.length && (dryRun || await keep()))
   endSession({ cli, programme, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
 else if (choices.length) console.log('Nothing recorded.');
 if (!TTY) process.stdin.destroy(); // piped mode: end the line reader so the process exits
