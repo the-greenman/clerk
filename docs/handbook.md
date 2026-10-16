@@ -57,6 +57,47 @@ Three rules shape everything that follows:
 - **Theory and practice together.** There is always a working system, and the theory stays beside it. We build when a trigger fires, not ahead of need.
 
 
+#### Flow at a glance: what moves each stage
+
+One table for the whole flow: what moves each stage, what it needs before it moves, and whether that mover runs today. Read it top to bottom; work stops at the first row whose input is waiting and whose mover is not live. `clerk desk` shows the same picture day to day.
+
+| # | Stage | Moved by | Needs before it moves | Live (2026-10-16) |
+|---|---|---|---|---|
+| 1 | Domain | agents suggest; the owner affirms (Method editor, CLI `record fork` fallback) | purpose, in and out of scope | suggested only: no domain is affirmed |
+| 2 | Persona in domain | agents suggest; the owner affirms | `refines` a shared persona, `in-domain` exactly one domain | suggested in one domain only |
+| 3 | Problem | anyone suggests; the owner affirms | `held-by` a persona-in-domain (the principle 2 gate, warn level) | affirmed problems exist; most still held by shared personas |
+| 4 | Remedy | agents suggest 1 to 3 per domain; the owner affirms | `answers` affirmed problems, a falsifier | suggested in two domains |
+| 5 | Objective, period, epic | the owner ranks; `roadmap --apply` (daily) derives priority | an epic `implements` a remedy and `serves` a ranked objective | working |
+| 6 | **Issue admission** | the filer (analyst, scout, owner) | `Answers: SP-nn` naming an affirmed problem whose persona and domain are affirmed | `claim` checks the affirmed problem only |
+| 7 | **Routing to a group** | the filer, then topup | the group whose charter holds the problem's domain gets its `wg:` label; a domain no group holds goes to `lane:unattended` | not yet: proposed as D4, D5 and D15 (2026-10-16) |
+| 8 | Ready | `board sync` hourly: topup writes `promote:ready`, promote sets `ready` | not blocked, not `needs-input`, on the board; target about six | working, lane-blind |
+| 9 | Claim and build | nightly worker (00:00, up to 3, `lane:unattended`); WG builder (hourly at :10, one `wg:` issue) | `ready` + a lane, no assignee, no open PR or branch; within budget, group not paused | nightly working; WG builder live from 2026-10-16 |
+| 10 | Review | central lane: a self-review subagent; WG: the reviewer (hourly at :40) posts the quorum | gates green by exit code, within the mandate | WG reviewer live from 2026-10-16 |
+| 11 | Merge | `pr-upkeep` every 15 minutes | `gate:auto-merge` and clean; for a group, a valid quorum, within budget, not paused | working |
+| 12 | Report | WG steward daily at 11:30 (run-report record and #31 comment); worker run reports on issues | the cycle's merged PRs | working |
+| 13 | Ratify | the owner's session (`/session`) | a `proposed` decision **recorded in a decision log** | working; decisions only in PR text never reach it |
+
+#### How an issue reaches a group
+
+**Proposed, not yet in force** (decisions D4, D5 and D15 in the SemanticOps log, recorded 2026-10-16; `claim` already enforces the affirmed problem). An issue is not work until it is grounded and routed. Before any routine may take it:
+
+1. **Grounded.** Its first line is `Answers: SP-nn`, naming an affirmed problem. The problem is `held-by` an affirmed persona-in-domain, and that persona's `in-domain` reaches an affirmed domain. An issue that reveals a problem nobody has recorded yields a problem *suggestion* in the domain, and stays parked against it until the problem is affirmed.
+2. **Routed.** The problem's domain decides the group: the group whose charter names that domain takes it through its input queue (its `wg:` label); a domain no group holds goes to the central group (`lane:unattended`).
+3. **Ranked.** Its epic serves a ranked objective, which gives its priority. An issue under no ranked objective stays `parked`.
+
+`parked` means "waiting for meaning", not "rejected": the 2026-10 backlog was parked so that domains, problems and personas are established first. Issues come out of parking only by passing steps 1 to 3, a domain at a time, never in bulk.
+
+#### Where flow stops, and how to see it
+
+| Symptom | Usual cause | See it with |
+|---|---|---|
+| Hundreds of issues, an empty queue | domains and personas not affirmed, so nothing can be grounded (rows 1 to 3) | `clerk check`, `clerk roadmap --explain` |
+| `ready` issues nobody takes | no lane label (row 7), or the routine cannot reach the repo | `clerk queue`, the routine's run log |
+| A group merges nothing | builder or reviewer trigger missing or disabled | `clerk routines --check <dump>` |
+| A decision you were asked for never appears in a session | it exists only as PR text, or is in no decision log | `clerk desk` ("in no log") |
+| A group stops | two unreceived reports | `clerk desk`, then a session's Reports |
+
+
 #### Domains, personas and problems define the work
 
 A **domain** says *where* and *when* a problem occurs: an area of work with a purpose, and what is in and out of scope. A **persona** says *who* has it: their jobs and needs. A **problem** is a claim that something is wrong for that persona in that domain.
