@@ -90,9 +90,9 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | unattended-worker.md | Ship `lane:unattended` issues as PRs | nightly 00:00 UTC, `trig_01GcbJwYyVfVTAekgYkAxFpJ` | issues (`ready` + lane), `queue` rules | branches, PRs, `status: in progress`, `needs-input` |
 | wg-steward.md | Daily cycle close: report, minutes | 11:30 UTC, `trig_015iT3SoLLvJmgADknC7RpfG` | merged PRs, issues | run-report records, a PR, comment on the report issue |
 | wg-analyst.md | Analyse and feed the group queue | 12:00 UTC, `trig_01M6mtE5wZJg2FeXFFnZjCSk` | issues, programme records | suggestions and issues |
-| wg-builder.md | Build one `wg:third-party-ready` issue | event: issue labelled `ready` / PR merged | issue | branch, PR |
+| wg-builder.md | Build one `wg:third-party-ready` issue | hourly :10 UTC, `trig_01RC6KWkRKzVVsPQxzZWbWpF` (scheduled: GitHub event triggers cannot filter by label through the API; the brief's merge-event path picks the next issue) | issue | branch, PR |
 | handbook-watcher.md | Keep the handbook true to code, data and boards; report drift | weekly, Monday 06:00 UTC (trigger not yet created) | clerk and programme history, tests, boards, programme records | handbook records and render (a PR), run report, issues |
-| wg-reviewer.md | Review one PR, post quorum | event: PR opened/synchronize/labeled | PR | quorum comment, `gate:auto-merge` |
+| wg-reviewer.md | Review open group PRs (up to 3 per run), post quorum | hourly :40 UTC, `trig_017sfYgXA1PXoZRmHDzG69Jz` (scheduled, same reason) | PRs | quorum comment, `gate:auto-merge` |
 | working-groups.md | Overview of the group's rules | | | |
 
 ## Label contract

@@ -69,3 +69,10 @@ test('an assigned issue labelled status: in progress is claimed by someone, not 
   assert.doesNotMatch(body, /r#1\b/);
   assert.doesNotMatch(needsYou(deskBody({ now: NOW, assigned: [row(1, ['status: in progress'])] })), /assigned to you/);
 });
+
+test('a proposed decision in no log is flagged; one in the owner log is to ratify', () => {
+  const d = (id, title) => ({ instanceId: id, record: { lifecycleState: 'proposed', fieldValues: { title } } });
+  const body = needsYou(deskBody({ now: NOW, decisions: [d('aaaaaaaa-1', 'Logged'), d('bbbbbbbb-1', 'Orphan')], ownerLog: { memberInstanceIds: [{ instanceId: 'aaaaaaaa-1' }] } }));
+  assert.match(body, /1 proposed decision to ratify:\*\* Logged \[aaaaaaaa\]/);
+  assert.match(body, /1 proposed decision in no log:\*\* Orphan \[bbbbbbbb\]/);
+});
