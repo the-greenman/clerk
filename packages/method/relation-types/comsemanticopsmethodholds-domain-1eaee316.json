@@ -1,0 +1,13 @@
+{
+  "id": "1eaee316-0a6c-4bf7-a171-942ab7e30d66",
+  "version": 1,
+  "key": "com.semanticops.method/holds-domain",
+  "namespace": "com.semanticops.method",
+  "label": "Holds domain",
+  "description": "A working group's charter names a domain it holds. Endpoints: governance role (the group) -> domain record. A request placed in a domain goes to the input queue of the group that holds it; a domain no group holds goes to the central group (decision 0a87ebf6, D15).",
+  "category": "association",
+  "createdAt": "2026-10-16T13:30:00+00:00",
+  "canonicalDirection": "source is the group's governance role; target is the domain record",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

@@ -56,7 +56,8 @@
     "relation-types/comsemanticopsmethodinstantiates-5f121def.json",
     "relation-types/comsemanticopsmethodconcerns-e1d12490.json",
     "relation-types/comsemanticopsmethodrestores-5e582fc5.json",
-    "relation-types/comsemanticopsmethodin-domain-488e264d.json"
+    "relation-types/comsemanticopsmethodin-domain-488e264d.json",
+    "relation-types/comsemanticopsmethodholds-domain-1eaee316.json"
   ],
   "views": [],
   "compositions": [],
