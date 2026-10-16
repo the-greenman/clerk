@@ -13,7 +13,7 @@ const {
   planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics,
   bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT,
   planStaleClaims, STALE_CLAIM_HOURS_DEFAULT,
-  planTopup, TOPUP_TARGET_DEFAULT,
+  planTopup, hasLane, TOPUP_TARGET_DEFAULT,
   isWorkItem, isConsumableReady, countConsumableReady,
   hasOpenBlockers, isBlocked, blockedLabelWant,
 } = await import("./gh-project.mjs");
@@ -642,4 +642,11 @@ test("planStaleClaims: a reclaimed agent claim unassigns the owner; the owner's 
   assert.deepEqual(plan.map((p) => [p.num, p.action, p.unassign ?? null]),
     [[60, "reclaim", "ada"], [61, "reclaim", null], [62, "reclaim", null], [63, "reclaim", null], [64, "fresh", null]]);
   assert.equal(planStaleClaims(rows.slice(0, 1), 100 * HOUR, 3 * HOUR, { owner: "ada" })[0].unassign, undefined); // ownerActor unknown
+});
+
+test("hasLane: topup feeds only issues routed to a lane (lane:unattended or a wg: label)", () => {
+  assert.equal(hasLane(["ready", "lane:unattended"]), true);
+  assert.equal(hasLane(["priority: P1", "wg:third-party-ready"]), true);
+  assert.equal(hasLane(["priority: P1", "enhancement"]), false);
+  assert.equal(hasLane([]), false);
 });

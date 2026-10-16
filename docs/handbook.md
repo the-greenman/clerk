@@ -70,7 +70,7 @@ One table for the whole flow: what moves each stage, what it needs before it mov
 | 5 | Objective, period, epic | the owner ranks; `roadmap --apply` (daily) derives priority | an epic `implements` a remedy and `serves` a ranked objective | working |
 | 6 | **Issue admission** | the filer (analyst, scout, owner) | `Answers: SP-nn` naming an affirmed problem whose persona and domain are affirmed | `claim` checks the affirmed problem only |
 | 7 | **Routing to a group** | the filer, then topup | the group whose charter holds the problem's domain (`holds-domain`, role to domain) gets its `wg:` label; a domain no group holds goes to `lane:unattended` | ruled (D4, D5, D15, ratified 2026-10-16); charters name domains (`clerk groups`); topup does not route yet |
-| 8 | Ready | `board sync` hourly: topup writes `promote:ready`, promote sets `ready` | not blocked, not `needs-input`, on the board; target about six | working, lane-blind |
+| 8 | Ready | `board sync` hourly: topup writes `promote:ready`, promote sets `ready` | routed to a lane (`lane:unattended` or a `wg:` label), not blocked, not `needs-input`, on the board; target about six | working; feeds only routed issues |
 | 9 | Claim and build | nightly worker (00:00, up to 3, `lane:unattended`); WG builder (hourly at :10, one `wg:` issue) | `ready` + a lane, no assignee, no open PR or branch; within budget, group not paused | nightly working; WG builder live from 2026-10-16 |
 | 10 | Review | central lane: a self-review subagent; WG: the reviewer (hourly at :40) posts the quorum | gates green by exit code, within the mandate | WG reviewer live from 2026-10-16 |
 | 11 | Merge | `pr-upkeep` every 15 minutes | `gate:auto-merge` and clean; for a group, a valid quorum, within budget, not paused | working |

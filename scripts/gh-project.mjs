@@ -832,6 +832,13 @@ function planStaleClaims(rows, nowMs, thresholdMs, { owner, ownerActor } = {}) {
 // returns the first `deficit` candidates as nominees. Caller writes `promote:ready` on each;
 // `promote --fix` (run next in board-sync) converts them to board Status=Ready immediately.
 // Returns { toNominate, deficit, currentReady, target }.
+// An issue has a lane when a routine will take it once Ready: `lane:unattended` or a working group's `wg:` label.
+// Routing is done when the issue is grounded (D4, D5, D15); topup only feeds issues already routed, so Ready never
+// fills with work no routine takes.
+function hasLane(labels) {
+  return labels.some((l) => l === "lane:unattended" || l.startsWith("wg:"));
+}
+
 function planTopup(candidates, readyCount, target) {
   const deficit = Math.max(0, target - readyCount);
   return { toNominate: candidates.slice(0, deficit), deficit, currentReady: readyCount, target };
@@ -2048,6 +2055,7 @@ function cmdTopup(argv) {
     // claim semantics and the bug-floor priority derivation all still apply to bugs.
     !row.labels.includes("bug") &&
     !row.labels.includes(PROMOTE_INTENT_LABEL) &&
+    hasLane(row.labels) &&   // routed to a lane when grounded; no lane, no routine to take it
     !wontExcluded.has(row.key)
   );
   candidates.sort((x, y) => (orderIndex.get(x.key) ?? Infinity) - (orderIndex.get(y.key) ?? Infinity));
@@ -2237,7 +2245,7 @@ Auth: requires an authenticated \`gh\` CLI, or GITHUB_TOKEN/GH_TOKEN env var (cu
 // Dispatch
 // ---------------------------------------------------------------------------
 // Pure helpers exported for unit tests. Importing the module must NOT run the CLI.
-export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics, bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, planStaleClaims, STALE_CLAIM_HOURS_DEFAULT, planTopup, TOPUP_TARGET_DEFAULT, isWorkItem, isConsumableReady, countConsumableReady, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT, hasOpenBlockers, isBlocked, blockedLabelWant };
+export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics, bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, planStaleClaims, STALE_CLAIM_HOURS_DEFAULT, planTopup, hasLane, TOPUP_TARGET_DEFAULT, isWorkItem, isConsumableReady, countConsumableReady, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT, hasOpenBlockers, isBlocked, blockedLabelWant };
 
 // Only dispatch when run directly (`node gh-project.mjs ...`), not when imported.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
