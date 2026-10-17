@@ -206,7 +206,7 @@ for (const gr of isOwner ? groupLogs : []) {
   gstate[gr.title] = await groupState(repo, gr);
   const q = groupQueue(GH_OWNER, gr, records, gstate[gr.title]); if (q) next[gr.title] = q;
 }
-const stalled = isOwner ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), Number(process.env.CLERK_STALLED_DAYS) > 0 ? { days: Number(process.env.CLERK_STALLED_DAYS) } : {}) : [];
+const stalled = isOwner ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), { ...(Number(process.env.CLERK_STALLED_DAYS) > 0 && { days: Number(process.env.CLERK_STALLED_DAYS) }), ...(Number(process.env.CLERK_STALLED_CLAIM_DAYS) > 0 && { claimDays: Number(process.env.CLERK_STALLED_CLAIM_DAYS) }) }) : [];
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const acted = { merge: 0 }; const doneIds = { 5: new Set() };
 const isDec = (n) => n === 1 || n === 3 || n === 4; // record-backed items (3 = exercises: never ratified)
