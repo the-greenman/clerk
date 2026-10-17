@@ -32,10 +32,11 @@ export function derive(records, relations, today, affirmed = new Set(), outlines
   const rows = records.map((r) => ({ id: r.instanceId, type: r.record.typeName, ns: r.record.typeNamespace, fv: r.record.fieldValues }));
   const byId = new Map(rows.map((r) => [r.id, r]));
   const canon = canonOf(relations);
+  const same = (id) => rows.filter((r) => canon(r.id) === canon(id)).map((r) => r.id); // a suggestion and its fork are one identity
   const outlineCluster = (problemId) => {
     for (const o of outlines.filter((x) => x.containerType === "domain")) {
       const ms = o.memberInstanceIds ?? [], i = ms.findIndex((m) => canon(m.instanceId) === canon(problemId) && (m.depth ?? 0) >= 1);
-      for (let j = i - 1; i >= 0 && j >= 0; j--) if ((ms[j].depth ?? 0) === 0) { const c = byId.get(ms[j].instanceId); if (c?.type === "cluster") return c; break; }
+      for (let j = i - 1; i >= 0 && j >= 0; j--) if ((ms[j].depth ?? 0) === 0) { const cs = same(ms[j].instanceId).map((id) => byId.get(id)).filter((r) => r?.type === "cluster"), c = cs.find((r) => affirmed.has(r.id)) ?? cs[0]; if (c) return c; break; }
     }
     return null;
   };
@@ -65,10 +66,10 @@ export function derive(records, relations, today, affirmed = new Set(), outlines
       ({ rm, problems: rel("answers", rm.id).map((l) => aff(l.targetId, "problem")).filter(Boolean) }));
     const problems = [...new Set([...rel("answers", e.id).map((l) => aff(l.targetId, "problem")).filter(Boolean), ...remedies.flatMap((x) => x.problems)])];
     const answers = problems.map((pr) => {
-      const persona = lab(rel("held-by", pr.id).map((l) => any(l.targetId, "persona-in-domain") ?? any(l.targetId, "persona")).find(Boolean));
+      const persona = lab(same(pr.id).flatMap((id) => rel("held-by", id)).map((l) => any(l.targetId, "persona-in-domain") ?? any(l.targetId, "persona")).find(Boolean));
       const cl = outlineCluster(pr.id) ?? relations.filter((l) => l.relationType === "contains" && l.targetId === pr.id).map((l) => any(l.sourceId, "cluster")).find(Boolean);
       const cluster = lab(cl);
-      const objective = cl && rel("addresses", null, cl.id).map((l) => objectives.find((o) => o.id === l.sourceId)).find(Boolean);
+      const objective = cl && same(cl.id).flatMap((id) => rel("addresses", null, id)).map((l) => objectives.find((o) => o.id === l.sourceId)).find(Boolean);
       return { problem: pr.fv.problem_id ?? pr.fv.title, persona: persona?.label ?? null, ...(persona?.suggested ? { personaSuggested: true } : {}),
         cluster: cluster?.label ?? null, ...(cluster?.suggested ? { suggested: true } : {}), objective: objective?.title ?? null };
     });

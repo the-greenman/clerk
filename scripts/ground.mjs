@@ -15,9 +15,9 @@ try {
   const since = arg("--since"), one = arg("--pr");
   if (!one && !/^\d{4}-\d{2}-\d{2}$/.test(since ?? "")) throw new Error("give --pr <repo#n> or --since YYYY-MM-DD");
   const repo = repoRoot(), cli = srsCli(repo), st = loadSettings(repo, cli);
-  const { records, relations, affirmed } = loadProgramme(cli, repo);
+  const { records, relations, affirmed, outlines } = loadProgramme(cli, repo);
   let roadmap; // an inactive period must not stop the check: epics are then read from the records
-  try { roadmap = derive(records, relations, new Date().toISOString().slice(0, 10), affirmed); }
+  try { roadmap = derive(records, relations, new Date().toISOString().slice(0, 10), affirmed, outlines); }
   catch { roadmap = { epics: records.filter((r) => r.record.typeName === "epic").map((r) => ({ refs: r.record.fieldValues.issue_ref })) }; }
   const problems = problemsFrom(records, relations, affirmed), groups = loadGroups(repo, cli);
   const refs = one ? [one] : mergedSince(st.githubOwner, st.repos, since);
