@@ -16,7 +16,7 @@ import { loadSettings, issueRef, programmeRepo } from '../lib/adapters/settings.
 import { authorise, resolveContext, quorum, quorumText, rolesFor } from '../lib/practice/roles.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
 import { openPRsLabelled, mergePR } from '../lib/adapters/github.mjs';
-import { loadReports, loadReportComments, groupQueue } from '../lib/adapters/agenda.mjs';
+import { loadReports, loadReportComments, groupQueue, loadStalled } from '../lib/adapters/agenda.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -206,12 +206,13 @@ for (const gr of isOwner ? groupLogs : []) {
   gstate[gr.title] = await groupState(repo, gr);
   const q = groupQueue(GH_OWNER, gr, records, gstate[gr.title]); if (q) next[gr.title] = q;
 }
+const stalled = isOwner ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), { ...(Number(process.env.CLERK_STALLED_DAYS) > 0 && { days: Number(process.env.CLERK_STALLED_DAYS) }), ...(Number(process.env.CLERK_STALLED_CLAIM_DAYS) > 0 && { claimDays: Number(process.env.CLERK_STALLED_CLAIM_DAYS) }) }) : [];
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const acted = { merge: 0 }; const doneIds = { 5: new Set() };
 const isDec = (n) => n === 1 || n === 3 || n === 4; // record-backed items (3 = exercises: never ratified)
 const doneCount = (n) => (n === 5 ? doneIds[5].size : sections[n].items.filter((it) => choices.some((c) => c.id === it.instanceId && (n !== 2 || c.action === 'receive'))).length);
 const agenda = () => { header(); show(A.agendaLines({ done: { 1: doneCount(1), 2: doneCount(2), 3: doneCount(3), 4: doneCount(4), 5: doneCount(5) }, tally: A.tallyLine(choices, acted),
-  ratify: sections[1].items, reports: sections[2].items, exercises: sections[3].items, decide: sections[4].items, merge: sections[5].items,
+  stalled, ratify: sections[1].items, reports: sections[2].items, exercises: sections[3].items, decide: sections[4].items, merge: sections[5].items,
   status: groupLogs.filter(() => isOwner).flatMap((gr) => { const g = gstate[gr.title], n = next[gr.title]; return [A.statusLine(gr.title, g.pause, g.merged, g.budget), ...(n && A.isDry(n.ready.length, n.budget) ? [A.forecast(n.ready.length, n.budget)] : [])]; }) })); };
 
 const choices = [];
