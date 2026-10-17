@@ -7,12 +7,15 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 import { repoRoot } from "./lib/repo-arg.mjs";
+import { canonOf } from "../lib/practice/canon.mjs";
 const ROOT = repoRoot();
 const MNS = "com.semanticops.method";
 const ANS = "com.mudemocracy.argument";
 // Boundary rules (pilot semanticops.com#31, D6) bind only records created on/after this day: the 6 older principles have no
 // boundary and are not retro-fitted. Creation date, not layer, so agent suggestions are held to it too.
 export const BOUNDARY_RULES_FROM = "2026-10-09";
+// Principle 2 gate severity (clerk#35, rulings D2a/D4/D5): a warning until both pilot domains are walked; flip this one switch to "error" then.
+export const PRINCIPLE2_SEVERITY = "warning";
 
 /** records: `srs record list` entries; relations: `srs relation list` entries. Returns error strings. */
 export function checkMethod(records, relations, since = BOUNDARY_RULES_FROM) {
@@ -78,6 +81,22 @@ export function checkGates(records, relations, affirmed, setAside, today = new D
     if (!out(e.instanceId, "com.semanticops.programme/serves").some((o) => ranked.has(o))) continue;
     const viaRemedy = out(e.instanceId, `${MNS}/implements`).some((t) => affirmed.has(t) && isType(t, "remedy") && answersAffirmed(t));
     if (!answersAffirmed(e.instanceId) && !viaRemedy) warnings.push(`${label(e)} serves a ranked objective but answers no affirmed problem`);
+  }
+  // Principle 2. canon() makes a suggestion and its fork one identity; an edge on either copy counts.
+  const canon = canonOf(relations);
+  const affirmedIds = new Set([...affirmed].map(canon));
+  const classOf = (id) => records.map((r) => r.instanceId).filter((x) => canon(x) === canon(id));
+  const reach = (id, t) => [...new Set(classOf(id).flatMap((m) => out(m, t)).map(canon))];
+  const p2 = PRINCIPLE2_SEVERITY === "error" ? errors : warnings;
+  const typeOf = (id, n) => records.some((r) => canon(r.instanceId) === canon(id) && r.record.typeName === n);
+  for (const r of records.filter((r) => r.record.typeName === "problem" && affirmed.has(r.instanceId))) {
+    const holders = reach(r.instanceId, `${MNS}/held-by`).filter((h) => typeOf(h, "persona-in-domain") && affirmedIds.has(h));
+    if (!holders.length) { p2.push(`${label(r)} is affirmed but held-by no affirmed persona-in-domain`); continue; }
+    const grounded = holders.some((h) => {
+      const doms = reach(h, `${MNS}/in-domain`);
+      return doms.length === 1 && typeOf(doms[0], "domain") && affirmedIds.has(doms[0]);
+    });
+    if (!grounded) p2.push(`${label(r)} is affirmed but no affirmed persona-in-domain holding it has exactly one in-domain reaching an affirmed domain`);
   }
   return { errors, warnings };
 }

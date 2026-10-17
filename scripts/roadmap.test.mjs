@@ -81,3 +81,36 @@ console.log("roadmap.test (affirmed layer): ok");
   assert.match(checkMethod(data, good.slice(0, 2).concat(good.slice(3)))[0], /governs 0/); // no governs
   console.log("check-method.test: ok");
 }
+
+// Domain outline (clerk#35): clusters from the container outline equal clusters from `contains`; forks match through derived-from.
+{
+  const MNS = "com.semanticops.method";
+  const rl = (t, s, d) => ({ relationType: t === "contains" || t === "derived-from" ? t : `${MNS}/${t}`, sourceId: s, targetId: d });
+  const data = [...base, q4, rec("pr", "problem", { problem_id: "SP-01", title: "pr" }), rec("pid", "persona-in-domain", { title: "Writer in D" }), rec("cl", "cluster", { title: "Cluster X" }), rec("dom", "domain", { title: "D" })];
+  const common = [...links, rl("answers", "e1", "pr"), rl("held-by", "pr", "pid"), rl("addresses", "A", "cl")];
+  const aff = new Set(["pr", "pid", "cl"]);
+  const viaContains = derive(data, [...common, rl("contains", "cl", "pr")], "2026-10-08", aff).epics[0].answers;
+  const outline = [{ containerType: "domain", memberInstanceIds: [{ instanceId: "dom" }, { instanceId: "cl" }, { instanceId: "pr", depth: 1 }] }];
+  const viaOutline = derive(data, common, "2026-10-08", aff, outline).epics[0].answers;
+  assert.deepEqual(viaOutline, viaContains);
+  assert.deepEqual(viaOutline, [{ problem: "SP-01", persona: "Writer in D", cluster: "Cluster X", objective: "A" }]);
+  // the outline lists the suggestion of the affirmed problem: derived-from makes them one
+  const forked = [...data, rec("prS", "problem", { problem_id: "SP-01", title: "pr" })];
+  const o2 = [{ containerType: "domain", memberInstanceIds: [{ instanceId: "cl" }, { instanceId: "prS", depth: 1 }] }];
+  assert.equal(derive(forked, [...common, rl("derived-from", "pr", "prS")], "2026-10-08", aff, o2).epics[0].answers[0].cluster, "Cluster X");
+  // a problem at depth 0 is unclustered, not attached to the cluster above it
+  const o3 = [{ containerType: "domain", memberInstanceIds: [{ instanceId: "cl" }, { instanceId: "pr" }] }];
+  assert.equal(derive(data, common, "2026-10-08", aff, o3).epics[0].answers[0].cluster, null);
+}
+console.log("roadmap.test (domain outline): ok");
+
+// Forks: an edge on the suggestion copy still counts for the affirmed fork (clerk#35 review).
+{
+  const MNS = "com.semanticops.method";
+  const rl = (t, s, d) => ({ relationType: t === "derived-from" ? t : `${MNS}/${t}`, sourceId: s, targetId: d });
+  const data = [...base, q4, rec("pr", "problem", { problem_id: "SP-01", title: "pr" }), rec("pid", "persona-in-domain", { title: "W in D" }), rec("clS", "cluster", { title: "C" }), rec("cl", "cluster", { title: "C" }), rec("prS", "problem", { problem_id: "SP-01", title: "pr" })];
+  const rels = [...links, rl("answers", "e1", "pr"), rl("derived-from", "pr", "prS"), rl("derived-from", "cl", "clS"), rl("held-by", "prS", "pid"), rl("addresses", "A", "cl")];
+  const o = [{ containerType: "domain", memberInstanceIds: [{ instanceId: "clS" }, { instanceId: "prS", depth: 1 }] }];
+  assert.deepEqual(derive(data, rels, "2026-10-08", new Set(["pr", "pid", "cl"]), o).epics[0].answers, [{ problem: "SP-01", persona: "W in D", cluster: "C", objective: "A" }]);
+}
+console.log("roadmap.test (forks): ok");
