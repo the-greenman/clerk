@@ -40,11 +40,13 @@ wg_open_count() { local n=0 c r; for r in "$@"; do
 wg_reactions() { gh api "repos/${WG_REPORT_ISSUE%/issues/*}/issues/comments/$1/reactions" --paginate 2>/dev/null | jq -s 'add // []' 2>/dev/null; }
 
 # wg_paused <issue_comments_json>: ok, or "paused: ..." (fail closed on anything unreadable).
-# Reports = owner comments starting <!-- wg-report cycle=YYYY-MM-DD -->. Acknowledged = a +1 from the owner on the report.
+# Reports = owner comments starting <!-- wg-report cycle=YYYY-MM-DD group=<label> --> for this group ($WG_LABEL); an untagged marker
+# (written before tags) counts for every group, so it can pause but never un-pause. Acknowledged = a +1 from the owner on the report.
 # Paused when the latest WG_MAX_UNACKED reports all lack it; fewer reports than that never pause.
 wg_paused() {
   local ids id r n=0 un=0
-  ids=$(jq -r --argjson k "$WG_MAX_UNACKED" '[.[]|select(.author_association=="OWNER" and (.body|test("^<!-- wg-report cycle=[0-9-]+ -->")))]
+  ids=$(jq -r --argjson k "$WG_MAX_UNACKED" --arg l "$WG_LABEL" '[.[]|select(.author_association=="OWNER" and (.body|test("^<!-- wg-report cycle=[0-9-]+( group=[^ ]+)? -->"))
+    and (((.body|capture("^<!-- wg-report cycle=[0-9-]+ group=(?<g>[^ ]+) -->").g) // $l) == $l))]
     | sort_by(.created_at) | .[-$k:] | .[].id' <<<"$1" 2>/dev/null) || { echo "paused: reports unreadable"; return; }
   for id in $ids; do
     n=$((n+1))

@@ -41,6 +41,13 @@ test('a report comment is listed under the group its second line names', () => {
   assert.match(rows[0], /unreceived:\*\* B/);
 });
 
+test('a report comment is listed under the group its marker tags', () => {
+  const c = { ...report(1, '2026-10-14'), body: '<!-- wg-report cycle=2026-10-14 group=wg:B -->\nreport' };
+  const rows = needsYou(deskBody({ now: NOW, groups: [group('A', 'ok'), group('B', 'ok')], reportComments: [c] })).split('\n').filter((l) => /^\| \d/.test(l));
+  assert.equal(rows.length, 1);
+  assert.match(rows[0], /unreceived:\*\* B/);
+});
+
 test('a PR stating a decision is in Needs you; "Decision asked: none" asks nothing', () => {
   const pr = (number, body) => ({ repo: 'clerk', number, title: `pr ${number}`, body, labels: [], chain: [] });
   const body = deskBody({ now: NOW, prs: [pr(57, 'Decision asked: take D11 in the next session.\nmore'), pr(120, 'Decision asked: none to merge.')] });
