@@ -196,7 +196,7 @@ const prs = !isOwner ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(
 // Order follows a meeting: decisions since the last session, reports, decisions for this session, merges.
 const sections = {
   1: { name: 'Decisions since the last session', items: A.ratifyItems(records, mainLog, parentLogs) },
-  2: { name: 'Reports', items: isOwner ? runReports.flatMap((rr, i) => A.reportItems(rr.records, receivedIds, reports.filter((c) => A.reportGroup(c) ? A.reportGroup(c) === rr.label : !i), acked, rr.group)) : [] }, // one report issue per programme: a tagged comment goes to its group, an untagged one to the first group
+  2: { name: 'Reports', items: isOwner ? runReports.flatMap((rr, i) => A.reportItems(rr.records, receivedIds, reports.filter((c) => runReports.some((x) => x.label === A.reportGroup(c)) ? A.reportGroup(c) === rr.label : !i), acked, rr.group)) : [] }, // one report issue per programme: a comment goes to the group its marker tags, else (untagged or unknown tag) to the first group, as on the desk
   3: { name: 'Exercises', items: A.exerciseItems(exerciseRecs, mainLog) },
   4: { name: 'Decisions for this session', items: isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog)) : [] },
   5: { name: 'Merges', items: A.mergeItems(prs) },
