@@ -94,6 +94,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | wg-analyst.md | Analyse and feed the group queue | 12:00 UTC, `trig_01M6mtE5wZJg2FeXFFnZjCSk` | issues, programme records | suggestions and issues |
 | wg-builder.md | Build one `wg:third-party-ready` issue | hourly :10 UTC, `trig_01RC6KWkRKzVVsPQxzZWbWpF` (scheduled: GitHub event triggers cannot filter by label through the API; the brief's merge-event path picks the next issue) | issue | branch, PR |
 | handbook-watcher.md | Keep the handbook true to code, data and boards; report drift | weekly, Monday 06:00 UTC (trigger not yet created) | clerk and programme history, tests, boards, programme records | handbook records and render (a PR), run report, issues |
+| synthesiser.md | Group a domain's unclustered problems into named clusters (suggests only; affirmed clusters are the owner's) | weekly, Tuesday 06:00 UTC (trigger not yet created) | domain containers, problems, clusters, Suggestions | clusters and outline moves in Suggestions (a programme PR), run report, comment on the digest issue |
 | wg-reviewer.md | Review open group PRs (up to 3 per run), post quorum | hourly :40 UTC, `trig_017sfYgXA1PXoZRmHDzG69Jz` (scheduled, same reason) | PRs | quorum comment, `gate:auto-merge` |
 | working-groups.md | Overview of the group's rules | | | |
 
