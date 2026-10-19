@@ -147,17 +147,18 @@ if (sub) {
     const find = (p) => { const m = pool.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single decision on the agenda matches "${p}"`); return m[0]; };
     const item = (r) => ({ instanceId: r.instanceId, title: A.fv(r).title });
     const choices = [];
+    const takeAct = (it, patch) => take(choices, it, { ...patch, act: { at: new Date().toISOString() } }); // non-interactive: time only, no agenda position
     const transcript = arg('--transcript') && resolve(arg('--transcript'));
     if (argv[0] === 'comment') { // the same take() + endSession as the TUI's [c]omment
       const reply = arg('--reply-to') && (() => { const m = commentRecs.filter((c) => c.instanceId.startsWith(arg('--reply-to'))); if (m.length !== 1) throw new Error(`no single comment matches "${arg('--reply-to')}"`); return m[0].instanceId; })();
       take(choices, item(find(arg('--on') ?? die('--on <decision id> is required'))), { comment: { text: arg('--text') ?? die('--text is required'), replyTo: reply, cite: arg('--cite'), role: arg('--role-of-cite') } });
     }
     if (argv[0] === 'comment') { postComments({ cli, programme, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by') }); process.exit(0); } // discussion between sessions: no session record, no quorum
-    args('--set-aside').forEach((p) => take(choices, item(pick(p)), { action: 'setaside' }));
-    args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => take(choices, item(r), { action: 'ratify' }));
-    args('--consider').forEach((p) => take(choices, item(find(p)), {}));
+    args('--set-aside').forEach((p) => takeAct(item(pick(p)), { action: 'setaside' }));
+    args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => takeAct(item(r), { action: 'ratify' }));
+    args('--consider').forEach((p) => takeAct(item(find(p)), {}));
     const [fs, ts] = [args('--field'), args('--text')];
-    args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); take(choices, item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
+    args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); takeAct(item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
     if (dryRun) console.log(quorumText(quorumNow()));
     endSession({ cli, programme, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by') });
   } catch (e) { die(e.message); }
@@ -237,43 +238,45 @@ async function walk(n) {
   for (let i = 0; i < items.length; i++) {
     const it = items[i]; const dec = isDec(n);
     const ref = { instanceId: it.instanceId, exercise: n === 3, title: dec ? A.fv(it).title : n === 2 ? A.reportTitle(it) : '' };
-    const choice = (action, text) => take(choices, ref, { action, text });
+    const seen = new Set(); // what was opened on this item before acting
+    const takeAct = (r, patch) => take(choices, r, { ...patch, act: { at: new Date().toISOString(), section: sections[n].name, position: i + 1, of: items.length, seen: [...seen], ...(it.record?.updatedAt ? { updatedAt: it.record.updatedAt } : {}) } });
+    const choice = (action, text) => takeAct(ref, { action, text });
     show([`${sections[n].name} ${i + 1} of ${items.length} · ${doneCount(n)} done in this section`, ...keys[n].screen(it), ...(dec ? [A.choiceLine(choices.find((c) => c.id === it.instanceId))].filter(Boolean) : n === 2 ? [A.choiceLine(choices.find((c) => c.id === it.instanceId && c.action === 'receive'))].filter(Boolean) : doneIds[n].has(it.number) ? ['  This session: done'] : [])]);
     for (;;) {
       const k = (await key(keys[n].prompt)).toLowerCase();
       if (k === 'q') return false;
       if (k === 'n' || (k === 'd' && n === 4)) break;
-      if (k === 'o') { if (dec) show(A.fullScreen(it)); else if (n === 2) show([...it.text.split('\n'), ...(it.comment ? ['  ' + it.comment.html_url] : [])]); else openUrl(it.url); continue; }
+      if (k === 'o') { seen.add('full record'); if (dec) show(A.fullScreen(it)); else if (n === 2) show([...it.text.split('\n'), ...(it.comment ? ['  ' + it.comment.html_url] : [])]); else openUrl(it.url); continue; }
       try {
         if (dec && ((n === 1 && (k === 'r' || k === 's')) || (n === 4 && (k === 'a' || k === 'c'))) && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
-        if (dec && k === 'v') { show(D.fullDiscussion(threadOf(it))); continue; }
+        if (dec && k === 'v') { seen.add('discussion'); show(D.fullDiscussion(threadOf(it))); continue; }
         if (dec && (k === 'm' || ((n === 1 || n === 3) && k === 'c'))) { // any attendee may comment; no quorum needed
-          const th = threadOf(it); if (th.length) show(D.fullDiscussion(th));
+          const th = threadOf(it); if (th.length) seen.add('discussion'), show(D.fullDiscussion(th));
           const text = await ask('comment (markdown) > '); if (!text) continue;
           const to = th.length ? Number(await ask('reply to comment number (blank = the decision) > ')) : 0;
           const cite = await ask("cite (source-document id, URL, 'transcript', blank = none) > ");
           const role = cite ? (await ask('role of citation [quoted-from/evidence] (blank = default) > ')) || undefined : undefined;
           const note = cite ? (await ask('locator or passage note (optional) > ')) || undefined : undefined;
-          try { D.buildSourceRef(cite, role, { transcriptId: 'x', note }); take(choices, ref, { comment: { text, replyTo: th[to - 1]?.comment.instanceId, cite: cite || undefined, role, note } }); console.log(`  comment noted; the session will consider this ${n === 3 ? 'exercise' : 'item'}`); }
+          try { D.buildSourceRef(cite, role, { transcriptId: 'x', note }); takeAct(ref, { comment: { text, replyTo: th[to - 1]?.comment.instanceId, cite: cite || undefined, role, note } }); console.log(`  comment noted; the session will consider this ${n === 3 ? 'exercise' : 'item'}`); }
           catch (e) { console.log('  ' + e.message); }
           continue;
         }
         if (n === 3 && k === 'p') { // draft a proposal from the exercise: proposed, same log, derived-from it
           const question = await ask('decision question > '); if (!question) continue;
           const resolution = await ask('proposed resolution > '); if (!resolution) continue;
-          take(choices, ref, { proposal: { question, resolution } }); console.log('  proposal noted; created as a proposed decision when the session ends'); continue;
+          takeAct(ref, { proposal: { question, resolution } }); console.log('  proposal noted; created as a proposed decision when the session ends'); continue;
         }
         if (dec && k === 'e') {
           const F = n === 3 ? EX_FIELDS : FIELDS;
           const f = (await ask(`field (${Object.keys(F).join('/')}) > `)).toLowerCase();
           if (!F[f]) { console.log('  no such field'); continue; }
           const t = await ask('new text > '); if (!t) continue;
-          take(choices, ref, { edit: { field: f, text: t } }); console.log('  edited in place at the end of the session (decision stays proposed)'); continue;
+          takeAct(ref, { edit: { field: f, text: t } }); console.log('  edited in place at the end of the session (decision stays proposed)'); continue;
         }
-        if (dec && n !== 3 && k === 'h') { take(choices, ref, { hold: true, note: await ask('note for later sessions (optional) > ') }); console.log('  held: considered, stays proposed'); break; }
+        if (dec && n !== 3 && k === 'h') { takeAct(ref, { hold: true, note: await ask('note for later sessions (optional) > ') }); console.log('  held: considered, stays proposed'); break; }
         if (n === 1 && (k === 'r' || k === 's')) { choice(k === 'r' ? 'ratify' : 'setaside'); console.log('  noted for the session'); break; }
         if (n === 2 && k === 'r') { // receiving needs only the acting role present; the +1 is the mechanical side effect, done now
-          take(choices, ref, { action: 'receive', report: true, commentOnly: it.commentOnly });
+          takeAct(ref, { action: 'receive', report: true, commentOnly: it.commentOnly });
           if (!it.comment) console.log('  received (no #31 comment to acknowledge)');
           else if (acked.has(it.comment.id)) console.log('  received (already acknowledged on #31)');
           else { plusOne(it.comment.id); acked.add(it.comment.id); console.log(`  received; ${dryRun ? '[dry run: would acknowledge' : 'acknowledged'} on #31${dryRun ? ']' : ''} so the group keeps running`); }
@@ -281,7 +284,7 @@ async function walk(n) {
         }
         if (n === 2 && k === 'c') {
           const text = await ask('comment on the report (markdown) > '); if (!text) continue;
-          if (it.recordId) { take(choices, ref, { report: true, comment: { text } }); console.log('  comment noted; written on the report record when the session ends'); }
+          if (it.recordId) { takeAct(ref, { report: true, comment: { text } }); console.log('  comment noted; written on the report record when the session ends'); }
           else { // no record: reply on #31 (a comment reply, since issue comments do not thread)
             const body = `Re: wg-report cycle=${it.cycle} (${it.comment.html_url})\n\n${text}`;
             if (dryRun) console.log('  [dry run] would reply on #31'); else gh(['api', '-X', 'POST', `repos/${REPORT_ISSUE}/comments`, '-f', `body=${body}`]);

@@ -655,6 +655,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Practice**:
 - The group steward writes a `stewardship/run-report` record and the cycle report on #31 (`routines/wg-steward.md`), and ratifies the group's proposed decisions in one group session.
 - `clerk` (terminal UI) and `clerk session` write one `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives`, then open a signed PR with auto-merge enabled. `clerk comment` does the same for a comment between sessions.
+- Each act keeps when it was taken (the key press, not the write time), its agenda position (section, i of n) and what had been opened first (`v`, `o`, with the record's `updatedAt`). The session `summary` lists the acts in the order taken, and a linked `acts.json` source document (`sessions/<date>/`) holds them per act. `createdAt` stays the write time.
 - The recorder warns, never blocks, when a decision fails the framing tests; the kind goes in `decision_kind`.
 - Detail: README "Sessions", `.claude/commands/session.md`, [decision-log.md](decision-log.md).
 
@@ -662,7 +663,6 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - `endSession` returns from the whole function when a session takes up an exercise: that exercise's `considers`, comments and proposals, every later choice, and the validate, commit and PR are all skipped. The session record is left uncommitted in its worktree.
 - There are no exercise records yet.
 - The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link.
-- Session acts are stamped with the end-of-session time, not when they happened (clerk#43).
 
 **Open questions**:
 - Should the pause rule read `receives` instead of the thumbs-up?
