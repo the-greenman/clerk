@@ -147,17 +147,18 @@ if (sub) {
     const find = (p) => { const m = pool.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single decision on the agenda matches "${p}"`); return m[0]; };
     const item = (r) => ({ instanceId: r.instanceId, title: A.fv(r).title });
     const choices = [];
+    const takeAct = (it, patch) => take(choices, it, { ...patch, act: { at: new Date().toISOString() } }); // non-interactive: time only, no agenda position
     const transcript = arg('--transcript') && resolve(arg('--transcript'));
     if (argv[0] === 'comment') { // the same take() + endSession as the TUI's [c]omment
       const reply = arg('--reply-to') && (() => { const m = commentRecs.filter((c) => c.instanceId.startsWith(arg('--reply-to'))); if (m.length !== 1) throw new Error(`no single comment matches "${arg('--reply-to')}"`); return m[0].instanceId; })();
       take(choices, item(find(arg('--on') ?? die('--on <decision id> is required'))), { comment: { text: arg('--text') ?? die('--text is required'), replyTo: reply, cite: arg('--cite'), role: arg('--role-of-cite') } });
     }
     if (argv[0] === 'comment') { postComments({ cli, programme, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by') }); process.exit(0); } // discussion between sessions: no session record, no quorum
-    args('--set-aside').forEach((p) => take(choices, item(pick(p)), { action: 'setaside' }));
-    args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => take(choices, item(r), { action: 'ratify' }));
-    args('--consider').forEach((p) => take(choices, item(find(p)), {}));
+    args('--set-aside').forEach((p) => takeAct(item(pick(p)), { action: 'setaside' }));
+    args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => takeAct(item(r), { action: 'ratify' }));
+    args('--consider').forEach((p) => takeAct(item(find(p)), {}));
     const [fs, ts] = [args('--field'), args('--text')];
-    args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); take(choices, item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
+    args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); takeAct(item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
     if (dryRun) console.log(quorumText(quorumNow()));
     endSession({ cli, programme, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by') });
   } catch (e) { die(e.message); }
@@ -250,7 +251,7 @@ async function walk(n) {
         if (dec && ((n === 1 && (k === 'r' || k === 's')) || (n === 4 && (k === 'a' || k === 'c'))) && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
         if (dec && k === 'v') { seen.add('discussion'); show(D.fullDiscussion(threadOf(it))); continue; }
         if (dec && (k === 'm' || ((n === 1 || n === 3) && k === 'c'))) { // any attendee may comment; no quorum needed
-          const th = threadOf(it); if (th.length) show(D.fullDiscussion(th));
+          const th = threadOf(it); if (th.length) seen.add('discussion'), show(D.fullDiscussion(th));
           const text = await ask('comment (markdown) > '); if (!text) continue;
           const to = th.length ? Number(await ask('reply to comment number (blank = the decision) > ')) : 0;
           const cite = await ask("cite (source-document id, URL, 'transcript', blank = none) > ");
