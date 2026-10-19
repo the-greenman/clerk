@@ -181,7 +181,7 @@ Full detail, every command and the API budget: [board.md](board.md).
 
 #### Intake: how a request reaches a group
 
-> **Proposed, not in force** (clerk#56, `plans/wg-srs-operations.md`). This chapter is Theory until the owner's session ratifies decisions D2 to D7 and D11.
+> **Proposed, not in force** (clerk#56, `plans/wg-srs-operations.md`). This chapter is Theory until the owner's session ratifies decisions D2 to D7 (D11 is ratified).
 
 Work should never start as a finished `ready` issue that nobody assessed. A bug, a piece of friction or a feature idea first enters as a **request**. It is **placed** in a domain, and through the domain in a group. That group **assesses** it against its own priorities and queue, **proposes** what it becomes, **decides** inside its mandate (or escalates), and **reports** up.
 
@@ -231,14 +231,14 @@ stateDiagram-v2
   Done --> [*]
 ```
 
-**Parking a decision.** A decision someone cannot make in the moment is a request too, of kind *decision*. It is the commonest way a working window is lost: the work stops on a question, and the question is never asked anywhere it would be answered. So the question is parked, never held in the head of whoever is stuck:
+**Parking a decision.** A decision someone cannot make in the moment is a request too, of kind *decision*. It is the commonest way a working window is lost: the work stops on a question, and the question is never asked anywhere it would be answered. So the question is recorded at once as a proposed decision, never held in the head of whoever is stuck (D11, ratified 2026-10-15):
 
-1. Whoever is stuck, human or agent, writes it as an **exercise** in the decision log of the level that owns it. The exercise records what is blocked, the options seen so far, and the next action once it is decided (template T8). If you do not know which level owns it, use the SemanticOps log: the router moves it.
-2. The blocked issue gets `needs-input` and a comment linking the exercise. Work moves to something else, or stops cleanly with a run report.
-3. The exercise appears on that level's agenda (section 3, Exercises), where the session turns it into a proposed decision (`p`) and ratifies it, or sets it aside.
+1. Whoever is stuck, human or agent, writes it as a **proposed decision** in the decision log of the level that owns it. It records what is blocked, the options seen so far, and the next action once it is decided (template T8). If you do not know which level owns it, use the SemanticOps log: the router moves it.
+2. The blocked issue gets `needs-input` and a comment linking the proposal. Work moves to something else, or stops cleanly with a run report.
+3. The proposal appears on that level's agenda (decisions to ratify), where the session ratifies it, amends it or sets it aside.
 4. When the decision is ratified, `needs-input` comes off and the work resumes under it.
 
-Nothing new is needed but a one-step way to write the exercise; today it takes two srs CLI calls with the right container ids.
+Nothing new is needed but a one-step way to write the proposal; today it takes two srs CLI calls with the right container ids.
 
 **What is new.** One label (`intake`) and three comment markers (`<!-- intake-placement -->`, `<!-- intake-assessment -->`, `<!-- intake-proposal -->`), on the pattern of `<!-- wg-quorum -->`. Everything else is existing practice: domains, persona-in-domain, problems in Suggestions, the duplicate guard, the board, escalation. There is deliberately no intake record type, no board status and no command: `label:intake` is enough until intake regularly exceeds about ten items a week.
 
@@ -382,7 +382,7 @@ stateDiagram-v2
 |---|---|---|---|
 | **Decision** | ratify or set aside decisions, receive reports, merges | weekly, or when the agenda fills | `clerk session` (works) |
 | **Affirmation review** | walk Suggestions: domains, personas in domain, clusters, problems, remedies; affirm, edit and affirm, or set aside | when a domain is walked | srs-web Method editor: problems now; remedies, clusters and personas with srs-web#548; domains with srs-web#562 |
-| **Unblock** | short and frequent: parked decisions (exercises), `needs-input` issues, approved PRs that have not merged, PRs stating a `Decision asked:` | daily, minutes long | partly: exercises and owner-merge PRs only |
+| **Unblock** | short and frequent: parked decisions (proposals), `needs-input` issues, approved PRs that have not merged, PRs stating a `Decision asked:` | daily, minutes long | partly: exercises and owner-merge PRs only |
 | **Intake triage** | requests at the programme level waiting for placement | with Unblock until volume grows | proposed (chapter "Intake") |
 | **Retrospective** | period close: keep, change or drop practices and indicators | once a period | theory only |
 
@@ -943,7 +943,7 @@ Waiting longer than one cycle: <links>
 I5: median days request to assessment = d; returned share = X/P; useful | noisy | misleading
 ```
 
-**T8. Parked decision** (anyone who is stuck; an `exercise` record in the owning level's decision log, fields as named)
+**T8. Parked decision** (anyone who is stuck; a proposed decision in the owning level's decision log, body as named)
 
 ```
 title: <the question, as one line ending in "?">
