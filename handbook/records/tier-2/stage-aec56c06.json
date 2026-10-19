@@ -12,7 +12,8 @@
     "gaps": [
       "`endSession` returns from the whole function when a session takes up an exercise: that exercise's `considers`, comments and proposals, every later choice, and the validate, commit and PR are all skipped. The session record is left uncommitted in its worktree.",
       "There are no exercise records yet.",
-      "The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link."
+      "The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link.",
+      "There is one kind of meeting. Affirmation, unblocking and triage happen ad hoc or not at all, and what waits for the owner is assembled by hand (clerk#59)."
     ],
     "open_questions": [
       "Should the pause rule read `receives` instead of the thumbs-up?",

@@ -1,0 +1,32 @@
+{
+  "instanceId": "ef35de1c-3760-4cf5-ac05-806a2d694e3a",
+  "typeId": "700789ba-62b0-47a4-a86b-62910d7f251c",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "stage",
+  "fieldValues": {
+    "title": "Intake",
+    "theory": "A request (a bug, friction, a feature idea) enters a level's input queue, is placed in a domain and so in a group, is assessed by that group against its priorities and queue, and becomes proposed issues, flagged bugs and an epic placement. The same six steps (receive, place, assess, propose, decide, report) run at every level; a level never decides for the level above. Proposed, not in force (clerk#56, decisions D2 to D7).",
+    "status": "theory only",
+    "practice": "- Nothing implements intake. Work enters a group only as `ready` issues with its `wg:` label.\n- The nearest practice is the WG Third-party ready analyst (`routines/wg-analyst.md`), which files ruling-backed issues when the queue runs dry, with a duplicate guard and a fixed issue shape.\n- Proposed design, templates and charter: `plans/wg-srs-operations.md`; templates T1 to T6 in Reference.",
+    "gaps": [
+      "No `intake` label, no Request issue form, no router or group-intake brief.",
+      "Domain estimates are never written: no persona-in-domain exists outside Evidence-backed writing.",
+      "`clerk charter` writes only steward, builder and reviewer seats, so an analyst or synthesizer seat must be added by hand.",
+      "No one-step way to park a decision: writing an exercise into a log takes two srs CLI calls, and no exercise record exists yet."
+    ],
+    "open_questions": [
+      "Who acts as the programme router before a routine exists: the owner's session, or any session under its own actor?",
+      "Should a request with no fitting domain wait for a new domain, or be held by the central group meanwhile?"
+    ],
+    "test": "Stage Intake: pending: placed before assessed; input queue is label plus wg label; seat stance read from records."
+  },
+  "createdAt": "2026-10-12T08:53:09.759333534+00:00",
+  "updatedAt": "2026-10-12T09:33:58.575957622+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:clerk-session",
+    "name": "Clerk session (clerk#56)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

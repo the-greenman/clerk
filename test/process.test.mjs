@@ -104,6 +104,13 @@ describe('stage 4: problem', () => {
   test.todo('handbook stage 4: a problem is closed (solved, set aside or superseded) by a recorded ruling');
 });
 
+// ---- Intake (proposed, clerk#56) ----
+describe('stage intake: a request reaches a group', () => {
+  test.todo('handbook stage intake: a request is placed in a domain (intake-placement) before any group assesses it');
+  test.todo('handbook stage intake: a group\'s input queue is its wg: label plus intake, and an accepted estimate is a suggested problem held-by a persona-in-domain');
+  test.todo('handbook stage intake: a seat-holder\'s stance is read from records (derived-from a method/agent that instantiates an archetype)');
+});
+
 // ---- 5. Remedy ----
 describe('stage 5: remedy', () => {
   test('an affirmed remedy must carry a falsifier', () => {

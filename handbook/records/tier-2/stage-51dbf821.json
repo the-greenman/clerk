@@ -8,23 +8,25 @@
     "title": "Working groups",
     "theory": "A working group is a delegated authority with a purpose, standing orders, a delegation order, a compass (at least three tensions, this-over-that leanings, separate layers), membership and quorum, a rhythm with a cycle and a budget, its own decision log and a duty to report. Its charter is records, and its rules are read from them.",
     "status": "partial",
-    "practice": "- **WG Third-party ready** (semanticops.com#31, `wg:third-party-ready`): in force. Charter decision `00567bf1`, group role `834b61fd` (the Owner role `delegates` to it), decision log `88c32389`. Charter fields on the role: quorum of 2 with the reviewer required, budget 10 delegated merges per cycle, cycle close 11:30 UTC, pause after 2 unacknowledged reports.\n- **WG Agent-supported editor** (semanticops.com#29, `wg:agent-editor`): chartered by `clerk charter`, charter decision `384a704a`, role `1fc9ce85`, log `e509eb61`.\n- **Central group** (SemanticOps, the Owner role) holds all work with no `wg:` label.\n\n**Chartering, step by step.**\n\n1. An orchestrator session runs `clerk charter --repo <programme> --title \"WG ...\" --epic <repo#n> --label wg:... --repos a,b --budget N --cycle-close HH:MM --quorum-seats builder,reviewer --required-seat reviewer --prefix <p> --dry-run`, reads the plan, then runs it for real. Duplicates and malformed options are refused before anything is written.\n2. It creates, as drafts and proposals: the group's log and container, the group role with its charter fields, four standing-order articles, one member agent per seat, a boundary with a compass copied from the first group, and the charter decision, listed in both the group log and the SemanticOps log.\n3. The orchestrator validates, commits on a branch and opens a PR.\n4. An owner session ratifies the charter decision and asserts `delegates` from the Owner role to the group role.\n5. Then, by hand: the `wg:` label in each governed repo, the cloud routines and their standing-job records.",
+    "practice": "- **WG Third-party ready** (semanticops.com#31, `wg:third-party-ready`): in force. Charter decision `00567bf1`, group role `834b61fd` (the Owner role `delegates` to it), decision log `88c32389`. Charter fields on the role: quorum of 2 with the reviewer required, budget 10 delegated merges per cycle, cycle close 11:30 UTC, pause after 2 unacknowledged reports.\n- **WG Agent-supported editor** (semanticops.com#29, `wg:agent-editor`): chartered by `clerk charter`, charter decision `384a704a`, role `1fc9ce85`, log `e509eb61`.\n- **WG SRS operations** (`wg:srs-ops`): proposed only, not chartered (clerk#56, `plans/wg-srs-operations.md`). Domain SRS operations, five seats (steward, analyst, synthesizer, builder, reviewer), each seat built on a stance (chapter \"Stances\").\n- **Central group** (SemanticOps, the Owner role) holds all work with no `wg:` label.\n\n**Chartering, step by step.**\n\n1. An orchestrator session runs `clerk charter --repo <programme> --title \"WG ...\" --epic <repo#n> --label wg:... --repos a,b --budget N --cycle-close HH:MM --quorum-seats builder,reviewer --required-seat reviewer --prefix <p> --dry-run`, reads the plan, then runs it for real. Duplicates and malformed options are refused before anything is written.\n2. It creates, as drafts and proposals: the group's log and container, the group role with its charter fields, four standing-order articles, one member agent per seat, a boundary with a compass copied from the first group, and the charter decision, listed in both the group log and the SemanticOps log.\n3. The orchestrator validates, commits on a branch and opens a PR.\n4. An owner session ratifies the charter decision and asserts `delegates` from the Owner role to the group role.\n5. Then, by hand: the `wg:` label in each governed repo, the cloud routines and their standing-job records.",
     "gaps": [
       "WG Agent-supported editor has no `delegates` edge yet, so it is not in force.",
       "The articles' prose and the role's fields state the same numbers twice; nothing checks they agree.",
       "Every group reports to the same issue (#31), a programme setting.",
       "The analyst was added before its decision `b447e8ea` was ratified.",
-      "The compass is all Suggestions."
+      "The compass is all Suggestions.",
+      "`clerk charter` hard-codes the steward, builder and reviewer seat briefs (`lib/practice/charter.mjs`) and links no seat to a stance."
     ],
     "open_questions": [
       "How is a group dissolved? There is no command or rule yet.",
       "Which relation links an epic to its group? None fits; `clerk charter` names the epic in the role text.",
-      "Does a group's boundary map to a domain?"
+      "Does a group's boundary map to a domain?",
+      "Where two groups work in the same repos (Third-party ready and the proposed SRS operations), which placement rule separates them? Proposed: a request naming a ruling, RFC requirement or invariant the tool breaks goes to Third-party ready; the rest goes to SRS operations."
     ],
     "test": "Stage 10: 3 passing; pending: epic-group relation. Also test/charter.test.mjs."
   },
   "createdAt": "2026-10-11T18:33:29.592127922+00:00",
-  "updatedAt": "2026-10-11T18:33:29.592135558+00:00",
+  "updatedAt": "2026-10-12T08:53:44.172257429+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",
