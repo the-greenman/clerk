@@ -96,7 +96,11 @@ describe('stage 4: problem', () => {
     const dup = [...records, rec('prb2', 'problem', { problem_id: 'SP-901', title: 'dup' })];
     assert.match(checkGates(dup, relations, new Set([...affirmed, 'prb2']), new Set(), TODAY).errors[0], /duplicate problem_id SP-901/);
   });
-  test.todo('handbook stage 4 / principle 2: an affirmed problem without an affirmed persona and domain is refused by a check-method gate');
+  test('handbook stage 4 / principle 2: an affirmed problem held by no affirmed persona-in-domain warns (warning until both pilot domains are walked)', () => {
+    const r = checkGates(records, relations, affirmed, new Set(), TODAY);
+    assert.ok(r.warnings.some((w) => /affirmed but held-by no affirmed persona-in-domain/.test(w)));
+    assert.deepEqual(r.errors, []);
+  });
   test.todo('handbook stage 4: a problem is closed (solved, set aside or superseded) by a recorded ruling');
 });
 
@@ -143,7 +147,7 @@ describe('stage 7: epic', () => {
     assert.equal(e1.objective, 'Writing together works');
   });
   test('an epic serving a ranked objective with no affirmed problem warns; the grounded epic does not', () => {
-    const w = checkGates(records, relations, affirmed, new Set(), TODAY).warnings;
+    const w = checkGates(records, relations, affirmed, new Set(), TODAY).warnings.filter((x) => /answers no affirmed problem/.test(x));
     assert.equal(w.length, 1);
     assert.match(w[0], /Second epic.*answers no affirmed problem/);
   });

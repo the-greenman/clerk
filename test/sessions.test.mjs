@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import * as A from '../lib/practice/agenda.mjs';
 import { quorum, quorumText, ROLES, rolesFor } from '../lib/practice/roles.mjs';
 import { groups, TPR as GROUP_MEMBERS } from './groups.fixture.mjs';
-import { take, assertQuorum, summarise } from '../lib/practice/session.mjs';
+import { take, assertQuorum, summarise, actsInOrder } from '../lib/practice/session.mjs';
 import { endSession, postComments } from '../lib/adapters/session.mjs';
 
 const owner = { ...ROLES.owner, roleId: 'owner-role', logId: 'L' };
@@ -143,4 +143,16 @@ test('framingWarnings: warn-only checks on a recorded decision (D4)', async () =
     assert.equal(framingWarnings({ statement: bad, revisit_when: 'r', decision_kind: 'design' })[0]?.text.startsWith('not timeless'), true, bad);
   const none = framingWarnings({ statement: 'We do X.' });
   assert.deepEqual(none.map((w) => w.level), ['warn', 'info']);
+});
+test('each act keeps the time it was taken, its agenda position and what was seen (clerk#43)', () => {
+  const ch = [];
+  const a = { instanceId: 'aaaaaaaa1', title: 'A' }; const b = { instanceId: 'bbbbbbbb2', title: 'B' };
+  take(ch, b, { comment: { text: 'x' }, act: { at: '2026-10-11T14:20:00.000Z', section: 'Ratify', position: 2, of: 5, seen: ['discussion'], updatedAt: '2026-10-10T09:00:00Z' } });
+  take(ch, a, { action: 'ratify', act: { at: '2026-10-11T14:12:30.000Z', section: 'Ratify', position: 1, of: 5, seen: ['full record'] } });
+  take(ch, a, { edit: { field: 'why', text: 'y' }, act: { at: '2026-10-11T15:40:00.000Z', section: 'Ratify', position: 1, of: 5, seen: [] } });
+  const acts = actsInOrder(ch);
+  assert.deepEqual(acts.map((x) => [x.at.slice(11, 16), x.kind, x.position]), [['14:12', 'ratify', 1], ['14:20', 'comment', 2], ['15:40', 'edit', 1]]);
+  const s = summarise(ch, 'S');
+  assert.match(s, /Acts in the order taken \(UTC\):\n- 14:12:30Z ratify: A \[aaaaaaaa\] \(Ratify 1 of 5, saw full record\)\n- 14:20:00Z comment: B \[bbbbbbbb\] \(Ratify 2 of 5, saw discussion, record updated 2026-10-10T09:00:00Z\)\n- 15:40:00Z edit/);
+  assert.doesNotMatch(summarise([{ id: 'abcdef123', title: 'T', action: 'consider', edits: [] }], 'S'), /Acts in the order/);
 });

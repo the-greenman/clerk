@@ -129,3 +129,40 @@ test('queue: builder order, forecast fed vs dry', () => {
   const n = A.nextLines({ ready: q, inFlight: 2, merged: 4, budget: 10 }).join('\n');
   assert.match(n, /Ready group issues: 4[\s\S]*budget left this cycle: 6 of 10[\s\S]*running dry: 4 ready/);
 });
+
+test('a run-report whose comment was received (+1) before the record landed stays received', () => {
+  const run = { instanceId: 'r9', record: { fieldValues: { run_date: '2026-10-14T11:30:00Z' } } };
+  const c = { id: 9, body: '<!-- wg-report cycle=2026-10-14 -->\nreport' };
+  assert.equal(A.reportItems([run], new Set(), [c], new Set([9]), 'WG').length, 0);
+  assert.equal(A.reportItems([run], new Set(), [c], new Set(), 'WG').length, 1);
+});
+
+test('a report marker may tag its group; the cycle reads the same either way', () => {
+  const tagged = { body: '<!-- wg-report cycle=2026-10-14 group=wg:agent-editor -->\nreport' }, plain = { body: '<!-- wg-report cycle=2026-10-14 -->\nreport' };
+  assert.equal(A.reportCycle(tagged), '2026-10-14');
+  assert.equal(A.reportGroup(tagged), 'wg:agent-editor');
+  assert.equal(A.reportCycle(plain), '2026-10-14');
+  assert.equal(A.reportGroup(plain), undefined);
+});
+
+// Stalled work (clerk#38): read-only, three kinds, N configurable.
+test('stalled: stale claims, unmerged old branches and quiet epics are listed; fresh and merged ones are not', () => {
+  const now = Date.parse('2026-10-17T12:00:00Z'), ago = (d) => new Date(now - d * 864e5).toISOString();
+  const input = {
+    claims: [{ ref: 'srs#1', updatedAt: ago(3) }, { ref: 'srs#2', updatedAt: ago(0.1) }],
+    branches: [{ repo: 'srs-programme', name: 'pilot31-u8-steward', aheadBy: 4, lastCommitAt: ago(20) }, { repo: 'srs', name: 'merged', aheadBy: 0, lastCommitAt: ago(90) }, { repo: 'srs', name: 'fresh', aheadBy: 1, lastCommitAt: ago(2) }],
+    epics: [{ ref: 'semanticops.com#27', activityAt: ago(30) }, { ref: 'clerk#19', activityAt: ago(1) }],
+  };
+  const out = A.stalledItems(input, now);
+  assert.deepEqual(out.map((i) => [i.kind, i.ref]), [['claim', 'srs#1'], ['branch', 'srs-programme:pilot31-u8-steward'], ['epic', 'semanticops.com#27']]);
+  assert.match(out[1].text, /unmerged \(4 commits\), last commit 20d ago/);
+  assert.equal(A.stalledItems(input, now, { days: 60 }).filter((i) => i.kind !== 'claim').length, 0); // N is configurable
+  assert.equal(A.stalledItems(input, now, { claimDays: 5 }).filter((i) => i.kind === 'claim').length, 0);
+  assert.deepEqual(A.stalledItems({}, now), []);
+});
+test('stalled: the section prints in the agenda only when something is stalled', () => {
+  const base = { ratify: [], reports: [], decide: [], merge: [], status: [] };
+  assert.doesNotMatch(A.agendaLines(base).join('\n'), /Stalled/);
+  const s = A.stalledItems({ claims: [{ ref: 'srs#1', updatedAt: '2026-10-01T00:00:00Z' }] }, Date.parse('2026-10-17T00:00:00Z'));
+  assert.match(A.agendaLines({ ...base, stalled: s }).join('\n'), /Stalled[\s\S]*claim srs#1 in progress, no activity for 16d/);
+});

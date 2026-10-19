@@ -6,5 +6,5 @@
   "private": true,
   "bin": { "clerk": "bin/clerk.mjs" },
   "engines": { "node": ">=20" },
-  "scripts": { "test": "node --test test/ scripts/*.test.mjs && bash scripts/pr-upkeep.test.sh" }
+  "scripts": { "test": "node --test test/*.test.mjs scripts/*.test.mjs && bash scripts/pr-upkeep.test.sh" }
 }

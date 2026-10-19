@@ -8,9 +8,11 @@ const rec = (id, typeName, fieldValues = {}, createdBy = { kind: "human", id: "h
 const rel = (s, t, y) => ({ sourceId: s, relationType: y, targetId: t });
 const base = () => ({
   records: [rec("p1", "problem", { problem_id: "SP-1", title: "P" }), rec("r1", "remedy", { title: "R", falsifier: "f" }),
-    rec("e1", "epic", { title: "E" }), rec("o1", "objective", { title: "O" }), rec("pe", "period", { starts_on: "2026-01-01", objective_rank: ["o1"] })],
-  relations: [rel("r1", "p1", `${M}/answers`), rel("e1", "r1", `${M}/implements`), rel("e1", "o1", "com.semanticops.programme/serves")],
-  affirmed: new Set(["p1", "r1"]),
+    rec("e1", "epic", { title: "E" }), rec("o1", "objective", { title: "O" }), rec("pe", "period", { starts_on: "2026-01-01", objective_rank: ["o1"] }),
+    rec("pid", "persona-in-domain", { title: "W in D" }), rec("d1", "domain", { title: "D" })],
+  relations: [rel("r1", "p1", `${M}/answers`), rel("e1", "r1", `${M}/implements`), rel("e1", "o1", "com.semanticops.programme/serves"),
+    rel("p1", "pid", `${M}/held-by`), rel("pid", "d1", `${M}/in-domain`)],
+  affirmed: new Set(["p1", "r1", "pid", "d1"]),
 });
 const run = (f) => { const b = base(); f(b); return checkGates(b.records, b.relations, b.affirmed, b.setAside ?? new Set()); };
 
@@ -50,3 +52,21 @@ test("principle with no boundary fails", () => { const b = bnd(); b.relations = 
 test("principle within two boundaries fails", () => { const b = bnd(); b.records.push(mk("b2", "boundary", A, NEW)); b.relations.push(rel("pr1", "b2", `${A}/within-boundary`)); assert.match(mm(b).at(-1), /within-boundary of 2 boundaries/); });
 test("records created before the rule are exempt", () => { const b = bnd(); b.records[0].record.createdAt = OLD; b.records[1].record.createdAt = OLD; b.relations.splice(4); assert.deepEqual(mm(b), []); });
 test("no boundary type installed: old principles pass", () => { const b = bnd(); b.records = b.records.slice(1).map((r) => ({ ...r, record: { ...r.record, createdAt: OLD } })); b.relations = b.relations.slice(0, 4); assert.deepEqual(mm(b), []); });
+
+// Principle 2 (clerk#35): an affirmed problem is grounded in an affirmed domain through persona-in-domain; ends resolve through derived-from.
+const g = base;
+const p2 = (f) => { const b = g(); f(b); return checkGates(b.records, b.relations, b.affirmed, new Set()); };
+test("grounded problem is clean", () => assert.deepEqual(p2(() => {}).warnings, []));
+test("held by no persona-in-domain warns", () => assert.match(p2((b) => { b.relations = b.relations.filter((r) => r.relationType !== `${M}/held-by`); }).warnings[0], /held-by no affirmed persona-in-domain/));
+test("persona-in-domain not affirmed warns", () => assert.match(p2((b) => b.affirmed.delete("pid")).warnings[0], /held-by no affirmed/));
+test("domain not affirmed warns", () => assert.match(p2((b) => b.affirmed.delete("d1")).warnings[0], /exactly one in-domain/));
+test("two in-domain edges warn", () => assert.match(p2((b) => { b.records.push(rec("d2", "domain", {})); b.affirmed.add("d2"); b.relations.push(rel("pid", "d2", `${M}/in-domain`)); }).warnings[0], /exactly one in-domain/));
+test("shared persona (not persona-in-domain) warns", () => assert.match(p2((b) => { b.records.find((r) => r.instanceId === "pid").record.typeName = "persona"; }).warnings[0], /held-by no affirmed persona-in-domain/));
+test("edges on the suggestion count for its affirmed fork", () => {
+  const b = g();
+  b.records.push(rec("pidF", "persona-in-domain", { title: "W in D" }), rec("d1F", "domain", { title: "D" }));
+  b.relations.push(rel("pidF", "pid", "derived-from"), rel("d1F", "d1", "derived-from"));
+  b.affirmed = new Set(["p1", "r1", "pidF", "d1F"]); // only the forks are affirmed; the edges sit on the suggestions
+  assert.deepEqual(checkGates(b.records, b.relations, b.affirmed, new Set()).warnings, []);
+});
+test("never an error while the switch is warning", () => assert.deepEqual(p2((b) => b.affirmed.delete("d1")).errors, []));

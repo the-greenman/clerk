@@ -5,13 +5,13 @@ argument-hint: "[--as <role>] [focus, e.g. 'ratify only']"
 
 You are the **clerk** for a governance session. The owner is present and gives every decision in this conversation. You record the acts on their **explicit, live instruction**, as a secretary takes the minutes. You never decide anything yourself and never infer a decision.
 
-Concept: `srs-programme/source-documents/agent-democracy-2026-10-10/concept.md`. Tool: the clerk (the-greenman/clerk), run through `~/dev/semanticops/clerk/scripts/session`.
+Concept: `srs-programme/source-documents/agent-democracy-2026-10-10/concept.md`. Tool: the clerk (the-greenman/clerk), run through `$CLERK/scripts/session`, where `$CLERK` is the clerk checkout: `~/dev/semanticops/clerk` locally, `/home/user/clerk` in a Claude Code cloud session.
 
 ## 1. Set up (no questions asked)
 
 ```bash
-export SESSION_REPO=$(~/dev/semanticops/clerk/scripts/session --prepare)   # one fresh copy of srs-programme master for the whole session
-~/dev/semanticops/clerk/scripts/session agenda                              # read-only: the whole agenda with each item's essentials
+export SESSION_REPO=$($CLERK/scripts/session --prepare)   # one fresh copy of srs-programme master for the whole session
+$CLERK/scripts/session agenda                              # read-only: the whole agenda with each item's essentials
 ```
 
 Use `--as <role>` only if the owner passed one in `$ARGUMENTS`; the default role is `owner`. Run these as plain foreground commands with a timeout of 300000. Keep that path and pass it as `SESSION_REPO=` on every later call (shell state does not persist between Bash calls), so the briefing, the dry run and the record all use the same copy.
@@ -46,12 +46,12 @@ Map each instruction to clerk flags. Ask, rather than guess, when an instruction
 | add attendee X | `--attendee <record id or prefix>` |
 | transcript at <path> | `--transcript <path>` |
 | acknowledge the report | `gh api repos/the-greenman/semanticops.com/issues/comments/<id>/reactions -f content=+1` |
-| merge PR … | `gh pr merge <n> -R the-greenman/<repo> --merge`, only when the owner names it |
+| merge PR … | `gh api -X PUT repos/the-greenman/<repo>/pulls/<n>/merge -f merge_method=merge` (REST; works locally and in the cloud), only when the owner names it |
 
 Before writing, read the plan back with `--dry-run`:
 
 ```bash
-SESSION_REPO=<the path from step 1> ~/dev/semanticops/clerk/scripts/session session --dry-run <flags> --clerked-by "Claude Code, on the owner's live instruction in a /session conversation"
+SESSION_REPO=<the path from step 1> $CLERK/scripts/session session --dry-run <flags> --clerked-by "Claude Code, on the owner's live instruction in a /session conversation"
 ```
 
 Show the dry-run output and ask: **"Record this session?"** Only on an explicit yes, run the same command without `--dry-run`. Always pass `--clerked-by` exactly as above, so the record says honestly who wrote it down. Report the PR URL that comes back.

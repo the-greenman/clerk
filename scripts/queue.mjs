@@ -40,14 +40,16 @@ export function classify(issues, prs, LANES = lanesFrom([])) {
 const api = (path) => JSON.parse(execFileSync("gh", ["api", "--paginate", "--slurp", path], { encoding: "utf8" })).flat();
 
 function fetchAll(OWNER, REPOS, groups) {
-  const LANES = lanesFrom(groups), issues = new Map(), prs = [];
-  for (const repo of REPOS) {
+  const LANES = lanesFrom(groups), issues = new Map(), prs = [], unreadable = [];
+  for (const repo of REPOS) try {
     for (const lane of Object.keys(LANES).filter((l) => l === "lane:unattended" || groups.some((g) => g.label === l && g.repos.includes(repo))))
       for (const i of api(`repos/${OWNER}/${repo}/issues?labels=${encodeURIComponent(`${lane},ready`)}&state=open&per_page=100`))
         if (!i.pull_request) issues.set(`${repo}#${i.number}`, { ...i, repo });
     prs.push(...api(`repos/${OWNER}/${repo}/pulls?state=open&per_page=100`).map((p) => ({ ...p, repo })));
+  } catch (e) { // e.g. a cloud session without that repo attached: report it, keep the rest
+    unreadable.push(repo); console.error(`queue: ${repo} unreadable, skipped (${String(e.stderr || e.message).trim().split("\n")[0]})`);
   }
-  return classify([...issues.values()], prs, LANES);
+  return { ...classify([...issues.values()], prs, LANES), unreadable };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -61,5 +63,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(r.queued.map(line).join("\n") || "  (empty)");
     console.log(`\nHeld (${r.held.length}):`);
     console.log(r.held.map((x) => `${line(x)}\n        held: ${x.held.join("; ")}`).join("\n") || "  (none)");
+    if (r.unreadable.length) console.log(`\nNot read (${r.unreadable.length}): ${r.unreadable.join(", ")}: this queue is partial.`);
   }
 }

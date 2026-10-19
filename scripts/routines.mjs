@@ -12,7 +12,8 @@ const argv = process.argv.slice(2);
 const dump = argv[argv.indexOf('--check') + 1];
 if (!argv.includes('--check') || !dump) { console.error('usage: clerk routines --check <dump.json> [--repo <programme>] [--json]'); process.exit(2); }
 const raw = JSON.parse(readFileSync(dump, 'utf8'));
-const triggers = Array.isArray(raw) ? raw : raw.triggers ?? raw.data ?? [];
+// The RemoteTrigger API keeps the prompt under derived_state; flat dumps carry it at the top.
+const triggers = (Array.isArray(raw) ? raw : raw.triggers ?? raw.data ?? []).map((t) => ({ ...t, prompt: t.prompt ?? t.derived_state?.prompt }));
 const repo = repoRoot();
 const cli = srsCli(repo);
 const jobs = srs(cli, repo, ['record', 'list', '--type', 'com.mudemocracy.stewardship/standing-job']).records

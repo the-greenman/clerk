@@ -3,7 +3,7 @@
 #   gate:auto-merge  CLEAN -> merge;  BEHIND -> update branch
 #   gate:owner-merge BEHIND -> update branch, so it is always ready for the owner
 #   GitHub auto-merge on, BEHIND -> update branch (auto-merge then lands it)
-#   --digest         one comment on semanticops.com#33: ready for owner, conflicts, no gate label
+#   --digest         one comment on semanticops.com#33: conflicts, no gate label, group waits (owner merges are on the desk, clerk desk)
 #   wg:third-party-ready  working-group PRs (semanticops.com#31) merge only with a valid quorum comment and budget left
 # Dry run unless --apply. Never resolves conflicts, never labels, never touches drafts.
 set -uo pipefail
@@ -25,15 +25,28 @@ wg_cycle_start() {
 # wg_budget_query <cycle_start_iso>: delegated merges only; a gate:owner-merge PR was merged by the owner and does not count.
 wg_budget_query() { echo "user:$OWNER is:pr is:merged label:\"$WG_LABEL\" -label:\"gate:owner-merge\" merged:>=$1"; }
 
+# The same counts from repo-scoped REST, which is all a Claude Code cloud session allows (no search API, no GraphQL).
+# wg_count_prs <state: merged|open> <since_iso> <prs_json>: PRs labelled $WG_LABEL, not gate:owner-merge; merged ones only since <since_iso>.
+wg_count_prs() { jq --arg st "$1" --arg s "$2" --arg l "$WG_LABEL" '[.[]|select(([.labels[].name]|index($l)) and (([.labels[].name]|index("gate:owner-merge"))|not))
+  |select(if $st=="merged" then (.merged_at // "") >= $s else .state=="open" end)]|length' <<<"$3"; }
+# wg_budget_count <cycle_start_iso> <repo>...: delegated merges this cycle. Reads the 100 most recently updated closed PRs per repo (a cycle is a day).
+wg_budget_count() { local s=$1 n=0 c r; shift; for r in "$@"; do
+  c=$(wg_count_prs merged "$s" "$(gh api "repos/$OWNER/$r/pulls?state=closed&sort=updated&direction=desc&per_page=100")") || return 1; n=$((n+c)); done; echo "$n"; }
+# wg_open_count <repo>...: open group PRs not labelled gate:owner-merge.
+wg_open_count() { local n=0 c r; for r in "$@"; do
+  c=$(wg_count_prs open "" "$(gh api --paginate --slurp "repos/$OWNER/$r/pulls?state=open&per_page=100" | jq 'add // []')") || return 1; n=$((n+c)); done; echo "$n"; }
+
 # wg_reactions <comment_id>: reactions JSON array of a report comment (tests override this).
 wg_reactions() { gh api "repos/${WG_REPORT_ISSUE%/issues/*}/issues/comments/$1/reactions" --paginate 2>/dev/null | jq -s 'add // []' 2>/dev/null; }
 
 # wg_paused <issue_comments_json>: ok, or "paused: ..." (fail closed on anything unreadable).
-# Reports = owner comments starting <!-- wg-report cycle=YYYY-MM-DD -->. Acknowledged = a +1 from the owner on the report.
+# Reports = owner comments starting <!-- wg-report cycle=YYYY-MM-DD group=<label> --> for this group ($WG_LABEL); an untagged marker
+# (written before tags) counts for every group, so it can pause but never un-pause. Acknowledged = a +1 from the owner on the report.
 # Paused when the latest WG_MAX_UNACKED reports all lack it; fewer reports than that never pause.
 wg_paused() {
   local ids id r n=0 un=0
-  ids=$(jq -r --argjson k "$WG_MAX_UNACKED" '[.[]|select(.author_association=="OWNER" and (.body|test("^<!-- wg-report cycle=[0-9-]+ -->")))]
+  ids=$(jq -r --argjson k "$WG_MAX_UNACKED" --arg l "$WG_LABEL" '[.[]|select(.author_association=="OWNER" and (.body|test("^<!-- wg-report cycle=[0-9-]+( group=[^ ]+)? -->"))
+    and (((.body|capture("^<!-- wg-report cycle=[0-9-]+ group=(?<g>[^ ]+) -->").g) // $l) == $l))]
     | sort_by(.created_at) | .[-$k:] | .[].id' <<<"$1" 2>/dev/null) || { echo "paused: reports unreadable"; return; }
   for id in $ids; do
     n=$((n+1))
@@ -69,6 +82,13 @@ wg_verdict() {
   [ "$q" = ok ] && [ "$4" -ge "$WG_BUDGET" ] && q="over budget ($4 of $WG_BUDGET merged this cycle)"
   echo "$q"
 }
+ordinary_action() { # wg gate state -> merge | update-branch | nothing; a labelled group is handled by its own rules
+  case "$1:$2:$3" in
+    [!:]*:*) ;;  # non-empty group (a bare ? would also match the leading ':' of an empty one)
+    *:*gate:auto-merge*:CLEAN) echo merge ;;
+    *:*gate:auto-merge*:BEHIND|*:*gate:owner-merge*:BEHIND|*:*auto-on*:BEHIND) echo update-branch ;;
+  esac
+}
 [[ "${BASH_SOURCE[0]}" != "$0" ]] && return 0  # sourced by the test: functions only
 
 APPLY=0; DIGEST=0; PROGRAMME="$PWD"
@@ -87,17 +107,18 @@ act() { # description, command...
   else echo "WOULD $what"; fi
 }
 
-FAILS=0; READY=""; CONFLICT=""; UNGATED=""
+FAILS=0; CONFLICT=""; UNGATED=""
 # Per group (keyed by its label): budget, cycle close, pause limit, merges this cycle, pause state, waiting list. Fail closed: an unreadable count or unreadable reports block group merges.
 declare -A G_BUDGET G_CLOSE G_UNACKED G_MERGED G_PAUSE G_WAIT; LABELS=()
-while IFS=$'\x1f' read -r WG_LABEL WG_BUDGET WG_CYCLE_CLOSE WG_MAX_UNACKED; do
+while IFS=$'\x1f' read -r WG_LABEL WG_BUDGET WG_CYCLE_CLOSE WG_MAX_UNACKED WG_REPOS; do
   [ -z "$WG_LABEL" ] && continue
   LABELS+=("$WG_LABEL"); G_BUDGET[$WG_LABEL]=$WG_BUDGET; G_CLOSE[$WG_LABEL]=$WG_CYCLE_CLOSE; G_UNACKED[$WG_LABEL]=$WG_MAX_UNACKED; G_WAIT[$WG_LABEL]=""
-  G_MERGED[$WG_LABEL]=$(gh api -X GET search/issues -f q="$(wg_budget_query "$(wg_cycle_start)")" --jq .total_count 2>/dev/null) \
+  # shellcheck disable=SC2086 # WG_REPOS is a space-separated list
+  G_MERGED[$WG_LABEL]=$(wg_budget_count "$(wg_cycle_start)" $WG_REPOS 2>/dev/null) \
     || { echo "FAIL  group budget count"; FAILS=$((FAILS+1)); G_MERGED[$WG_LABEL]=$WG_BUDGET; }
   G_PAUSE[$WG_LABEL]=$(wg_pause_check)
   case ${G_PAUSE[$WG_LABEL]} in *unreadable*) echo "FAIL  group pause check"; FAILS=$((FAILS+1)) ;; esac
-done < <(jq -r '.[]|[.label,.budget,.cycleClose,.maxUnacked]|map(tostring)|join("\u001f")' <<<"$GROUPS_JSON")
+done < <(jq -r '.[]|[.label,.budget,.cycleClose,.maxUnacked,(.repos|join(" "))]|map(tostring)|join("\u001f")' <<<"$GROUPS_JSON")
 LABELS_JSON=$(jq -c "[.[].label]" <<<"$GROUPS_JSON")
 for r in $REPOS; do
   # mergeStateStatus is computed lazily; UNKNOWN just waits for the next run.
@@ -129,14 +150,9 @@ for r in $REPOS; do
         G_WAIT[$wg]+="- $pr $title ($why)"$'\n'
       fi
     fi
-    case "$wg:$gate:$state" in
-      ?*:*) ;;
-      *:*gate:auto-merge*:CLEAN)  act "merge $pr" gh pr merge "$n" -R "$OWNER/$r" --merge ;;
-      *:*gate:auto-merge*:BEHIND|*:*gate:owner-merge*:BEHIND|*:*auto-on*:BEHIND)
-                                act "update-branch $pr" gh pr update-branch "$n" -R "$OWNER/$r" ;;
-    esac
-    case "$gate:$state" in
-      *gate:owner-merge*:CLEAN) READY+="- $pr $title"$'\n' ;;
+    case $(ordinary_action "$wg" "$gate" "$state") in
+      merge)         act "merge $pr" gh pr merge "$n" -R "$OWNER/$r" --merge ;;
+      update-branch) act "update-branch $pr" gh pr update-branch "$n" -R "$OWNER/$r" ;;
     esac
     [ "$state" = DIRTY ] && CONFLICT+="- $pr $title"$'\n'
     [[ "$gate" != *gate:* && -z "$wg" ]] && UNGATED+="- $pr $title"$'\n'
@@ -153,9 +169,6 @@ ${w:-- none
   done
   body="**PR upkeep digest $(date -u +%F)** (srs-programme \`scripts/pr-upkeep.sh\`)
 
-Ready for owner merge (green, up to date):
-${READY:-- none
-}
 Conflicts (need a person or agent):
 ${CONFLICT:-- none
 }

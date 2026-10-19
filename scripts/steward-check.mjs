@@ -5,15 +5,18 @@
 //   reopen-no-pr   closed COMPLETED, not an epic, no merged closing PR, no `no-code` label -> reopen + comment
 //   reopen-epic    epic (label `epic` or has sub-issues) closed with open sub-issues, unless every open child has a re-homing comment -> reopen + comment
 // Closed by a Commit or a merged PR (timeline closer) also counts as landed; duplicates and bots are skipped.
+// So does a comment naming a MERGED PR after "Landed" (clerk#68): "Landed: srs-web#548 ...", "Landed via srs-programme#44, #45".
+// The refs run to the end of that line; a bare #n takes the repo of the ref before it on the line, else the issue's own repo.
+// Each is checked as a merged PR (REST pulls/{n}); a named issue or an unmerged PR is no evidence.
 //   answers        OPEN and opened without an `Answers:` / `No affirmed problem yet` line -> one comment
 // Every comment carries a hidden marker, so reruns are idempotent; an issue that already carries our
 // marker is never reopened again (a human who re-closes it has overruled us).
-// plan() is pure (rows in, actions out); the gh I/O is the thin layer below. The gh helper pattern is
-// copied from srs-rust/scripts/gh-project.mjs (separate repo, so a small copy rather than an import).
+// plan() is pure (rows in, actions out); the GitHub I/O is the thin REST layer below (lib/adapters/github.mjs).
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { answersOf } from "../lib/practice/grounding.mjs";
+import { issuesSince, list, get, closers } from "../lib/adapters/github.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
 // Go-forward only: history before this is never acted on (the weekly audit, srs-programme#38, reports it).
@@ -22,6 +25,22 @@ const RESET_RE = /Closed in the SemanticOps roadmap reset/;
 const M = { noPr: "<!-- steward-check:reopen-no-pr -->", epic: "<!-- steward-check:reopen-epic -->", answers: "<!-- steward-check:answers -->" };
 const REHOME_RE = /(re-?hom|moved to|moving to|tracked (in|by)|now (in|under|tracked))/i;
 const REF_RE = /(?:[\w.-]+\/)?[\w.-]*#(\d+)/g;
+
+const LANDED_RE = /\bLanded\b([^\n]*)/g;
+const LANDED_REF_RE = /(?:([\w.-]+)\/)?([\w.-]+)?#(\d+)/g;
+
+// Refs named after "Landed" in any comment -> [{repo, number}], deduped. repo: the issue's own repo, for a bare #n with no repo before it.
+export function landedRefs(comments, repo) {
+  const out = new Map();
+  for (const c of comments || []) for (const [, tail] of c.matchAll(LANDED_RE)) {
+    let last = repo;
+    for (const m of tail.matchAll(LANDED_REF_RE)) {
+      last = m[2] ?? last;
+      out.set(`${last}#${m[3]}`, { repo: last, number: Number(m[3]) });
+    }
+  }
+  return [...out.values()];
+}
 
 const names = (xs) => (xs || []).map((l) => l.name);
 const hasMarker = (issue, m) => (issue.comments || []).some((c) => c.includes(m));
@@ -35,7 +54,7 @@ export function rehomed(child) {
 }
 
 // issue: {repo, number, title, body, state, stateReason, createdAt, closedAt, labels:[name], comments:[body],
-//         closingPrs:[{merged}], openChildren:[{number, comments:[body]}]}
+//         closingPrs:[{merged}], landedPrs:[{repo, number, merged}] (from landedRefs), openChildren:[{number, comments:[body]}]}
 export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE } = {}) {
   const since = Math.max(Date.parse(cutoff), now - days * 864e5);
   const out = [];
@@ -49,7 +68,7 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
         if (orphans.length && !hasMarker(i, M.epic))
           out.push({ rule: "reopen-epic", ref, repo: i.repo, number: i.number, reopen: true,
             comment: `${M.epic}\nReopened by steward-check: this epic was closed while sub-issues are still open and not re-homed: ${orphans.map((c) => "#" + c.number).join(", ")}. Close it again once each is finished, or comment on each child saying where it moved (e.g. "re-homed to #123"). Re-closing after this comment is respected.` });
-      } else if (i.stateReason === "COMPLETED" && !(i.comments || []).some((c) => RESET_RE.test(c)) && !i.labels.includes("no-code") && !(i.closingPrs || []).some((p) => p.merged) && i.closer?.__typename !== "Commit" && !i.closer?.merged && !i.labels.includes("duplicate") && !hasMarker(i, M.noPr))
+      } else if (i.stateReason === "COMPLETED" && !(i.comments || []).some((c) => RESET_RE.test(c)) && !i.labels.includes("no-code") && !(i.closingPrs || []).some((p) => p.merged) && !(i.landedPrs || []).some((p) => p.merged) && i.closer?.__typename !== "Commit" && !i.closer?.merged && !i.labels.includes("duplicate") && !hasMarker(i, M.noPr))
         out.push({ rule: "reopen-no-pr", ref, repo: i.repo, number: i.number, reopen: true,
           comment: `${M.noPr}\nReopened by steward-check: closed as completed within ${days} days but no merged pull request closes it, so the fix may only exist on a branch. Link the merged PR, or add the \`no-code\` label if no code was needed, then close it again. Re-closing after this comment is respected.` });
     }
@@ -66,33 +85,31 @@ function gh(args, input) {
   if (r.status !== 0) throw new Error(`gh ${args.slice(0, 3).join(" ")} failed: ${r.stderr || r.error}`);
   return r.stdout;
 }
-const gql = (query, vars) => JSON.parse(gh(["api", "graphql", "--input", "-"], JSON.stringify({ query, variables: vars }))).data;
+// Repo-scoped REST only (cloud sessions refuse GraphQL and search): the window's issues, then per closed issue its timeline
+// (closing PRs, commit closer) and, for epics, its sub-issues. Shapes match what plan() reads.
+const comments = (OWNER, repo, n) => list(`repos/${OWNER}/${repo}/issues/${n}/comments?per_page=100`).map((c) => c.body);
 
-const ISSUE_Q = `query($q:String!,$after:String){search(query:$q,type:ISSUE,first:50,after:$after){pageInfo{hasNextPage endCursor}
- nodes{... on Issue{number title body author{__typename} timelineItems(itemTypes:[CLOSED_EVENT],last:1){nodes{... on ClosedEvent{closer{__typename ... on PullRequest{merged}}}}} state stateReason createdAt closedAt labels(first:30){nodes{name}} comments(last:100){nodes{body}}
- subIssuesSummary{total} closedByPullRequestsReferences(first:10,includeClosedPrs:true){nodes{merged}}}}}}`;
-const CHILD_Q = `query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n){subIssues(first:100){nodes{number state comments(last:30){nodes{body}}}}}}}`;
+// A named ref is evidence only as a merged PR; an issue number (404 on pulls) or any read failure is not.
+function mergedPr(OWNER, { repo, number }) {
+  try { return Boolean(get(`repos/${OWNER}/${repo}/pulls/${number}`)?.merged_at); } catch { return false; }
+}
 
 export function fetchIssues(repo, days, cutoff = SINCE, OWNER) {
   const since = new Date(Math.max(Date.parse(cutoff), Date.now() - days * 864e5)).toISOString().slice(0, 10);
-  const seen = new Map();
-  for (const qual of [`closed:>=${since}`, `created:>=${since}`]) {
-    let after = null;
-    do {
-      const { search } = gql(ISSUE_Q, { q: `repo:${OWNER}/${repo} is:issue ${qual}`, after });
-      for (const n of search.nodes) if (n.number) seen.set(n.number, n);
-      after = search.pageInfo.hasNextPage ? search.pageInfo.endCursor : null;
-    } while (after);
-  }
-  return [...seen.values()].map((n) => {
-    const labels = names(n.labels.nodes);
-    let openChildren = [];
-    if (n.state === "CLOSED" && (labels.includes("epic") || n.subIssuesSummary.total > 0))
-      openChildren = gql(CHILD_Q, { o: OWNER, r: repo, n: n.number }).repository.issue.subIssues.nodes
-        .filter((c) => c.state === "OPEN").map((c) => ({ number: c.number, comments: c.comments.nodes.map((x) => x.body) }));
-    return { repo, number: n.number, title: n.title, body: n.body, state: n.state, stateReason: n.stateReason,
-      createdAt: n.createdAt, closedAt: n.closedAt, labels, comments: n.comments.nodes.map((c) => c.body),
-      closingPrs: n.closedByPullRequestsReferences.nodes, closer: n.timelineItems.nodes[0]?.closer || null, bot: n.author?.__typename === "Bot", openChildren };
+  const inWindow = (t) => t && t.slice(0, 10) >= since;
+  return issuesSince(`${OWNER}/${repo}`, since).filter((n) => inWindow(n.closed_at) || inWindow(n.created_at)).map((n) => {
+    const labels = names(n.labels), state = n.state.toUpperCase();
+    const subTotal = n.sub_issues_summary?.total ?? 0;
+    const openChildren = state === "CLOSED" && (labels.includes("epic") || subTotal > 0)
+      ? list(`repos/${OWNER}/${repo}/issues/${n.number}/sub_issues?per_page=100`).filter((c) => c.state === "open")
+        .map((c) => ({ number: c.number, comments: comments(OWNER, repo, c.number) }))
+      : [];
+    const { closingPrs, closer } = state === "CLOSED" ? closers(OWNER, repo, n.number) : { closingPrs: [], closer: null };
+    const cs = n.comments ? comments(OWNER, repo, n.number) : [];
+    const landedPrs = state === "CLOSED" ? landedRefs(cs, repo).map((r) => ({ ...r, merged: mergedPr(OWNER, r) })) : [];
+    return { repo, number: n.number, title: n.title, body: n.body, state, stateReason: n.state_reason?.toUpperCase() ?? null,
+      createdAt: n.created_at, closedAt: n.closed_at, labels, comments: cs,
+      closingPrs, landedPrs, closer, bot: n.user?.type === "Bot", openChildren };
   });
 }
 

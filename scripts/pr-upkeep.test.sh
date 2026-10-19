@@ -28,6 +28,12 @@ eq "cycle start at close"     "$(wg_cycle_start 2026-10-09T11:30:00Z)" 2026-10-0
 # owner-merge PRs are not counted
 case $(wg_budget_query 2026-10-09T11:30:00Z) in *'-label:"gate:owner-merge"'*'merged:>=2026-10-09T11:30:00Z') echo "ok   budget query excludes owner-merge" ;; *) echo "FAIL budget query"; FAIL=1 ;; esac
 
+pr() { jq -n --arg m "$1" --arg st "$2" --argjson ls "$3" '{merged_at:(if $m=="" then null else $m end),state:$st,labels:[$ls[]|{name:.}]}'; }
+prs=$(jq -s . <(pr 2026-10-09T12:00:00Z closed '["wg:third-party-ready"]') <(pr 2026-10-09T12:00:00Z closed '["wg:third-party-ready","gate:owner-merge"]') \
+  <(pr 2026-10-09T10:00:00Z closed '["wg:third-party-ready"]') <(pr "" closed '["wg:third-party-ready"]') <(pr 2026-10-09T12:00:00Z closed '[]') <(pr "" open '["wg:third-party-ready"]'))
+eq "REST budget count: merged this cycle, labelled, not owner-merge" "$(wg_count_prs merged 2026-10-09T11:30:00Z "$prs")" 1
+eq "REST open count: open, labelled" "$(wg_count_prs open "" "$prs")" 1
+
 # pause: reports are owner comments with the marker; ack = +1 from the-greenman
 rep() { jq -n --argjson ids "$1" '[$ids[]|{id:.,body:"<!-- wg-report cycle=2026-10-0\(.) -->\nreport",created_at:"2026-10-0\(.)T11:30:00Z",author_association:"OWNER"}]'; }
 ACKED=; wg_reactions() { case " $ACKED " in *" $1 "*) echo '[{"content":"+1","user":{"login":"the-greenman"}}]' ;; *) echo '[{"content":"+1","user":{"login":"stranger"}},{"content":"heart","user":{"login":"the-greenman"}}]' ;; esac; }
@@ -35,5 +41,18 @@ eq "paused with 2 unacked reports" "$(wg_paused "$(rep '[7,8]')")" "paused: 2 re
 ACKED=7; eq "not paused when one is acked" "$(wg_paused "$(rep '[7,8]')")" ok
 ACKED=; eq "not paused with fewer than 2 reports" "$(wg_paused "$(rep '[8]')")" ok
 eq "stranger's report ignored" "$(wg_paused "$(rep '[7,8]' | jq '.[]|=(.author_association="NONE")')")" ok
+tag() { jq --argjson ids "$1" --arg g "$2" '[.[]|if (.id|IN($ids[])) then .body|=sub(" -->"; " group=\($g) -->") else . end]'; }
+eq "own tagged reports pause" "$(wg_paused "$(rep '[7,8]' | tag '[7,8]' wg:third-party-ready)")" "paused: 2 reports unacknowledged"
+eq "another group's reports do not pause" "$(wg_paused "$(rep '[7,8]' | tag '[7,8]' wg:agent-editor)")" ok
+eq "another group's latest report is skipped" "$(wg_paused "$(rep '[6,7,8]' | tag '[8]' wg:agent-editor)")" "paused: 2 reports unacknowledged"
+eq "untagged reports count for every group" "$(wg_paused "$(rep '[7,8]' | tag '[7]' wg:third-party-ready)")" "paused: 2 reports unacknowledged"
 wg_reactions() { return 1; }; eq "fail closed on unreadable reactions" "$(wg_paused "$(rep '[7,8]')")" "paused: reactions unreadable"
+# ordinary rules: an empty group label must still route (#61)
+oa() { eq "ordinary: $1" "$(ordinary_action "$2" "$3" "$4")" "$5"; }
+oa "ungrouped auto-merge CLEAN"   ""     "gate:auto-merge"  CLEAN  merge
+oa "ungrouped auto-merge BEHIND"  ""     "gate:auto-merge"  BEHIND update-branch
+oa "ungrouped owner-merge BEHIND" ""     "gate:owner-merge" BEHIND update-branch
+oa "ungrouped auto-on BEHIND"     ""     "auto-on"          BEHIND update-branch
+oa "grouped is left to its group" "wg:x" "gate:auto-merge"  CLEAN  ""
+oa "ungrouped no gate CLEAN"      ""     ""                 CLEAN  ""
 exit $FAIL

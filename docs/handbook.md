@@ -57,6 +57,47 @@ Three rules shape everything that follows:
 - **Theory and practice together.** There is always a working system, and the theory stays beside it. We build when a trigger fires, not ahead of need.
 
 
+#### Flow at a glance: what moves each stage
+
+One table for the whole flow: what moves each stage, what it needs before it moves, and whether that mover runs today. Read it top to bottom; work stops at the first row whose input is waiting and whose mover is not live. `clerk desk` shows the same picture day to day.
+
+| # | Stage | Moved by | Needs before it moves | Live (2026-10-16) |
+|---|---|---|---|---|
+| 1 | Domain | agents suggest; the owner affirms (Method editor, CLI `record fork` fallback) | purpose, in and out of scope | suggested only: no domain is affirmed |
+| 2 | Persona in domain | agents suggest; the owner affirms | `refines` a shared persona, `in-domain` exactly one domain | suggested in one domain only |
+| 3 | Problem | anyone suggests; the owner affirms | `held-by` a persona-in-domain (the principle 2 gate, warn level) | affirmed problems exist; most still held by shared personas |
+| 4 | Remedy | agents suggest 1 to 3 per domain; the owner affirms | `answers` affirmed problems, a falsifier | suggested in two domains |
+| 5 | Objective, period, epic | the owner ranks; `roadmap --apply` (daily) derives priority | an epic `implements` a remedy and `serves` a ranked objective | working |
+| 6 | **Issue admission** | the filer (analyst, scout, owner) | `Answers: SP-nn` naming an affirmed problem whose persona and domain are affirmed | `claim` checks the affirmed problem only |
+| 7 | **Routing to a group** | the filer, then topup | the group whose charter holds the problem's domain (`holds-domain`, role to domain) gets its `wg:` label; a domain no group holds goes to `lane:unattended` | ruled (D4, D5, D15, ratified 2026-10-16); charters name domains (`clerk groups`); topup does not route yet |
+| 8 | Ready | `board sync` hourly: topup writes `promote:ready`, promote sets `ready` | routed to a lane (`lane:unattended` or a `wg:` label), not blocked, not `needs-input`, on the board; target about six | working; feeds only routed issues |
+| 9 | Claim and build | nightly worker (00:00, up to 3, `lane:unattended`); WG builder (hourly at :10, one `wg:` issue) | `ready` + a lane, no assignee, no open PR or branch; within budget, group not paused | nightly working; WG builder live from 2026-10-16 |
+| 10 | Review | central lane: a self-review subagent; WG: the reviewer (hourly at :40) posts the quorum | gates green by exit code, within the mandate | WG reviewer live from 2026-10-16 |
+| 11 | Merge | `pr-upkeep` every 15 minutes | `gate:auto-merge` and clean; for a group, a valid quorum, within budget, not paused | working |
+| 12 | Report | WG steward daily at 11:30 (run-report record and #31 comment); worker run reports on issues | the cycle's merged PRs | working |
+| 13 | Ratify | the owner's session (`/session`) | a `proposed` decision **recorded in a decision log** | working; decisions only in PR text never reach it |
+
+#### How an issue reaches a group
+
+**Ruled** (decisions D4, D5 and D15, ratified in the owner's session of 2026-10-16; `claim` already enforces the affirmed problem, routing is not yet automatic). An issue is not work until it is grounded and routed. Before any routine may take it:
+
+1. **Grounded.** Its first line is `Answers: SP-nn`, naming an affirmed problem. The problem is `held-by` an affirmed persona-in-domain, and that persona's `in-domain` reaches an affirmed domain. An issue that reveals a problem nobody has recorded yields a problem *suggestion* in the domain, and stays parked against it until the problem is affirmed.
+2. **Routed.** The problem's domain decides the group: the group whose charter names that domain (a `com.semanticops.method/holds-domain` relation from the group's role to the domain record) takes it through its input queue (its `wg:` label); a domain no group holds goes to the central group (`lane:unattended`).
+3. **Ranked.** Its epic serves a ranked objective, which gives its priority. An issue under no ranked objective stays `parked`.
+
+`parked` means "waiting for meaning", not "rejected": the 2026-10 backlog was parked so that domains, problems and personas are established first. Issues come out of parking only by passing steps 1 to 3, a domain at a time, never in bulk.
+
+#### Where flow stops, and how to see it
+
+| Symptom | Usual cause | See it with |
+|---|---|---|
+| Hundreds of issues, an empty queue | domains and personas not affirmed, so nothing can be grounded (rows 1 to 3) | `clerk check`, `clerk roadmap --explain` |
+| `ready` issues nobody takes | no lane label (row 7), or the routine cannot reach the repo | `clerk queue`, the routine's run log |
+| A group merges nothing | builder or reviewer trigger missing or disabled | `clerk routines --check <dump>` |
+| A decision you were asked for never appears in a session | it exists only as PR text, or is in no decision log | `clerk desk` ("in no log") |
+| A group stops | two unreceived reports | `clerk desk`, then a session's Reports |
+
+
 #### Domains, personas and problems define the work
 
 A **domain** says *where* and *when* a problem occurs: an area of work with a purpose, and what is in and out of scope. A **persona** says *who* has it: their jobs and needs. A **problem** is a claim that something is wrong for that persona in that domain.
@@ -406,6 +447,8 @@ Exact schedules and triggers live in [tools.md](tools.md); this table says what 
 | Report | wg-steward, daily 11:30 | routine | closes the cycle: run report record, ratifies the group's decisions in one group session, report on #31 |
 | Report | handbook watcher, weekly | routine | re-reads code, data and boards; updates the handbook records; renders; opens a PR |
 
+**The desk.** Everything that needs the owner is on one pinned issue, semanticops.com#35 (label `desk`). `clerk desk --post` rewrites its body in place, never as a comment, in three parts: **Needs you** (unreceived reports first when a group is paused, decisions to ratify, open exercises, owner merges with their `Decision asked:` line, approved PRs that have not merged and why, issues assigned to the owner with their age, `needs-input` issues oldest first), **Threads** (one line per ranked epic, working group and unthreaded PR: state, last moved, next step, who) and **Running fine** (counts only). If it is not on the desk, it does not need the owner; #31 and #33 are history.
+
 **Rules for every routine.**
 
 - **Thin prompt.** The trigger only points at its brief in `routines/`. Rules live in the brief, so a change is a pull request.
@@ -454,7 +497,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 #### Domain
 
-**Theory**: A domain is an area of work with a purpose and what is in and out of scope. It tells us *when* a problem occurs. A domain is a container whose identity is the domain record; its outline holds clusters at depth 0 and their problems at depth 1. A problem's domain is derived (problem `held-by` persona-in-domain `in-domain` domain), never stored. Domains nest by perspective. The owner affirms a domain in the srs-web Method editor.
+**Theory**: A domain is an area of work with a purpose and what is in and out of scope. It tells us *when* a problem occurs. A domain is a container whose identity is the domain record; its outline holds clusters at depth 0 and their problems at depth 1. A problem with no cluster sits at depth 0: early in a domain we do not yet know all its parts, so an unclustered problem is valid, never a gap. Where a cluster is required (an objective `addresses` clusters), a cluster holding one problem is valid. Clusters evolve, and problems move between them as understanding changes (owner, 2026-10-11). A problem's domain is derived (problem `held-by` persona-in-domain `in-domain` domain), never stored. Domains nest by perspective. The owner affirms a domain in the srs-web Method editor.
 
 **Status**: partial
 
@@ -471,7 +514,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - Clusters still hang off domains by `contains` edges as well as by container outline: two groupings for one goal, until readers switch to the outline (decision a6280447).
 - Nothing checks that a problem has a domain.
 - An affirmed domain is a fork, so its container identity still names the suggestion; readers resolve it with `canon()`.
-- Proposed decision a8aabd01 lets a problem sit in a domain with no cluster, or a cluster of its own; the Theory above still puts every problem under a cluster. Until it is ratified, both readings are live.
+- Decision a8aabd01 (unclustered problems and one-problem clusters are valid) is proposed, not yet ratified.
 
 **Open questions**:
 - How is a domain retired?
@@ -762,6 +805,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Practice**:
 - The group steward writes a `stewardship/run-report` record and the cycle report on #31 (`routines/wg-steward.md`), and ratifies the group's proposed decisions in one group session.
 - `clerk` (terminal UI) and `clerk session` write one `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives`, then open a signed PR with auto-merge enabled. `clerk comment` does the same for a comment between sessions.
+- Each act keeps when it was taken (the key press, not the write time), its agenda position (section, i of n) and what had been opened first (`v`, `o`, with the record's `updatedAt`). The session `summary` lists the acts in the order taken, and a linked `acts.json` source document (`sessions/<date>/`) holds them per act. `createdAt` stays the write time.
 - The recorder warns, never blocks, when a decision fails the framing tests; the kind goes in `decision_kind`.
 - Detail: README "Sessions", `.claude/commands/session.md`, [decision-log.md](decision-log.md).
 
@@ -769,9 +813,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - `endSession` returns from the whole function when a session takes up an exercise: that exercise's `considers`, comments and proposals, every later choice, and the validate, commit and PR are all skipped. The session record is left uncommitted in its worktree.
 - There are no exercise records yet.
 - The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link.
-- Session acts are stamped with the end-of-session time, not when they happened (clerk#43).
 - There is one kind of meeting. Affirmation, unblocking and triage happen ad hoc or not at all, and what waits for the owner is assembled by hand (clerk#59).
-- `agenda.mjs` reads a `Decision asked:` line from each owner-merge PR, but no PR writes one, so every merge shows "(none stated)".
 
 **Open questions**:
 - Should the pause rule read `receives` instead of the thumbs-up?

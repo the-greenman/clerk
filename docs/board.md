@@ -120,7 +120,7 @@ Nothing else revisits an In progress issue, so `stale-claims` does. It looks at 
 | `needs-input` label | Never touched; reported |
 | An open PR closes the issue | Board Status to In review, claim label cleared, one comment; never reclaimed however old |
 | Claim time unresolvable (or PR lookup failed) | Reported `unknown`; no change |
-| Idle at or over the threshold (default 3h, `--hours N`) | Status to Ready, `ready` label set, comment |
+| Idle at or over the threshold (default 3h, `--hours N`) | Status to Ready, `ready` label set, comment; if the owner is assigned and the latest `Claimed by <actor>` comment names an actor other than `owner_actor`, the owner is unassigned (an agent claim never assigns, clerk#68) |
 | Otherwise | Left alone |
 
 **needs-input.** A session that hits a human gate cannot ask. It comments the specific question, adds `needs-input`, removes `status: in progress`, and stops. The label keeps the issue out of topup, the Ready count and reclaim. A human answers in the comments and removes the label; the next sync feeds it again. To list them, filter a board view by `label:needs-input` (views are UI-only).
@@ -149,6 +149,6 @@ The hourly run is rate-limited, so call volume is a design limit.
 
 The srs-programme workflow `board-sync.yml` calls the clerk's reusable `programme-board-sync.yml`, which runs `clerk board sync`. Triggers (in the caller): push to the default branch, hourly, and `workflow_dispatch` (a session can label issues, then `gh workflow run board-sync.yml --repo the-greenman/srs-programme` to promote at once). Concurrency group `board-sync`, no cancel. It needs a PAT with `project` scope as the secret `BOARD_SECRET` (or `BOARD_TOKEN`); with neither it fails loudly rather than skipping.
 
-The programme settings record supplies `GHP_OWNER` (`github_owner`), `GHP_PROJECT` (`board_project`), `GHP_STORY_REPO` (`board_story_repo`) and `GHP_MIRROR_REPOS` (`governed_repos`); the workflow's `project`, `story-repo` and `mirror-repos` inputs override them. Env set directly beats settings. The script reads settings from `CLERK_REPO` or the cwd. There is one board-sync workflow, since it reconciles the whole cross-repo board; a copy elsewhere without its own secret would silently do nothing.
+The programme settings record supplies `GHP_OWNER` (`github_owner`), `GHP_OWNER_ACTOR` (`owner_actor`, so `stale-claims` can tell an agent claim from the owner's), `GHP_PROJECT` (`board_project`), `GHP_STORY_REPO` (`board_story_repo`) and `GHP_MIRROR_REPOS` (`governed_repos`); the workflow's `project`, `story-repo` and `mirror-repos` inputs override them. Env set directly beats settings. The script reads settings from `CLERK_REPO` or the cwd. There is one board-sync workflow, since it reconciles the whole cross-repo board; a copy elsewhere without its own secret would silently do nothing.
 
 Related commands: [/triage, /stories, /roadmap](../.claude/commands/) are the agent workflows over this tool.

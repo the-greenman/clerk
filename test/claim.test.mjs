@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { checkClaim } from '../lib/practice/claim.mjs';
+import { checkClaim, claimAssigns, claimActorOf, claimComment } from '../lib/practice/claim.mjs';
 import { answersOf } from '../lib/practice/grounding.mjs';
 import { fxGroup, tprGroup } from './groups.fixture.mjs';
 
@@ -36,4 +36,18 @@ test('answersOf reads both forms', () => {
   assert.deepEqual(answersOf('x\nAnswers: SP-1, SP-22').problems, ['SP-1', 'SP-22']);
   assert.equal(answersOf('No affirmed problem yet: foo').none, 'foo');
   assert.equal(answersOf('nothing').stated, false);
+});
+
+test('an open claim comment refuses a claim even with no label or assignee; an unlabel closes it', () => {
+  const claimed = [{ event: 'commented', body: 'Claimed by agent:x as builder of WG Fixture (clerk claim). Branch: 10-a.' }];
+  assert.match(why({ issue: { ...issue, timeline: claimed } }), /open claim comment by agent:x/);
+  assert.equal(checkClaim({ ...base, issue: { ...issue, timeline: [...claimed, { event: 'unlabeled', label: { name: 'status: in progress' } }] } }).ok, true);
+  assert.match(why({ issue: { ...issue, timeline: [{ event: 'commented', body: 'Claimed by orchestrator session (Sonnet worker).' }] } }), /by orchestrator\)/);
+});
+test('only the owner\'s own actor assigns; the claim comment names its actor', () => {
+  assert.equal(claimAssigns('human:ada', 'human:ada'), true);
+  assert.equal(claimAssigns('agent:fx-builder', 'human:ada'), false);
+  assert.equal(claimAssigns('human:ada', undefined), false);
+  assert.equal(claimActorOf(claimComment('agent:fx-builder', 'builder', 'WG Fixture', '10-a')), 'agent:fx-builder');
+  assert.equal(claimActorOf('no claim here'), null);
 });
