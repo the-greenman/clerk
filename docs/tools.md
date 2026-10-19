@@ -34,6 +34,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 | charter.mjs, roadmap.mjs, queue.mjs, steward-check.mjs, check-method.mjs, check-programme-conformance.mjs, fetch-pinned-srs.mjs, gh-project.mjs, pr-upkeep.sh, wt | Behind the commands above | see above | see above | `clerk <name>` |
 | lib/pinned-srs.mjs, lib/repo-arg.mjs | Pin lookup; `--repo` resolution | programme `validate.yml` | | scripts |
 | session | Fresh programme worktree, pinned srs, then open the clerk | srs-programme master | a worktree | owner, `/session` (`.claude/commands/session.md`) |
+| `/ship <repo>#<n>` (`.claude/commands/ship.md`) | A local session takes one issue through the handbook chain as a member (decision f799b6bc): checks for an existing claim or PR, admission (affirmed, user-facing problem), routing, `claim`, dependency gate, decisions, gates, review, PR with `pr-check`, run report; stops at grounding, dependency and decisions | the issue, settings, groups, Affirmed problems | claim, PR, run report comment | owner (local session) |
 | routines.mjs | Behind `clerk routines` (logic in `lib/practice/routines.mjs`) | see above | nothing | `clerk routines` |
 | *.test.mjs, pr-upkeep.test.sh | Tests (`npm test`) | fixtures | | CI |
 
