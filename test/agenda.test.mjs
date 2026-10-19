@@ -137,6 +137,14 @@ test('a run-report whose comment was received (+1) before the record landed stay
   assert.equal(A.reportItems([run], new Set(), [c], new Set(), 'WG').length, 1);
 });
 
+test('a report marker may tag its group; the cycle reads the same either way', () => {
+  const tagged = { body: '<!-- wg-report cycle=2026-10-14 group=wg:agent-editor -->\nreport' }, plain = { body: '<!-- wg-report cycle=2026-10-14 -->\nreport' };
+  assert.equal(A.reportCycle(tagged), '2026-10-14');
+  assert.equal(A.reportGroup(tagged), 'wg:agent-editor');
+  assert.equal(A.reportCycle(plain), '2026-10-14');
+  assert.equal(A.reportGroup(plain), undefined);
+});
+
 // Stalled work (clerk#38): read-only, three kinds, N configurable.
 test('stalled: stale claims, unmerged old branches and quiet epics are listed; fresh and merged ones are not', () => {
   const now = Date.parse('2026-10-17T12:00:00Z'), ago = (d) => new Date(now - d * 864e5).toISOString();

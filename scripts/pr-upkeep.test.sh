@@ -41,6 +41,11 @@ eq "paused with 2 unacked reports" "$(wg_paused "$(rep '[7,8]')")" "paused: 2 re
 ACKED=7; eq "not paused when one is acked" "$(wg_paused "$(rep '[7,8]')")" ok
 ACKED=; eq "not paused with fewer than 2 reports" "$(wg_paused "$(rep '[8]')")" ok
 eq "stranger's report ignored" "$(wg_paused "$(rep '[7,8]' | jq '.[]|=(.author_association="NONE")')")" ok
+tag() { jq --argjson ids "$1" --arg g "$2" '[.[]|if (.id|IN($ids[])) then .body|=sub(" -->"; " group=\($g) -->") else . end]'; }
+eq "own tagged reports pause" "$(wg_paused "$(rep '[7,8]' | tag '[7,8]' wg:third-party-ready)")" "paused: 2 reports unacknowledged"
+eq "another group's reports do not pause" "$(wg_paused "$(rep '[7,8]' | tag '[7,8]' wg:agent-editor)")" ok
+eq "another group's latest report is skipped" "$(wg_paused "$(rep '[6,7,8]' | tag '[8]' wg:agent-editor)")" "paused: 2 reports unacknowledged"
+eq "untagged reports count for every group" "$(wg_paused "$(rep '[7,8]' | tag '[7]' wg:third-party-ready)")" "paused: 2 reports unacknowledged"
 wg_reactions() { return 1; }; eq "fail closed on unreadable reactions" "$(wg_paused "$(rep '[7,8]')")" "paused: reactions unreadable"
 # ordinary rules: an empty group label must still route (#61)
 oa() { eq "ordinary: $1" "$(ordinary_action "$2" "$3" "$4")" "$5"; }

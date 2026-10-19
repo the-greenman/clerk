@@ -10,7 +10,7 @@ Environment gaps, the CLI and signing notes are as in `routines/unattended-worke
 
 ## 1. Gate (check first, then exit quietly if it does not pass)
 
-1. Read the latest comment on the-greenman/semanticops.com#31 whose first line is `<!-- wg-report cycle=... -->` (REST). If its Next section (section 6) does not say "Queue running dry", exit with one line.
+1. Read the latest comment on the-greenman/semanticops.com#31 whose first line is `<!-- wg-report cycle=... group=<your group's wg: label> -->`, or an untagged marker if none is tagged yet (REST). If its Next section (section 6) does not say "Queue running dry", exit with one line.
 2. Recount the ready queue yourself: open issues labelled `ready` + `wg:third-party-ready` in srs-rust, srs, srs-vscode, srs-web. If the count is at least the budget (10, from the Budget article), exit.
 
 **Target:** fill to about two cycles (20 ready). **At most 12 new issues per run.**
