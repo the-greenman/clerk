@@ -48,7 +48,7 @@ The agenda follows a meeting's order:
 4. **Decisions for this session**: escalations: `proposed` decisions in a group log made by `agent:tpr-steward` that are not yet in the SemanticOps log. The report's "Decisions for you" count points here.
 5. **Merges**: open, clean `gate:owner-merge` PRs.
 
-**Receiving a report** means the parent context (you, as owner) has taken the group's report in: it is noted for the session, and when the session ends a `receives` relation runs from the session record to the run-report record (nothing goes into SRS for a comment-only report; the summary says so). It needs no quorum beyond the acting role being present. The 👍 on the #31 comment is only the mechanical side effect, added at once so `pr-upkeep.sh`'s pause rule (2 unacknowledged reports) sees it: "received; acknowledged on #31 so the group keeps running". There is no separate Acknowledge section.
+**Receiving a report** means the parent context (you, as owner) has taken the group's report in: it is noted for the session, and when the session ends a `receives` relation runs from the session record to the run-report record (nothing goes into SRS for a comment-only report; the summary says so). It needs no quorum beyond the acting role being present. The 👍 on the #31 comment is only the mechanical side effect, added at once so `clerk upkeep`'s pause rule (2 unacknowledged reports) sees it: "received; acknowledged on #31 so the group keeps running". There is no separate Acknowledge section.
 
 Pick a section and the items come **one at a time**, essentials only. Read-only until you press a key.
 

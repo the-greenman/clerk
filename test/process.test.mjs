@@ -3,8 +3,6 @@
 // the todo list is the progress bar. Offline: plain objects shaped like `srs record list` / `srs relation list`.
 import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { derive } from '../scripts/roadmap.mjs';
 import { checkMethod, checkGates } from '../scripts/check-method.mjs';
 import { classify, lanesFrom } from '../scripts/queue.mjs';
@@ -17,6 +15,7 @@ import { groups, tprGroup, fxGroup, FX, roles, agents, authorisedBy } from './gr
 import { groupsFrom } from '../lib/practice/groups.mjs';
 import { take, assertQuorum, summarise } from '../lib/practice/session.mjs';
 import * as A from '../lib/practice/agenda.mjs';
+import * as U from '../lib/practice/upkeep.mjs';
 import { endSession } from '../lib/adapters/session.mjs';
 import { groundPR, i1 } from '../lib/practice/grounding-check.mjs';
 
@@ -261,33 +260,26 @@ describe('stage 12: execution', () => {
 
 // ---- 13. Review and merge ----
 describe('stage 13: review and merge', () => {
-  const upkeep = fileURLToPath(new URL('../scripts/pr-upkeep.sh', import.meta.url));
-  const groupEnv = (g) => ({ ...process.env, WG_LABEL: g.label, WG_BUDGET: String(g.budget), WG_CYCLE_CLOSE: g.cycleClose, WG_MAX_UNACKED: String(g.maxUnacked) });
-  const verdict = (builder, reviewer, verdictWord, commentAt, merged) => {
-    const body = `<!-- wg-quorum --> builder=${builder} reviewer=${reviewer} gates=green@abc mandate=fixture#10 verdict=${verdictWord}`;
-    const comments = JSON.stringify([{ body, created_at: commentAt, author_association: 'OWNER' }]);
-    const r = spawnSync('bash', ['-c', `OWNER=o WG_REPORT_ISSUE=o/r/issues/1; source "${upkeep}"; wg_verdict 1 "$1" 2026-10-11T10:00:00Z ${merged}`, '_', comments], { encoding: 'utf8', env: groupEnv(tprGroup) });
-    return r.stdout.trim();
-  };
-  test('a different reviewer approving after the last commit, within budget, is a quorum', () => assert.equal(verdict(BUILDER, REVIEWER, 'approve', '2026-10-11T11:00:00Z', 3), 'ok'));
-  test('the builder cannot review their own PR', () => assert.match(verdict(BUILDER, BUILDER, 'approve', '2026-10-11T11:00:00Z', 3), /same actor/));
-  test('a stale quorum comment, a rejection, or an exhausted budget each block the merge', () => {
-    assert.match(verdict(BUILDER, REVIEWER, 'approve', '2026-10-11T09:00:00Z', 3), /older than the last commit/);
-    assert.match(verdict(BUILDER, REVIEWER, 'reject', '2026-10-11T11:00:00Z', 3), /verdict reject/);
-    assert.match(verdict(BUILDER, REVIEWER, 'approve', '2026-10-11T11:00:00Z', 10), /over budget/);
+  const HEAD = 'abc1234def';
+  const quorumC = (builder, reviewer, verdictWord, sha = HEAD) => [{ body: `<!-- wg-quorum --> builder=${builder} reviewer=${reviewer} gates=green@${sha} mandate=fixture#10 verdict=${verdictWord}`, created_at: '2026-10-11T11:00:00Z', author_association: 'OWNER' }];
+  const verdict = (builder, reviewer, verdictWord, merged, sha) => { const v = U.quorumVerdict(quorumC(builder, reviewer, verdictWord, sha), HEAD); return v === 'ok' ? U.budgetVerdict(merged, tprGroup.budget) : v; };
+  test('a different reviewer approving the head commit, within budget, is a quorum', () => assert.equal(verdict(BUILDER, REVIEWER, 'approve', 3), 'ok'));
+  test('the builder cannot review their own PR', () => assert.match(verdict(BUILDER, BUILDER, 'approve', 3), /same actor/));
+  test('a quorum on another commit, a rejection, or an exhausted budget each block the merge', () => {
+    assert.match(verdict(BUILDER, REVIEWER, 'approve', 3, 'fff0000'), /quorum is for fff0000/);
+    assert.match(verdict(BUILDER, REVIEWER, 'reject', 3), /verdict reject/);
+    assert.match(verdict(BUILDER, REVIEWER, 'approve', 10), /over budget/);
   });
   test.todo('handbook stage 13 / principle 6: the reviewer\'s quorum makes a group session in which the decision is ratified (wg-reviewer.md moves a decision to ratified directly)');
-  test('pr-upkeep acts on the charter it is given: WG Fixture\'s label, budget, cycle close and pause limit', () => {
-    const sh = (script) => spawnSync('bash', ['-c', `OWNER=o WG_REPORT_ISSUE=o/r/issues/1; source "${upkeep}"; ${script}`], { encoding: 'utf8', env: groupEnv(fxGroup) }).stdout.trim();
-    assert.match(sh('wg_budget_query 2026-10-09T16:00:00Z'), /label:"wg:fixture" .*merged:>=2026-10-09T16:00:00Z/);
-    assert.equal(sh('wg_cycle_start 2026-10-09T15:00:00Z'), '2026-10-08T16:00:00Z'); // closes at 16:00, not 11:30
-    assert.equal(sh('wg_cycle_start 2026-10-09T17:00:00Z'), '2026-10-09T16:00:00Z');
-    const q = JSON.stringify([{ body: `<!-- wg-quorum --> builder=${BUILDER} reviewer=${REVIEWER} gates=green@abc mandate=fixture#10 verdict=approve`, created_at: '2026-10-11T11:00:00Z', author_association: 'OWNER' }]);
-    assert.equal(sh(`wg_verdict 1 '${q}' 2026-10-11T10:00:00Z 3`), 'ok');
-    assert.match(sh(`wg_verdict 1 '${q}' 2026-10-11T10:00:00Z 4`), /over budget \(4 of 4 merged this cycle\)/); // WG Fixture's budget is 4, not 10
-    const rep = (n) => `{"id":${n},"body":"<!-- wg-report cycle=2026-10-0${n} -->","created_at":"2026-10-0${n}T16:00:00Z","author_association":"OWNER"}`;
-    assert.equal(sh(`wg_reactions() { echo '[]'; }; wg_paused '[${rep(6)},${rep(7)}]'`), 'ok'); // limit 3: two unacknowledged reports do not pause
-    assert.match(sh(`wg_reactions() { echo '[]'; }; wg_paused '[${rep(6)},${rep(7)},${rep(8)}]'`), /paused: 3 reports unacknowledged/);
+  test('upkeep acts on the charter it is given: WG Fixture\'s label, budget, cycle close and pause limit', () => {
+    assert.equal(U.cycleStart('2026-10-09T15:00:00Z', fxGroup.cycleClose), '2026-10-08T16:00:00Z'); // closes at 16:00, not 11:30
+    assert.equal(U.cycleStart('2026-10-09T17:00:00Z', fxGroup.cycleClose), '2026-10-09T16:00:00Z');
+    assert.equal(U.quorumVerdict(quorumC(BUILDER, REVIEWER, 'approve'), HEAD), 'ok');
+    assert.match(U.budgetVerdict(4, fxGroup.budget), /over budget \(4 of 4 merged this cycle\)/); // WG Fixture's budget is 4, not 10
+    const rep = (n) => ({ id: n, body: `<!-- wg-report cycle=2026-10-0${n} -->`, created_at: `2026-10-0${n}T16:00:00Z`, author_association: 'OWNER' });
+    const pause = (cs) => U.pauseState(U.pauseReports(cs, fxGroup.label, fxGroup.maxUnacked), new Set(), fxGroup.maxUnacked);
+    assert.equal(pause([rep(6), rep(7)]), 'ok'); // limit 3: two unacknowledged reports do not pause
+    assert.match(pause([rep(6), rep(7), rep(8)]), /paused: 3 reports unacknowledged/);
   });
   test('the queue lanes are the chartered groups\' labels', () => {
     const lanes = lanesFrom(groups);
