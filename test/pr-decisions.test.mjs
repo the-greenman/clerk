@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDecisions, checkDecisions, answersFrom, signComment } from '../lib/practice/pr-decisions.mjs';
+import { parseDecisions, checkDecisions, answersFrom, signComment, classifyComment } from '../lib/practice/pr-decisions.mjs';
 
 const block = (o) => `Answers: SP-12\n\n\`\`\`srs-decisions\n${JSON.stringify(o)}\n\`\`\`\n`;
 
@@ -66,4 +66,29 @@ test('signing keeps the first line free and is idempotent', () => {
   assert.match(s, /<!-- actor: agent:tpr-reviewer -->$/);
   assert.equal(signComment(s, 'agent:tpr-reviewer'), s);
   assert.equal(signComment('hi', null), 'hi');
+});
+
+test('the clerk\'s loose signals are read, block or not', () => {
+  const d = parseDecisions('Mode: clear · Door: 1 · owner-merge\nDecision asked: keep the flag?\nBuilder: agent:tpr-builder\nRuling: 3c8b94d1\n');
+  assert.deepEqual([d.legacy.mode, d.legacy.door, d.legacy.asked, d.legacy.builder, d.legacy.ruling], ['clear', '1', 'keep the flag?', 'agent:tpr-builder', '3c8b94d1']);
+  assert.equal(parseDecisions('Mode: clear · Door 2').legacy.door, '2', 'with or without the colon');
+});
+
+test('who speaks: markers first, then a signature, then the account', () => {
+  const q = classifyComment({ body: '<!-- wg-quorum --> builder=agent:a reviewer=agent:b gates=green@abc mandate=x verdict=approve' });
+  assert.deepEqual([q.kind, q.actor, q.builder, q.verdict], ['quorum', 'agent:b', 'agent:a', 'approve']);
+  assert.equal(classifyComment({ body: '<!-- srs:answer ask=A1 choice="Do x" -->\n**Decision A1:** Do x' }).choice, 'Do x');
+  assert.equal(classifyComment({ body: '<!-- srs:review-request seat=reviewer stance=challenger -->' }).stance, 'challenger');
+  assert.equal(classifyComment({ body: '<!-- actor: agent:tpr-builder -->\nDone', assoc: 'OWNER' }).actor, 'agent:tpr-builder');
+  assert.equal(classifyComment({ body: 'Claimed by agent:tpr-builder' }).kind, 'agent');
+  assert.equal(classifyComment({ body: 'lgtm', user: 'dependabot', userType: 'Bot' }).kind, 'bot');
+  assert.equal(classifyComment({ body: 'looks good', user: 'someone' }).kind, 'human');
+  assert.equal(classifyComment({ body: 'looks good', user: 'owner', assoc: 'OWNER' }).kind, 'unsigned', 'the owner\'s token does not say who wrote it');
+});
+
+test('a decision id named only in the prose is reported, not failed', () => {
+  const body = `Executes 3c8b94d1 and 9ee14517.\n${block({ by: 'a', made: [{ id: '3c8b94d1' }] })}`;
+  const f = checkDecisions(parseDecisions(body), { body });
+  assert.ok(f.some((x) => x.level === 'info' && /9ee14517/.test(x.text) && !/3c8b94d1/.test(x.text)));
+  assert.ok(f.some((x) => x.level === 'ok'), 'an info finding does not stop the block being ok');
 });
