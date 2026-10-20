@@ -15,6 +15,8 @@ Environment gaps, the CLI and signing notes are as in `routines/unattended-worke
 
 **Target:** fill to about two cycles (20 ready). **At most 12 new issues per run.**
 
+**Every run walks every source in full, from source 1.** Never shorten a run to "what changed since the last run": an earlier run may have used an older brief, and affirmations land in srs-programme without touching the issue repos. Source 1 means opening the domain outline and reading each affirmed problem, every run; a report that says "domain 0" names the problems it checked and why each yielded nothing.
+
 ## 2. Sources, in this order
 
 1. **The domain's affirmed problems.** The group's charter holds the Semantic records domain (affirmed record `1cf008d0-da07-40e0-a323-54f07e0e7b66`, domain container `7467d521-9a21-4631-8c23-dbc564d78f5c` in srs-programme). Read the domain outline (`"$SRS_CLI_PATH" container get 7467d521-9a21-4631-8c23-dbc564d78f5c`) and take only problems that are **affirmed**: a record in the Affirmed container that `derived-from` the suggestion (resolve every link to its affirmed end). Walk them cluster by cluster. Where a cluster has an affirmed remedy, the remedy says which direction the work takes; a suggested remedy is context only, never the reason to file. For each problem, look in srs, srs-rust, srs-web and srs-vscode at origin/master for the concrete gap that keeps it true, and pair it with the ruling that work would carry out (source 2's sense of a ruling). A gap with no ruling behind it is an exercise, not work (section 4). When two candidates compete, prefer the one on the group's lean (decision 7270e772: Office, Portability, Evolution), bound by the domain's paired stabilising defaults. Each candidate names its `SP-nn`.
