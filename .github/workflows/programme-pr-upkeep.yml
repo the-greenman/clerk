@@ -75,11 +75,16 @@ jobs:
           if [ "$SCHEDULE" = "$DIGEST_CRON" ] || [ "$DIGEST" = true ]; then args+=(--digest); fi
           node "$RUNNER_TEMP/clerk/bin/clerk.mjs" upkeep "${args[@]}"
 
-      # The owner's desk (clerk#64): rewrite the pinned desk issue's body, on the digest run only.
+      # The owner's desk (clerk#64): rewrite the pinned desk issue's body, on the digest run only. Like upkeep, it writes
+      # only when the run applies (scheduled runs, or a dispatch with apply); a dry-run dispatch prints the body instead (clerk#93).
       - name: Desk
         if: github.event.schedule == inputs.digest-cron || inputs.digest
         env:
           GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
+          IS_AUTO: ${{ github.event_name != 'workflow_dispatch' }}
+          APPLY: ${{ inputs.apply }}
         run: |
           export $(node "$RUNNER_TEMP/clerk/bin/clerk.mjs" fetch-srs --repo "$GITHUB_WORKSPACE")
-          node "$RUNNER_TEMP/clerk/bin/clerk.mjs" desk --repo "$GITHUB_WORKSPACE" --post
+          args=(--repo "$GITHUB_WORKSPACE" --post)
+          if [ "$IS_AUTO" != true ] && [ "$APPLY" != true ]; then args+=(--dry-run); fi
+          node "$RUNNER_TEMP/clerk/bin/clerk.mjs" desk "${args[@]}"
