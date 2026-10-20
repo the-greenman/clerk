@@ -26,11 +26,32 @@ test('a ruling needs a record; a broken block is reported', () => {
 });
 
 test('a merge-blocking ask must be answered before merge', () => {
-  const d = parseDecisions(block({ by: 'a', asks: [{ key: 'A1', question: 'q', options: ['x', 'y'], recommend: 'x', blocks: 'merge' }] }));
+  const d = parseDecisions(block({ by: 'a', asks: [{ key: 'A1', question: 'q', tension: '3-9', options: ['Do x: x happens', 'Do nothing: y stays'], recommend: 'Do x', blocks: 'merge' }] }));
   assert.equal(checkDecisions(d)[0].level, 'ok');
   assert.ok(checkDecisions(d, { merging: true }).some((f) => f.level === 'error'));
   const answered = answersFrom(['<!-- srs:answer ask=A1 choice="x" -->\n**Decision A1:** x']);
   assert.equal(checkDecisions(d, { merging: true, answered })[0].level, 'ok');
+});
+
+const ask = (a) => checkDecisions(parseDecisions(block({ by: 'a', asks: [{ key: 'A1', question: 'q', ...a }] })));
+
+test('an option is a course of action, never a disposition', () => {
+  const f = ask({ options: ['Ratify', 'Set aside', 'Hold'], recommend: 'Ratify', tension: 't' });
+  assert.equal(f.filter((x) => x.level === 'error' && /disposition/.test(x.text)).length, 3);
+  assert.ok(ask({ options: ['Accept option A: do x', 'Shelve', 'Deny'], recommend: 'Accept option A' }).some((x) => /"Accept option A" is a disposition/.test(x.text)));
+  assert.ok(!ask({ options: ['No change: y stays', 'Do x: x'], recommend: 'Do x', tension: 't' }).some((x) => x.level === 'error'), '"No change" is a status quo, not a "no"');
+});
+
+test('an ask offers two or more options, a status quo, and says where each leads', () => {
+  assert.ok(ask({ options: ['Do x: x'], recommend: 'Do x', tension: 't' }).some((x) => x.level === 'error' && /at least two/.test(x.text)));
+  assert.ok(ask({ options: [], tension: 't' }).some((x) => /offers 0/.test(x.text)));
+  const w = ask({ options: ['Do x', { action: 'Do y', leads_to: 'y' }], recommend: 'Do z' }).map((x) => x.text);
+  assert.ok(w.some((t) => /no status-quo/.test(t)));
+  assert.ok(w.some((t) => /"Do x" does not say what it leads to/.test(t)));
+  assert.ok(w.some((t) => /no tension and no why_unplaced/.test(t)));
+  assert.ok(w.some((t) => /none of its options/.test(t)));
+  const ok = ask({ why_unplaced: 'no compass for this domain yet', options: [{ action: 'Do x', leads_to: 'x', pole: 'p' }, { action: 'Do nothing', leads_to: 'y stays' }], recommend: 'Do x' });
+  assert.equal(ok[0].level, 'ok');
 });
 
 test('a choice on the group\'s axes names its lean', () => {

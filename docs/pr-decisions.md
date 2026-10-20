@@ -35,8 +35,19 @@ So the richer a group's soil (affirmed tensions, principles, its trigram), the m
 | error | An `ask` with no question, or with `blocks: "merge"` and no answer, on a PR that is about to merge. |
 | warn | A `choice` that says it constrains later work (`constrains: true`): it should be a ruling. |
 | warn | A `choice` with no `principle` or `lean` on a PR whose group has a trigram: say which way it leans, or make it a ruling. |
-| warn | An ask with no options or no recommendation: the owner cannot answer it in one click. |
+| error | An ask option that is a disposition (ratify, set aside, hold, shelve, accept, deny, approve, reject, merge, defer): what is done *with* an ask is never one of its options. |
+| error | An ask with fewer than two options. |
+| warn | An ask with no status-quo option ("Do nothing: …"), an option that does not say what it leads to, no `tension` and no `why_unplaced`, or a `recommend` that names none of its options. |
 | info | A decision record named in the prose but not in the block. |
+
+## Well-formed asks
+
+A decision presents real courses of action, and the owner chooses between them (semanticops.com#37, clerk#85).
+
+- **Options are courses of action.** There are at least two, and one is the status quo: "Do nothing: what stays, and what it costs". Each says what it leads to, as `"Do X: leads to Y"` or `{ "action", "leads_to", "pole" }`.
+- **Dispositions are not options.** Ratify, set aside, hold, shelve, accept, deny, approve, reject and merge are what is done *with* an ask: the owner's answer, a hold for the session, a `review:requested`, or a session's ratify / set aside. "Accept option A / Shelve / Deny" is one option dressed as three.
+- **Place it where the domain allows.** `tension` names the trade-off: a group tension, or for spec and implementation work a compass axis from `srs/docs/charter/decision-compass.md` (for example `3-9`). Each option's `pole` says which way it leans. `layer` names the plane and layer, or the boundary, it lives in. Two decisions that take opposite poles on one tension conflict only within one layer; across layers, the difference is a boundary. When nothing fits, say why in `why_unplaced`. A complex decision links a consequence map instead of naming one tension.
+- **The recommendation is one of the options.** It follows the lean, or quotes the boundary clause that lets it go against it.
 
 ## Actors
 
@@ -53,7 +64,10 @@ Every block and every agent comment names its actor (`"by": "agent:<id>"` in the
     { "title": "Stalled means 14 days without a commit", "kind": "preference", "why": "matches the board's stale-claim window" }
   ],
   "asks": [
-    { "key": "A1", "id": null, "question": "Are the 14d / 1d defaults right?", "options": ["Keep 14d / 1d", "7d / 1d", "Make them settings"],
+    { "key": "A1", "id": null, "question": "Are the 14d / 1d defaults right?", "tension": "Reviewable ↔ fast",
+      "options": ["Keep 14d / 1d: stalled claims surface after two weeks, as today",
+                  "7d / 1d: stalled claims surface twice as fast, with more false alarms",
+                  { "action": "Make them settings", "leads_to": "each group sets its own rhythm", "pole": "fast" }],
       "recommend": "Make them settings", "why": "Groups differ in rhythm", "blocks": "merge" }
   ],
   "review": { "builder": "agent:clerk-builder", "focus": "the stalled-claims query" }
@@ -65,7 +79,7 @@ Every block and every agent comment names its actor (`"by": "agent:<id>"` in the
 |---|---|
 | `answers` | Problem ids (SP-nn) the PR answers. Same as the clerk's `Answers:` line. |
 | `made` | Decisions the PR made or executes: a decision record (`id`, 8-hex or full) or an inline one (`title`, `kind` from the seven kinds, `why`). Inline decisions that pass the four tests should become records. |
-| `asks` | Decisions it needs from the owner. `key` is unique within the PR. `id` names a `proposed` decision record when there is one. `options` and `recommend` make the ask answerable in one click; `blocks` says whether merge waits on it (`merge` or `none`). |
+| `asks` | Decisions it needs from the owner. `key` is unique within the PR. `id` names a `proposed` decision record when there is one. `options` and `recommend` make the ask answerable in one click; `blocks` says whether merge waits on it (`merge` or `none`). See [Well-formed asks](#well-formed-asks). |
 | `review` | Who built it and what a reviewer should look at. |
 
 ## Replies, as PR comments
