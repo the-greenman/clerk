@@ -15,7 +15,9 @@ Environment gaps, the CLI and signing notes are as in `routines/unattended-worke
 
 **Target:** fill to about two cycles (20 ready). **At most 12 new issues per run.**
 
-**Every run walks every source in full, from source 1.** Never shorten a run to "what changed since the last run": an earlier run may have used an older brief, and affirmations land in srs-programme without touching the issue repos. Source 1 means opening the domain outline and reading each affirmed problem, every run; a report that says "domain 0" names the problems it checked and why each yielded nothing.
+**There is no duplicate-run exit.** The only exits are the two gate checks above. A second run on the same day, a manual fire, or an earlier report saying the sources ran dry are never reasons to stop or to shorten the run: an earlier run may have used an older brief, and affirmations land in srs-programme without touching the issue repos. Every run walks every source in full, starting with source 1, and every run that passes the gate posts the section 5 report.
+
+**Source 1 leaves evidence.** Before anything else in section 2, list the affirmed problems in the domain with one command and keep the output for the report: their `SP-nn`, title and cluster. The report carries that list, one line per problem, each with what it yielded (an issue, a problem suggestion, an exercise, or why nothing).
 
 ## 2. Sources, in this order
 
@@ -41,7 +43,7 @@ After filing: `gh workflow run board-sync.yml -R the-greenman/srs-programme`.
 
 ## 5. Report
 
-One comment on #31: "Queue fed: filed N (domain D, rulings Y, conformance X, drift table Z), unparked U, exercises W, problem suggestions P; ready now R (about K cycles)". If the sources ran dry, say so plainly, and name what waiting on the owner would open the feed (unaffirmed clusters or remedies, problem suggestions, rulings not yet recorded as decisions); that tells the owner what to do.
+One comment on #31, every run that passes the gate: "Queue fed: filed N (domain D, rulings Y, conformance X, drift table Z), unparked U, exercises W, problem suggestions P; ready now R (about K cycles)". Then the source 1 list (one line per affirmed problem). If the sources ran dry, say so plainly, and name what waiting on the owner would open the feed (unaffirmed clusters or remedies, problem suggestions, rulings not yet recorded as decisions); that tells the owner what to do.
 
 ## Hard rules
 
