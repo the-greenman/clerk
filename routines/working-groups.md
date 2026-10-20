@@ -1,6 +1,6 @@
 # Working groups: how decisions are made
 
-> **Settings first.** Before anything else read the programme's settings record: `node /tmp/clerk/bin/clerk.mjs settings --repo <programme checkout> --json` (`/tmp/clerk` is a clone of the-greenman/clerk, OUTSIDE the programme checkout because srs scans the whole repo root and a clerk inside it collides with the installed packages; clone it there if absent). Owner, governed repos, report and digest issues, board project and the programme repo come from it (`githubOwner`, `repos`, `reportIssue`, `digestIssue`, `boardProject`); where this brief names them, the literals are the current values and the record wins. Scripts are clerk commands (`clerk upkeep`, `clerk queue`, `clerk fetch-srs`, `clerk session`), run as `node /tmp/clerk/bin/clerk.mjs <command>`. Before `source /tmp/clerk/scripts/pr-upkeep.sh` (functions only) export `OWNER` (= `githubOwner`) and `WG_REPORT_ISSUE` (= `<githubOwner>/<repo>/issues/<n>` from `reportIssue`), and, for a working group's checks, its charter: `eval "$(node /tmp/clerk/bin/clerk.mjs groups --env <wg:label> --repo <programme checkout>)"` (sets `WG_LABEL`, `WG_BUDGET`, `WG_CYCLE_CLOSE`, `WG_MAX_UNACKED`; without them `wg_pause_check` fails closed with "paused: reports unreadable").
+> **Settings first.** Before anything else read the programme's settings record: `node /tmp/clerk/bin/clerk.mjs settings --repo <programme checkout> --json` (`/tmp/clerk` is a clone of the-greenman/clerk, OUTSIDE the programme checkout because srs scans the whole repo root and a clerk inside it collides with the installed packages; clone it there if absent). Owner, governed repos, report and digest issues, board project and the programme repo come from it (`githubOwner`, `repos`, `reportIssue`, `digestIssue`, `boardProject`); where this brief names them, the literals are the current values and the record wins. Scripts are clerk commands (`clerk upkeep`, `clerk queue`, `clerk fetch-srs`, `clerk session`), run as `node /tmp/clerk/bin/clerk.mjs <command>`. A working group's pause, cycle and budget: `node /tmp/clerk/bin/clerk.mjs group-state <wg:label> --repo <programme checkout> --json` (`pause`, `cycleStart`, `merged`, `open`, `budget`, `room`; a non-zero exit means something was unreadable: treat the group as paused).
 
 A working group is an epic run like a co-op subcommittee. The owner delegates a mandate to the group, and the group decides and merges inside it. Anything outside the mandate comes back to the owner as one decision. The first group is **WG Third-party ready** (semanticops.com#31).
 
@@ -65,7 +65,7 @@ flowchart TD
 flowchart TD
   T(["Issue labelled ready, or a group PR merged"]) --> F{"Charter ratified?<br/>(RATIFYING_DECISION_ID set)"}
   F -->|no| Z0(["Stop: group not in force"])
-  F -->|yes| P{"Group paused?<br/>(wg_pause_check)"}
+  F -->|yes| P{"Group paused?<br/>(clerk group-state)"}
   P -->|paused| Z1(["Stop: no new builds"])
   P -->|ok| BU{"Delegated merges this cycle<br/>+ open group PRs < 10?"}
   BU -->|no| Z2(["Stop: budget spent"])
@@ -120,7 +120,7 @@ A group PR merges only when every check passes. Anything else leaves it listed u
 flowchart TD
   S(["pr-upkeep, every 15 minutes"]) --> L{"Labelled wg:third-party-ready?"}
   L -->|no| ORD(["Ordinary rules"])
-  L -->|yes| OM{"Labelled gate:owner-merge?"}
+  L -->|yes| OM{"Labelled gate:owner-merge?<br/>(wins over gate:auto-merge)"}
   OM -->|yes| ORD2(["Escalated: waits for the owner"])
   OM -->|no| AL{"Labelled gate:auto-merge?"}
   AL -->|no| W1(["Wait: awaiting group review"])
@@ -130,8 +130,8 @@ flowchart TD
   DA -->|no| W3(["Wait: same actor"])
   DA -->|yes| VA{"Verdict approve?"}
   VA -->|no| W4(["Wait: rejected"])
-  VA -->|yes| NW{"Newer than the head commit?"}
-  NW -->|no| W5(["Wait: quorum is stale"])
+  VA -->|yes| NW{"Gates green on the head commit?<br/>(gates=green@sha, sha = head)"}
+  NW -->|no| W5(["Wait: quorum is for another commit, or gates red"])
   NW -->|yes| PA{"Group paused?"}
   PA -->|yes| W6(["Wait: paused"])
   PA -->|no| BU{"Delegated merges this cycle < 10?"}
@@ -141,7 +141,7 @@ flowchart TD
   CL -->|yes| MG(["Merge, count 1 against the budget"])
 ```
 
-Group PRs are never branch-updated by pr-upkeep: a new commit voids the quorum, so the reviewer updates and re-reviews instead. If the budget count or the reports cannot be read, the group is treated as over budget or paused (fail closed).
+Group PRs are never branch-updated by upkeep: a new commit voids the quorum, so the reviewer updates and re-reviews instead. The merge names the reviewed commit, so a push between the check and the merge is refused by GitHub. Drafts and PRs whose base is not the default branch are never merged. If the budget count or the reports cannot be read, or the charter has no budget, the group is treated as over budget or paused (fail closed). The rules are `lib/practice/upkeep.mjs`.
 
 ## 6. Cycle, report and pause
 

@@ -60,13 +60,9 @@ The problem's domain decides the group (handbook "How an issue reaches a group",
 
 - **The issue has a `wg:` label:** that group takes it. Then:
   - **Mandate** (`routines/wg-builder.md` step 5): the issue must name the recorded ruling, RFC, invariant or affirmed remedy it executes, or be non-normative, and sit in the group's repos. If not, go to the escalation in stage 5.
-  - **Pause and budget** (wg-builder step 1), in bash:
+  - **Pause and budget** (wg-builder step 1):
     ```bash
-    export OWNER=the-greenman WG_REPORT_ISSUE=the-greenman/semanticops.com/issues/31   # from settings: githubOwner, reportIssue
-    eval "$($CLERK groups --env <wg:label> --repo $PROG)"
-    source $SO/clerk/scripts/pr-upkeep.sh
-    wg_pause_check                                                        # must print ok
-    wg_budget_count "$(wg_cycle_start)" <group repos>; wg_open_count <group repos>   # sum must be under WG_BUDGET
+    $CLERK group-state <wg:label> --repo $PROG --json    # pause must be ok, room above 0, exit 0
     ```
     Paused or over budget: comment on the issue, add `needs-input`, stop.
 - **The issue has no `wg:` label, and a group's charter holds the domain:** propose that label to the owner in one line. This is not a checkpoint unless they object.
