@@ -957,7 +957,7 @@ next_action: what happens, and who does it, once it is decided
 **T9. Decision asked** (first lines of any PR that needs the owner: `gate:owner-merge` or a proposal)
 
 ```
-Decision asked: <one sentence the owner can answer yes or no, or choose between>
+Decision asked: <one sentence: the choice between the courses of action in the srs-decisions block (docs/pr-decisions.md, Well-formed asks)>
 Unblocks: <what proceeds once it is answered>
 If not now: <what waits, and the cost of waiting>
 ```
