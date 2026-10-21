@@ -11,7 +11,7 @@ const fail = (m) => { console.error('claim: ' + m); process.exit(2); };
 const m = /^([\w.-]+)#(\d+)$/.exec(argv[0] ?? ''), seat = arg('--as');
 if (!m || !seat) fail('usage: clerk claim <repo#n> --as <seat> [--repo <programme>] [--branch <name>] [--dry-run]');
 let actor; try { actor = JSON.parse(process.env.SRS_ACTOR ?? '').id; } catch { /* below */ }
-if (!actor) fail('SRS_ACTOR must be a JSON actor {"kind","id"}');
+if (!actor) fail('SRS_ACTOR must be a JSON actor, e.g. SRS_ACTOR=\'{"kind":"ai","id":"agent:<name>"}\' on the same command line');
 const repo = repoRoot(), s = loadSettings(repo), n = Number(m[2]);
 const { issue, prs, branches } = readIssue(s.githubOwner, m[1], n);
 const r = checkClaim({ issue, prs, branches, groups: loadGroups(repo), central: loadCentralGroup(repo), affirmed: affirmedProblemIds(repo), actor, seat, ownerActor: s.ownerActor });
