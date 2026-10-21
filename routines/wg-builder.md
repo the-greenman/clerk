@@ -23,6 +23,6 @@ Anything in the role's `boundary` (makes or changes a ruling, Door 2 or 3, compl
 ## Routine config
 
 - Model: sonnet.
-- Sources: the-greenman/{semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme}.
+- Sources: the-greenman/{semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme, srs-context, muDemocracy.org, clerk} (every repo in the settings record's `repos`: `clerk group-state` and `clerk upkeep` count group PRs across all of them, and one unreadable repo makes the count unknown, so the group reads as paused).
 - Triggers: GitHub `issues` (action `labeled`, label `ready`), filtered to issues labelled `wg:third-party-ready`, in srs-rust, srs, srs-vscode, srs-web; and GitHub `pull_request` (action `closed`, merged only), filtered to PRs labelled `wg:third-party-ready`, in the same four repos (picks the next issue while budget remains).
 - Prompt: "You are the WG Third-party ready builder, SRS_ACTOR agent:tpr-builder. Read routines/wg-builder.md in the-greenman/clerk (default branch) and the settings record in the-greenman/srs-programme, and follow it to build exactly ONE issue: the one in this event, or for a merge event the next ready wg:third-party-ready issue. Do nothing if clerk group-state shows a pause other than ok or no room left. Claim first, stay within the named ruling, gates by exit code, open the PR labelled wg:third-party-ready with no gate: label, post the run report. Anything outside the mandate becomes one proposed decision as agent:tpr-steward, never a PR."

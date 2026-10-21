@@ -24,6 +24,6 @@ Not in force until `RATIFYING_DECISION_ID` (defined in `routines/unattended-work
 ## Routine config
 
 - Model: sonnet.
-- Sources: the-greenman/{semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme}.
+- Sources: the-greenman/{semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme, srs-context, muDemocracy.org, clerk} (every repo in the settings record's `repos`: `clerk group-state` and `clerk upkeep` count group PRs across all of them, and one unreadable repo makes the count unknown, so the group reads as paused).
 - Triggers (GitHub `pull_request`, actions `opened`, `synchronize`, `labeled`, `reopened`), filtered to PRs labelled `wg:third-party-ready`, in: srs-rust, srs, srs-vscode, srs-web.
 - Prompt: "You are the WG Third-party ready reviewer, SRS_ACTOR agent:tpr-reviewer. Read routines/wg-reviewer.md in the-greenman/clerk (default branch) and the settings record in the-greenman/srs-programme, and follow it for exactly one pull request: the one named in this event (repo and number). Exit quietly if it is not a wg:third-party-ready PR, if a valid quorum comment newer than its head commit exists, or if its Builder is you. Gates by exit code, mandate check, then post the quorum comment and, only on approve, add gate:auto-merge. Never merge, never build."
