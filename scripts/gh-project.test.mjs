@@ -650,3 +650,44 @@ test("hasLane: topup feeds only issues routed to a lane (lane:unattended or a wg
   assert.equal(hasLane(["priority: P1", "enhancement"]), false);
   assert.equal(hasLane([]), false);
 });
+
+// Rank flows to blockers (clerk#113, SP-97).
+{
+  const { pullBlockers, BLOCKS_RANKED_LABEL } = await import("./gh-project.mjs");
+  const ent = (key, p, o = {}) => ({ row: { key, labels: [], blockedBy: [], ...o.row }, p, stages: { wontExcluded: false, ...o.stages } });
+  const by = (...keys) => keys.map((key) => ({ key, state: "OPEN" }));
+
+  test("pullBlockers: a ranked issue raises its open blocker, transitively", () => {
+    const a = ent("srs-web#1", "P0", { row: { blockedBy: by("srs-rust#2") } });
+    const b = ent("srs-rust#2", "P2", { row: { blockedBy: by("srs#3") } });
+    const c = ent("srs#3", null);
+    const { pulled, parkedBlockers } = pullBlockers([a, b, c]);
+    assert.equal(b.p, "P0");
+    assert.equal(b.stages.pulledBy, "srs-web#1");
+    assert.equal(c.p, "P0");
+    assert.equal(pulled.length, 2);
+    assert.equal(parkedBlockers.size, 0);
+  });
+
+  test("pullBlockers: a parked blocker gets no priority, only collected for the desk", () => {
+    const a = ent("srs-web#1", "P1", { row: { blockedBy: by("srs-rust#1333") } });
+    const parked = ent("srs-rust#1333", null, { row: { labels: ["parked"] }, stages: { wontExcluded: true } });
+    const { parkedBlockers } = pullBlockers([a, parked]);
+    assert.equal(parked.p, null);
+    assert.deepEqual(parkedBlockers.get("srs-rust#1333"), ["srs-web#1"]);
+  });
+
+  test("pullBlockers: no pull from unranked work, closed edges or a weaker rank", () => {
+    const unranked = ent("srs-web#1", null, { row: { blockedBy: by("srs-rust#2") } });
+    const closed = ent("srs-web#2", "P0", { row: { blockedBy: [{ key: "srs-rust#2", state: "CLOSED" }] } });
+    const weaker = ent("srs-web#3", "P2", { row: { blockedBy: by("srs-rust#2") } });
+    const blocker = ent("srs-rust#2", "P1");
+    const { pulled } = pullBlockers([unranked, closed, weaker, blocker]);
+    assert.equal(blocker.p, "P1");
+    assert.equal(pulled.length, 0);
+  });
+
+  test("blocks-ranked is a mirror label the tool creates", () => {
+    assert.ok(MIRROR_LABELS.some((l) => l.name === BLOCKS_RANKED_LABEL));
+  });
+}

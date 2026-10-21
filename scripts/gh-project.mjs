@@ -124,6 +124,10 @@ const PROMOTE_INTENT_LABEL = "promote:ready";
 // progress-review routine, and filterable on the board (`label:needs-input`). The HUMAN removes
 // the label after answering — that alone puts the issue back in the feed.
 const NEEDS_INPUT_LABEL = "needs-input";
+// `blocks-ranked` (clerk#113, SP-97): derived by reconcile, never by hand. A parked (or Won't-
+// excluded) issue that blocks open ranked work: it gets no priority of its own (it is still
+// ungrounded), so the label is how it reaches the owner's desk to be re-grounded.
+const BLOCKS_RANKED_LABEL = "blocks-ranked";
 const MIRROR_LABELS = [
   { name: "ready", color: "0E8A16", description: "Board Status=Ready mirror — the routines' work queue (set by `promote`/`reconcile`, not by hand)" },
   { name: "priority: P0", color: "B60205", description: "Derived priority (highest served story) — top" },
@@ -133,6 +137,7 @@ const MIRROR_LABELS = [
   { name: PROMOTE_INTENT_LABEL, color: "5319E7", description: "Judged unblocked; awaiting CI promotion to board Status=Ready (write this, not `ready`)" },
   { name: "blocked", color: "E4E669", description: "Derived from blocked-by edges when present (auto-clears); hand-set only for non-issue blocks" },
   { name: NEEDS_INPUT_LABEL, color: "D876E3", description: "Stopped at a human gate — question is in the comments; answer and REMOVE this label to re-feed" },
+  { name: BLOCKS_RANKED_LABEL, color: "B60205", description: "Derived: parked, yet it blocks ranked work. Re-ground it to that work's problem (owner's desk); auto-clears" },
 ];
 // Repos whose merges/routines depend on the mirror set existing. Overridable for tests/forks.
 const MIRROR_REPOS = (process.env.GHP_MIRROR_REPOS || (SETTINGS.repos ?? []).join(","))
@@ -1057,6 +1062,40 @@ function derivePriority(row, served, storiesByNum, epicInfo = null) {
   return { p, stages: { kind, isBug, served: servedArr, storyValues, base, wontExcluded, epicFallback, bugFloor, defaultFloor, bump, final: p } };
 }
 
+// Rank flows to blockers (clerk#113, SP-97). entries: [{row, p, stages}] for every open work
+// item. A ranked entry's open blocker that is itself an entry takes the higher priority
+// (transitively: a pulled blocker pulls its own blockers); a parked or Won't-excluded blocker is
+// not fed, only collected. Mutates p/stages in place; returns
+// { pulled: [{key, from, to, by}], parkedBlockers: Map<blockerKey, [blocked keys]> }.
+function pullBlockers(entries) {
+  const byKey = new Map(entries.map((e) => [e.row.key, e]));
+  const pulled = [], parkedBlockers = new Map();
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const e of entries) {
+      if (!e.p) continue;
+      for (const b of e.row.blockedBy ?? []) {
+        const be = b.state === "OPEN" ? byKey.get(b.key) : null;
+        if (!be) continue;
+        if (be.stages.wontExcluded) {
+          const xs = parkedBlockers.get(be.row.key) ?? [];
+          if (!xs.includes(e.row.key)) parkedBlockers.set(be.row.key, [...xs, e.row.key]);
+          continue;
+        }
+        const to = higher(e.p, be.p);
+        if (to === be.p) continue;
+        pulled.push({ key: be.row.key, from: be.p, to, by: e.row.key });
+        be.p = to;
+        be.stages.pulledBy = e.row.key;
+        be.stages.final = to;
+        changed = true;
+      }
+    }
+  }
+  return { pulled, parkedBlockers };
+}
+
 function computeRollup() {
   const b = board();
   const stories = openStories();
@@ -1091,12 +1130,13 @@ function computeRollup() {
       derived.push({ row, p, stages, basis: `epic #${stages.epicFallback.epic} ${stages.epicFallback.epicPriority}${stages.epicFallback.defaulted ? "*" : ""}→${stages.epicFallback.to}` });
     else unlinked.push({ row, p, stages, basis: "default floor (orphaned — link to a story/epic)" });
   }
+  const { pulled, parkedBlockers } = pullBlockers([...derived, ...bugs, ...unlinked]);
   const uncovered = [...storiesByNum.values()].filter(
     (s) => ![...descendants.values()].some((set) => set.has(s.num))
   );
   // epicDesc/epicByNum let consumers (summary) group rows by claiming epic without a
   // second graph walk — the Release field that used to carry this grouping is retired (#720).
-  return { derived, bugs, unlinked, uncovered, storiesByNum, epicDesc, epicByNum };
+  return { derived, bugs, unlinked, uncovered, storiesByNum, epicDesc, epicByNum, pulled, parkedBlockers };
 }
 
 function applyPriority(entry, dryRun) {
@@ -1802,6 +1842,15 @@ function cmdExplain(argv) {
         : `    signal present (${s.bump.labels.join(", ")}) but already at P0`
       : "    none"
   );
+  L.push("Stage 7b · blocker pull (rank flows to what blocks ranked work, clerk#113)");
+  const holds = r.parkedBlockers.get(key);
+  L.push(
+    s.pulledBy
+      ? `    applied: blocks ${s.pulledBy} → ${p}`
+      : holds
+        ? `    parked, yet blocks ranked work (${holds.join(", ")}): no priority; labelled ${BLOCKS_RANKED_LABEL} for the desk — re-ground it`
+        : "    none"
+  );
   L.push("Stage 8 · final");
   const label = row.labels.find((l) => l.startsWith("priority: ")) ?? "(no label)";
   const sync = (p ? `priority: ${p}` : "(none)") === label && (p ?? null) === (row.priority ?? null);
@@ -2145,6 +2194,20 @@ function cmdReconcile(argv) {
       patchRowLabels(row.repo, row.num, want ? ["blocked"] : [], want ? [] : ["blocked"]);
     }
   }
+  // blocks-ranked derivation (clerk#113): tool-owned on every open row; set iff the row is a
+  // parked blocker of ranked work, cleared otherwise (the edge closed, the work lost its rank,
+  // or the issue was re-grounded out of parking).
+  for (const row of board().values()) {
+    if (row.state !== "OPEN") continue;
+    const want = r.parkedBlockers.has(row.key);
+    if (want === row.labels.includes(BLOCKS_RANKED_LABEL)) continue;
+    issues.push(`blocks-ranked-stale: ${row.key} ${want ? `set (blocks ${r.parkedBlockers.get(row.key).join(",")})` : "clear"}`);
+    if (!dryRun) {
+      try { gh(["issue", "edit", String(row.num), "--repo", `${OWNER}/${row.repo}`, want ? "--add-label" : "--remove-label", BLOCKS_RANKED_LABEL]); }
+      catch { /* label may not exist yet; non-fatal */ }
+      patchRowLabels(row.repo, row.num, want ? [BLOCKS_RANKED_LABEL] : [], want ? [] : [BLOCKS_RANKED_LABEL]);
+    }
+  }
   // Open bug with no priority
   for (const e of r.bugs) {
     if (!e.row.priority && !e.row.labels.some((l) => l.startsWith("priority: ")))
@@ -2245,7 +2308,7 @@ Auth: requires an authenticated \`gh\` CLI, or GITHUB_TOKEN/GH_TOKEN env var (cu
 // Dispatch
 // ---------------------------------------------------------------------------
 // Pure helpers exported for unit tests. Importing the module must NOT run the CLI.
-export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics, bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, planStaleClaims, STALE_CLAIM_HOURS_DEFAULT, planTopup, hasLane, TOPUP_TARGET_DEFAULT, isWorkItem, isConsumableReady, countConsumableReady, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT, hasOpenBlockers, isBlocked, blockedLabelWant };
+export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics, bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, planStaleClaims, STALE_CLAIM_HOURS_DEFAULT, planTopup, hasLane, TOPUP_TARGET_DEFAULT, isWorkItem, isConsumableReady, countConsumableReady, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT, hasOpenBlockers, isBlocked, blockedLabelWant, pullBlockers, BLOCKS_RANKED_LABEL };
 
 // Only dispatch when run directly (`node gh-project.mjs ...`), not when imported.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

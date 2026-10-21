@@ -8,11 +8,11 @@
     "title": "Board labels",
     "kind": "label",
     "home": "GitHub (clerk `gh-project.mjs`)",
-    "meaning": "`ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `wg:*`, `intake` (proposed, clerk#56: a request in a level's input queue), `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.",
+    "meaning": "`ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `blocks-ranked` (derived: a parked blocker of ranked work), `wg:*`, `intake` (proposed, clerk#56: a request in a level's input queue), `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.",
     "read_by": "`board sync`, `queue`, `claim`, `pr-upkeep`, every routine"
   },
   "createdAt": "2026-10-11T18:33:33.128085200+00:00",
-  "updatedAt": "2026-10-12T08:53:44.291433672+00:00",
+  "updatedAt": "2026-10-21T11:57:52.121104948+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",
