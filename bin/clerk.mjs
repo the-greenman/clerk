@@ -39,6 +39,7 @@ const TOOLS = {
   charter: ['charter.mjs', 'charter a working group as draft/proposed records for the owner to ratify (--dry-run prints the plan)'],
   groups: ['groups.mjs', 'print the working groups chartered in the records (--json)'],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
+  doctor: ['doctor.mjs', 'self-test where it runs: srs CLI, settings, every repo readable, group state, SRS_ACTOR (--json; --post records it on the digest issue)'],
 };
 if (argv[0] === 'help' || argv[0] === '--help') {
   console.log('clerk: act by role on an SRS programme.\n\n  session|comment   hold a session or post comments (clerk session --repo <path> --as <role>)\n  (no subcommand)   the interactive agenda (clerk --repo <path> --as <role>)\n  desk              print the owner\'s desk; --post rewrites the pinned `desk` issue in place (--dry-run prints what it would write)');
