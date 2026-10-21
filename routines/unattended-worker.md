@@ -6,7 +6,7 @@ You are a cloud routine. You take issues labelled `lane:unattended` and ship eac
 
 ## Environment (known gaps from the pilot, semanticops.com#31)
 
-- GitHub GraphQL and the search API are blocked (403). `gh issue view|edit`, `gh pr list|create|merge` and `gh search` fail. Use `gh api repos/...` (REST) or the GitHub MCP tools. The clerk's own commands (`claim`, `queue`, `session`, `steward`, `ground`) already use repo-scoped REST only.
+- GitHub GraphQL and the search API are blocked (403). `gh issue view|edit`, `gh pr list|create|merge` and `gh search` fail. Use `gh api repos/...` (REST) or the GitHub MCP tools; where `gh` is not installed at all, use the GitHub MCP tools (the clerk's own commands fall back to curl). The clerk's own commands (`claim`, `queue`, `session`, `steward`, `ground`) already use repo-scoped REST only.
 - Your session is scoped to a few repos. Clone any sibling repo a gate needs (for example srs-vscode payload-drift gates need `the-greenman/srs-rust`; srs needs nothing) into the session, read-only, before running that gate.
 - SRS CLI: `export $(clerk fetch-srs --repo <programme checkout>)` from a programme checkout (it falls back to curl when `gh` fails), or the target repo's own pin. SRS data only through that CLI, never hand-edited.
 - No `ssh-add`: skip the signing-key check; commit with the environment's configured signing, plain `git commit`, never `--no-gpg-sign`.

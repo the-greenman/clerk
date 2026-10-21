@@ -8,8 +8,8 @@
  * Held: an assignee, a `needs-input`, `parked` or `blocked` label, or an open PR referencing the issue.
  * Order: `priority: P0|P1|P2` label, then oldest first; no priority sorts last. Read-only.
  */
-import { execFileSync } from "child_process";
 import { fileURLToPath } from "url";
+import { ghJson } from "../lib/adapters/cli.mjs";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { loadGroups } from "../lib/adapters/groups.mjs";
 import { refersTo } from "../lib/practice/claim.mjs";
@@ -37,7 +37,7 @@ export function classify(issues, prs, LANES = lanesFrom([])) {
   return { queued: rows.filter((r) => !r.held.length), held: rows.filter((r) => r.held.length) };
 }
 
-const api = (path) => JSON.parse(execFileSync("gh", ["api", "--paginate", "--slurp", path], { encoding: "utf8" })).flat();
+const api = (path) => ghJson(["api", "--paginate", "--slurp", path]).flat();
 
 function fetchAll(OWNER, REPOS, groups) {
   const LANES = lanesFrom(groups), issues = new Map(), prs = [], unreadable = [];
