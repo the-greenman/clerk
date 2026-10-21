@@ -22,7 +22,7 @@ The terminal state is **PR open, gates green, run report posted**. Never wait fo
 
 Below, "stage N" means this command's stages, not the handbook's.
 
-Shorthands: `SO=$HOME/dev/semanticops`, `CLERK="node $HOME/dev/semanticops/clerk/bin/clerk.mjs"`, `PROG=$HOME/dev/semanticops/srs-programme`, `ME='{"kind":"human","id":"human:the-greenman"}'`. `ME` is the owner's actor, the same as `settings.ownerActor`. The login shell is fish, so wrap bash idioms in `bash -c`.
+Shorthands: `SO=$HOME/dev/semanticops`, `CLERK="node $HOME/dev/semanticops/clerk/bin/clerk.mjs"`, `PROG=$HOME/dev/semanticops/srs-programme`, `ME='{"kind":"human","id":"human:the-greenman"}'`. `ME` is the owner's actor, the same as `settings.ownerActor`. The login shell is fish, so wrap bash idioms in `bash -c`. In a cloud session the checkouts sit at `/home/user/<repo>` (`CLERK="node /home/user/clerk/bin/clerk.mjs"`, `PROG=/home/user/srs-programme`); `ME` is unchanged. Shell state does not persist between commands: write the values out on each command line.
 
 ---
 
