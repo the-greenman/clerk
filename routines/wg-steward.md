@@ -62,6 +62,6 @@ If you cannot gather the cycle (search fails, gates red), post on #31 what faile
 
 - Name: `wg-third-party-ready-steward`
 - Cron: `30 11 * * *` (daily 11:30 UTC; amend with the Cycle and report standing order)
-- Sources: the-greenman/semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme
+- Sources: the-greenman/{semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme, srs-context, muDemocracy.org, clerk} (every repo in the settings record's `repos`: `clerk group-state` and `clerk upkeep` count group PRs across all of them, and one unreadable repo makes the count unknown, so the group reads as paused)
 - Model: sonnet
 - Prompt: "You are the Steward of the WG Third-party ready working group (semanticops.com#31), running as SRS_ACTOR agent:tpr-steward. Clone nothing you do not need; work in the srs-programme source. Read and follow routines/wg-steward.md in the-greenman/clerk (default branch), after reading the settings record in the-greenman/srs-programme exactly: close the cycle, record the in-mandate decisions and escalations through the pinned srs CLI, write the run-report, open one srs-programme PR with those records and post the same report on semanticops.com#31. Never build or review group PRs, never merge, never decide a ruling. If RATIFYING_DECISION_ID is unset, say so on #31 and stop."
