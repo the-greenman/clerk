@@ -19,4 +19,5 @@ const s = groupStates(loadSettings(a.values.repo), [g])[label];
 const room = [s.budget, s.merged, s.open].every(Number.isInteger) ? s.budget - s.merged - s.open : 0;
 const out = { label, pause: s.pause, cycleStart: s.cycleStart, merged: s.merged, open: s.open, budget: s.budget, room };
 console.log(a.values.json ? JSON.stringify(out, null, 2) : `${label}: ${out.pause}; cycle from ${out.cycleStart}; ${out.merged} merged + ${out.open} open of ${out.budget}; room ${room}`);
+if (s.why) console.error(`clerk group-state: counts unknown: ${s.why} (attach every settings repo to the session, or set GH_TOKEN)`);
 process.exit(s.merged === 'unknown' || s.open === 'unknown' || /unreadable/.test(s.pause) ? 1 : 0);
