@@ -73,6 +73,7 @@ test("landedRefs reads repo#n, bare #n after a repo ref, and only text after Lan
 test("prereqRefs: Blocked-by lines and 'once X lands', bare #n in the issue's repo", () => {
   assert.deepEqual(prereqRefs("x\nBlocked by: the-greenman/srs-rust#1333, then an srs-rust release.\n", "srs-web"), ["srs-rust#1333"]);
   assert.deepEqual(prereqRefs("Blocked by #4 and srs#9", "srs-web"), ["srs-web#4", "srs#9"]);
+  assert.deepEqual(prereqRefs("Blocked by: srs-rust#1333, #1334", "srs-web"), ["srs-rust#1333", "srs-rust#1334"]);
   assert.deepEqual(prereqRefs("file text once srs-rust#1333 lands (the UI says so)", "srs-web"), ["srs-rust#1333"]);
   assert.deepEqual(prereqRefs("nothing blocks this", "srs-web"), []);
 });

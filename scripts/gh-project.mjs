@@ -124,9 +124,10 @@ const PROMOTE_INTENT_LABEL = "promote:ready";
 // progress-review routine, and filterable on the board (`label:needs-input`). The HUMAN removes
 // the label after answering — that alone puts the issue back in the feed.
 const NEEDS_INPUT_LABEL = "needs-input";
-// `blocks-ranked` (clerk#113, SP-97): derived by reconcile, never by hand. A parked (or Won't-
-// excluded) issue that blocks open ranked work: it gets no priority of its own (it is still
-// ungrounded), so the label is how it reaches the owner's desk to be re-grounded.
+// `blocks-ranked` (clerk#113, SP-97): derived by reconcile, never by hand. A parked (own label or parked
+// epic) issue that blocks open ranked work: it gets no priority of its own (it is still
+// ungrounded), so the label is how it reaches the owner's desk to be re-grounded. Written by
+// reconcile (same hourly board sync as rollup). A blocker not on the board is invisible here.
 const BLOCKS_RANKED_LABEL = "blocks-ranked";
 const MIRROR_LABELS = [
   { name: "ready", color: "0E8A16", description: "Board Status=Ready mirror — the routines' work queue (set by `promote`/`reconcile`, not by hand)" },
@@ -1059,7 +1060,7 @@ function derivePriority(row, served, storiesByNum, epicInfo = null) {
   }
 
   const kind = servedArr.length ? "story-derived" : isBug ? "bug-floor" : epicFallback.applied ? "epic-derived" : "orphaned";
-  return { p, stages: { kind, isBug, served: servedArr, storyValues, base, wontExcluded, epicFallback, bugFloor, defaultFloor, bump, final: p } };
+  return { p, stages: { kind, isBug, served: servedArr, storyValues, base, wontExcluded, parked, epicFallback, bugFloor, defaultFloor, bump, final: p } };
 }
 
 // Rank flows to blockers (clerk#113, SP-97). entries: [{row, p, stages}] for every open work
@@ -1078,7 +1079,10 @@ function pullBlockers(entries) {
       for (const b of e.row.blockedBy ?? []) {
         const be = b.state === "OPEN" ? byKey.get(b.key) : null;
         if (!be) continue;
+        // Parked (own label or parked epic): collected for the desk to re-ground. An explicit Won't
+        // is a ruling, not a wait: it stays a hard block, neither pulled nor collected.
         if (be.stages.wontExcluded) {
+          if (!be.stages.parked) continue;
           const xs = parkedBlockers.get(be.row.key) ?? [];
           if (!xs.includes(e.row.key)) parkedBlockers.set(be.row.key, [...xs, e.row.key]);
           continue;

@@ -671,7 +671,7 @@ test("hasLane: topup feeds only issues routed to a lane (lane:unattended or a wg
 
   test("pullBlockers: a parked blocker gets no priority, only collected for the desk", () => {
     const a = ent("srs-web#1", "P1", { row: { blockedBy: by("srs-rust#1333") } });
-    const parked = ent("srs-rust#1333", null, { row: { labels: ["parked"] }, stages: { wontExcluded: true } });
+    const parked = ent("srs-rust#1333", null, { row: { labels: ["parked"] }, stages: { wontExcluded: true, parked: true } });
     const { parkedBlockers } = pullBlockers([a, parked]);
     assert.equal(parked.p, null);
     assert.deepEqual(parkedBlockers.get("srs-rust#1333"), ["srs-web#1"]);
@@ -685,6 +685,19 @@ test("hasLane: topup feeds only issues routed to a lane (lane:unattended or a wg
     const { pulled } = pullBlockers([unranked, closed, weaker, blocker]);
     assert.equal(blocker.p, "P1");
     assert.equal(pulled.length, 0);
+  });
+
+  test("pullBlockers: an explicit Won't blocker is a hard block, neither pulled nor collected", () => {
+    const a = ent("srs-web#1", "P1", { row: { blockedBy: by("srs-rust#9") } });
+    const wont = ent("srs-rust#9", null, { stages: { wontExcluded: true, parked: false } });
+    const { parkedBlockers } = pullBlockers([a, wont]);
+    assert.equal(wont.p, null);
+    assert.equal(parkedBlockers.size, 0);
+  });
+
+  test("derivePriority marks parked apart from Won't", () => {
+    const row = { key: "srs-rust#1", labels: ["parked"], blockedBy: [] };
+    assert.equal(derivePriority(row, new Set(), new Map(), null).stages.parked, true);
   });
 
   test("blocks-ranked is a mirror label the tool creates", () => {

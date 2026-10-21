@@ -44,11 +44,12 @@ export function landedRefs(comments, repo) {
   return [...out.values()];
 }
 
-// Prerequisites named in text (clerk#113): refs on a "Blocked by:" line, and "once <ref> lands". A bare #n is the issue's own repo.
+// Prerequisites named in text (clerk#113): refs on a "Blocked by:" line, and "once <ref> lands".
 const BLOCKED_BY_RE = /^\W*Blocked by\b:?([^\n]*)/gim;
 const ONCE_RE = /\bonce\s+((?:[\w.-]+\/)?[\w.-]*#\d+)\s+lands\b/gi;
 export function prereqRefs(body, repo) {
-  const out = new Set(), add = (tail) => { for (const m of tail.matchAll(LANDED_REF_RE)) out.add(`${m[2] ?? repo}#${m[3]}`); };
+  // A bare #n takes the repo of the ref before it on the line, else the issue's own (as landedRefs).
+  const out = new Set(), add = (tail) => { let last = repo; for (const m of tail.matchAll(LANDED_REF_RE)) { last = m[2] ?? last; out.add(`${last}#${m[3]}`); } };
   for (const [, tail] of String(body ?? "").matchAll(BLOCKED_BY_RE)) add(tail);
   for (const [, ref] of String(body ?? "").matchAll(ONCE_RE)) add(ref);
   return [...out];
@@ -88,7 +89,7 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
     if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !answersOf(i.body || "").stated && !(i.comments || []).some((c) => answersOf(c).stated) && !hasMarker(i, M.answers))
       out.push({ rule: "answers", ref, repo: i.repo, number: i.number, reopen: false,
         comment: `${M.answers}\nsteward-check: this issue has no \`Answers:\` line. State \`Answers: SP-nn\` or \`No affirmed problem yet: <one-line problem>\` in the description (see srs-programme CLAUDE.md, "Filing issues").` });
-    if (i.state === "OPEN" && i.createdAt && Date.parse(i.createdAt) >= since && !hasMarker(i, M.prereq)) {
+    if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !hasMarker(i, M.prereq)) {
       const missing = prereqRefs(i.body, i.repo).filter((r) => r !== ref && !(i.blockedBy || []).includes(r));
       if (missing.length)
         out.push({ rule: "prereq-edge", ref, repo: i.repo, number: i.number, reopen: false,
