@@ -51,6 +51,7 @@ The clerk runs unchanged in a Claude Code cloud session (claude.ai/code, cloud r
 - **Actions only:** `board` (GitHub Projects v2 is GraphQL-only) and `upkeep` (lists PRs with `gh pr list`). `roadmap --apply` also calls `board`. Their workflows run them; nothing in a session needs them.
 - **Repositories:** attach every settings `governed_repos` entry to the cloud environment, with write access (`add_repo` with `access: push` in a session). A public repo with read-only git access still refuses API calls. A repo the session cannot reach is skipped with a warning (`queue` prints "this queue is partial"; `steward` and `ground` name it).
 - **Paths:** checkouts sit side by side (`/home/user/<repo>`); `wt` finds siblings next to the clerk's own checkout, and worktrees go to `$WT_ROOT` (default `~/dev/.wt`), which `session` reads too.
+- **No `gh`:** a session has no `gh` binary. The clerk's `gh api` calls fall back to curl (`lib/adapters/cli.mjs`), authenticated by `GH_TOKEN`/`GITHUB_TOKEN` when set and otherwise by the session's egress proxy; `--jq` and `gh` porcelain have no fallback, so clerk code never uses them. `wt prune` cannot see squash merges without `gh` and keeps those worktrees.
 - **srs CLI:** fetched on first use from the programme's pin (`fetch-srs`, cached in `/tmp/srs-cli`); no setup step.
 - **Signing:** commits use the environment's configured signing; there is no `ssh-add` in a session.
 

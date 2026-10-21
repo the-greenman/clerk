@@ -191,7 +191,7 @@ if (TTY) {
 }
 const show = (ls) => console.log('\n' + ls.join('\n'));
 
-const owner = isOwner ? gh(['api', 'user', '-q', '.login']).trim() : '';
+const owner = isOwner ? JSON.parse(gh(['api', 'user'])).login : '';
 const { reports, acked } = isOwner ? loadReportComments(REPORT_ISSUE, owner) : { reports: [], acked: new Set() };
 const prs = !isOwner ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, 'gate:owner-merge'); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
 
