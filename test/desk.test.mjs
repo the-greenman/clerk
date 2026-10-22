@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deskBody } from '../lib/practice/desk.mjs';
+import { deskBody as body0 } from '../lib/practice/desk.mjs';
+const GATES = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' }; // the programme's merge_gate bindings (test/workflow.fixture.json)
+const deskBody = (input) => body0({ gates: GATES, ...input });
 
 const NOW = '2026-10-15T08:00:00Z';
 const report = (id, date) => ({ id, body: `<!-- wg-report cycle=${date} -->\nreport`, created_at: `${date}T11:30:00Z`, author_association: 'OWNER', html_url: `u${id}` });

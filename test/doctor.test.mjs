@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { verdict, healthComment, latestHealth, healthState } from '../lib/practice/doctor.mjs';
-import { deskBody } from '../lib/practice/desk.mjs';
+import { deskBody as body0 } from '../lib/practice/desk.mjs';
+const GATES = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' }; // the programme's merge_gate bindings (test/workflow.fixture.json)
+const deskBody = (input) => body0({ gates: GATES, ...input });
 
 const checks = [{ name: 'settings', ok: true, detail: '9 repos' }, { name: 'repo srs-context', ok: false, detail: '404 (Not Found)' }];
 const NOW = '2026-10-22T12:00:00Z';
