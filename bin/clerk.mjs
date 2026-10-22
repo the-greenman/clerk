@@ -41,10 +41,12 @@ const TOOLS = {
   domains: ['domains.mjs', 'every domain\'s focus, boundary and tensions (--json); affirm-tension <id> with both poles, place-axes <domain> <t1> <t2> <t3> (--dry-run)'],
   groups: ['groups.mjs', 'print the working groups chartered in the records (--json)'],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
+  snapshot: ['snapshot.mjs', 'the programme as one snapshot: records, relations, container outlines (--json)'],
+  serve: ['serve.mjs', 'the local service for web clients, on loopback (docs/service.md, api/openapi.json): CLERK_PORT, CLERK_SYNC_MINUTES, CLERK_DESK_MINUTES, CLERK_STATE_DIR'],
   doctor: ['doctor.mjs', 'self-test where it runs: srs CLI, settings, every repo readable, group state, SRS_ACTOR (--json; --post records it on the digest issue)'],
 };
 if (argv[0] === 'help' || argv[0] === '--help') {
-  console.log('clerk: act by role on an SRS programme.\n\n  session|comment   hold a session or post comments (clerk session --repo <path> --as <role>)\n  (no subcommand)   the interactive agenda (clerk --repo <path> --as <role>)\n  desk              print the owner\'s desk; --post rewrites the pinned `desk` issue in place (--dry-run prints what it would write)');
+  console.log('clerk: act by role on an SRS programme.\n\n  session|comment   hold a session or post comments (clerk session --repo <path> --as <role>)\n  (no subcommand)   the interactive agenda (clerk --repo <path> --as <role>)\n  desk              print the owner\'s desk; --post rewrites the pinned `desk` issue in place (--dry-run prints what it would write); --json prints it as data');
   for (const [k, [, d]] of Object.entries(TOOLS)) console.log(`  ${k.padEnd(17)} ${d}`);
   console.log('\nTools take --repo <programme path> (default: current directory). See docs/tools.md.');
   process.exit(0);
@@ -62,6 +64,13 @@ if (TOOLS[argv[0]] || argv[0] === 'desk') {
   if (argv[0] === 'desk') { // read-only unless --post; reading needs no role
     const repo = resolve(argv.includes('--repo') ? argv[argv.indexOf('--repo') + 1] : '.');
     try {
+      if (argv.includes('--json')) { // the desk as data for clients (clerk serve, the control room); never posts
+        const { deskDetail } = await import('../lib/adapters/desk-detail.mjs');
+        // exit only once stdout has drained: process.exit() right after a large write to a pipe truncates it
+        const out = JSON.stringify(await deskDetail(repo)) + '\n';
+        await new Promise((done) => process.stdout.write(out, done));
+        process.exit(0);
+      }
       const { gatherDesk, findDeskIssue, postDesk } = await import('../lib/adapters/desk.mjs');
       const { deskBody } = await import('../lib/practice/desk.mjs');
       const post = argv.includes('--post'), dry = argv.includes('--dry-run');
