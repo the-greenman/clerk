@@ -129,7 +129,7 @@ Nothing else revisits an In progress issue, so `stale-claims` does. It looks at 
 
 ## The bug track
 
-Bugs do not ride the feature feed: a P1 floor and an epic-major feed contradict each other. `topup` never nominates a `bug` and bugs do not count toward Ready. `label:bug` is the bug queue: derived priority label first (a bug with none counts as P1), oldest first. A bug consumer takes one at a time with the same claim, activity and `needs-input` rules. The bug floor, `coverage`'s bugs report, blocked semantics and stale-claim recovery all still apply.
+Bugs do not ride the feature feed: a P1 floor and an epic-major feed contradict each other. `topup` never nominates a `bug` and bugs do not count toward Ready. `label:bug` is the bug queue: derived priority label first (a bug with none counts as P1), oldest first. The bug fixer (`routines/bug-fixer.md`) reads it as `clerk queue --bugs` and takes one at a time with the same claim, activity and `needs-input` rules; it holds the builder seat in every group. The bug floor, `coverage`'s bugs report, blocked semantics and stale-claim recovery all still apply.
 
 ## API budget
 
