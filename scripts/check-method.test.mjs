@@ -70,3 +70,19 @@ test("edges on the suggestion count for its affirmed fork", () => {
   assert.deepEqual(checkGates(b.records, b.relations, b.affirmed, new Set()).warnings, []);
 });
 test("never an error while the switch is warning", () => assert.deepEqual(p2((b) => b.affirmed.delete("d1")).errors, []));
+
+// axes (decision cdd272a3)
+const ax = (b) => {
+  b.records.push(rec("t", "tension", { title: "T" }), rec("ya", "pole", { title: "Ya" }), rec("yi", "pole", { title: "Yi" }), rec("ax", "axis-in-domain", { title: "T in D", line: 1 }));
+  b.relations.push(rel("t", "ya", "contains"), rel("t", "yi", "contains"), rel("ax", "t", "refines"), rel("ax", "d1", `${M}/in-domain`), rel("ax", "ya", `${M}/yang-pole`));
+  b.affirmed.add("ax");
+};
+test("a sound axis is clean", () => assert.deepEqual(run(ax).errors, []));
+test("an axis's yang must be its tension's pole", () => assert.match(run((b) => { ax(b); b.records.push(rec("other", "pole", { title: "O" })); b.relations.find((r) => r.relationType.endsWith("yang-pole")).targetId = "other"; }).errors.join(), /not one of its tension's poles/));
+test("an axis names exactly one yang-pole", () => assert.match(run((b) => { ax(b); b.relations.push(rel("ax", "yi", `${M}/yang-pole`)); }).errors.join(), /2 yang-pole/));
+test("an axis's line is 1-3", () => assert.match(run((b) => { ax(b); b.records.at(-1).record.fieldValues.line = 4; }).errors.join(), /line 4/));
+test("two affirmed axes of one domain cannot share a line", () => assert.match(run((b) => {
+  ax(b); b.records.push(rec("t2", "tension", { title: "T2" }), rec("a2", "pole", { title: "A2" }), rec("b2", "pole", { title: "B2" }), rec("ax2", "axis-in-domain", { title: "T2 in D", line: 1 }));
+  b.relations.push(rel("t2", "a2", "contains"), rel("t2", "b2", "contains"), rel("ax2", "t2", "refines"), rel("ax2", "d1", `${M}/in-domain`), rel("ax2", "a2", `${M}/yang-pole`));
+  b.affirmed.add("ax2");
+}).errors.join(), /repeats line 1/));

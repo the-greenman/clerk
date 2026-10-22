@@ -29,7 +29,8 @@
     "fields/actorid-94d587e4.json",
     "fields/usewhen-8882824d.json",
     "fields/brief-274fc803.json",
-    "fields/goals-812204a1.json"
+    "fields/goals-812204a1.json",
+    "fields/line-481bf75b.json"
   ],
   "types": [
     "types/problem-b7d15218.json",
@@ -42,7 +43,8 @@
     "types/principle-eff00965.json",
     "types/archetype-6ce9e193.json",
     "types/agent-ba97e194.json",
-    "types/persona-in-domain-872fbd42.json"
+    "types/persona-in-domain-872fbd42.json",
+    "types/axis-in-domain-88d9b5da.json"
   ],
   "relationTypes": [
     "relation-types/comsemanticopsmethodheld-by-ec88d284.json",
@@ -57,7 +59,8 @@
     "relation-types/comsemanticopsmethodconcerns-e1d12490.json",
     "relation-types/comsemanticopsmethodrestores-5e582fc5.json",
     "relation-types/comsemanticopsmethodin-domain-488e264d.json",
-    "relation-types/comsemanticopsmethodholds-domain-1eaee316.json"
+    "relation-types/comsemanticopsmethodholds-domain-1eaee316.json",
+    "relation-types/comsemanticopsmethodyang-pole-2ffbeb2e.json"
   ],
   "views": [],
   "compositions": [],
@@ -65,7 +68,7 @@
   "id": "45c51908-183a-4cc5-a2b5-a0beb58bb366",
   "namespace": "com.semanticops.method",
   "name": "method",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "vocabularies": [
     "vocabularies/problem-kind-7d21013f.json",
     "vocabularies/imbalance-cc6ffec6.json"

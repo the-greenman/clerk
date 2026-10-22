@@ -42,7 +42,7 @@ const TOOLS = {
   wt: ['wt', 'create, list and prune git worktrees'],
   settings: ['settings.mjs', 'print the programme settings record (--json)'],
   charter: ['charter.mjs', 'charter a working group as draft/proposed records for the owner to ratify (--dry-run prints the plan)'],
-  domains: ['domains.mjs', 'every domain\'s focus, boundary and tensions (--json); affirm-tension <id> with both poles, place-axes <domain> <t1> <t2> <t3> (--dry-run)'],
+  domains: ['domains.mjs', 'every domain\'s focus, boundary and tensions (--json); affirm-tension <id> with both poles; set-axis <domain> <tension> --line N --yang <pole>; unset-axis <axis> (--dry-run)'],
   groups: ['groups.mjs', 'print the working groups chartered in the records (--json)'],
   labels: ['labels.mjs', "every governed repo's labels against the programme's bindings: missing, stale, retired, unknown (--apply; --delete-retired --repo-name <r>; --json)"],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],

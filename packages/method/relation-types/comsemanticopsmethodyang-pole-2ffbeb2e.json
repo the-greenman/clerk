@@ -1,0 +1,13 @@
+{
+  "id": "2ffbeb2e-efd1-4185-9a63-fc971a180571",
+  "version": 1,
+  "key": "com.semanticops.method/yang-pole",
+  "namespace": "com.semanticops.method",
+  "label": "Yang pole",
+  "description": "An axis-in-domain names which of its tension's two poles is yang in that domain. Endpoints: axis-in-domain -> pole. Exactly one per axis, and the pole is one its tension contains. Polarity exists only here: the same pole may be yang on one domain's axis and yin on a narrower one's.",
+  "category": "association",
+  "createdAt": "2026-10-22T12:00:00+00:00",
+  "canonicalDirection": "source is the axis-in-domain; target is the yang pole",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

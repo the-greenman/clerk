@@ -1,0 +1,17 @@
+{
+  "id": "481bf75b-0e08-4687-babb-2f55f12890a0",
+  "namespace": "com.semanticops.method",
+  "name": "line",
+  "version": 1,
+  "description": "Which line of the domain's trigram an axis is: 1, 2 or 3, line 1 at the bottom.",
+  "aiGuidance": {
+    "purpose": "Orders a domain's three axes so its leans read as a trigram.",
+    "extraction": "1, 2 or 3. Follow the line order the owner fixed for the compass (srs-context cc05d4c9) unless told otherwise.",
+    "negativeGuidance": "Not a rank or a weight. Two affirmed axes of one domain never share a line."
+  },
+  "fieldType": {
+    "datatype": "number",
+    "cardinality": "single"
+  },
+  "createdAt": "2026-10-22T12:00:00+00:00"
+}
