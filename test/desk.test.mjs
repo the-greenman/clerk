@@ -71,10 +71,10 @@ test('a PR belongs to the nearest epic up its chain', () => {
 
 test('an assigned issue labelled status: in progress is claimed by someone, not listed as assigned to you', () => {
   const row = (number, labels) => ({ repo: 'r', number, title: 't', url: `https://x/${number}`, createdAt: '2026-10-05T07:00:00Z', labels });
-  const body = needsYou(deskBody({ now: NOW, assigned: [row(1, [{ name: 'status: in progress' }]), row(2, ['bug'])] }));
+  const body = needsYou(deskBody({ now: NOW, claimLabel: 'status: in progress', assigned: [row(1, [{ name: 'status: in progress' }]), row(2, ['bug'])] }));
   assert.match(body, /r#2/);
   assert.doesNotMatch(body, /r#1\b/);
-  assert.doesNotMatch(needsYou(deskBody({ now: NOW, assigned: [row(1, ['status: in progress'])] })), /assigned to you/);
+  assert.doesNotMatch(needsYou(deskBody({ now: NOW, claimLabel: 'status: in progress', assigned: [row(1, ['status: in progress'])] })), /assigned to you/);
 });
 
 test('a proposed decision in no log is flagged; one in the owner log is to ratify', () => {

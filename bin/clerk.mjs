@@ -17,6 +17,7 @@ import { authorise, resolveContext, quorum, quorumText, rolesFor } from '../lib/
 import { loadGroups } from '../lib/adapters/groups.mjs';
 import { openPRsLabelled, mergePR } from '../lib/adapters/github.mjs';
 import { loadReports, loadReportComments, groupQueue, loadStalled } from '../lib/adapters/agenda.mjs';
+import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -87,6 +88,7 @@ const repo = resolve(arg('--repo') ?? die('--repo is required'));
 const cli = srsCli(repo);
 let settings; try { settings = loadSettings(repo, cli); } catch (e) { die(e.message); }
 let groups; try { groups = loadGroups(repo, cli); } catch (e) { die(e.message); }
+let W; try { W = loadWorkflow(repo, cli); } catch (e) { die(e.message); }
 let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR, settings.ownerActor, rolesFor(groups)); } catch (e) { die(e.message); }
 const isOwner = arg('--as') === 'owner';
 const dryRun = argv.includes('--dry-run');
@@ -209,9 +211,9 @@ const sections = {
 const next = {}, gstate = {};
 for (const gr of isOwner ? groupLogs : []) {
   gstate[gr.title] = await groupState(repo, gr);
-  const q = groupQueue(GH_OWNER, gr, records, gstate[gr.title]); if (q) next[gr.title] = q;
+  const q = groupQueue(GH_OWNER, gr, records, gstate[gr.title], W); if (q) next[gr.title] = q;
 }
-const stalled = isOwner ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), { ...(Number(process.env.CLERK_STALLED_DAYS) > 0 && { days: Number(process.env.CLERK_STALLED_DAYS) }), ...(Number(process.env.CLERK_STALLED_CLAIM_DAYS) > 0 && { claimDays: Number(process.env.CLERK_STALLED_CLAIM_DAYS) }) }) : [];
+const stalled = isOwner ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), { ...(Number(process.env.CLERK_STALLED_DAYS) > 0 && { days: Number(process.env.CLERK_STALLED_DAYS) }), ...(Number(process.env.CLERK_STALLED_CLAIM_DAYS) > 0 && { claimDays: Number(process.env.CLERK_STALLED_CLAIM_DAYS) }) }, W) : [];
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const acted = { merge: 0 }; const doneIds = { 5: new Set() };
 const isDec = (n) => n === 1 || n === 3 || n === 4; // record-backed items (3 = exercises: never ratified)

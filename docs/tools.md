@@ -108,19 +108,22 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 
 ## Label contract
 
+What each status, hold, gate and classification means is the work-status set in `packages/programme` (decision f58db200); the label text is the programme's `label-binding` records. This table says who writes and reads each label today.
+
 | Label | Written by | Read by |
 |---|---|---|
 | `ready` | board mirror (`board promote`/`reconcile`), never by hand | queue, unattended-worker, wg-builder, steward |
 | `promote:ready` | `board topup` (intent) or the owner | `board promote`, which sets Status=Ready and the `ready` mirror |
 | `priority: P0` / `P1` / `P2` | `board` (derived from stories and epics; epics from `roadmap`) | queue, unattended-worker (ordering) |
-| `parked` | `roadmap --apply` (epic serves no ranked objective) | queue (held), `board` (excluded) |
-| `blocked` | `board` mirror of open blocked-by edges | queue (held), unattended-worker, wg-builder |
-| `needs-input` | a stopping routine; the human removes it | queue (held), `board` (never reclaimed), wg-steward |
+| `parked` | `roadmap --apply` (epic serves no ranked objective) | queue (held), `board` (excluded), `claim` (refuses) |
+| `blocked` | `board` mirror of open blocked-by edges | queue (held), `board` (excluded), `claim` (refuses), unattended-worker, wg-builder |
+| `needs-input` | a stopping routine (it keeps its claim); the human removes it | queue (held), `board` (never reclaimed), `claim` (refuses), wg-steward |
 | `lane:unattended` | owner or filing agent | queue, unattended-worker |
 | `gate:auto-merge` | PR author per repo rule; wg-reviewer on approve | upkeep (merge when clean; never beside `gate:owner-merge`) |
 | `gate:owner-merge` | PR author or owner | upkeep (keep up to date, never merge, wins over `gate:auto-merge`), clerk Merges section, `desk` (Needs you), wg budget (not counted) |
 | `wg:third-party-ready` | owner or steward on issues; builder on PRs | queue (wg lane), wg-builder, wg-reviewer, upkeep (quorum and budget), wg-steward |
-| `status: in progress` | `clerk claim` or a routine claiming an issue (mirror of board Status); an agent's claim is this label plus the claim comment, never an assignee | `board` reclaim (unassigns the owner from an agent's claim), `claim` (refuses), `desk` (not listed as assigned), unattended-worker |
+| `status: in progress` | `clerk claim` or a routine claiming an issue; `reconcile` moves the board column to match. An agent's claim is this label plus the claim comment, never an assignee | `board` reclaim (unassigns the owner from an agent's claim), `claim` (refuses), `desk` (not listed as assigned), unattended-worker |
+| `status: in review` | `board` stale-claims, when an open PR closes the issue | `claim` (refuses), `board` (back to Ready if the PR closes unmerged) |
 | `desk` | the owner, on exactly one pinned issue in the settings `digest_issue` repo (semanticops.com#35) | `desk --post` (rewrites that issue's body) |
 
 ## Repo lists
