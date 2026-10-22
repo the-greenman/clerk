@@ -47,6 +47,19 @@ test('a parameter rule the server cannot enforce is refused at startup', () => {
   assert.match(checkSpec(s, Object.keys(HANDLERS)).join(), /uses "maxLength", which the server cannot enforce/);
 });
 
+test('an object that does not say whether it is closed is refused', () => {
+  const s = clone();
+  delete s.components.schemas.Settings.additionalProperties;
+  assert.match(opaqueSchemas(s).join(), /Settings \(object not closed: say additionalProperties\)/);
+});
+
+test('a parameter pattern must be anchored, so a value cannot smuggle a second argument', () => {
+  const s = clone();
+  s.paths['/api/clerk/explain'].get.parameters[0].schema.pattern = '[A-Za-z0-9_.-]+#[0-9]+';
+  assert.match(checkSpec(s, Object.keys(HANDLERS)).join(), /needs a pattern anchored with \^ and \$/);
+  for (const r of routes(SPEC)) for (const p of r.params) assert.match(p.pattern, /^\^.*\$$/);
+});
+
 test('the spec is OpenAPI 3.1 with a MAJOR.MINOR.PATCH version', () => {
   assert.match(SPEC.openapi, /^3\.1\./);
   assert.match(SPEC.info.version, /^\d+\.\d+\.\d+$/);

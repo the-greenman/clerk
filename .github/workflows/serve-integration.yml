@@ -1,9 +1,10 @@
 name: Serve integration
 # Tier 2 (docs/service.md): a real clerk serve, real git and the pinned srs CLI against the real srs-programme, read-only.
 # Every GET operation's live response is validated against api/openapi.json: conformance on live output, not fixtures.
+# Pull requests and on demand only: one run costs about 200 GitHub API calls of GITHUB_TOKEN's hourly 1,000.
 on:
-  push:
   pull_request:
+  workflow_dispatch:
 jobs:
   integration:
     runs-on: ubuntu-latest

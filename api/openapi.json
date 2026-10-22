@@ -33,7 +33,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -73,7 +74,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -111,7 +113,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -152,7 +155,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -192,7 +196,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -232,7 +237,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -272,7 +278,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -324,7 +331,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -345,7 +353,7 @@
   "/api/clerk/queue": {
    "get": {
     "operationId": "queue",
-    "summary": "clerk queue",
+    "summary": "clerk queue --json",
     "responses": {
      "200": {
       "description": "ok",
@@ -358,53 +366,14 @@
            "const": true
           },
           "payload": {
-           "$ref": "#/components/schemas/Text"
+           "$ref": "#/components/schemas/Queue"
           }
          },
          "required": [
           "ok",
           "payload"
-         ]
-        }
-       }
-      }
-     },
-     "default": {
-      "description": "refused or failed",
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/Failure"
-        }
-       }
-      }
-     }
-    }
-   }
-  },
-  "/api/clerk/desk": {
-   "get": {
-    "operationId": "desk",
-    "summary": "clerk desk --json",
-    "responses": {
-     "200": {
-      "description": "ok",
-      "content": {
-       "application/json": {
-        "schema": {
-         "type": "object",
-         "properties": {
-          "ok": {
-           "const": true
-          },
-          "payload": {
-           "$ref": "#/components/schemas/Desk"
-          }
-         },
-         "required": [
-          "ok",
-          "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -444,7 +413,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -506,7 +476,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -546,7 +517,8 @@
          "required": [
           "ok",
           "payload"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
       }
@@ -580,7 +552,8 @@
     "required": [
      "code",
      "message"
-    ]
+    ],
+    "additionalProperties": false
    },
    "Failure": {
     "type": "object",
@@ -596,10 +569,11 @@
      }
     },
     "required": [
-     "ok",
-     "errors"
+     "errors",
+     "ok"
     ],
-    "description": "Every refusal and failure."
+    "description": "Every refusal and failure.",
+    "additionalProperties": false
    },
    "Text": {
     "type": "object",
@@ -616,9 +590,11 @@
     },
     "required": [
      "exit",
+     "stderr",
      "text"
     ],
-    "description": "A command that prints text: its exit code is data (clerk check exits 1 on findings)."
+    "description": "A command that prints text: its exit code is data (clerk check exits 1 on findings).",
+    "additionalProperties": false
    },
    "FieldValue": {
     "type": [
@@ -649,11 +625,12 @@
      }
     },
     "required": [
-     "version",
-     "startedAt",
      "repo",
-     "sync"
-    ]
+     "startedAt",
+     "sync",
+     "version"
+    ],
+    "additionalProperties": false
    },
    "SyncStatus": {
     "type": "object",
@@ -696,15 +673,25 @@
      },
      "deskMinutes": {
       "type": "integer"
+     },
+     "clerkUpdated": {
+      "type": "boolean",
+      "description": "The last sync fast-forwarded the clerk itself: the service restarts onto the new code."
      }
     },
     "required": [
-     "notes",
-     "everyMinutes",
+     "at",
+     "clerkUpdated",
+     "deskAt",
      "deskMinutes",
+     "everyMinutes",
+     "head",
+     "ms",
+     "notes",
      "syncing"
     ],
-    "description": "The last sync: when it finished, how long it took, the programme's head, when the desk was last refreshed (on its own, longer cadence: it reads GitHub heavily), and anything that went wrong."
+    "description": "The last sync: when it finished, how long it took, the programme's head, when the desk was last refreshed (on its own, longer cadence: it reads GitHub heavily), and anything that went wrong.",
+    "additionalProperties": false
    },
    "Settings": {
     "type": "object",
@@ -744,10 +731,17 @@
      }
     },
     "required": [
+     "boardProject",
+     "boardStoryRepo",
+     "digestIssue",
      "githubOwner",
+     "governedRepos",
      "ownerActor",
-     "repos"
-    ]
+     "reportIssue",
+     "repos",
+     "title"
+    ],
+    "additionalProperties": false
    },
    "Group": {
     "type": "object",
@@ -781,7 +775,13 @@
         "agentId": {
          "type": "string"
         }
-       }
+       },
+       "additionalProperties": false,
+       "required": [
+        "actor",
+        "agentId",
+        "role"
+       ]
       }
      },
      "quorum": {
@@ -799,7 +799,13 @@
        "requiredSeat": {
         "type": "string"
        }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+       "min",
+       "requiredSeat",
+       "seats"
+      ]
      },
      "budget": {
       "type": "number"
@@ -824,10 +830,20 @@
      }
     },
     "required": [
+     "budget",
+     "cycleClose",
+     "domains",
      "id",
-     "title",
-     "label"
-    ]
+     "label",
+     "logId",
+     "maxUnacked",
+     "members",
+     "quorum",
+     "repos",
+     "roleId",
+     "title"
+    ],
+    "additionalProperties": false
    },
    "Roadmap": {
     "type": "object",
@@ -869,14 +885,20 @@
              "to": {
               "type": "string"
              }
-            }
+            },
+            "additionalProperties": false,
+            "required": [
+             "to",
+             "type"
+            ]
            }
           }
          },
          "required": [
           "key",
           "title"
-         ]
+         ],
+         "additionalProperties": false
         }
        },
        "stages": {
@@ -913,14 +935,20 @@
              "to": {
               "type": "string"
              }
-            }
+            },
+            "additionalProperties": false,
+            "required": [
+             "to",
+             "type"
+            ]
            }
           }
          },
          "required": [
           "key",
           "title"
-         ]
+         ],
+         "additionalProperties": false
         }
        },
        "contracts": {
@@ -957,7 +985,12 @@
              "to": {
               "type": "string"
              }
-            }
+            },
+            "additionalProperties": false,
+            "required": [
+             "to",
+             "type"
+            ]
            }
           },
           "stability": {
@@ -967,7 +1000,8 @@
          "required": [
           "key",
           "title"
-         ]
+         ],
+         "additionalProperties": false
         }
        },
        "assessments": {
@@ -1004,7 +1038,12 @@
              "to": {
               "type": "string"
              }
-            }
+            },
+            "additionalProperties": false,
+            "required": [
+             "to",
+             "type"
+            ]
            }
           },
           "evidence": {
@@ -1020,10 +1059,18 @@
          "required": [
           "key",
           "title"
-         ]
+         ],
+         "additionalProperties": false
         }
        }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+       "assessments",
+       "boundaries",
+       "contracts",
+       "stages"
+      ]
      },
      "activePeriod": {
       "type": "object",
@@ -1040,7 +1087,13 @@
          "null"
         ]
        }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+       "ends_on",
+       "starts_on",
+       "title"
+      ]
      },
      "objectives": {
       "type": "array",
@@ -1062,8 +1115,11 @@
        },
        "required": [
         "id",
+        "rank",
+        "tier",
         "title"
-       ]
+       ],
+       "additionalProperties": false
       }
      },
      "epics": {
@@ -1130,7 +1186,14 @@
              "type": "string"
             }
            }
-          }
+          },
+          "additionalProperties": false,
+          "required": [
+           "answers",
+           "id",
+           "move",
+           "title"
+          ]
          }
         },
         "answers": {
@@ -1159,14 +1222,29 @@
            "personaSuggested": {
             "type": "boolean"
            }
-          }
+          },
+          "additionalProperties": false,
+          "required": [
+           "cluster",
+           "objective",
+           "persona",
+           "problem"
+          ]
          }
         }
        },
        "required": [
+        "number",
+        "objective",
+        "parked",
+        "priority",
+        "rank",
         "ref",
+        "refs",
+        "repo",
         "title"
-       ]
+       ],
+       "additionalProperties": false
       }
      },
      "parked": {
@@ -1177,9 +1255,13 @@
      }
     },
     "required": [
+     "activePeriod",
+     "epics",
      "objectives",
-     "epics"
-    ]
+     "parked",
+     "snapshot"
+    ],
+    "additionalProperties": false
    },
    "Ground": {
     "type": "object",
@@ -1223,9 +1305,27 @@
          "group": {
           "type": "number"
          }
-        }
+        },
+        "additionalProperties": false,
+        "required": [
+         "epic",
+         "group",
+         "issue",
+         "none",
+         "problem",
+         "problem+persona+domain"
+        ]
        }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+       "byLevel",
+       "full",
+       "fullShare",
+       "grounded",
+       "share",
+       "total"
+      ]
      },
      "prs": {
       "type": "array",
@@ -1271,7 +1371,16 @@
           "group": {
            "type": "boolean"
           }
-         }
+         },
+         "additionalProperties": false,
+         "required": [
+          "domain",
+          "epic",
+          "group",
+          "issue",
+          "persona",
+          "problem"
+         ]
         },
         "sp": {
          "type": [
@@ -1281,16 +1390,23 @@
         }
        },
        "required": [
+        "chain",
+        "grounded",
+        "level",
+        "reasons",
         "ref",
-        "level"
-       ]
+        "sp",
+        "title"
+       ],
+       "additionalProperties": false
       }
      }
     },
     "required": [
      "i1",
      "prs"
-    ]
+    ],
+    "additionalProperties": false
    },
    "Desk": {
     "type": "object",
@@ -1325,7 +1441,14 @@
         "why": {
          "type": "string"
         }
-       }
+       },
+       "additionalProperties": false,
+       "required": [
+        "action",
+        "n",
+        "what",
+        "why"
+       ]
       }
      },
      "threads": {
@@ -1348,7 +1471,15 @@
         "who": {
          "type": "string"
         }
-       }
+       },
+       "additionalProperties": false,
+       "required": [
+        "moved",
+        "next",
+        "state",
+        "thread",
+        "who"
+       ]
       }
      },
      "groups": {
@@ -1389,7 +1520,17 @@
           "null"
          ]
         }
-       }
+       },
+       "additionalProperties": false,
+       "required": [
+        "budget",
+        "label",
+        "merged",
+        "pause",
+        "ready",
+        "roleId",
+        "title"
+       ]
       }
      },
      "prs": {
@@ -1482,7 +1623,16 @@
            "review": {
             "type": "string"
            }
-          }
+          },
+          "additionalProperties": false,
+          "required": [
+           "assoc",
+           "at",
+           "body",
+           "url",
+           "user",
+           "userType"
+          ]
          }
         },
         "decisionFiles": {
@@ -1532,7 +1682,18 @@
              "null"
             ]
            }
-          }
+          },
+          "additionalProperties": false,
+          "required": [
+           "instanceId",
+           "kind",
+           "path",
+           "question",
+           "state",
+           "statement",
+           "status",
+           "title"
+          ]
          }
         },
         "issueBody": {
@@ -1570,15 +1731,32 @@
            "del": {
             "type": "number"
            }
-          }
+          },
+          "additionalProperties": false,
+          "required": [
+           "add",
+           "del",
+           "name",
+           "status"
+          ]
          }
         }
        },
        "required": [
-        "repo",
+        "approved",
+        "body",
+        "chain",
+        "checks",
+        "draft",
+        "labels",
+        "mergeState",
         "number",
-        "title"
-       ]
+        "repo",
+        "title",
+        "updatedAt",
+        "url"
+       ],
+       "additionalProperties": false
       }
      },
      "exercises": {
@@ -1595,7 +1773,12 @@
           "null"
          ]
         }
-       }
+       },
+       "additionalProperties": false,
+       "required": [
+        "id",
+        "title"
+       ]
       }
      },
      "assigned": {
@@ -1617,9 +1800,12 @@
         }
        },
        "required": [
+        "createdAt",
         "ref",
-        "title"
-       ]
+        "title",
+        "url"
+       ],
+       "additionalProperties": false
       }
      },
      "needsInput": {
@@ -1641,9 +1827,12 @@
         }
        },
        "required": [
+        "createdAt",
         "ref",
-        "title"
-       ]
+        "title",
+        "url"
+       ],
+       "additionalProperties": false
       }
      },
      "closedPrs": {
@@ -1686,9 +1875,17 @@
         }
        },
        "required": [
+        "author",
+        "body",
+        "closedAt",
+        "labels",
+        "merged",
+        "number",
         "repo",
-        "number"
-       ]
+        "title",
+        "url"
+       ],
+       "additionalProperties": false
       }
      },
      "epics": {
@@ -1746,25 +1943,45 @@
              "type": "string"
             }
            }
-          }
+          },
+          "additionalProperties": false,
+          "required": [
+           "labels",
+           "ref",
+           "state",
+           "title",
+           "url"
+          ]
          }
         }
        },
        "required": [
+        "priority",
+        "rank",
         "ref",
+        "tasks",
         "title"
-       ]
+       ],
+       "additionalProperties": false
       }
      }
     },
     "required": [
-     "now",
-     "owner",
+     "assigned",
+     "closedDays",
+     "closedPrs",
+     "epics",
+     "exercises",
+     "groups",
      "markdown",
      "needs",
+     "needsInput",
+     "now",
+     "owner",
      "prs",
-     "epics"
-    ]
+     "threads"
+    ],
+    "additionalProperties": false
    },
    "Programme": {
     "type": "object",
@@ -1781,13 +1998,31 @@
        "repositoryId": {
         "type": "string"
        },
-       "namespace": {
-        "type": "string"
-       },
        "title": {
         "type": "string"
+       },
+       "description": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "conformance": {
+        "type": [
+         "object",
+         "string",
+         "null"
+        ],
+        "x-clerk-any": "srs repo map's conformance summary, passed through as the srs CLI reports it"
        }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+       "conformance",
+       "description",
+       "repositoryId",
+       "title"
+      ]
      },
      "records": {
       "type": "array",
@@ -1851,7 +2086,9 @@
            "required": [
             "kind",
             "id"
-           ]
+           ],
+           "additionalProperties": false,
+           "description": "An SRS Actor (RFC-046): kind and id, name optional."
           }
          ]
         },
@@ -1869,10 +2106,18 @@
         }
        },
        "required": [
+        "by",
+        "createdAt",
+        "f",
         "id",
+        "label",
+        "ns",
+        "state",
+        "tags",
         "type",
-        "f"
-       ]
+        "updatedAt"
+       ],
+       "additionalProperties": false
       }
      },
      "relations": {
@@ -1895,10 +2140,11 @@
        },
        "required": [
         "id",
-        "type",
         "s",
-        "t"
-       ]
+        "t",
+        "type"
+       ],
+       "additionalProperties": false
       }
      },
      "containers": {
@@ -1937,33 +2183,154 @@
            }
           },
           "required": [
-           "id",
-           "depth"
-          ]
+           "depth",
+           "id"
+          ],
+          "additionalProperties": false
          }
         }
        },
        "required": [
+        "anchor",
         "id",
-        "title",
-        "outline"
-       ]
+        "identity",
+        "outline",
+        "title"
+       ],
+       "additionalProperties": false
       }
      }
     },
     "required": [
+     "containers",
      "extractedAt",
      "records",
      "relations",
-     "containers"
+     "repo",
+     "repository"
     ],
-    "description": "The programme as the clerk projects it from the srs CLI: records with field values, relations, containers with their ordered outlines."
+    "description": "The programme as the clerk projects it from the srs CLI: records with field values, relations, containers with their ordered outlines.",
+    "additionalProperties": false
    },
    "Groups": {
     "type": "array",
     "items": {
      "$ref": "#/components/schemas/Group"
     }
+   },
+   "Queue": {
+    "type": "object",
+    "properties": {
+     "queued": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "ref": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "url": {
+         "type": "string"
+        },
+        "created": {
+         "type": "string"
+        },
+        "priority": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "lanes": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "held": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "created",
+        "held",
+        "lanes",
+        "priority",
+        "ref",
+        "title",
+        "url"
+       ]
+      }
+     },
+     "held": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "ref": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "url": {
+         "type": "string"
+        },
+        "created": {
+         "type": "string"
+        },
+        "priority": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "lanes": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "held": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       },
+       "additionalProperties": false,
+       "required": [
+        "created",
+        "held",
+        "lanes",
+        "priority",
+        "ref",
+        "title",
+        "url"
+       ]
+      }
+     },
+     "unreadable": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "description": "clerk queue --json: what the unattended lane would take next, what is held and why, and the repos it could not read.",
+    "additionalProperties": false,
+    "required": [
+     "held",
+     "queued",
+     "unreadable"
+    ]
    }
   }
  }

@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // clerk serve [--repo <programme>]: the clerk's local service (docs/service.md). One handler per operation of
 // api/openapi.json, no semantics here: each read runs the clerk command of the same name, and the sync job keeps the programme
-// and desk snapshots current. Binds to loopback only (decision e745e9b2); acts need the x-control-room header.
-//   CLERK_PORT (5181)  CLERK_BIND (127.0.0.1; loopback only)  CLERK_SYNC_MINUTES (5; 0 = off)  CLERK_DESK_MINUTES (30)
-//   CLERK_STATE_DIR (~/.local/state/clerk)
+// and desk snapshots current. Binds to a literal loopback address only (decision e745e9b2), answers only requests whose Host
+// header names it (or a name in CLERK_HOSTS, e.g. control.semanticops.com), which stops DNS rebinding, and acts need the
+// x-control-room header. When a sync fast-forwards the clerk itself, it exits 75 so systemd restarts it onto the new code.
+//   CLERK_PORT (5181)  CLERK_BIND (127.0.0.1 or ::1)  CLERK_HOSTS (extra Host names, comma-separated)
+//   CLERK_SYNC_MINUTES (5; 0 = off)  CLERK_DESK_MINUTES (30)  CLERK_STATE_DIR (~/.local/state/clerk)
 import { createServer } from 'node:http';
 import { execFile } from 'node:child_process';
 import { appendFileSync, readFileSync } from 'node:fs';
@@ -15,7 +17,9 @@ import { createSync } from '../lib/adapters/sync.mjs';
 
 const CLERK_DIR = fileURLToPath(new URL('..', import.meta.url)).replace(/\/$/, '');
 export const SPEC = JSON.parse(readFileSync(new URL('../api/openapi.json', import.meta.url), 'utf8'));
-export const LOOPBACK = new Set(['127.0.0.1', '::1', 'localhost']);
+// literal addresses only: a name such as localhost resolves through /etc/hosts, which can point anywhere
+export const LOOPBACK = new Set(['127.0.0.1', '::1']);
+export const RESTART = 75; // EX_TEMPFAIL: systemd's Restart=on-failure brings the service back on the new code
 
 // a clerk command as a child process: its exit code is data, never an exception
 export const execClerk = (live) => (args) => new Promise((done) =>
@@ -41,10 +45,9 @@ export const HANDLERS = {
   settings: json(['settings', '--json']),
   groups: json(['groups', '--json']),
   roadmap: json(['roadmap', '--json']),
-  desk: json(['desk', '--json']),
   explain: text((q) => ['roadmap', '--explain', q.ref]),
   check: text(() => ['check']),
-  queue: text(() => ['queue']),
+  queue: json(['queue', '--json']),
   ground: async (q, ctx) => ((q.ref === undefined) === (q.since === undefined)
     ? fail(error('bad-parameter', 'give exactly one of "ref" or "since"'))
     : json(q.ref ? ['ground', '--pr', q.ref, '--json'] : ['ground', '--since', q.since, '--json'])(q, ctx)),
@@ -52,10 +55,13 @@ export const HANDLERS = {
   deskSnapshot: snapshot('desk'),
 };
 
-const STATUS = { 'unknown-parameter': 400, 'missing-parameter': 400, 'bad-parameter': 400, 'not-found': 404, 'not-synced': 404, 'method-not-allowed': 405, 'act-needs-header': 403 };
+const STATUS = { 'bad-host': 403, 'unknown-parameter': 400, 'missing-parameter': 400, 'bad-parameter': 400, 'not-found': 404, 'not-synced': 404, 'method-not-allowed': 405, 'act-needs-header': 403 };
 
-// the request listener: route by the spec, check the query, guard acts, answer with the envelope
-export function createService({ spec = SPEC, handlers = HANDLERS, clerk, sync, live, actLog = null, startedAt = new Date().toISOString() }) {
+// the Host names a request may carry: the loopback names on our port, plus the names the owner publishes the service under
+export const allowedHosts = (port, extra = []) => new Set([`127.0.0.1:${port}`, `[::1]:${port}`, `localhost:${port}`, ...extra]);
+
+// the request listener: check the Host, route by the spec, check the query, guard acts, answer with the envelope
+export function createService({ spec = SPEC, handlers = HANDLERS, clerk, sync, live, hosts, actLog = null, startedAt = new Date().toISOString() }) {
   const errors = checkSpec(spec, Object.keys(handlers));
   if (errors.length) throw new Error(`api/openapi.json cannot be served:\n  ${errors.join('\n  ')}`);
   const table = routes(spec);
@@ -66,6 +72,8 @@ export function createService({ spec = SPEC, handlers = HANDLERS, clerk, sync, l
       res.end(JSON.stringify(env));
     };
     try {
+      // a page that rebinds its own domain to 127.0.0.1 is same-origin with us but cannot change the Host it sends
+      if (!hosts.has(String(req.headers.host ?? '').toLowerCase())) return send(fail(error('bad-host', `Host "${req.headers.host ?? ''}" is not this service's name`)));
       const url = new URL(req.url, 'http://clerk.local');
       const here = table.filter((r) => r.path === url.pathname);
       if (!here.length) return send(fail(error('not-found', `no operation at ${url.pathname}`)));
@@ -85,17 +93,26 @@ async function main() {
   const argv = process.argv.slice(2), i = argv.indexOf('--repo');
   const live = resolve(i >= 0 ? argv[i + 1] : '.');
   const host = process.env.CLERK_BIND || '127.0.0.1', port = Number(process.env.CLERK_PORT || 5181);
-  if (!LOOPBACK.has(host)) { console.error(`clerk serve: CLERK_BIND=${host} refused: loopback only (127.0.0.1, ::1, localhost), decision e745e9b2`); process.exit(2); }
+  if (!LOOPBACK.has(host)) { console.error(`clerk serve: CLERK_BIND=${host} refused: loopback only (127.0.0.1 or ::1, literal addresses), decision e745e9b2`); process.exit(2); }
+  const hosts = allowedHosts(port, (process.env.CLERK_HOSTS ?? '').split(',').map((h) => h.trim().toLowerCase()).filter(Boolean));
   const stateDir = resolve(process.env.CLERK_STATE_DIR || join(homedir(), '.local', 'state', 'clerk'));
   const everyMinutes = Number(process.env.CLERK_SYNC_MINUTES ?? 5);
-  const sync = createSync({ live, clerkDir: CLERK_DIR, stateDir, everyMinutes, deskMinutes: Number(process.env.CLERK_DESK_MINUTES ?? 30) });
+  const base = createSync({ live, clerkDir: CLERK_DIR, stateDir, everyMinutes, deskMinutes: Number(process.env.CLERK_DESK_MINUTES ?? 30) });
+  let server;
+  // every sync, scheduled or POSTed: if it fast-forwarded the clerk itself, finish the request and restart on the new code
+  const sync = { ...base, syncNow: (o) => base.syncNow(o).then((st) => {
+    if (st.clerkUpdated) { console.log('clerk serve: the sync updated the clerk; exiting to restart on the new code'); server?.close(() => process.exit(RESTART)); }
+    return st;
+  }) };
   const actLog = (entry) => appendFileSync(join(stateDir, 'acts.jsonl'), JSON.stringify(entry) + '\n');
   let listener;
-  try { listener = createService({ clerk: execClerk(live), sync, live, actLog }); }
+  try { listener = createService({ clerk: execClerk(live), sync, live, hosts, actLog }); }
   catch (e) { console.error(`clerk serve: ${e.message}`); process.exit(2); }
-  const server = createServer(listener);
+  server = createServer(listener);
   server.listen(port, host, () => console.log(`clerk serve ${SPEC.info.version}: http://${host.includes(':') ? `[${host}]` : host}:${port}/api/health (programme ${live}; state ${stateDir}; sync every ${everyMinutes || 'never'} min)`));
-  if (everyMinutes > 0) { sync.syncNow({ force: false }); setInterval(() => sync.syncNow({ force: false }), everyMinutes * 60e3).unref(); }
+  // a sync never takes the service down; one that updated the clerk itself restarts it onto the new code (and spec)
+  const scheduled = () => sync.syncNow({ force: false }).catch((e) => console.error(`clerk serve: sync failed: ${e.message}`));
+  if (everyMinutes > 0) { scheduled(); setInterval(scheduled, everyMinutes * 60e3).unref(); }
   for (const s of ['SIGINT', 'SIGTERM']) process.on(s, () => server.close(() => process.exit(0)));
 }
 
