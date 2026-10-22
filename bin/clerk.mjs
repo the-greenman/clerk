@@ -40,6 +40,7 @@ const TOOLS = {
   charter: ['charter.mjs', 'charter a working group as draft/proposed records for the owner to ratify (--dry-run prints the plan)'],
   domains: ['domains.mjs', 'every domain\'s focus, boundary and tensions (--json); affirm-tension <id> with both poles, place-axes <domain> <t1> <t2> <t3> (--dry-run)'],
   groups: ['groups.mjs', 'print the working groups chartered in the records (--json)'],
+  labels: ['labels.mjs', "every governed repo's labels against the programme's bindings: missing, stale, retired, unknown (--apply; --delete-retired --repo-name <r>; --json)"],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
   snapshot: ['snapshot.mjs', 'the programme as one snapshot: records, relations, container outlines (--json)'],
   serve: ['serve.mjs', 'the local service for web clients, on loopback (docs/service.md, api/openapi.json): CLERK_PORT, CLERK_SYNC_MINUTES, CLERK_DESK_MINUTES, CLERK_STATE_DIR'],
