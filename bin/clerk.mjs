@@ -37,6 +37,7 @@ const TOOLS = {
   wt: ['wt', 'create, list and prune git worktrees'],
   settings: ['settings.mjs', 'print the programme settings record (--json)'],
   charter: ['charter.mjs', 'charter a working group as draft/proposed records for the owner to ratify (--dry-run prints the plan)'],
+  domains: ['domains.mjs', 'every domain\'s focus, boundary and tensions (--json); affirm-tension <id> with both poles, place-axes <domain> <t1> <t2> <t3> (--dry-run)'],
   groups: ['groups.mjs', 'print the working groups chartered in the records (--json)'],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
   doctor: ['doctor.mjs', 'self-test where it runs: srs CLI, settings, every repo readable, group state, SRS_ACTOR (--json; --post records it on the digest issue)'],
