@@ -2,6 +2,8 @@
 
 Everything the programme runs, in one place. Programme data lives in srs-programme; code lives here. Scripts take `--repo <programme path>` (default: current directory) where they read the programme repo.
 
+Planned: `clerk serve`, the local service layer that web clients such as the srs-lab control room reach. Its rules, inventory and graduation criterion are in [service.md](service.md); it lands with clerk#97 and is listed below once it does.
+
 ## Commands (`node bin/clerk.mjs <name>`, or `clerk <name>` when linked)
 
 | Command | Purpose | Trigger | Reads | Writes | Called by |
