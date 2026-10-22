@@ -1,0 +1,1970 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "clerk serve",
+  "version": "1.0.0",
+  "description": "The clerk's local service (docs/service.md). One function per operation, no semantics in the server: each read runs the clerk command of the same name. This document is the single source of the contract (decision 46bb7a8c): routes and parameter checks derive from it, clients generate their types from it. Bound to loopback only (decision e745e9b2)."
+ },
+ "servers": [
+  {
+   "url": "http://127.0.0.1:5181"
+  }
+ ],
+ "paths": {
+  "/api/health": {
+   "get": {
+    "operationId": "health",
+    "summary": "The service is up: its version, start time, programme and last sync.",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Health"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/sync": {
+   "get": {
+    "operationId": "syncStatus",
+    "summary": "The last sync.",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/SyncStatus"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "operationId": "syncNow",
+    "summary": "Sync now: fast-forward srs-programme and the clerk when clean, then rewrite the programme and desk snapshots (both, whatever the desk's cadence). Needs the x-control-room header.",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/SyncStatus"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    },
+    "x-clerk-act": true
+   }
+  },
+  "/api/clerk/settings": {
+   "get": {
+    "operationId": "settings",
+    "summary": "clerk settings --json",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Settings"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clerk/groups": {
+   "get": {
+    "operationId": "groups",
+    "summary": "clerk groups --json",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Groups"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clerk/roadmap": {
+   "get": {
+    "operationId": "roadmap",
+    "summary": "clerk roadmap --json",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Roadmap"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clerk/explain": {
+   "get": {
+    "operationId": "explain",
+    "summary": "clerk roadmap --explain <ref>",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Text"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "ref",
+      "in": "query",
+      "required": true,
+      "description": "repo#n",
+      "schema": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.-]+#[0-9]+$"
+      }
+     }
+    ]
+   }
+  },
+  "/api/clerk/check": {
+   "get": {
+    "operationId": "check",
+    "summary": "clerk check (exit 1 means findings)",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Text"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clerk/queue": {
+   "get": {
+    "operationId": "queue",
+    "summary": "clerk queue",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Text"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clerk/desk": {
+   "get": {
+    "operationId": "desk",
+    "summary": "clerk desk --json",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Desk"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/clerk/ground": {
+   "get": {
+    "operationId": "ground",
+    "summary": "clerk ground --pr <ref> | --since <date> --json (exactly one)",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Ground"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "ref",
+      "in": "query",
+      "required": false,
+      "description": "repo#n",
+      "schema": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.-]+#[0-9]+$"
+      }
+     },
+     {
+      "name": "since",
+      "in": "query",
+      "required": false,
+      "description": "YYYY-MM-DD",
+      "schema": {
+       "type": "string",
+       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      }
+     }
+    ]
+   }
+  },
+  "/api/data/programme": {
+   "get": {
+    "operationId": "programmeSnapshot",
+    "summary": "The programme snapshot written by the last sync.",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Programme"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/data/desk": {
+   "get": {
+    "operationId": "deskSnapshot",
+    "summary": "The desk snapshot written by the last sync.",
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Desk"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ]
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "Error": {
+    "type": "object",
+    "properties": {
+     "code": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "code",
+     "message"
+    ]
+   },
+   "Failure": {
+    "type": "object",
+    "properties": {
+     "ok": {
+      "const": false
+     },
+     "errors": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Error"
+      }
+     }
+    },
+    "required": [
+     "ok",
+     "errors"
+    ],
+    "description": "Every refusal and failure."
+   },
+   "Text": {
+    "type": "object",
+    "properties": {
+     "exit": {
+      "type": "integer"
+     },
+     "text": {
+      "type": "string"
+     },
+     "stderr": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "exit",
+     "text"
+    ],
+    "description": "A command that prints text: its exit code is data (clerk check exits 1 on findings)."
+   },
+   "FieldValue": {
+    "type": [
+     "string",
+     "number",
+     "integer",
+     "boolean",
+     "array",
+     "object",
+     "null"
+    ],
+    "x-clerk-any": "An SRS field value: typed by each record's Type, which the clerk does not know."
+   },
+   "Health": {
+    "type": "object",
+    "properties": {
+     "version": {
+      "type": "string"
+     },
+     "startedAt": {
+      "type": "string"
+     },
+     "repo": {
+      "type": "string"
+     },
+     "sync": {
+      "$ref": "#/components/schemas/SyncStatus"
+     }
+    },
+    "required": [
+     "version",
+     "startedAt",
+     "repo",
+     "sync"
+    ]
+   },
+   "SyncStatus": {
+    "type": "object",
+    "properties": {
+     "at": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "ms": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "head": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "notes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "everyMinutes": {
+      "type": "integer"
+     },
+     "syncing": {
+      "type": "boolean"
+     },
+     "deskAt": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "deskMinutes": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "notes",
+     "everyMinutes",
+     "deskMinutes",
+     "syncing"
+    ],
+    "description": "The last sync: when it finished, how long it took, the programme's head, when the desk was last refreshed (on its own, longer cadence: it reads GitHub heavily), and anything that went wrong."
+   },
+   "Settings": {
+    "type": "object",
+    "properties": {
+     "title": {
+      "type": "string"
+     },
+     "githubOwner": {
+      "type": "string"
+     },
+     "governedRepos": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "reportIssue": {
+      "type": "string"
+     },
+     "digestIssue": {
+      "type": "string"
+     },
+     "boardProject": {
+      "type": "number"
+     },
+     "boardStoryRepo": {
+      "type": "string"
+     },
+     "ownerActor": {
+      "type": "string"
+     },
+     "repos": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "githubOwner",
+     "ownerActor",
+     "repos"
+    ]
+   },
+   "Group": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "roleId": {
+      "type": "string"
+     },
+     "label": {
+      "type": "string"
+     },
+     "logId": {
+      "type": "string"
+     },
+     "members": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "actor": {
+         "type": "string"
+        },
+        "role": {
+         "type": "string"
+        },
+        "agentId": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "quorum": {
+      "type": "object",
+      "properties": {
+       "min": {
+        "type": "number"
+       },
+       "seats": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       "requiredSeat": {
+        "type": "string"
+       }
+      }
+     },
+     "budget": {
+      "type": "number"
+     },
+     "cycleClose": {
+      "type": "string"
+     },
+     "maxUnacked": {
+      "type": "number"
+     },
+     "repos": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "domains": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "id",
+     "title",
+     "label"
+    ]
+   },
+   "Roadmap": {
+    "type": "object",
+    "properties": {
+     "snapshot": {
+      "type": "object",
+      "properties": {
+       "boundaries": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "properties": {
+          "key": {
+           "type": "string"
+          },
+          "title": {
+           "type": "string"
+          },
+          "summary": {
+           "type": "string"
+          },
+          "body": {
+           "type": "string"
+          },
+          "issue_ref": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          "links": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "type": {
+              "type": "string"
+             },
+             "to": {
+              "type": "string"
+             }
+            }
+           }
+          }
+         },
+         "required": [
+          "key",
+          "title"
+         ]
+        }
+       },
+       "stages": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "properties": {
+          "key": {
+           "type": "string"
+          },
+          "title": {
+           "type": "string"
+          },
+          "summary": {
+           "type": "string"
+          },
+          "body": {
+           "type": "string"
+          },
+          "issue_ref": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          "links": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "type": {
+              "type": "string"
+             },
+             "to": {
+              "type": "string"
+             }
+            }
+           }
+          }
+         },
+         "required": [
+          "key",
+          "title"
+         ]
+        }
+       },
+       "contracts": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "properties": {
+          "key": {
+           "type": "string"
+          },
+          "title": {
+           "type": "string"
+          },
+          "summary": {
+           "type": "string"
+          },
+          "body": {
+           "type": "string"
+          },
+          "issue_ref": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          "links": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "type": {
+              "type": "string"
+             },
+             "to": {
+              "type": "string"
+             }
+            }
+           }
+          },
+          "stability": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "key",
+          "title"
+         ]
+        }
+       },
+       "assessments": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "properties": {
+          "key": {
+           "type": "string"
+          },
+          "title": {
+           "type": "string"
+          },
+          "summary": {
+           "type": "string"
+          },
+          "body": {
+           "type": "string"
+          },
+          "issue_ref": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          "links": {
+           "type": "array",
+           "items": {
+            "type": "object",
+            "properties": {
+             "type": {
+              "type": "string"
+             },
+             "to": {
+              "type": "string"
+             }
+            }
+           }
+          },
+          "evidence": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          "reality_state": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "key",
+          "title"
+         ]
+        }
+       }
+      }
+     },
+     "activePeriod": {
+      "type": "object",
+      "properties": {
+       "title": {
+        "type": "string"
+       },
+       "starts_on": {
+        "type": "string"
+       },
+       "ends_on": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      }
+     },
+     "objectives": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "rank": {
+         "type": "number"
+        },
+        "tier": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "title"
+       ]
+      }
+     },
+     "epics": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "ref": {
+         "type": "string"
+        },
+        "refs": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "repo": {
+         "type": "string"
+        },
+        "number": {
+         "type": "number"
+        },
+        "title": {
+         "type": "string"
+        },
+        "objective": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "rank": {
+         "type": [
+          "number",
+          "null"
+         ]
+        },
+        "priority": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "parked": {
+         "type": "boolean"
+        },
+        "remedies": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "id": {
+            "type": "string"
+           },
+           "title": {
+            "type": "string"
+           },
+           "move": {
+            "type": "string"
+           },
+           "answers": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           }
+          }
+         }
+        },
+        "answers": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "problem": {
+            "type": "string"
+           },
+           "persona": {
+            "type": "string"
+           },
+           "cluster": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "objective": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "personaSuggested": {
+            "type": "boolean"
+           }
+          }
+         }
+        }
+       },
+       "required": [
+        "ref",
+        "title"
+       ]
+      }
+     },
+     "parked": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "objectives",
+     "epics"
+    ]
+   },
+   "Ground": {
+    "type": "object",
+    "properties": {
+     "i1": {
+      "type": "object",
+      "properties": {
+       "total": {
+        "type": "number"
+       },
+       "grounded": {
+        "type": "number"
+       },
+       "share": {
+        "type": "number"
+       },
+       "full": {
+        "type": "number"
+       },
+       "fullShare": {
+        "type": "number"
+       },
+       "byLevel": {
+        "type": "object",
+        "properties": {
+         "none": {
+          "type": "number"
+         },
+         "issue": {
+          "type": "number"
+         },
+         "problem": {
+          "type": "number"
+         },
+         "problem+persona+domain": {
+          "type": "number"
+         },
+         "epic": {
+          "type": "number"
+         },
+         "group": {
+          "type": "number"
+         }
+        }
+       }
+      }
+     },
+     "prs": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "ref": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "grounded": {
+         "type": "boolean"
+        },
+        "level": {
+         "type": "string"
+        },
+        "reasons": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "chain": {
+         "type": "object",
+         "properties": {
+          "issue": {
+           "type": "boolean"
+          },
+          "problem": {
+           "type": "boolean"
+          },
+          "persona": {
+           "type": "boolean"
+          },
+          "domain": {
+           "type": "boolean"
+          },
+          "epic": {
+           "type": "boolean"
+          },
+          "group": {
+           "type": "boolean"
+          }
+         }
+        },
+        "sp": {
+         "type": [
+          "string",
+          "null"
+         ]
+        }
+       },
+       "required": [
+        "ref",
+        "level"
+       ]
+      }
+     }
+    },
+    "required": [
+     "i1",
+     "prs"
+    ]
+   },
+   "Desk": {
+    "type": "object",
+    "properties": {
+     "now": {
+      "type": "string"
+     },
+     "owner": {
+      "type": "string"
+     },
+     "markdown": {
+      "type": "string",
+      "description": "The desk exactly as `clerk desk` prints it."
+     },
+     "closedDays": {
+      "type": "number"
+     },
+     "needs": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "n": {
+         "type": "string"
+        },
+        "what": {
+         "type": "string"
+        },
+        "action": {
+         "type": "string"
+        },
+        "why": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "threads": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "thread": {
+         "type": "string"
+        },
+        "state": {
+         "type": "string"
+        },
+        "moved": {
+         "type": "string"
+        },
+        "next": {
+         "type": "string"
+        },
+        "who": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "groups": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "title": {
+         "type": "string"
+        },
+        "label": {
+         "type": "string"
+        },
+        "roleId": {
+         "type": "string"
+        },
+        "pause": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "merged": {
+         "type": [
+          "number",
+          "null"
+         ]
+        },
+        "budget": {
+         "type": [
+          "number",
+          "null"
+         ]
+        },
+        "ready": {
+         "type": [
+          "number",
+          "null"
+         ]
+        }
+       }
+      }
+     },
+     "prs": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "repo": {
+         "type": "string"
+        },
+        "number": {
+         "type": "number"
+        },
+        "title": {
+         "type": "string"
+        },
+        "url": {
+         "type": "string"
+        },
+        "draft": {
+         "type": "boolean"
+        },
+        "labels": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "updatedAt": {
+         "type": "string"
+        },
+        "checks": {
+         "enum": [
+          "none",
+          "failing",
+          "pending",
+          "green"
+         ]
+        },
+        "mergeState": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "approved": {
+         "type": "boolean"
+        },
+        "chain": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "body": {
+         "type": "string"
+        },
+        "comments": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "at": {
+            "type": "string"
+           },
+           "user": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "userType": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "assoc": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "body": {
+            "type": "string"
+           },
+           "url": {
+            "type": "string"
+           },
+           "review": {
+            "type": "string"
+           }
+          }
+         }
+        },
+        "decisionFiles": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "path": {
+            "type": "string"
+           },
+           "status": {
+            "type": "string"
+           },
+           "instanceId": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "state": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "title": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "question": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "statement": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "kind": {
+            "type": [
+             "string",
+             "null"
+            ]
+           }
+          }
+         }
+        },
+        "issueBody": {
+         "type": "string"
+        },
+        "additions": {
+         "type": "number"
+        },
+        "deletions": {
+         "type": "number"
+        },
+        "changedFiles": {
+         "type": "number"
+        },
+        "head": {
+         "type": "string"
+        },
+        "author": {
+         "type": "string"
+        },
+        "files": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "name": {
+            "type": "string"
+           },
+           "status": {
+            "type": "string"
+           },
+           "add": {
+            "type": "number"
+           },
+           "del": {
+            "type": "number"
+           }
+          }
+         }
+        }
+       },
+       "required": [
+        "repo",
+        "number",
+        "title"
+       ]
+      }
+     },
+     "exercises": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string"
+        },
+        "title": {
+         "type": [
+          "string",
+          "null"
+         ]
+        }
+       }
+      }
+     },
+     "assigned": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "ref": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "url": {
+         "type": "string"
+        },
+        "createdAt": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "ref",
+        "title"
+       ]
+      }
+     },
+     "needsInput": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "ref": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "url": {
+         "type": "string"
+        },
+        "createdAt": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "ref",
+        "title"
+       ]
+      }
+     },
+     "closedPrs": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "repo": {
+         "type": "string"
+        },
+        "number": {
+         "type": "number"
+        },
+        "title": {
+         "type": "string"
+        },
+        "url": {
+         "type": "string"
+        },
+        "labels": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "merged": {
+         "type": "boolean"
+        },
+        "closedAt": {
+         "type": "string"
+        },
+        "author": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "body": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "repo",
+        "number"
+       ]
+      }
+     },
+     "epics": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "ref": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "priority": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "rank": {
+         "type": [
+          "number",
+          "null"
+         ]
+        },
+        "url": {
+         "type": "string"
+        },
+        "state": {
+         "type": "string"
+        },
+        "updatedAt": {
+         "type": "string"
+        },
+        "tasks": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "ref": {
+            "type": "string"
+           },
+           "title": {
+            "type": "string"
+           },
+           "state": {
+            "type": "string"
+           },
+           "url": {
+            "type": "string"
+           },
+           "labels": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           }
+          }
+         }
+        }
+       },
+       "required": [
+        "ref",
+        "title"
+       ]
+      }
+     }
+    },
+    "required": [
+     "now",
+     "owner",
+     "markdown",
+     "needs",
+     "prs",
+     "epics"
+    ]
+   },
+   "Programme": {
+    "type": "object",
+    "properties": {
+     "extractedAt": {
+      "type": "string"
+     },
+     "repo": {
+      "type": "string"
+     },
+     "repository": {
+      "type": "object",
+      "properties": {
+       "repositoryId": {
+        "type": "string"
+       },
+       "namespace": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       }
+      }
+     },
+     "records": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string"
+        },
+        "label": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "ns": {
+         "type": "string"
+        },
+        "type": {
+         "type": "string"
+        },
+        "state": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "createdAt": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "updatedAt": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "by": {
+         "oneOf": [
+          {
+           "type": "null"
+          },
+          {
+           "type": "object",
+           "properties": {
+            "kind": {
+             "enum": [
+              "human",
+              "ai"
+             ]
+            },
+            "id": {
+             "type": "string"
+            },
+            "name": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "kind",
+            "id"
+           ]
+          }
+         ]
+        },
+        "tags": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "f": {
+         "type": "object",
+         "additionalProperties": {
+          "$ref": "#/components/schemas/FieldValue"
+         }
+        }
+       },
+       "required": [
+        "id",
+        "type",
+        "f"
+       ]
+      }
+     },
+     "relations": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string"
+        },
+        "type": {
+         "type": "string"
+        },
+        "s": {
+         "type": "string"
+        },
+        "t": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "type",
+        "s",
+        "t"
+       ]
+      }
+     },
+     "containers": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        },
+        "anchor": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "identity": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "outline": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "id": {
+            "type": "string"
+           },
+           "depth": {
+            "type": "integer"
+           }
+          },
+          "required": [
+           "id",
+           "depth"
+          ]
+         }
+        }
+       },
+       "required": [
+        "id",
+        "title",
+        "outline"
+       ]
+      }
+     }
+    },
+    "required": [
+     "extractedAt",
+     "records",
+     "relations",
+     "containers"
+    ],
+    "description": "The programme as the clerk projects it from the srs CLI: records with field values, relations, containers with their ordered outlines."
+   },
+   "Groups": {
+    "type": "array",
+    "items": {
+     "$ref": "#/components/schemas/Group"
+    }
+   }
+  }
+ }
+}

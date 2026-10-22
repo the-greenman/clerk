@@ -4,7 +4,7 @@
 
 The first client is the control room in srs-lab, the owner's programme dashboard. The client stays in srs-lab while its views change. This layer exists for semanticops.com#38 (One always-on owner desk; remedy 6858b178), which answers SP-61, SP-63, SP-59 and SP-49.
 
-Status: **planned**. Building starts with clerk#97. The rules cite three decisions proposed in the SemanticOps decision log (two rulings and one escalation the owner has answered), which hold as proposals until a session ratifies them.
+Status: **phase 1 built** (clerk#97): reads, the sync job and the snapshots. Rounds (clerk#98) and method acts (clerk#99) graduate later. The rules cite three decisions proposed in the SemanticOps decision log (two rulings and one escalation the owner has answered), which hold as proposals until a session ratifies them.
 
 ## Where it sits
 
@@ -37,7 +37,8 @@ In clerk#94's layer map, **service** is a transport **beside commands**: both si
    - Network membership is the access control. The service acts with the owner's authority (signed commits, the owner's GitHub token).
    - Acts also need the `x-control-room` header, a guard against other sites driving the browser.
 5. **Never duplicate the shared schedules.** Upkeep, board sync, priority and pages stay in GitHub Actions. The service runs only what is local to the owner.
-6. **`node:http`, no framework.** The one runtime dependency is ajv, which validates requests against the spec at the trust boundary.
+6. **`node:http`, no framework, no runtime dependencies.** srs-programme's workflows and the cloud routines run `node bin/clerk.mjs` from a bare checkout with no `npm install`. So query parameters are checked by `lib/practice/api.mjs`, which derives the checks from the spec and refuses at startup any parameter rule it can't enforce. ajv is a devDependency, used by the tests to validate every response against the spec. Ruling `c04d8164` (proposed); `test/runtime-imports.test.mjs` holds the line.
+7. **Each cadence fits its cost.** The programme snapshot reads only the srs CLI and refreshes every `CLERK_SYNC_MINUTES` (5). The desk reads GitHub heavily, about 150 API calls with several per open PR, so it refreshes every `CLERK_DESK_MINUTES` (30). Refreshing it every 5 minutes exhausted the 5,000-an-hour limit on 2026-10-22. `POST /api/sync` refreshes both.
 
 ## Inventory: the control room's server functions
 
@@ -62,9 +63,41 @@ A capability graduates with tests at every layer it touches. The clerk's convent
 - **Tier 2** (a CI job with `clerk fetch-srs`): a real `clerk serve` and real git against a fixture programme, a local bare remote and a fake `gh` (clerk#97, clerk#98).
 - **Tier 3** (srs-lab CI): the control room as a typed client (srs-lab#7).
 
-## Running it (once clerk#97 lands)
+## Running it
 
-A systemd user unit on the owner's desktop runs `clerk serve` on loopback, with the owner's SSH agent for signed commits and `gh` auth from the user. Caddy publishes the control room. Until clerk#97 lands, `npm run dev:desk` in srs-lab serves the control room on `127.0.0.1:5180`.
+```sh
+clerk serve --repo ~/dev/semanticops/srs-programme     # http://127.0.0.1:5181/api/health
+```
+
+| Variable | Default | What |
+|---|---|---|
+| `CLERK_PORT` | `5181` | the port |
+| `CLERK_BIND` | `127.0.0.1` | loopback only (`127.0.0.1`, `::1`, `localhost`); anything else is refused (decision `e745e9b2`) |
+| `CLERK_SYNC_MINUTES` | `5` | the programme snapshot's cadence; `0` turns the job off |
+| `CLERK_DESK_MINUTES` | `30` | the desk's cadence |
+| `CLERK_STATE_DIR` | `~/.local/state/clerk` | `programme.json`, `desk.json`, `sync.json`, the lock, and `acts.jsonl` (each act, with its remote address) |
+
+The snapshots come from two commands, which also work on their own: `clerk snapshot --json` (the programme) and `clerk desk --json` (the desk as data).
+
+As a systemd user service (`~/.config/systemd/user/clerk-serve.service`, then `systemctl --user enable --now clerk-serve`):
+
+```ini
+[Unit]
+Description=clerk serve: the owner's desk
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/node %h/dev/semanticops/clerk/bin/clerk.mjs serve --repo %h/dev/semanticops/srs-programme
+# signed commits (later acts) and gh need the owner's agent and login
+Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket
+Environment=SRS_CLI_PATH=%h/.cargo/bin/srs
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+```
+
+Caddy publishes the control room at `https://control.semanticops.com`. Until srs-lab#7 points the control room at this service, `npm run dev:desk` in srs-lab still serves the control room with its own sync. Don't run both syncs: the two desk refreshes together exhaust GitHub's rate limit.
 
 ## Not here
 
