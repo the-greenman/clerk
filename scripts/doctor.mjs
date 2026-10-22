@@ -10,6 +10,8 @@ import { loadSettings, issueRef } from '../lib/adapters/settings.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
 import { groupStates } from '../lib/adapters/upkeep.mjs';
 import { loadWorkflow } from '../lib/adapters/workflow.mjs';
+import { list } from '../lib/adapters/github.mjs';
+import { planLabels } from '../lib/practice/labels.mjs';
 import { verdict, healthComment } from '../lib/practice/doctor.mjs';
 import { repoRoot } from './lib/repo-arg.mjs';
 
@@ -32,6 +34,12 @@ if (st) {
   const O = st.githubOwner;
   // the pulls read is what group-state needs, and a private repo not attached to the session 404s here
   for (const r of st.repos) probe(`repo ${r}`, () => { get(`repos/${O}/${r}/pulls?state=all&per_page=1`); });
+  // a bound label missing from a repo is reported, never a failure: routines keep running (a REST label write creates a
+  // missing label, and board-sync heals the mirror set); `clerk labels --apply` creates the rest
+  if (W) for (const r of st.repos) probe(`labels ${r}`, () => {
+    const missing = planLabels(W, list(`repos/${O}/${r}/labels?per_page=100`)).missing.map((l) => l.name);
+    return missing.length ? `warning: missing ${missing.join(', ')} (clerk labels --apply)` : 'in line';
+  });
   for (const [k, ref] of [['report issue', st.reportIssue], ['digest issue', st.digestIssue]]) probe(`${k} ${ref}`, () => { get(`repos/${issueRef(ref, O).path}`); });
   let groups = [];
   if (probe('groups', () => `${(groups = loadGroups(repo, cli)).length} chartered`) && groups.length && W) {

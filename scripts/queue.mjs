@@ -17,7 +17,8 @@ import { refersTo } from "../lib/practice/claim.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
 /** Lane label -> lane name: the general lane, plus one label per chartered working group (from the records). */
-export const lanesFrom = (groups) => ({ "lane:unattended": "general", ...Object.fromEntries(groups.map((g) => [g.label, "wg"])) });
+/** The general lane is the bound unattended-lane label (work_label lane-unattended); each chartered group adds its own. */
+export const lanesFrom = (groups, general) => ({ [general]: "general", ...Object.fromEntries(groups.map((g) => [g.label, "wg"])) });
 
 /** issues: REST issue objects plus `repo`; prs: open PR objects plus `repo`; lanes: lanesFrom(groups); holds: the work_hold labels. Returns ordered queued/held rows. */
 export function classify(issues, prs, LANES, holds) {
@@ -41,9 +42,9 @@ export function classify(issues, prs, LANES, holds) {
 const api = (path) => ghJson(["api", "--paginate", "--slurp", path]).flat();
 
 function fetchAll(OWNER, REPOS, groups, W) {
-  const LANES = lanesFrom(groups), issues = new Map(), prs = [], unreadable = [];
+  const LANES = lanesFrom(groups, W.lane), issues = new Map(), prs = [], unreadable = [];
   for (const repo of REPOS) try {
-    for (const lane of Object.keys(LANES).filter((l) => l === "lane:unattended" || groups.some((g) => g.label === l && g.repos.includes(repo))))
+    for (const lane of Object.keys(LANES).filter((l) => l === W.lane || groups.some((g) => g.label === l && g.repos.includes(repo))))
       for (const i of api(`repos/${OWNER}/${repo}/issues?labels=${encodeURIComponent(`${lane},${W.ready}`)}&state=open&per_page=100`))
         if (!i.pull_request) issues.set(`${repo}#${i.number}`, { ...i, repo });
     prs.push(...api(`repos/${OWNER}/${repo}/pulls?state=open&per_page=100`).map((p) => ({ ...p, repo })));
