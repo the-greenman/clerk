@@ -1,0 +1,31 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json",
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "How this programme shows one definition from the work-status set on its tracker: a GitHub label, a board Status option, or both. The definition holds the meaning; the binding is the programme's presentation of it.",
+  "fields": [
+    {
+      "fieldId": "fe186145-c604-4aac-baa5-486a2fd93b9c",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "c54d2057-e1d3-4b73-b718-91d8ff9521df",
+      "order": 1,
+      "required": true
+    },
+    {
+      "fieldId": "1ac3e920-9628-4e0a-b8b3-2ac8eeeac5ce",
+      "order": 2,
+      "required": false
+    },
+    {
+      "fieldId": "e3747f9d-72f6-42ec-9ae5-671f7e673b87",
+      "order": 3,
+      "required": false
+    }
+  ],
+  "id": "1814db47-e095-44c1-9d91-3f4c8a932b9e",
+  "name": "label-binding",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}
