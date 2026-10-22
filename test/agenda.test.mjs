@@ -14,7 +14,14 @@ test('ratify: proposed and in the main log only', () => {
   assert.deepEqual(A.ratifyItems(recs, log('a', 'b', 'e')).map((r) => r.instanceId), ['a', 'e']);
 });
 test('decide: steward proposals in the group log, not yet in the main log', () => {
-  assert.deepEqual(A.escalationItems(recs, log('a', 'c', 'e', 'f'), log('e')).map((r) => r.instanceId), ['c']);
+  assert.deepEqual(A.escalationItems(recs, log('a', 'c', 'e', 'f'), log('e'), ['agent:tpr-steward']).map((r) => r.instanceId), ['c']);
+});
+test('decide: any group\'s steward seat escalates, not only Third-party ready (clerk#138)', () => {
+  const editor = { members: [{ actor: 'agent:editor-steward', role: 'steward' }, { actor: 'agent:editor-builder', role: 'builder' }] };
+  const rs = [d('g', 'proposed', 'agent:editor-steward'), d('h', 'proposed', 'agent:editor-builder'), d('i', 'proposed', 'agent:tpr-steward')];
+  assert.deepEqual(A.stewardsOf(editor), ['agent:editor-steward']);
+  assert.deepEqual(A.escalationItems(rs, log('g', 'h', 'i'), log(), A.stewardsOf(editor)).map((r) => r.instanceId), ['g']);
+  assert.deepEqual(A.escalationItems(rs, log('g'), log()).map((r) => r.instanceId), [], 'no stewards, no escalations');
 });
 const run = (id, date, chose) => ({ instanceId: id, record: { fieldValues: { title: 'Run ' + date, run_date: date, chose } } });
 const mark = (id, date, body = 'x') => ({ id, body: `<!-- wg-report cycle=${date} -->\n${body}`, created_at: date + 'T11:30:00Z', html_url: 'u' + id });
