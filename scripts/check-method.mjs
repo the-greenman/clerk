@@ -113,6 +113,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   };
   const gates = checkGates(records, relations, members("Affirmed"), members("Set aside"));
   gates.warnings.forEach((w) => console.warn(`! ${w}`));
+  // advisory (SP-94, SP-98, clerk#129): a domain is not fully defined until three of its tensions are placed as axes
+  const { loadField } = await import("../lib/adapters/domain-field.mjs");
+  for (const c of loadField(ROOT, cli).contexts.filter((c) => c.domain && c.axes.length < 3))
+    console.warn(`! domain ${c.title} has ${c.axes.length} of 3 axes placed (clerk domains)`);
   const errors = [...checkMethod(records, relations), ...gates.errors];
   if (errors.length) { errors.forEach((e) => console.error(`✗ ${e}`)); process.exit(1); }
   console.log("✓ method: every tension has 2 poles; every principle governs one tension and leans toward one of its poles.");
