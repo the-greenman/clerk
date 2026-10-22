@@ -1503,10 +1503,18 @@
          ]
         },
         "merged": {
-         "type": [
-          "number",
-          "null"
-         ]
+         "anyOf": [
+          {
+           "type": [
+            "number",
+            "null"
+           ]
+          },
+          {
+           "const": "unknown"
+          }
+         ],
+         "description": "PRs merged this cycle; \"unknown\" when the group's closed PRs could not be read (upkeep's own rule)."
         },
         "budget": {
          "type": [
