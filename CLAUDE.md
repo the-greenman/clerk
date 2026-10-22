@@ -4,7 +4,7 @@ The clerk puts into practice the core practices muDemocracy proposes as essentia
 
 ## Rule
 
-Programme and governance code lives here; programme data never does (srs-programme holds data and settings). srs-web imports `lib/practice`, never reimplements it. `lib/practice` stays pure (no Node built-ins, no `process`), guarded by `test/practice-purity.test.mjs`; I/O lives in `lib/adapters`. The ten clerk rules (decision 926c059f) are checked by `test/clerk-rules.test.mjs` against `test/clerk-rules.allowlist.json`, which only shrinks: a new exception fails the build, and so does a listed one that is fixed but not removed.
+Programme and governance code lives here; programme data never does (srs-programme holds data and settings). srs-web imports `lib/practice`, never reimplements it. `lib/practice` stays pure (no Node built-ins, no `process`), guarded by `test/practice-purity.test.mjs`; I/O lives in `lib/adapters`. The ten clerk rules (decision 926c059f) are checked by `test/clerk-rules.test.mjs` against `test/clerk-rules.allowlist.json`, which only shrinks: a new exception fails the build, and so does a listed one that is fixed but not removed. Rules 4 and 9 hold per-file ceilings (lines, GitHub writes) that may fall but never rise.
 
 Every script, workflow, routine and label: `docs/tools.md`. Add to it when you add one.
 
