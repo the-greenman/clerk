@@ -15,6 +15,7 @@ import { fileURLToPath } from "url";
 
 import { repoRoot } from "./lib/repo-arg.mjs";
 import { loadSettings } from "../lib/adapters/settings.mjs";
+import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { canonOf } from "../lib/practice/canon.mjs";
 const ROOT = repoRoot();
 const NS = "com.semanticops.programme";
@@ -131,11 +132,11 @@ function main(argv) {
       try { if (live) execFileSync(cmd, args, { stdio: soft ? "pipe" : "inherit", env: { ...process.env, ...env } }); }
       catch (e) { if (!(soft && /HTTP 404|Label does not exist/.test(String(e.stderr)))) throw e; } // soft: a label the issue or repo lacks (clerk#42)
     };
-    const OWNER = loadSettings(ROOT).githubOwner;
+    const OWNER = loadSettings(ROOT).githubOwner, PARKED = loadWorkflow(ROOT).parked;
     for (const e of result.epics) {
       if (!e.parked) sh("node", [ghp ?? "$GHP_SCRIPT", "epic", "set", String(e.number), "--priority", e.priority], { GHP_STORY_REPO: e.repo });
-      sh("gh", e.parked ? ["api", "-X", "POST", `repos/${OWNER}/${e.repo}/issues/${e.number}/labels`, "-f", "labels[]=parked"]
-        : ["api", "-X", "DELETE", `repos/${OWNER}/${e.repo}/issues/${e.number}/labels/parked`], {}, !e.parked); // REST, not `gh issue edit` (GraphQL); removing an absent label is a 404, not a failure
+      sh("gh", e.parked ? ["api", "-X", "POST", `repos/${OWNER}/${e.repo}/issues/${e.number}/labels`, "-f", `labels[]=${PARKED}`]
+        : ["api", "-X", "DELETE", `repos/${OWNER}/${e.repo}/issues/${e.number}/labels/${encodeURIComponent(PARKED)}`], {}, !e.parked); // REST, not `gh issue edit` (GraphQL); removing an absent label is a 404, not a failure
     }
   } else console.log(JSON.stringify(result, null, 2));
 }

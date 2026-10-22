@@ -1,0 +1,599 @@
+{
+ "lifecycles": [
+  {
+   "id": "e71e57d2-54cd-41f1-a926-9f8388fd5f5d",
+   "version": 1,
+   "namespace": "com.semanticops.programme",
+   "name": "work_item",
+   "states": [
+    {
+     "id": "21218875-94b2-4156-94ce-0525e1b96c49",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "backlog",
+     "label": "Backlog",
+     "description": "Filed, but not yet judged unblocked, grounded and routed. Routines do not take it. A reopened item returns here.",
+     "isInitial": true
+    },
+    {
+     "id": "8395e6f2-8981-40ff-ba77-52399975a4e7",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "ready",
+     "label": "Ready",
+     "description": "Unblocked, grounded and routed to a lane: one member may claim it. The routines' work queue."
+    },
+    {
+     "id": "ef2a4108-c790-4e0e-a425-ffa083de3e25",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "in_progress",
+     "label": "In progress",
+     "description": "Claimed by one member, who is working it. Nobody else starts it while the claim stands. A stop for a human's input keeps the claim and adds the needs-input hold."
+    },
+    {
+     "id": "47aecc4b-9aa7-4ced-a91c-7c401b200cd2",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "in_review",
+     "label": "In review",
+     "description": "A pull request that closes it is open. It is not claimable while that pull request is open, including while review asks for changes."
+    },
+    {
+     "id": "ada52b66-6406-4e98-8125-a3faf790d40e",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "done",
+     "label": "Done",
+     "description": "Closed: completed (landed, or no code was needed) or not planned (dropped or superseded)."
+    }
+   ],
+   "transitions": [
+    {
+     "id": "cf36c9d4-9cd8-4118-8f91-72e0162b7484",
+     "name": "promote",
+     "from": "backlog",
+     "to": "ready",
+     "description": "Judged unblocked, grounded and routed. Any member may request it; the clerk makes it."
+    },
+    {
+     "id": "37f816bd-d2f6-42d6-89d2-f96986462314",
+     "name": "claim",
+     "from": "ready",
+     "to": "in_progress",
+     "description": "One member claims it through the clerk."
+    },
+    {
+     "id": "1777084e-7ab1-47ee-a194-b9ab6130cdb2",
+     "name": "claim-unfed",
+     "from": "backlog",
+     "to": "in_progress",
+     "description": "The owner's session or a group builder claims an item the feed never promoted."
+    },
+    {
+     "id": "a66542a5-3ac5-4ee1-a041-da36c6af1d9b",
+     "name": "open-pr",
+     "from": "in_progress",
+     "to": "in_review",
+     "description": "A pull request that closes it is open."
+    },
+    {
+     "id": "a132ec3a-6471-4119-8d4d-f0e9619f60be",
+     "name": "reclaim",
+     "from": "in_progress",
+     "to": "ready",
+     "description": "The claim went quiet past the stale-claim window, with no open closing pull request and no needs-input hold."
+    },
+    {
+     "id": "fa48c33c-4a85-4076-b659-01e49a4f3dab",
+     "name": "pr-closed-unmerged",
+     "from": "in_review",
+     "to": "ready",
+     "description": "Its pull request closed without merging and no other is open."
+    },
+    {
+     "id": "c35650c5-1312-4105-9741-abbc17ea2f61",
+     "name": "merge",
+     "from": "in_review",
+     "to": "done",
+     "description": "A merged pull request closed it."
+    },
+    {
+     "id": "cb58c59a-7378-4df9-b64e-92878400bb96",
+     "name": "close-backlog",
+     "from": "backlog",
+     "to": "done",
+     "description": "Closed by hand, not by a merged pull request: no code was needed, not planned, or superseded."
+    },
+    {
+     "id": "5cc96add-7560-42a4-b6ae-c68016984137",
+     "name": "close-ready",
+     "from": "ready",
+     "to": "done",
+     "description": "Closed by hand, not by a merged pull request: no code was needed, not planned, or superseded."
+    },
+    {
+     "id": "ccc3820e-eb10-468e-bc38-e0fe85fddfc0",
+     "name": "close-in-progress",
+     "from": "in_progress",
+     "to": "done",
+     "description": "Closed by hand, not by a merged pull request: no code was needed, not planned, or superseded."
+    },
+    {
+     "id": "dac18501-9a12-46e8-8e61-27b6cd5204c2",
+     "name": "close-in-review",
+     "from": "in_review",
+     "to": "done",
+     "description": "Closed by hand, not by a merged pull request: no code was needed, not planned, or superseded."
+    },
+    {
+     "id": "9b84d8a1-85f9-48ed-b8af-18456c17325c",
+     "name": "reopen",
+     "from": "done",
+     "to": "backlog",
+     "description": "Reopened; it is judged again before it is fed."
+    }
+   ],
+   "initialState": "backlog",
+   "description": "Where a work item is in the flow, from filing to done. Position only: what stops an item is a hold (work_hold), and a hold never moves the position. How a programme shows each state (board column, label) is its own data: label-binding records that bind to these states.",
+   "createdAt": "2026-10-22T00:00:00Z"
+  }
+ ],
+ "vocabularies": [
+  {
+   "id": "183a8ca6-7e5f-430b-a76c-884516131cf7",
+   "version": 1,
+   "namespace": "com.semanticops.programme",
+   "name": "work_label",
+   "mode": "closed",
+   "terms": [
+    {
+     "id": "c00f4e51-70ae-44d6-b6da-0704324f99d5",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "promote-request",
+     "label": "Promote request",
+     "description": "Asks for the promote transition; board-sync makes it."
+    },
+    {
+     "id": "7f5af99c-1150-482f-b13f-220f2bff08c9",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "bug",
+     "label": "Bug",
+     "description": "Something does not work. Bugs ride their own track, never the Ready feed, and are never weaker than P1."
+    },
+    {
+     "id": "8a0231a4-773f-47e7-8914-166546c96dac",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "epic",
+     "label": "Epic",
+     "description": "A tracking item whose sub-issues are the work."
+    },
+    {
+     "id": "b0713cf9-28c0-49c5-85ed-063cb8abe926",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "plan",
+     "label": "Plan",
+     "description": "A design brief, not a work item."
+    },
+    {
+     "id": "355e0c82-19b5-47ab-b740-ac5f266c8680",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "user-story",
+     "label": "User story",
+     "description": "A user-facing story that work serves."
+    },
+    {
+     "id": "719e56d9-fa11-4bbf-adab-4e9539d8efcb",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "lane-unattended",
+     "label": "Unattended lane",
+     "description": "Routines may run it without the owner present."
+    },
+    {
+     "id": "08266227-79fa-4f7b-ac6d-a25a6e4b3491",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "priority-p0",
+     "label": "Priority P0",
+     "description": "Derived priority P0; never set by hand."
+    },
+    {
+     "id": "fffed2dd-f79c-44a8-97c8-ec4eb27100d0",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "priority-p1",
+     "label": "Priority P1",
+     "description": "Derived priority P1; never set by hand."
+    },
+    {
+     "id": "9a931d66-019d-4e2c-a885-f9d088cc9004",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "priority-p2",
+     "label": "Priority P2",
+     "description": "Derived priority P2; never set by hand."
+    },
+    {
+     "id": "963a8b67-1880-43df-bb8c-140666b5b067",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "size-small",
+     "label": "Size small",
+     "description": "Effort estimate: small."
+    },
+    {
+     "id": "b5fced42-e328-47b1-ab1d-a9bb77e01c08",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "size-medium",
+     "label": "Size medium",
+     "description": "Effort estimate: medium."
+    },
+    {
+     "id": "306af961-3e6a-4caa-a71d-e6cf853d85d1",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "size-large",
+     "label": "Size large",
+     "description": "Effort estimate: large."
+    },
+    {
+     "id": "1eb4f6f0-191c-406f-b560-67d936f1fefc",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "size-xl",
+     "label": "Size xl",
+     "description": "Effort estimate: xl."
+    },
+    {
+     "id": "90a69d0a-5821-4f7b-bc08-bb18750f4468",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "critical-path",
+     "label": "Critical path",
+     "description": "On the critical path of a ranked change: raises derived priority one tier."
+    },
+    {
+     "id": "55afe7d4-b98e-4e99-b6fe-7404fde3ddbb",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "blocks-gate",
+     "label": "Blocks a gate",
+     "description": "Blocks a gate: raises derived priority one tier."
+    },
+    {
+     "id": "7e823ebd-9f86-4939-8c96-1250e3a4a8ee",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "regression",
+     "label": "Regression",
+     "description": "Something that worked broke: raises derived priority one tier."
+    },
+    {
+     "id": "2cacbb3d-b5b7-496d-962c-4a4c796ebb93",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "no-code",
+     "label": "No code",
+     "description": "Closed as completed with no code change."
+    },
+    {
+     "id": "bc618dbc-4dc9-412b-97e4-f20cb602e241",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "desk",
+     "label": "Desk",
+     "description": "The owner's desk item."
+    },
+    {
+     "id": "7cbc18c6-4144-4ea1-8bff-f07b4818887a",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "review-requested",
+     "label": "Review requested",
+     "description": "The owner asks the group reviewer to look at a pull request again."
+    }
+   ],
+   "description": "What a work item or pull request is, or who takes it: classification, never position or hold. Also the request that asks for promotion. A working group's own label is its charter's group_label, not a term here.",
+   "createdAt": "2026-10-22T00:00:00Z"
+  },
+  {
+   "id": "36b3c787-7249-4cca-8d4a-51e91efa4dd6",
+   "version": 1,
+   "namespace": "com.semanticops.programme",
+   "name": "merge_gate",
+   "mode": "closed",
+   "terms": [
+    {
+     "id": "c815f578-f3da-4f02-9f17-6cb4213d5142",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "auto-merge",
+     "label": "Auto-merge",
+     "description": "Merges itself once every gate is green: mode clear or complicated, and Door 1 or non-normative. In a working group only its reviewer sets it, with the quorum."
+    },
+    {
+     "id": "d033bfb0-0fbc-4ae3-9bd0-2d66cd3dbc22",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "owner-merge",
+     "label": "Owner merge",
+     "description": "Held for the owner to merge: mode complex, Door 2 or 3, a new dependency, a user-visible product change, or anything the builder is unsure of."
+    }
+   ],
+   "description": "How a pull request may merge. One per gated pull request. The rules for which applies are the owner's (a8bc55ef).",
+   "createdAt": "2026-10-22T00:00:00Z"
+  },
+  {
+   "id": "dcf0ee69-ddda-478d-b5c9-4491d58aad1c",
+   "version": 1,
+   "namespace": "com.semanticops.programme",
+   "name": "work_hold",
+   "mode": "closed",
+   "terms": [
+    {
+     "id": "559fddda-de74-4f42-b643-4810c301aa93",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "needs-input",
+     "label": "Needs input",
+     "description": "Stopped at a question only a human can answer; the question is in the comments. Set by the member who stops; a human answers and clears it."
+    },
+    {
+     "id": "39c9db8d-20e1-48eb-b4e8-93d07349ec30",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "blocked",
+     "label": "Blocked",
+     "description": "Waiting on other work. Derived from blocked-by edges when there are any; set and cleared by hand only for a block outside the tracker, such as a spec RFC not yet accepted."
+    },
+    {
+     "id": "5518c847-05f8-4574-9df3-1c60226c3972",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "parked",
+     "label": "Parked",
+     "description": "Serves no ranked objective in the active period. It returns when a period ranks it, or when ranked work depends on it."
+    }
+   ],
+   "description": "What stops a work item from being fed, claimed or built, whatever its position (work_item). An item that carries any of these is held; removing it lets the item go on from where it was. An assignee or an open pull request is not a hold: it is a position.",
+   "createdAt": "2026-10-22T00:00:00Z"
+  }
+ ],
+ "bindings": [
+  {
+   "binds": "ada52b66-6406-4e98-8125-a3faf790d40e",
+   "binding_status": "active",
+   "board_status": "Done"
+  },
+  {
+   "binds": "21218875-94b2-4156-94ce-0525e1b96c49",
+   "binding_status": "active",
+   "board_status": "Backlog"
+  },
+  {
+   "binds": "39c9db8d-20e1-48eb-b4e8-93d07349ec30",
+   "binding_status": "active",
+   "github_label": "blocked"
+  },
+  {
+   "binds": "55afe7d4-b98e-4e99-b6fe-7404fde3ddbb",
+   "binding_status": "active",
+   "github_label": "blocks-gate"
+  },
+  {
+   "binds": "7f5af99c-1150-482f-b13f-220f2bff08c9",
+   "binding_status": "active",
+   "github_label": "bug"
+  },
+  {
+   "binds": "90a69d0a-5821-4f7b-bc08-bb18750f4468",
+   "binding_status": "active",
+   "github_label": "critical-path"
+  },
+  {
+   "binds": "bc618dbc-4dc9-412b-97e4-f20cb602e241",
+   "binding_status": "active",
+   "github_label": "desk"
+  },
+  {
+   "binds": "8a0231a4-773f-47e7-8914-166546c96dac",
+   "binding_status": "active",
+   "github_label": "epic"
+  },
+  {
+   "binds": "d033bfb0-0fbc-4ae3-9bd0-2d66cd3dbc22",
+   "binding_status": "retired",
+   "github_label": "epic-256:owner-merge"
+  },
+  {
+   "binds": "c815f578-f3da-4f02-9f17-6cb4213d5142",
+   "binding_status": "active",
+   "github_label": "gate:auto-merge"
+  },
+  {
+   "binds": "559fddda-de74-4f42-b643-4810c301aa93",
+   "binding_status": "retired",
+   "github_label": "gate:blocked-owner"
+  },
+  {
+   "binds": "8395e6f2-8981-40ff-ba77-52399975a4e7",
+   "binding_status": "retired",
+   "github_label": "gate:dispatched"
+  },
+  {
+   "binds": "",
+   "binding_status": "retired",
+   "github_label": "gate:external-work"
+  },
+  {
+   "binds": "47aecc4b-9aa7-4ced-a91c-7c401b200cd2",
+   "binding_status": "retired",
+   "github_label": "gate:in-review"
+  },
+  {
+   "binds": "559fddda-de74-4f42-b643-4810c301aa93",
+   "binding_status": "retired",
+   "github_label": "gate:needs-input"
+  },
+  {
+   "binds": "d033bfb0-0fbc-4ae3-9bd0-2d66cd3dbc22",
+   "binding_status": "active",
+   "github_label": "gate:owner-merge"
+  },
+  {
+   "binds": "",
+   "binding_status": "retired",
+   "github_label": "gate:pool"
+  },
+  {
+   "binds": "21218875-94b2-4156-94ce-0525e1b96c49",
+   "binding_status": "retired",
+   "github_label": "gate:queued"
+  },
+  {
+   "binds": "",
+   "binding_status": "retired",
+   "github_label": "gate:session-unit"
+  },
+  {
+   "binds": "ef2a4108-c790-4e0e-a425-ffa083de3e25",
+   "binding_status": "retired",
+   "github_label": "gate:working"
+  },
+  {
+   "binds": "ef2a4108-c790-4e0e-a425-ffa083de3e25",
+   "binding_status": "retired",
+   "github_label": "in-progress"
+  },
+  {
+   "binds": "719e56d9-fa11-4bbf-adab-4e9539d8efcb",
+   "binding_status": "active",
+   "github_label": "lane:unattended"
+  },
+  {
+   "binds": "559fddda-de74-4f42-b643-4810c301aa93",
+   "binding_status": "active",
+   "github_label": "needs-input"
+  },
+  {
+   "binds": "2cacbb3d-b5b7-496d-962c-4a4c796ebb93",
+   "binding_status": "active",
+   "github_label": "no-code"
+  },
+  {
+   "binds": "5518c847-05f8-4574-9df3-1c60226c3972",
+   "binding_status": "active",
+   "github_label": "parked"
+  },
+  {
+   "binds": "b0713cf9-28c0-49c5-85ed-063cb8abe926",
+   "binding_status": "active",
+   "github_label": "plan"
+  },
+  {
+   "binds": "08266227-79fa-4f7b-ac6d-a25a6e4b3491",
+   "binding_status": "active",
+   "github_label": "priority: P0"
+  },
+  {
+   "binds": "fffed2dd-f79c-44a8-97c8-ec4eb27100d0",
+   "binding_status": "active",
+   "github_label": "priority: P1"
+  },
+  {
+   "binds": "9a931d66-019d-4e2c-a885-f9d088cc9004",
+   "binding_status": "active",
+   "github_label": "priority: P2"
+  },
+  {
+   "binds": "c00f4e51-70ae-44d6-b6da-0704324f99d5",
+   "binding_status": "active",
+   "github_label": "promote:ready"
+  },
+  {
+   "binds": "8395e6f2-8981-40ff-ba77-52399975a4e7",
+   "binding_status": "active",
+   "github_label": "ready",
+   "board_status": "Ready"
+  },
+  {
+   "binds": "7e823ebd-9f86-4939-8c96-1250e3a4a8ee",
+   "binding_status": "active",
+   "github_label": "regression"
+  },
+  {
+   "binds": "39c9db8d-20e1-48eb-b4e8-93d07349ec30",
+   "binding_status": "retired",
+   "github_label": "requires-spec-rfc"
+  },
+  {
+   "binds": "7cbc18c6-4144-4ea1-8bff-f07b4818887a",
+   "binding_status": "active",
+   "github_label": "review:requested"
+  },
+  {
+   "binds": "306af961-3e6a-4caa-a71d-e6cf853d85d1",
+   "binding_status": "active",
+   "github_label": "size: large"
+  },
+  {
+   "binds": "b5fced42-e328-47b1-ab1d-a9bb77e01c08",
+   "binding_status": "active",
+   "github_label": "size: medium"
+  },
+  {
+   "binds": "963a8b67-1880-43df-bb8c-140666b5b067",
+   "binding_status": "active",
+   "github_label": "size: small"
+  },
+  {
+   "binds": "1eb4f6f0-191c-406f-b560-67d936f1fefc",
+   "binding_status": "active",
+   "github_label": "size: xl"
+  },
+  {
+   "binds": "b5fced42-e328-47b1-ab1d-a9bb77e01c08",
+   "binding_status": "retired",
+   "github_label": "size:m"
+  },
+  {
+   "binds": "963a8b67-1880-43df-bb8c-140666b5b067",
+   "binding_status": "retired",
+   "github_label": "size:XS"
+  },
+  {
+   "binds": "ada52b66-6406-4e98-8125-a3faf790d40e",
+   "binding_status": "retired",
+   "github_label": "status: done"
+  },
+  {
+   "binds": "ef2a4108-c790-4e0e-a425-ffa083de3e25",
+   "binding_status": "active",
+   "github_label": "status: in progress",
+   "board_status": "In progress"
+  },
+  {
+   "binds": "47aecc4b-9aa7-4ced-a91c-7c401b200cd2",
+   "binding_status": "active",
+   "github_label": "status: in review",
+   "board_status": "In review"
+  },
+  {
+   "binds": "ada52b66-6406-4e98-8125-a3faf790d40e",
+   "binding_status": "retired",
+   "github_label": "superseded"
+  },
+  {
+   "binds": "355e0c82-19b5-47ab-b740-ac5f266c8680",
+   "binding_status": "active",
+   "github_label": "user-story"
+  }
+ ]
+}

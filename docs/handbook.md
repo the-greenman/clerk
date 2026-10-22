@@ -157,8 +157,8 @@ flowchart TD
   EP --> ST["User story<br/>MoSCoW set by a human"]
   ST --> IS["Implementation issue<br/>priority: Pn label (rollup)"]
   IS -->|"topup nominates (promote:ready)"| PR["promote sets Status = Ready<br/>and the ready label"]
-  PR -->|"clerk claim"| IP["In progress<br/>assignee + status: in progress"]
-  IP -->|PR opened| IR[In review]
+  PR -->|"clerk claim"| IP["In progress<br/>status: in progress"]
+  IP -->|PR opened| IR["In review<br/>status: in review"]
   IR -->|merged| DN[Done]
   IP -.->|"idle 3h (stale-claims)"| PR
   IP -.->|"human gate: needs-input"| HU[Waits for a human]
@@ -170,7 +170,7 @@ flowchart TD
 
 **The ready queue.** `topup` keeps about six issues Ready. It nominates the top Backlog candidates in implementation order (epic Priority, started epics first, the `NN` in the title, issue priority, sub-issue position) by writing `promote:ready`. `promote` turns that intent into Status Ready. Blocked issues (an open blocked-by edge, or the `blocked` label), `needs-input` issues and bugs are never nominated. Bugs have their own track: `label:bug`, oldest first.
 
-**One hourly pass.** The srs-programme workflow `board-sync.yml` runs `clerk board sync` every hour: stories sync, rollup, topup, promote, stale claims, reconcile. Only this tool writes Projects v2 fields. Cloud routines cannot reach Projects v2, so they read and write the label mirror (`ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`).
+**One hourly pass.** The srs-programme workflow `board-sync.yml` runs `clerk board sync` every hour: stories sync, rollup, topup, promote, stale claims, reconcile. Only this tool writes Projects v2 fields. Cloud routines cannot reach Projects v2, so they read and write the label mirror: the labels the programme binds to the work-status set (decision f58db200), such as `ready`, `status: in progress`, `status: in review`, `promote:ready`, `blocked` and `needs-input`.
 
 **Claiming.** Before anyone starts, `clerk claim <repo#n> --as <seat>` checks that the issue is open, has no branch, PR or assignee, answers an affirmed problem, falls under a group, and that the actor holds the seat. It then assigns, labels and comments. The same command serves humans, local sessions and routines.
 
@@ -1196,7 +1196,7 @@ What the clerk reads and writes in srs-programme. When a stage changes, these ar
 
 **Defined in**: GitHub (clerk `gh-project.mjs`)
 
-**Meaning**: `ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `wg:*`, `intake` (proposed, clerk#56: a request in a level's input queue), `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.
+**Meaning**: What each status, hold, gate and classification means is the work-status set in the clerk's programme package (decision f58db200); the label text is the programme's `label-binding` records. Today: `ready`, `status: in progress`, `status: in review`, `promote:ready`, `priority: Pn`, `blocked`, `needs-input`, `parked`, `gate:auto-merge`, `gate:owner-merge`, `lane:unattended`, and each group's `wg:*` (from its charter). `intake` is proposed (clerk#56).
 
 **Read by**: `board sync`, `queue`, `claim`, `pr-upkeep`, every routine
 

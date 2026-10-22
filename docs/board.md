@@ -70,7 +70,7 @@ Link at creation: whoever files an implementation issue parents it under the sto
 
 ## Status lifecycle
 
-`Backlog`, `Ready`, `In progress`, `In review`, `Done`. Ready means unblocked. `reconcile --fix` moves any closed issue not already Done to Done. Only the board holds Status; the label mirror below is derived from it.
+`Backlog`, `Ready`, `In progress`, `In review`, `Done`. What each means, and the moves between them, is the `work_item` lifecycle in the clerk's programme package (decision f58db200); what stops an item (needs-input, blocked, parked) is the `work_hold` vocabulary. The column and label names are the programme's `label-binding` records, which every clerk command reads (`lib/adapters/workflow.mjs`). `reconcile --fix` moves any closed issue not already Done to Done, an open one still in Done back to Backlog (reopened), and a claimed one still in Backlog or Ready to In progress (a claim label, written over REST, wins over an earlier column).
 
 Iterations are delivery windows. GitHub has no API to create them: add them in the project UI, and the tool only assigns existing ones (`set --iteration`).
 
@@ -91,13 +91,14 @@ Readiness is split into judgment and a privileged write, so cloud routines (REST
 
 ## The plain-label mirror
 
-Cloud routines cannot read Projects v2 through the web-session proxy, so the board is mirrored to labels they can read and write. `MIRROR_LABELS` in the script is the one definition: `ready`, `priority: P0/P1/P2`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`. (Size labels are created separately, by `size`.)
+Cloud routines cannot read Projects v2 through the web-session proxy, so the board is mirrored to labels they can read and write. The set comes from the programme's label bindings: the Ready, In progress and In review labels, the priorities, the promote request, `blocked` and `needs-input`. (Size labels are created separately, by `size`.)
 
 | Board field | Label | Written by |
 |---|---|---|
 | Priority P0/P1/P2 | `priority: Pn` | `rollup --fix`, `reconcile --fix`, `set --priority` |
 | Status Ready | `ready` | `promote`, `reconcile --fix`, `set --status` |
-| Status In progress | `status: in progress` | `reconcile --fix`, `set --status`; routines write it when they claim |
+| Status In progress | `status: in progress` | `clerk claim` (and so any routine claiming), `reconcile --fix`, `set --status` |
+| Status In review | `status: in review` | `stale-claims` (an open PR closes the issue), `reconcile --fix` |
 
 `reconcile --fix` repairs drift: open Ready or In progress items get the matching label, every other status and every closed issue has both cleared (`status-mirror-stale`); a stale `priority:` label is rewritten (`rollup-stale`). Self-healing: `ensure-labels`, `rollup --fix`, `reconcile --fix`, `topup --fix` and `promote --fix` create any missing mirror label in every mirror repo first, so a routine's `--add-label` cannot hit a missing label. `blocked` and `needs-input` have no board field; they are plain labels.
 
@@ -118,12 +119,13 @@ Nothing else revisits an In progress issue, so `stale-claims` does. It looks at 
 | Case | Action |
 |---|---|
 | `needs-input` label | Never touched; reported |
-| An open PR closes the issue | Board Status to In review, claim label cleared, one comment; never reclaimed however old |
+| An open PR closes the issue | Board Status to In review, the claim label replaced by the In review label, one comment; never reclaimed however old |
+| In review, and no PR that would close it is open any more (closed unmerged) | Status to Ready, `ready` label set, comment |
 | Claim time unresolvable (or PR lookup failed) | Reported `unknown`; no change |
 | Idle at or over the threshold (default 3h, `--hours N`) | Status to Ready, `ready` label set, comment; if the owner is assigned and the latest `Claimed by <actor>` comment names an actor other than `owner_actor`, the owner is unassigned (an agent claim never assigns, clerk#68) |
 | Otherwise | Left alone |
 
-**needs-input.** A session that hits a human gate cannot ask. It comments the specific question, adds `needs-input`, removes `status: in progress`, and stops. The label keeps the issue out of topup, the Ready count and reclaim. A human answers in the comments and removes the label; the next sync feeds it again. To list them, filter a board view by `label:needs-input` (views are UI-only).
+**needs-input.** A session that hits a human gate cannot ask. It comments the specific question, adds `needs-input`, keeps its claim, and stops. The label keeps the issue out of topup, the Ready count and reclaim. A human answers in the comments and removes the label; the next sync feeds it again. To list them, filter a board view by `label:needs-input` (views are UI-only).
 
 ## The bug track
 
