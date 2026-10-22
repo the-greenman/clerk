@@ -7,6 +7,7 @@
 import { parseArgs } from 'node:util';
 import { loadSettings, issueRef } from '../lib/adapters/settings.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
+import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 import { groupStates, repoPRs } from '../lib/adapters/upkeep.mjs';
 import { mergePR, updateBranch, comment } from '../lib/adapters/github.mjs';
 import { upkeepPlan, digestBody } from '../lib/practice/upkeep.mjs';
@@ -17,17 +18,17 @@ catch (e) { console.error(`clerk upkeep: ${e.message}`); process.exit(2); }
 
 let fails = 0;
 const fail = (what, e) => { console.log(`FAIL  ${what}${e ? ` (${String(e.stderr || e.message).trim().split('\n')[0]})` : ''}`); fails++; };
-let st, groups;
-try { st = loadSettings(opts.repo); groups = loadGroups(opts.repo); }
-catch (e) { fail('programme settings or working groups unreadable', e); process.exit(1); }
+let st, groups, gates;
+try { st = loadSettings(opts.repo); groups = loadGroups(opts.repo); gates = loadWorkflow(opts.repo).gates; }
+catch (e) { fail('programme settings, working groups or merge-gate labels unreadable', e); process.exit(1); } // no gate labels: no merge
 
-const G = groupStates(st, groups);
+const G = groupStates(st, groups, gates);
 for (const [l, g] of Object.entries(G)) {
   if (g.merged === 'unknown') fail(`budget count for ${l}`);
   if (/unreadable/.test(g.pause)) fail(`pause check for ${l}`);
 }
-const repos = st.repos.flatMap((r) => { try { return [repoPRs(st.githubOwner, r, Object.keys(G))]; } catch (e) { fail(`list ${r}`, e); return []; } });
-const plan = upkeepPlan(repos, G);
+const repos = st.repos.flatMap((r) => { try { return [repoPRs(st.githubOwner, r, Object.keys(G), gates)]; } catch (e) { fail(`list ${r}`, e); return []; } });
+const plan = upkeepPlan(repos, G, gates);
 
 for (const a of plan.actions) {
   const what = `${a.do} ${a.repo}#${a.number}${a.why ? ` (${a.why})` : ''}`;
@@ -36,7 +37,7 @@ for (const a of plan.actions) {
   catch (e) { fail(what, e); }
 }
 if (opts.digest) {
-  const body = digestBody(plan, G, new Date().toISOString().slice(0, 10)), D = issueRef(st.digestIssue, st.githubOwner);
+  const body = digestBody(plan, G, new Date().toISOString().slice(0, 10), gates), D = issueRef(st.digestIssue, st.githubOwner);
   if (!opts.apply) console.log(`WOULD digest:\n${body}`);
   else try { comment(`${st.githubOwner}/${D.repo}`, D.number, body); console.log('DID   digest'); } catch (e) { fail('digest', e); }
 }
