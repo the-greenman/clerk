@@ -1,0 +1,231 @@
+{
+  "containerId": "8c686bc8-1018-4196-990b-dd62f19a2f92",
+  "title": "Clerk handbook",
+  "identityInstanceId": "9cabd30d-073c-4e13-97dd-586e68e4f12f",
+  "memberInstanceIds": [
+    {
+      "instanceId": "9cabd30d-073c-4e13-97dd-586e68e4f12f"
+    },
+    {
+      "instanceId": "8367bca7-6f1f-4cc7-8dc3-467039927c85"
+    },
+    {
+      "instanceId": "371a41cf-abcf-4748-a438-9a59a27514e2",
+      "depth": 1
+    },
+    {
+      "instanceId": "f4aeabae-4265-4565-a9ef-674ffd867fce",
+      "depth": 1
+    },
+    {
+      "instanceId": "6c84d281-b060-4c31-956c-c4375638ac54",
+      "depth": 1
+    },
+    {
+      "instanceId": "f680d44b-8216-4a87-9935-997412b68a0d",
+      "depth": 1
+    },
+    {
+      "instanceId": "4c5f07db-cb77-4a6a-b14f-5ecd517f5c88",
+      "depth": 1
+    },
+    {
+      "instanceId": "918d8e37-c846-44b1-b466-c976a7e1b213",
+      "depth": 1
+    },
+    {
+      "instanceId": "920c81a5-875a-48c0-aef8-facf3dededa3",
+      "depth": 1
+    },
+    {
+      "instanceId": "bc830bef-38da-42dc-8897-9f34b8a3c11c",
+      "depth": 1
+    },
+    {
+      "instanceId": "321870c9-d3f4-4c83-bc19-5041be41a65a",
+      "depth": 1
+    },
+    {
+      "instanceId": "d62f3797-6060-49fb-a862-89ca7ba3f4b8",
+      "depth": 1
+    },
+    {
+      "instanceId": "9ea1e5b4-3584-4636-9ba8-05a51a984702"
+    },
+    {
+      "instanceId": "6969de3d-6bcb-4d8e-ac72-5f5df4679e6e",
+      "depth": 1
+    },
+    {
+      "instanceId": "2cfd8ff7-59ed-4554-ba42-a70e287b6a1b",
+      "depth": 1
+    },
+    {
+      "instanceId": "22299081-251a-4d77-adc0-6f363db43b4c",
+      "depth": 1
+    },
+    {
+      "instanceId": "95f206d3-daa9-4d0a-9a82-4c90e1817108",
+      "depth": 1
+    },
+    {
+      "instanceId": "ef35de1c-3760-4cf5-ac05-806a2d694e3a",
+      "depth": 1
+    },
+    {
+      "instanceId": "42bdeb70-434d-43ac-a18b-9ae9e1c25123",
+      "depth": 1
+    },
+    {
+      "instanceId": "d87c346e-454e-49bf-965f-92a68a789bd5",
+      "depth": 1
+    },
+    {
+      "instanceId": "e640ef39-dfa8-46a3-abf6-44424b392780",
+      "depth": 1
+    },
+    {
+      "instanceId": "cb665d5b-b412-4293-9830-8952412ae3d0",
+      "depth": 1
+    },
+    {
+      "instanceId": "aa299f91-4d99-4dcd-a988-2d8e771603d6",
+      "depth": 1
+    },
+    {
+      "instanceId": "51dbf821-5392-4d42-85e3-03e704e33d39",
+      "depth": 1
+    },
+    {
+      "instanceId": "fca0a5cf-0eeb-4fcc-949f-ed3b39bbf64a",
+      "depth": 1
+    },
+    {
+      "instanceId": "2935b14f-acc4-4458-bd23-309a7c49c6bb",
+      "depth": 1
+    },
+    {
+      "instanceId": "476048f5-50c6-468c-8010-1bf37d6ca82f",
+      "depth": 1
+    },
+    {
+      "instanceId": "aec56c06-439a-43df-bc38-c6f0c639c7a2",
+      "depth": 1
+    },
+    {
+      "instanceId": "ba0efeed-6e6a-447a-91ed-b33637aa8ac7",
+      "depth": 1
+    },
+    {
+      "instanceId": "d6e2661a-a576-4ebb-8bd7-cb37a9d21daf"
+    },
+    {
+      "instanceId": "badc5ab4-ef80-447b-ad7f-57cf3828411c",
+      "depth": 1
+    },
+    {
+      "instanceId": "423bf68f-93f9-4cfe-9db6-a5f801c662ee",
+      "depth": 1
+    },
+    {
+      "instanceId": "37b3444a-0bfb-4f4a-ab56-ae74fa188d97",
+      "depth": 1
+    },
+    {
+      "instanceId": "057bd24f-e0ce-458b-b827-5899ec00528f",
+      "depth": 1
+    },
+    {
+      "instanceId": "161ff051-74fd-4e29-b238-61af3184cf8a",
+      "depth": 1
+    },
+    {
+      "instanceId": "2a29395b-e29f-4ce0-b28d-45174ebbb6ea",
+      "depth": 1
+    },
+    {
+      "instanceId": "4c5e46c3-f673-47bc-8330-ebdeb85ae517",
+      "depth": 1
+    },
+    {
+      "instanceId": "4c9d6fb2-ad30-4c47-9000-b58147a21e6b",
+      "depth": 1
+    },
+    {
+      "instanceId": "92f6a7ea-d3f3-4ca6-a957-a6d95a240e54",
+      "depth": 1
+    },
+    {
+      "instanceId": "68a3e5b2-271e-42a5-ae2f-1d6b2e575e6a",
+      "depth": 1
+    },
+    {
+      "instanceId": "54c3dc2f-cfc4-4a2b-aa53-561ec80707a3",
+      "depth": 1
+    },
+    {
+      "instanceId": "5cc151a2-5a31-4095-8f57-19eb46160960",
+      "depth": 1
+    },
+    {
+      "instanceId": "609f9d30-c2fd-4e7d-9246-7ae27897220d",
+      "depth": 1
+    },
+    {
+      "instanceId": "4c3bf59a-734e-4f2c-98c3-39bf0df55553",
+      "depth": 1
+    },
+    {
+      "instanceId": "015dbe31-9992-4711-8b0a-ff5ca2efd877",
+      "depth": 1
+    },
+    {
+      "instanceId": "61ab6325-1a86-4eb1-833a-c77a8b53af6a",
+      "depth": 1
+    },
+    {
+      "instanceId": "89b16eda-ea22-44de-998a-fc9ef3a04f13",
+      "depth": 1
+    },
+    {
+      "instanceId": "3ee1cd15-8139-47ac-9f0d-059d8fa88211",
+      "depth": 1
+    },
+    {
+      "instanceId": "77230267-1599-44ce-91ed-d3a86992f5d6",
+      "depth": 1
+    },
+    {
+      "instanceId": "b9a52757-473c-4d09-9f99-0d95e07b643a",
+      "depth": 1
+    },
+    {
+      "instanceId": "afaf498c-6c65-464a-8da0-5d80c6c28cc0",
+      "depth": 1
+    },
+    {
+      "instanceId": "612b7e29-629e-482e-83a6-6088ccf9a34b",
+      "depth": 1
+    },
+    {
+      "instanceId": "4a074c29-eb7d-496c-8ab9-c4662d3898bd",
+      "depth": 1
+    },
+    {
+      "instanceId": "c06c53eb-f67f-4977-9c38-88ed62e32e12",
+      "depth": 1
+    },
+    {
+      "instanceId": "1376e396-77f6-4e7b-b691-ed6775ba9557",
+      "depth": 1
+    },
+    {
+      "instanceId": "aab84865-b6a3-4d95-8b39-a5fcab347e8e",
+      "depth": 1
+    },
+    {
+      "instanceId": "4ba1adbf-ad8c-4214-8c11-0102c162dd48",
+      "depth": 1
+    }
+  ]
+}

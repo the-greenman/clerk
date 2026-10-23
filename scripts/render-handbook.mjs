@@ -5,17 +5,18 @@
 //   node scripts/render-handbook.mjs           # validate, then write docs/handbook.md
 //   node scripts/render-handbook.mjs --check   # exit 1 if docs/handbook.md differs from the records
 //
-// Uses SRS_CLI_PATH (export $(node scripts/fetch-pinned-srs.mjs --repo .)), else `srs` on PATH.
+// Uses SRS_CLI_PATH when set, else the clerk's own pinned build (.github/workflows/validate.yml), never `srs` on PATH.
 
 import { execFileSync } from "child_process";
 import { readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { srsCli } from "../lib/adapters/cli.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const REPO = join(ROOT, "handbook");
 const OUT = join(ROOT, "docs", "handbook.md");
-const SRS = process.env.SRS_CLI_PATH || "srs";
+const SRS = srsCli(ROOT);
 const BANNER = "<!-- Rendered from handbook/ (an SRS repository) by scripts/render-handbook.mjs. Do not edit: change the records. -->\n\n";
 
 const fail = (msg) => { console.error(`handbook: ${msg}`); process.exit(1); };
@@ -34,7 +35,10 @@ function srs(...args) {
 const { summary } = srs("repo", "validate");
 if (summary.errors > 0) fail(`${summary.errors} validation errors (srs repo validate --repo handbook)`);
 
-const { containerId, identityInstanceId } = JSON.parse(readFileSync(join(REPO, "manifest.json"), "utf8")).container;
+// The root container and its identity record, through the CLI (RFC-052: the manifest names the root by rootContainerId).
+const { rootContainerId: containerId, identity } = srs("repo", "navigation").navigation;
+if (!containerId || !identity?.instanceId) fail("repo navigation names no root container or identity record");
+const identityInstanceId = identity.instanceId;
 const composition = srs("composition", "list").compositions.find((c) => c.name === "handbook");
 if (!composition) fail("no composition named handbook in handbook/");
 const { rendered, diagnostics } = srs("render", "composition", "--view", composition.id, "--container", containerId,
