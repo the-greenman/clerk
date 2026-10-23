@@ -48,7 +48,7 @@ Where each one goes. The control room's own copy is deleted when it graduates.
 |---|---|---|
 | Live sync: fast-forward srs-programme and the clerk when clean, re-extract the snapshot and desk, under a pid lock with atomic swaps | stable | **clerk#97**: the service's scheduler |
 | Read allowlist: settings, groups, roadmap, explain, queue, check, desk, ground | stable, all commands | **clerk#97, done**: each endpoint runs the command. JSON where the command prints it (`settings`, `groups`, `roadmap`, `queue`, `ground`); `explain` and `check` return their text and exit code. The desk is served only from its snapshot (`/api/data/desk`): a live desk costs about 150 GitHub calls a request |
-| Desk snapshot (`extract/desk.mjs`: `gatherDesk` and `deskBody`, plus epics with their tasks and PR detail) | stable | **clerk#97, done**: `clerk desk --json` (srs-lab's `CR_CLOSED_DAYS` is `CLERK_CLOSED_DAYS` here) |
+| Desk snapshot (srs-lab's former `extract/desk.mjs`: `gatherDesk` and `deskBody`, plus epics with their tasks and PR detail) | stable | **clerk#97, done**: `clerk desk --json` (`CLERK_CLOSED_DAYS`, formerly srs-lab's `CR_CLOSED_DAYS`); srs-lab's copy deleted in srs-lab#7 |
 | Programme snapshot, record and similar reads | stable, but SRS-generic | **srs**: the service runs the srs CLI. A whole-graph read and lineage are srs-rust#1415 and #1416 |
 | Affirmation rounds (start, publish through the CI gates, finish), the workbench state (`/api/workbench`) and its snapshot (`publishSnapshot`, `dropWorkbenchEntry`) | first real round 2026-10-20 (srs-programme#180) | **clerk#98**, after a second real round |
 | Method acts: affirm, set aside as a human fork, hold for review, restore, comment | corrected after srs-programme#170 | **clerk#99**, next to `scripts/check-method.mjs` |
@@ -61,7 +61,7 @@ A capability graduates with tests at every layer it touches. The clerk's convent
 
 - **Tier 1** (`npm test`): practice, adapters with recording fakes, and the server on an ephemeral port. The cases are listed on clerk#97.
 - **Tier 2** (`serve-integration.yml`, on pull requests and on demand): a real `clerk serve` with the pinned srs against the real srs-programme, read-only (no pulls). Every GET response is validated against the spec. clerk#98 adds a round against a local bare remote and a fake `gh`.
-- **Tier 3** (srs-lab CI): the control room as a typed client (srs-lab#7).
+- **Tier 3** (srs-lab's `.github/workflows/test.yml`, srs-lab#7): the clerk checked out beside srs-lab at its `clerk.pin`; the control room's model tests; its client types regenerated from `api/openapi.json` and diffed; `tsc` over the client; a headless smoke of every view against a stub of this service, with every write intercepted.
 
 ## Running it
 
@@ -100,7 +100,7 @@ RestartSec=2
 WantedBy=default.target
 ```
 
-Caddy publishes the control room at `https://control.semanticops.com`. Until srs-lab#7 points the control room at this service, `npm run dev:desk` in srs-lab still serves the control room with its own sync. Don't run both syncs: the two desk refreshes together exhaust GitHub's rate limit.
+Caddy publishes the control room at `https://control.semanticops.com`. The control room has no sync of its own (srs-lab#7). It reads this service through its dev server, `npm run dev:desk`, which proxies `/api/data`, `/api/sync`, `/api/health` and `/api/clerk` here, and its client is typed from `api/openapi.json`. Keep this service running (the systemd unit above) and the page stays live; without it, the page shows its last committed snapshot under a banner.
 
 ## Not here
 

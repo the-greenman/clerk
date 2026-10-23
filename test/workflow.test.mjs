@@ -23,3 +23,10 @@ test('workflowFrom: a definition the clerk acts on with no active binding stops 
   assert.throws(() => workflowFrom({ ...fixture, bindings: fixture.bindings.filter((b) => b.github_label !== 'gate:owner-merge') }), /owner-merge/);
   assert.throws(() => workflowFrom({ ...fixture, bindings: fixture.bindings.filter((b) => b.github_label !== 'status: in review') }), /in_review/);
 });
+
+test('blocks-ranked is optional: null until the programme binds the work label (clerk#113)', () => {
+  const f = JSON.parse(readFileSync(new URL('./workflow.fixture.json', import.meta.url), 'utf8'));
+  assert.equal(workflowFrom(f).blocksRanked, 'blocks-ranked');
+  const unbound = { ...f, bindings: f.bindings.filter((b) => b.github_label !== 'blocks-ranked') };
+  assert.equal(workflowFrom(unbound).blocksRanked, null);
+});
