@@ -3,9 +3,13 @@ import assert from 'node:assert/strict';
 import { checkClaim, claimAssigns, claimActorOf, claimComment } from '../lib/practice/claim.mjs';
 import { answersOf } from '../lib/practice/grounding.mjs';
 import { fxGroup, tprGroup } from './groups.fixture.mjs';
+import { readFileSync } from 'node:fs';
+import { workflowFrom } from '../lib/practice/workflow.mjs';
+
+const W = workflowFrom(JSON.parse(readFileSync(new URL('./workflow.fixture.json', import.meta.url), 'utf8')));
 
 const issue = { repo: 'fixture', number: 10, state: 'open', labels: [{ name: 'wg:fixture' }], assignees: [], body: 'Answers: SP-901' };
-const base = { issue, groups: [tprGroup, fxGroup], affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder', ownerActor: 'human:ada' };
+const base = { issue, groups: [tprGroup, fxGroup], affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder', ownerActor: 'human:ada', W };
 const why = (o) => checkClaim({ ...base, ...o }).reasons.join('|');
 
 test('a member in the right seat on a grounded, free issue may claim', () => {
@@ -50,4 +54,11 @@ test('only the owner\'s own actor assigns; the claim comment names its actor', (
   assert.equal(claimAssigns('human:ada', undefined), false);
   assert.equal(claimActorOf(claimComment('agent:fx-builder', 'builder', 'WG Fixture', '10-a')), 'agent:fx-builder');
   assert.equal(claimActorOf('no claim here'), null);
+});
+
+test('claim: an item in review or held is not claimed', () => {
+  const withLabels = (...names) => ({ issue: { ...issue, labels: [...issue.labels, ...names.map((name) => ({ name }))] } });
+  assert.match(why(withLabels('status: in review')), /already in review/);
+  assert.match(why(withLabels('needs-input')), /held \(needs-input\)/);
+  assert.match(why(withLabels('parked', 'blocked')), /held \(blocked, parked\)|held \(parked, blocked\)/);
 });

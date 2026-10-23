@@ -1,0 +1,26 @@
+name: Serve integration
+# Tier 2 (docs/service.md): a real clerk serve, real git and the pinned srs CLI against the real srs-programme, read-only.
+# Every GET operation's live response is validated against api/openapi.json: conformance on live output, not fixtures.
+# Pull requests and on demand only: one run costs about 200 GitHub API calls of GITHUB_TOKEN's hourly 1,000.
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: the-greenman/srs-programme
+          path: programme
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - name: Pinned srs CLI (the programme's pin)
+        run: node scripts/fetch-pinned-srs.mjs --repo programme | tee -a "$GITHUB_ENV"
+      - name: Every operation conforms to api/openapi.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run test:integration -- programme

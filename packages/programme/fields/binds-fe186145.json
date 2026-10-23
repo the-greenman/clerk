@@ -1,0 +1,17 @@
+{
+  "aiGuidance": {
+    "purpose": "The definition the label or board column stands for; code branches on this id, never on the label text."
+  },
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "Id of the work_item state or vocabulary term this binding shows.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "fe186145-c604-4aac-baa5-486a2fd93b9c",
+  "name": "binds",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

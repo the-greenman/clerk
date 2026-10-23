@@ -1,0 +1,17 @@
+{
+  "aiGuidance": {
+    "purpose": "Presentation only."
+  },
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "The label text the programme uses on GitHub.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "1ac3e920-9628-4e0a-b8b3-2ac8eeeac5ce",
+  "name": "github_label",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

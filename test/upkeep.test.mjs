@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseQuorum, quorumVerdict, budgetVerdict, cycleStart, countMerged, countOpen, pauseReports, pauseState, routePR, upkeepPlan, digestBody }
   from '../lib/practice/upkeep.mjs';
+const GATES = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' }; // the programme's merge_gate bindings (test/workflow.fixture.json)
 
 const HEAD = '219d484a20b2b4591fd05b1865e92af3b0bebae7';
 const q = ({ builder = 'agent:tpr-builder', reviewer = 'agent:tpr-reviewer', gates = 'green', sha = HEAD, verdict = 'approve', at = '2026-10-12T11:00:00Z', assoc = 'OWNER' } = {}) =>
@@ -53,8 +54,8 @@ test('delegated merges and open PRs are counted; owner merges are not', () => {
   const pr = (merged_at, state, labels) => ({ merged_at, state, labels: labels.map((name) => ({ name })) });
   const L = 'wg:third-party-ready', prs = [pr('2026-10-09T12:00:00Z', 'closed', [L]), pr('2026-10-09T12:00:00Z', 'closed', [L, 'gate:owner-merge']),
     pr('2026-10-09T10:00:00Z', 'closed', [L]), pr(null, 'closed', [L]), pr('2026-10-09T12:00:00Z', 'closed', []), pr(null, 'open', [L])];
-  assert.equal(countMerged(prs, L, '2026-10-09T11:30:00Z'), 1);
-  assert.equal(countOpen(prs, L), 1);
+  assert.equal(countMerged(prs, L, '2026-10-09T11:30:00Z', GATES), 1);
+  assert.equal(countOpen(prs, L, GATES), 1);
 });
 
 const rep = (id, group, assoc = 'OWNER') => ({ id, body: `<!-- wg-report cycle=2026-10-0${id}${group ? ` group=${group}` : ''} -->\nreport`, created_at: `2026-10-0${id}T11:30:00Z`, author_association: assoc });
@@ -74,7 +75,7 @@ test('a group pauses when its latest reports are all unacknowledged', () => {
   assert.equal(pauseState([], new Set(), undefined), 'paused: no pause limit in the charter');
 });
 
-const ctx = { groupLabels: ['wg:x'], defaultBranch: 'main' };
+const ctx = { groupLabels: ['wg:x'], defaultBranch: 'main', gates: GATES };
 const P = (labels, state = 'CLEAN', more = {}) => ({ labels, state, base: 'main', draft: false, autoMerge: false, ...more });
 test('routing: exact labels; owner merge always wins and never merges', () => {
   assert.equal(routePR(P(['gate:auto-merge']), ctx).action, 'merge');
@@ -105,7 +106,7 @@ test('a run: group merges need quorum, budget and no pause, and use up budget as
     pr(4, ['wg:x']),                                                        // not yet reviewed
     pr(5, ['gate:auto-merge', 'gate:owner-merge']),                         // escalated
     pr(6, ['gate:auto-merge']), pr(7, [], { state: 'DIRTY' }),
-  ] }], groups);
+  ] }], groups, GATES);
   assert.deepEqual(plan.actions.map((a) => [a.do, a.number, a.sha]), [['merge', 1, HEAD], ['merge', 6, HEAD]]);
   assert.deepEqual(plan.waits['wg:x'], ['r#2 pr 2 (over budget (2 of 2 merged this cycle))', 'r#3 pr 3 (could not read comments)', 'r#4 pr 4 (awaiting group review)']);
   assert.deepEqual(plan.conflicts, ['r#7 pr 7']);
@@ -113,10 +114,24 @@ test('a run: group merges need quorum, budget and no pause, and use up budget as
   assert.equal(plan.merged['wg:x'], 2);
   assert.equal(groups['wg:x'].merged, 1, 'the input is not changed');
 
-  const paused = upkeepPlan([{ repo: 'r', defaultBranch: 'main', prs: [pr(1, ['wg:x', 'gate:auto-merge'], { comments: [q()] })] }], { 'wg:x': { budget: 9, merged: 0, pause: 'paused: 2 reports unacknowledged' } });
+  const paused = upkeepPlan([{ repo: 'r', defaultBranch: 'main', prs: [pr(1, ['wg:x', 'gate:auto-merge'], { comments: [q()] })] }], { 'wg:x': { budget: 9, merged: 0, pause: 'paused: 2 reports unacknowledged' } }, GATES);
   assert.deepEqual(paused.actions, []);
   assert.deepEqual(paused.waits['wg:x'], ['r#1 pr 1 (paused: 2 reports unacknowledged)']);
-  const behind = upkeepPlan([{ repo: 'r', defaultBranch: 'main', prs: [pr(1, ['wg:x', 'gate:auto-merge'], { comments: [q()], state: 'BEHIND' })] }], { 'wg:x': { budget: 9, merged: 0, pause: 'ok' } });
+  const behind = upkeepPlan([{ repo: 'r', defaultBranch: 'main', prs: [pr(1, ['wg:x', 'gate:auto-merge'], { comments: [q()], state: 'BEHIND' })] }], { 'wg:x': { budget: 9, merged: 0, pause: 'ok' } }, GATES);
   assert.deepEqual(behind.waits['wg:x'], ['r#1 pr 1 (quorum ok, waiting for state BEHIND)'], 'a group PR is never updated here');
-  assert.match(digestBody(plan, groups, '2026-10-20'), /Working group: running - waiting \(`wg:x`, 2 of 2 merged this cycle\):\n- r#2/);
+  assert.match(digestBody(plan, groups, '2026-10-20', GATES), /Working group: running - waiting \(`wg:x`, 2 of 2 merged this cycle\):\n- r#2/);
+});
+
+test('upkeep reads its gate labels from the bindings, so a renamed gate still routes and the old name no longer merges', () => {
+  const renamed = { ...ctx, gates: { auto: 'merge:auto', owner: 'merge:owner' } };
+  const P2 = (labels) => ({ labels, draft: false, base: 'main', state: 'CLEAN', autoMerge: false });
+  assert.equal(routePR(P2(['merge:auto']), renamed).action, 'merge');
+  assert.equal(routePR(P2(['merge:owner']), renamed).kind, 'owner');
+  assert.equal(routePR(P2(['gate:auto-merge']), renamed).action, null, 'an unbound label is not a gate');
+});
+
+test('upkeep refuses to route without both gate labels: no merge rule runs on a partial set', () => {
+  const P2 = { labels: ['gate:auto-merge', 'gate:owner-merge'], draft: false, base: 'main', state: 'CLEAN', autoMerge: false };
+  assert.throws(() => routePR(P2, { ...ctx, gates: { auto: 'gate:auto-merge' } }), /merge-gate labels missing/);
+  assert.throws(() => upkeepPlan([{ repo: 'r', defaultBranch: 'main', prs: [P2] }], {}), /merge-gate labels missing/);
 });

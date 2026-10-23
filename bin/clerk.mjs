@@ -17,6 +17,7 @@ import { authorise, resolveContext, quorum, quorumText, rolesFor } from '../lib/
 import { loadGroups } from '../lib/adapters/groups.mjs';
 import { openPRsLabelled, mergePR } from '../lib/adapters/github.mjs';
 import { loadReports, loadReportComments, groupQueue, loadStalled } from '../lib/adapters/agenda.mjs';
+import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -37,11 +38,16 @@ const TOOLS = {
   wt: ['wt', 'create, list and prune git worktrees'],
   settings: ['settings.mjs', 'print the programme settings record (--json)'],
   charter: ['charter.mjs', 'charter a working group as draft/proposed records for the owner to ratify (--dry-run prints the plan)'],
+  domains: ['domains.mjs', 'every domain\'s focus, boundary and tensions (--json); affirm-tension <id> with both poles, place-axes <domain> <t1> <t2> <t3> (--dry-run)'],
   groups: ['groups.mjs', 'print the working groups chartered in the records (--json)'],
+  labels: ['labels.mjs', "every governed repo's labels against the programme's bindings: missing, stale, retired, unknown (--apply; --delete-retired --repo-name <r>; --json)"],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
+  snapshot: ['snapshot.mjs', 'the programme as one snapshot: records, relations, container outlines (--json)'],
+  serve: ['serve.mjs', 'the local service for web clients, on loopback (docs/service.md, api/openapi.json): CLERK_PORT, CLERK_SYNC_MINUTES, CLERK_DESK_MINUTES, CLERK_STATE_DIR'],
+  doctor: ['doctor.mjs', 'self-test where it runs: srs CLI, settings, every repo readable, group state, SRS_ACTOR (--json; --post records it on the digest issue)'],
 };
 if (argv[0] === 'help' || argv[0] === '--help') {
-  console.log('clerk: act by role on an SRS programme.\n\n  session|comment   hold a session or post comments (clerk session --repo <path> --as <role>)\n  (no subcommand)   the interactive agenda (clerk --repo <path> --as <role>)\n  desk              print the owner\'s desk; --post rewrites the pinned `desk` issue in place (--dry-run prints what it would write)');
+  console.log('clerk: act by role on an SRS programme.\n\n  session|comment   hold a session or post comments (clerk session --repo <path> --as <role>)\n  (no subcommand)   the interactive agenda (clerk --repo <path> --as <role>)\n  desk              print the owner\'s desk; --post rewrites the pinned `desk` issue in place (--dry-run prints what it would write); --json prints it as data');
   for (const [k, [, d]] of Object.entries(TOOLS)) console.log(`  ${k.padEnd(17)} ${d}`);
   console.log('\nTools take --repo <programme path> (default: current directory). See docs/tools.md.');
   process.exit(0);
@@ -59,6 +65,13 @@ if (TOOLS[argv[0]] || argv[0] === 'desk') {
   if (argv[0] === 'desk') { // read-only unless --post; reading needs no role
     const repo = resolve(argv.includes('--repo') ? argv[argv.indexOf('--repo') + 1] : '.');
     try {
+      if (argv.includes('--json')) { // the desk as data for clients (clerk serve, the control room); never posts
+        const { deskDetail } = await import('../lib/adapters/desk-detail.mjs');
+        // exit only once stdout has drained: process.exit() right after a large write to a pipe truncates it
+        const out = JSON.stringify(await deskDetail(repo)) + '\n';
+        await new Promise((done) => process.stdout.write(out, done));
+        process.exit(0);
+      }
       const { gatherDesk, findDeskIssue, postDesk } = await import('../lib/adapters/desk.mjs');
       const { deskBody } = await import('../lib/practice/desk.mjs');
       const post = argv.includes('--post'), dry = argv.includes('--dry-run');
@@ -85,6 +98,7 @@ const repo = resolve(arg('--repo') ?? die('--repo is required'));
 const cli = srsCli(repo);
 let settings; try { settings = loadSettings(repo, cli); } catch (e) { die(e.message); }
 let groups; try { groups = loadGroups(repo, cli); } catch (e) { die(e.message); }
+let W; try { W = loadWorkflow(repo, cli); } catch (e) { die(e.message); }
 let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR, settings.ownerActor, rolesFor(groups)); } catch (e) { die(e.message); }
 const isOwner = arg('--as') === 'owner';
 const dryRun = argv.includes('--dry-run');
@@ -154,14 +168,14 @@ if (sub) {
       const reply = arg('--reply-to') && (() => { const m = commentRecs.filter((c) => c.instanceId.startsWith(arg('--reply-to'))); if (m.length !== 1) throw new Error(`no single comment matches "${arg('--reply-to')}"`); return m[0].instanceId; })();
       take(choices, item(find(arg('--on') ?? die('--on <decision id> is required'))), { comment: { text: arg('--text') ?? die('--text is required'), replyTo: reply, cite: arg('--cite'), role: arg('--role-of-cite') } });
     }
-    if (argv[0] === 'comment') { postComments({ cli, programme, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by') }); process.exit(0); } // discussion between sessions: no session record, no quorum
+    if (argv[0] === 'comment') { postComments({ cli, programme, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by'), autoMerge: W.gates.auto }); process.exit(0); } // discussion between sessions: no session record, no quorum
     args('--set-aside').forEach((p) => takeAct(item(pick(p)), { action: 'setaside' }));
     args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => takeAct(item(r), { action: 'ratify' }));
     args('--consider').forEach((p) => takeAct(item(find(p)), {}));
     const [fs, ts] = [args('--field'), args('--text')];
     args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); takeAct(item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
     if (dryRun) console.log(quorumText(quorumNow()));
-    endSession({ cli, programme, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by') });
+    endSession({ cli, programme, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by'), autoMerge: W.gates.auto });
   } catch (e) { die(e.message); }
   process.exit(0);
 }
@@ -191,9 +205,9 @@ if (TTY) {
 }
 const show = (ls) => console.log('\n' + ls.join('\n'));
 
-const owner = isOwner ? gh(['api', 'user', '-q', '.login']).trim() : '';
+const owner = isOwner ? JSON.parse(gh(['api', 'user'])).login : '';
 const { reports, acked } = isOwner ? loadReportComments(REPORT_ISSUE, owner) : { reports: [], acked: new Set() };
-const prs = !isOwner ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, 'gate:owner-merge'); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
+const prs = !isOwner ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, W.gates.owner); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
 
 // Order follows a meeting: decisions since the last session, reports, decisions for this session, merges.
 const sections = {
@@ -201,15 +215,15 @@ const sections = {
   2: { name: 'Reports', items: isOwner ? runReports.flatMap((rr, i) => A.reportItems(rr.records, receivedIds, reports.filter((c) => runReports.some((x) => x.label === A.reportGroup(c)) ? A.reportGroup(c) === rr.label : !i), acked, rr.group)) : [] }, // one report issue per programme: a comment goes to the group its marker tags, else (untagged or unknown tag) to the first group, as on the desk
   3: { name: 'Exercises', items: A.exerciseItems(exerciseRecs, mainLog) },
   4: { name: 'Decisions for this session', items: isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog)) : [] },
-  5: { name: 'Merges', items: A.mergeItems(prs) },
+  5: { name: 'Merges', items: A.mergeItems(prs, W.gates.owner) },
 };
 // Next: the queue behind each group, live via gh REST (owner only; tolerant of failure). State: its pause, merged and budget.
 const next = {}, gstate = {};
 for (const gr of isOwner ? groupLogs : []) {
   gstate[gr.title] = await groupState(repo, gr);
-  const q = groupQueue(GH_OWNER, gr, records, gstate[gr.title]); if (q) next[gr.title] = q;
+  const q = groupQueue(GH_OWNER, gr, records, gstate[gr.title], W); if (q) next[gr.title] = q;
 }
-const stalled = isOwner ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), { ...(Number(process.env.CLERK_STALLED_DAYS) > 0 && { days: Number(process.env.CLERK_STALLED_DAYS) }), ...(Number(process.env.CLERK_STALLED_CLAIM_DAYS) > 0 && { claimDays: Number(process.env.CLERK_STALLED_CLAIM_DAYS) }) }) : [];
+const stalled = isOwner ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), { ...(Number(process.env.CLERK_STALLED_DAYS) > 0 && { days: Number(process.env.CLERK_STALLED_DAYS) }), ...(Number(process.env.CLERK_STALLED_CLAIM_DAYS) > 0 && { claimDays: Number(process.env.CLERK_STALLED_CLAIM_DAYS) }) }, W) : [];
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const acted = { merge: 0 }; const doneIds = { 5: new Set() };
 const isDec = (n) => n === 1 || n === 3 || n === 4; // record-backed items (3 = exercises: never ratified)
@@ -326,6 +340,6 @@ const keep = async () => {
   return (await ask(`type "discard" to drop all ${choices.length} item(s), anything else records them > `)).trim().toLowerCase() !== 'discard';
 };
 if (choices.length && (dryRun || await keep()))
-  endSession({ cli, programme, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
+  endSession({ cli, programme, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by'), autoMerge: W.gates.auto });
 else if (choices.length) console.log('Nothing recorded.');
 if (!TTY) process.stdin.destroy(); // piped mode: end the line reader so the process exits

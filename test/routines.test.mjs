@@ -32,3 +32,13 @@ test('each drift kind', () => {
     'record-trigger-disabled:j-off', 'record-without-trigger:j-none', 'stale-check-in:t-ci', 'trigger-without-record:t-orphan',
   ].sort());
 });
+
+test('sources-missing and unknown-clerk-command catch the 2026-10-21 agent-editor builder', () => {
+  const prompt = 'Read routines/a.md in the-greenman/clerk; use the repos in `clerk groups --json` for wg:x; eval "$(node /tmp/clerk/bin/clerk.mjs groups --env wg:x --repo <p>)" before wg_pause_check. Then `clerk nope`.';
+  const triggers = [{ ...T('t-b', 'Builder', true, prompt), sources: ['srs', 'clerk'] }];
+  const jobs = [{ id: 'j-b', title: 'Builder job', routine_id: 't-b', brief: 'routines/a.md' }];
+  const commands = { groups: 'const a = parseArgs({ options: { json: { type: "boolean" } } }); // --repo' };
+  const drift = checkRoutines({ triggers, jobs, briefs, repos: ['srs', 'srs-context', 'clerk'], commands }).map((d) => `${d.kind}: ${d.detail}`);
+  assert.deepEqual(drift, ['sources-missing: Builder: attach srs-context', 'unknown-clerk-command: Builder: clerk groups --env', 'unknown-clerk-command: Builder: clerk nope']);
+  assert.deepEqual(checkRoutines({ triggers: [{ ...triggers[0], prompt: thinPrompt('routines/a.md'), sources: ['srs', 'srs-context', 'clerk'] }], jobs, briefs, repos: ['srs', 'srs-context', 'clerk'], commands }), []);
+});

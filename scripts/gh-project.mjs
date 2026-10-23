@@ -74,6 +74,8 @@ import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { claimActorOf } from "../lib/practice/claim.mjs";
+import { loadWorkflow } from "../lib/adapters/workflow.mjs";
+import { workflowFrom, labelDescription } from "../lib/practice/workflow.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
@@ -82,6 +84,16 @@ import { claimActorOf } from "../lib/practice/claim.mjs";
 const SETTINGS = process.env.GHP_OWNER && process.env.GHP_PROJECT && process.env.GHP_STORY_REPO && process.env.GHP_MIRROR_REPOS ? {} : (() => {
   try { return loadSettings(resolve(process.env.CLERK_REPO || process.cwd())); } catch { return {}; }
 })();
+// The work-status set (decision f58db200): every status label and board column below comes from the programme's
+// definitions and label bindings, read from CLERK_REPO or the cwd (GHP_WORKFLOW_FILE: a JSON fixture, for the tests).
+// Unreadable => every command that acts on statuses dies in main; nothing falls back to a built-in label.
+const WF = (() => {
+  try {
+    if (process.env.GHP_WORKFLOW_FILE) return workflowFrom(JSON.parse(readFileSync(process.env.GHP_WORKFLOW_FILE, "utf8")));
+    return loadWorkflow(resolve(process.env.CLERK_REPO || process.cwd()));
+  } catch (e) { return { error: e.message, columns: {}, statusLabels: {}, holds: [], isHeld: () => false, labels: [] }; }
+})();
+const COL = WF.columns; // work_item state key -> board column
 const OWNER = process.env.GHP_OWNER || SETTINGS.githubOwner;
 // The owner's human actor (settings owner_actor): a reclaimed claim by anyone else had no business assigning OWNER (clerk#68).
 const OWNER_ACTOR = process.env.GHP_OWNER_ACTOR || SETTINGS.ownerActor;
@@ -101,47 +113,32 @@ const BUG_FLOOR = "P1"; // bugs are fixed ASAP even with no story
 // Explicit, auditable bump signals (label names). A match bumps one tier (cap P0).
 const BUMP_LABELS = new Set(["critical-path", "blocks-gate", "regression"]);
 
-// Canonical plain-label mirror set. The scheduled cloud routines read/write these
-// (they can't use Projects v2 GraphQL through the web-session proxy), so every repo a
-// routine touches must carry the full set — otherwise a `gh issue edit --add-label`
-// hard-fails and the routine dies. This tool is the single source of truth for the set
-// and creates any missing labels on demand (`ensure-labels`, and `rollup --fix` /
-// `reconcile --fix`) so it can't drift. (#335)
+// The plain-label mirror set. The scheduled cloud routines read/write these (they can't use Projects v2 GraphQL through
+// the web-session proxy). The names come from the programme's label bindings; this tool creates any missing ones on
+// demand (`ensure-labels`, and `rollup --fix` / `reconcile --fix`). (#335)
 //
-// `promote:ready` is the promotion INTENT signal (not a mirror of any board field). A REST-only
-// judge — the progress-review cloud routine, a human, or a future rule — marks an unblocked issue
-// with it; it CANNOT set the board Status through the proxy. The `promote` command (run where
-// Projects v2 is reachable: CI/local) converts that intent into the source of truth (board
-// Status=Ready) and clears it. Kept distinct from `ready` so `reconcile`'s Status→label mirror
-// never fights the judge: the judge writes `promote:ready`, the mirror owns `ready`.
-const PROMOTE_INTENT_LABEL = "promote:ready";
-// `needs-input` (#715) — an automatic session that hits a HUMAN GATE (a decision, a missing
-// secret, an ambiguity it must not guess at) cannot ask a question; this label is where that
-// state lives. The stopping agent writes the question as an issue comment, adds `needs-input`,
-// and removes its `status: in progress` claim. Semantics everywhere: excluded from topup and
-// from the consumable-Ready count (a gated issue must not clog the queue), never auto-reclaimed
-// by stale-claims (re-feeding it just hits the same gate), listed FIRST by the morning
-// progress-review routine, and filterable on the board (`label:needs-input`). The HUMAN removes
-// the label after answering — that alone puts the issue back in the feed.
-const NEEDS_INPUT_LABEL = "needs-input";
-const MIRROR_LABELS = [
-  { name: "ready", color: "0E8A16", description: "Board Status=Ready mirror — the routines' work queue (set by `promote`/`reconcile`, not by hand)" },
-  { name: "priority: P0", color: "B60205", description: "Derived priority (highest served story) — top" },
-  { name: "priority: P1", color: "D93F0B", description: "Derived priority (highest served story)" },
-  { name: "priority: P2", color: "FBCA04", description: "Derived priority (highest served story)" },
-  { name: "status: in progress", color: "1D76DB", description: "Claimed in progress by the SRS jobs routine" },
-  { name: PROMOTE_INTENT_LABEL, color: "5319E7", description: "Judged unblocked; awaiting CI promotion to board Status=Ready (write this, not `ready`)" },
-  { name: "blocked", color: "E4E669", description: "Derived from blocked-by edges when present (auto-clears); hand-set only for non-issue blocks" },
-  { name: NEEDS_INPUT_LABEL, color: "D876E3", description: "Stopped at a human gate — question is in the comments; answer and REMOVE this label to re-feed" },
-];
+// The promotion request (work_label promote-request) is an INTENT, not a mirror: a REST-only judge (a cloud routine, a
+// human) adds it because it cannot set the board Status through the proxy; `promote` (run where Projects v2 is reachable)
+// makes the board write and clears it. Kept apart from the Ready label so reconcile's mirror never fights the judge.
+const PROMOTE_INTENT_LABEL = WF.promote;
+// The needs-input hold (#715): a member stopped at a question only a human can answer. The claim and the position stay
+// (work_item in_progress says so); the hold stops topup, the consumable count and stale-claims re-feeding it. A human
+// answers and removes it, and the item goes on from where it was.
+const NEEDS_INPUT_LABEL = WF.needsInput;
+// Label colours are presentation the board alone uses, so they stay here (f58db200: unless the surface is the only reader).
+const MIRROR_COLORS = { ready: "0E8A16", "priority-p0": "B60205", "priority-p1": "D93F0B", "priority-p2": "FBCA04", in_progress: "1D76DB",
+  in_review: "5319E7", "promote-request": "5319E7", blocked: "E4E669", "needs-input": "D876E3" };
+// The mirror set the routines read and write: every repo a routine touches must carry it, or a label write hard-fails.
+const MIRROR_LABELS = WF.labels.filter((l) => MIRROR_COLORS[l.key])
+  .map((l) => ({ name: l.name, color: MIRROR_COLORS[l.key], description: labelDescription(l.description) }));
 // Repos whose merges/routines depend on the mirror set existing. Overridable for tests/forks.
 const MIRROR_REPOS = (process.env.GHP_MIRROR_REPOS || (SETTINGS.repos ?? []).join(","))
   .split(",").map((s) => s.trim()).filter(Boolean);
 
-// Board Status → plain-label mirror. The routines can't read Projects v2 Status through the
-// proxy, so the label IS their signal: `ready` is the work queue, `status: in progress` marks a
-// claim. Only these two statuses mirror to a label; all others (Backlog/In review/Done) clear both.
-const STATUS_LABEL_MAP = { Ready: "ready", "In progress": "status: in progress" };
+// Board Status → plain-label mirror, from the bindings. The routines can't read Projects v2 Status through the proxy, so
+// the label IS their signal: Ready is the work queue, In progress a claim, In review a closing PR open. Backlog and Done
+// carry no label.
+const STATUS_LABEL_MAP = WF.statusLabels;
 const STATUS_MIRROR_LABELS = Object.values(STATUS_LABEL_MAP);
 
 // ---------------------------------------------------------------------------
@@ -759,6 +756,18 @@ function setStatusLabel(repo, num, want, dryRun) {
 function statusMirrorWant(row) {
   return row.state === "OPEN" ? (STATUS_LABEL_MAP[row.status] || null) : null;
 }
+// The board column an OPEN row should be in when its labels or state say more than the board does (null: board is right).
+// A claim label is written over REST by a member who cannot set the board (work_item claim / claim-unfed), so it wins
+// over an earlier column. An open work item still in Done was reopened (work_item reopen) unless a merged PR closed it
+// (row.mergedClosingPr, annotated by the caller: the work landed and the issue was left open); epics, stories and plans
+// are left where they are.
+function positionFix(row) {
+  if (row.state !== "OPEN") return null;
+  const claimed = row.labels.includes(WF.inProgress);
+  if (claimed && [COL.backlog, COL.ready, COL.done, null, undefined].includes(row.status)) return COL.in_progress;
+  if (row.status === COL.done && isWorkItem(row) && row.mergedClosingPr === false) return COL.backlog;
+  return null;
+}
 
 // Pure promotion planner (unit-tested). Given board rows, decide what `promote` does with each
 // `promote:ready` intent. Only OPEN Backlog issues (or ones with no Status set yet) actually move
@@ -766,13 +775,13 @@ function statusMirrorWant(row) {
 // stale intent cleared — the intent is a one-shot request, never a demotion or a re-open.
 // Returns [{ repo, num, key, action, promote, from }] — `promote` true means "set Status=Ready".
 function planPromotions(rows) {
-  const PROMOTABLE = new Set(["Backlog", null, undefined]);
+  const PROMOTABLE = new Set([COL.backlog, null, undefined]);
   const out = [];
   for (const row of rows) {
     if (!(row.labels || []).includes(PROMOTE_INTENT_LABEL)) continue;
     const base = { repo: row.repo, num: row.num, key: row.key, from: row.status ?? null };
     if (row.state !== "OPEN") out.push({ ...base, action: "cleared-closed", promote: false });
-    else if (row.status === "Ready") out.push({ ...base, action: "already-ready", promote: false });
+    else if (row.status === COL.ready) out.push({ ...base, action: "already-ready", promote: false });
     else if (PROMOTABLE.has(row.status)) out.push({ ...base, action: "promoted", promote: true });
     else out.push({ ...base, action: "skip-advanced", promote: false });
   }
@@ -796,23 +805,28 @@ function planPromotions(rows) {
 // cmdStaleClaims) is finished work awaiting review, whose silence is expected: `in-review`,
 // never reclaimed, regardless of age (#1375). A PR closed unmerged is not annotated, so the
 // claim ages out as before.
+// An In review row (board column or its label) stays while its closing PR is open; once none is open (closed unmerged:
+// work_item pr-closed-unmerged, annotated as closedUnmerged) it is planned back to Ready. Anything else is left.
 // A reclaim also names `unassign` (the owner's login) when the issue is assigned to the owner and its
 // latest claim comment names an actor other than the owner's (`claimActor`, from claimTimes): an agent
 // claim under the owner's account must not leave a permanent owner assignment (clerk#68). No claim
 // comment, or no known ownerActor, leaves the assignee alone.
 // Returns [{ repo, num, key, itemId, claimedAtMs, action, ageMs, openClosingPr?, unassign? }] —
-// action: reclaim|fresh|needs-input|in-review|unknown.
+// action: reclaim|fresh|needs-input|in-review|pr-closed-unmerged|unknown.
 function planStaleClaims(rows, nowMs, thresholdMs, { owner, ownerActor } = {}) {
   const out = [];
-  const inProgLabel = STATUS_LABEL_MAP["In progress"];
   for (const row of rows) {
     // A claim is the `status: in progress` LABEL (what routines actually write — they can't set the
     // board Status through their proxy), not board Status "In progress". Keying off the label also
     // recovers zombie claims that never advanced the board (board still "Ready", label still set) —
     // previously invisible to both this recovery and the consumer. Board-Status matches still count.
     if (row.state !== "OPEN") continue;
-    if (row.status !== "In progress" && !row.labels?.includes(inProgLabel)) continue;
     const base = { repo: row.repo, num: row.num, key: row.key, itemId: row.itemId, claimedAtMs: row.claimedAtMs ?? null };
+    if (row.status === COL.in_review || row.labels?.includes(WF.inReview)) {
+      if (row.closedUnmerged === true) out.push({ ...base, action: "pr-closed-unmerged" });
+      continue;
+    }
+    if (row.status !== COL.in_progress && !row.labels?.includes(WF.inProgress)) continue;
     if (row.labels?.includes(NEEDS_INPUT_LABEL)) { out.push({ ...base, action: "needs-input" }); continue; }
     if (row.openClosingPr) { out.push({ ...base, action: "in-review", openClosingPr: row.openClosingPr }); continue; }
     if (row.claimedAtMs == null) { out.push({ ...base, action: "unknown" }); continue; }
@@ -836,7 +850,7 @@ function planStaleClaims(rows, nowMs, thresholdMs, { owner, ownerActor } = {}) {
 // Routing is done when the issue is grounded (D4, D5, D15); topup only feeds issues already routed, so Ready never
 // fills with work no routine takes.
 function hasLane(labels) {
-  return labels.some((l) => l === "lane:unattended" || l.startsWith("wg:"));
+  return labels.some((l) => l === WF.lane || l.startsWith("wg:"));
 }
 
 function planTopup(candidates, readyCount, target) {
@@ -914,7 +928,7 @@ function hasOpenBlockers(row) {
 }
 // The feed's blocking test (topup): edges are authoritative when present, else the label.
 function isBlocked(row) {
-  return (row.blockedBy?.length ?? 0) > 0 ? hasOpenBlockers(row) : row.labels.includes("blocked");
+  return (row.blockedBy?.length ?? 0) > 0 ? hasOpenBlockers(row) : row.labels.includes(WF.blocked);
 }
 // Desired `blocked` label for reconcile: true/false when derived from edges,
 // null = no edges, leave the label alone (human-owned).
@@ -930,12 +944,12 @@ function blockedLabelWant(row) {
 function isConsumableReady(row) {
   return row.state === "OPEN"
     && isWorkItem(row)
-    && !row.labels.includes(STATUS_LABEL_MAP["In progress"])
-    // A gated issue is not pickable — counting it would let it clog the queue (#715).
-    && !row.labels.includes(NEEDS_INPUT_LABEL)
+    && !row.labels.includes(WF.inProgress)
+    // A held issue (work_hold: needs-input, blocked, parked) is not pickable — counting it would clog the queue (#715).
+    && !WF.isHeld(row.labels)
     // Bugs ride the DEDICATED BUG TRACK (#717), not the Ready queue — see cmdTopup.
-    && !row.labels.includes("bug")
-    && (row.status === "Ready" || row.labels.includes(PROMOTE_INTENT_LABEL));
+    && !row.labels.includes(WF.bug)
+    && (row.status === COL.ready || row.labels.includes(PROMOTE_INTENT_LABEL));
 }
 function countConsumableReady(rows) {
   return rows.filter(isConsumableReady).length;
@@ -983,7 +997,7 @@ const higher = (a, b) => (a && (!b || P_ORDER.indexOf(a) < P_ORDER.indexOf(b)) ?
 // MoSCoW → Could, epic Priority → P2, orphan → P2 floor). The ONLY way out of the
 // feed is an explicit Won't on every served story.
 function derivePriority(row, served, storiesByNum, epicInfo = null) {
-  const isBug = row.labels.includes("bug");
+  const isBug = row.labels.includes(WF.bug);
   const servedArr = served ? [...served] : [];
 
   // Stage 1–2: served stories and each one's MoSCoW → P. A blank MoSCoW defaults to
@@ -1006,7 +1020,7 @@ function derivePriority(row, served, storiesByNum, epicInfo = null) {
   // default floor may resurrect it. (The bug floor still applies: bugs are never lost.)
   // A `parked` epic excludes its descendants the same way (#1347), and so does the
   // issue's own `parked` label (#1352).
-  const parked = !!epicInfo?.parked || row.labels.includes("parked");
+  const parked = !!epicInfo?.parked || row.labels.includes(WF.parked);
   // Story-derived P is capped at the claiming epic's P (a Must story under a P2 epic → P2).
   const epicCap = epicInfo ? (epicInfo.priority ?? EPIC_PRIORITY_DEFAULT) : null;
   if (base && epicCap && P_ORDER.indexOf(base) < P_ORDER.indexOf(epicCap)) base = epicCap;
@@ -1162,7 +1176,7 @@ function startedEpics(desc, b) {
     if (started.has(epicNum)) continue;
     const row = b.get(key);
     if (!row) continue;
-    if (row.state === "CLOSED" || ["In progress", "In review", "Done"].includes(row.status))
+    if (row.state === "CLOSED" || [COL.in_progress, COL.in_review, COL.done].includes(row.status))
       started.add(epicNum);
   }
   return started;
@@ -1175,7 +1189,7 @@ function openEpics() {
     "issue", "list", "--repo", `${OWNER}/${STORY_REPO}`,
     "--label", EPIC_LABEL, "--state", "open", "--limit", "100",
     "--json", "number,title,labels",
-  ]) || []).map((e) => ({ num: e.number, title: e.title, parked: (e.labels || []).some((l) => l.name === "parked") }));
+  ]) || []).map((e) => ({ num: e.number, title: e.title, parked: (e.labels || []).some((l) => l.name === WF.parked) }));
   const b = board();
   return rows.map((e) => {
     const row = b.get(`${STORY_REPO}#${e.num}`);
@@ -1229,7 +1243,7 @@ function cmdEpics() {
   const out = [...epics].sort((a, c) => epicFeedRank(a, started) - epicFeedRank(c, started)).map((e) => {
     const kids = kidsByEpic.get(e.num) || [];
     const rows = kids.map((k) => b.get(k)).filter(Boolean);
-    const done = rows.filter((r) => r.state === "CLOSED" || r.status === "Done").length;
+    const done = rows.filter((r) => r.state === "CLOSED" || r.status === COL.done).length;
     const seq = epicRoadmapSeq(e);
     const flags = [];
     if (!e.priority) flags.push("missing-priority");
@@ -1911,7 +1925,7 @@ function claimTimes(repo, num) {
   for (const e of events) {
     const ts = Date.parse(e.created_at ?? e.updated_at ?? "");
     if (isNaN(ts)) continue;
-    if (e.event === "labeled" && e.label?.name === "status: in progress") claimedAtMs = Math.max(claimedAtMs ?? 0, ts);
+    if (e.event === "labeled" && e.label?.name === WF.inProgress) claimedAtMs = Math.max(claimedAtMs ?? 0, ts);
     else if (ACTIVITY_EVENTS.has(e.event)) lastActivityMs = Math.max(lastActivityMs ?? 0, ts);
     if (e.event === "commented") claimActor = claimActorOf(e.body) ?? claimActor;
   }
@@ -1921,19 +1935,23 @@ function claimTimes(repo, num) {
 // Number of an OPEN pull request that will close the issue (GraphQL closedByPullRequestsReferences,
 // closed/merged PRs filtered out by state), or null. Unreadable → undefined with a warning; the
 // caller then reports the row `unknown` rather than risk reclaiming finished work.
-function openClosingPr(repo, num) {
+// The pull requests that would close an issue, as [{number, state: OPEN|CLOSED|MERGED}], or undefined when unreadable.
+function closingPrs(repo, num) {
   try {
     const d = graphql(
       `query($o:String!,$r:String!,$n:Int!){ repository(owner:$o,name:$r){ issue(number:$n){
          closedByPullRequestsReferences(first:20, includeClosedPrs:true){ nodes{ number state } } } } }`,
       { o: OWNER, r: repo, n: num });
-    const nodes = d?.repository?.issue?.closedByPullRequestsReferences?.nodes ?? [];
-    return nodes.find((p) => p.state === "OPEN")?.number ?? null;
-  } catch (e) { // fails closed: undefined, not null
+    return d?.repository?.issue?.closedByPullRequestsReferences?.nodes ?? [];
+  } catch (e) { // fails closed: undefined, never an empty list
     console.error(`gh-project: warning: could not read closing PRs for ${repo}#${num}: ${(e.stderr ? String(e.stderr) : e.message).trim()}`);
     return undefined;
   }
 }
+const openClosingPr = (repo, num) => { const prs = closingPrs(repo, num); return prs && (prs.find((p) => p.state === "OPEN")?.number ?? null); };
+// Only a closing PR that CLOSED unmerged, with none open or merged, sends In review back to Ready; none at all, or a merged
+// one (issue left open by Refs or a non-default base), is not that move. -> true/false, undefined when unreadable.
+const closedUnmerged = (prs) => prs && prs.some((p) => p.state === "CLOSED") && !prs.some((p) => p.state === "OPEN" || p.state === "MERGED");
 
 // stale-claims [--hours N] [--fix] — detect (and with --fix, recover) `In progress` issues whose
 // claim has gone stale: whatever claimed it (the "SRS jobs routine" or any other consumer) wrote
@@ -1949,12 +1967,13 @@ function cmdStaleClaims(argv) {
   let hours = STALE_CLAIM_HOURS_DEFAULT;
   for (let i = 0; i < argv.length; i++) if (argv[i] === "--hours") hours = Number(argv[++i]);
   const thresholdMs = hours * 3600 * 1000;
-  const inProgLabel = STATUS_LABEL_MAP["In progress"];
+  const inReview = (r) => r.status === COL.in_review || r.labels.includes(WF.inReview);
   const candidates = [...board().values()].filter(
-    (r) => r.state === "OPEN" && (r.status === "In progress" || r.labels.includes(inProgLabel))
+    (r) => r.state === "OPEN" && (r.status === COL.in_progress || r.labels.includes(WF.inProgress) || inReview(r))
   );
-  // needs-input rows never reclaim, so skip their timeline read (one API call each).
+  // needs-input rows never reclaim, so skip their timeline read (one API call each); In review rows need only their PR.
   const annotated = candidates.map((r) => {
+    if (inReview(r)) return { ...r, closedUnmerged: closedUnmerged(closingPrs(r.repo, r.num)) };
     if (r.labels.includes(NEEDS_INPUT_LABEL)) return r;
     const pr = openClosingPr(r.repo, r.num);
     // PR lookup failed: force `unknown` (no reclaim) instead of guessing "no PR".
@@ -1967,8 +1986,8 @@ function cmdStaleClaims(argv) {
     if (p.action === "in-review") console.log(`  open closing PR #${p.openClosingPr}`);
     if (dryRun) continue;
     if (p.action === "in-review") {
-      setSingleSelect(p.itemId, "Status", "In review", false);
-      setStatusLabel(p.repo, p.num, STATUS_LABEL_MAP["In review"] || null, false); // clears the claim label
+      setSingleSelect(p.itemId, "Status", COL.in_review, false);
+      setStatusLabel(p.repo, p.num, WF.inReview, false); // replaces the claim label: the item is in review, not unclaimed
       const marker = `<!-- stale-claims:in-review #${p.openClosingPr} -->`;
       try {
         const seen = ghJson(["issue", "view", String(p.num), "--repo", `${OWNER}/${p.repo}`, "--json", "comments"]);
@@ -1980,9 +1999,20 @@ function cmdStaleClaims(argv) {
       }
       continue;
     }
+    if (p.action === "pr-closed-unmerged") {
+      setSingleSelect(p.itemId, "Status", COL.ready, false);
+      setStatusLabel(p.repo, p.num, WF.ready, false);
+      try {
+        gh(["issue", "comment", String(p.num), "--repo", `${OWNER}/${p.repo}`,
+          "--body", "Back to **Ready**: the pull request that would close this issue closed without merging, and no other is open."]);
+      } catch (e) {
+        console.error(`gh-project: warning: could not comment on ${p.key}: ${(e.stderr ? String(e.stderr) : e.message).trim()}`);
+      }
+      continue;
+    }
     if (p.action !== "reclaim") continue;
-    setSingleSelect(p.itemId, "Status", "Ready", false);
-    setStatusLabel(p.repo, p.num, "ready", false); // mirror immediately; reconcile also keeps it in sync
+    setSingleSelect(p.itemId, "Status", COL.ready, false);
+    setStatusLabel(p.repo, p.num, WF.ready, false); // mirror immediately; reconcile also keeps it in sync
     if (p.unassign) try {
       gh(["issue", "edit", String(p.num), "--repo", `${OWNER}/${p.repo}`, "--remove-assignee", p.unassign]);
     } catch (e) {
@@ -1990,7 +2020,7 @@ function cmdStaleClaims(argv) {
     }
     try {
       gh(["issue", "comment", String(p.num), "--repo", `${OWNER}/${p.repo}`,
-        "--body", `Auto-reclaimed: this issue's \`status: in progress\` claim showed no activity for >${hours}h (no comments, commits, or PR references) and has been reset to **Ready** for re-pickup. If work is still genuinely in flight, re-claim it — activity on the issue refreshes the claim. If it stopped because a human decision is needed, add \`needs-input\` with the question instead.`]);
+        "--body", `Auto-reclaimed: this issue's \`${WF.inProgress}\` claim showed no activity for >${hours}h (no comments, commits, or PR references) and has been reset to **Ready** for re-pickup. If work is still genuinely in flight, re-claim it — activity on the issue refreshes the claim. If it stopped because a human decision is needed, add \`${NEEDS_INPUT_LABEL}\` with the question instead.`]);
     } catch (e) {
       console.error(`gh-project: warning: could not comment on ${p.key}: ${(e.stderr ? String(e.stderr) : e.message).trim()}`);
     }
@@ -1998,9 +2028,10 @@ function cmdStaleClaims(argv) {
   const reclaimed = plan.filter((p) => p.action === "reclaim").length;
   const unknown = plan.filter((p) => p.action === "unknown").length;
   const gated = plan.filter((p) => p.action === "needs-input").length;
-  const inReview = plan.filter((p) => p.action === "in-review").length;
-  console.log(`${plan.length} in-progress · ${reclaimed} ${dryRun ? "would be " : ""}reclaimed · ${plan.length - reclaimed - unknown - gated - inReview} fresh${inReview ? ` · ${inReview} ${dryRun ? "would move to " : "moved to "}In review (open closing PR)` : ""}${gated ? ` · ${gated} needs-input (paused on a human)` : ""}${unknown ? ` · ${unknown} unknown (no labeled event found)` : ""}`);
-  if (dryRun && (reclaimed || inReview)) console.log("(dry-run; pass --fix to apply)");
+  const toReview = plan.filter((p) => p.action === "in-review").length;
+  const reopened = plan.filter((p) => p.action === "pr-closed-unmerged").length;
+  console.log(`${plan.length - reopened} in-progress · ${reclaimed} ${dryRun ? "would be " : ""}reclaimed · ${plan.length - reopened - reclaimed - unknown - gated - toReview} fresh${toReview ? ` · ${toReview} ${dryRun ? "would move to " : "moved to "}In review (open closing PR)` : ""}${reopened ? ` · ${reopened} ${dryRun ? "would go " : "went "}back to Ready (closing PR closed unmerged)` : ""}${gated ? ` · ${gated} needs-input (paused on a human)` : ""}${unknown ? ` · ${unknown} unknown (no labeled event found)` : ""}`);
+  if (dryRun && (reclaimed || toReview || reopened)) console.log("(dry-run; pass --fix to apply)");
 }
 
 // topup [--fix] [--target N] — keep the Ready queue at target depth by writing `promote:ready`
@@ -2042,18 +2073,18 @@ function cmdTopup(argv) {
   const candidates = [...b.values()].filter((row) =>
     row.state === "OPEN" &&
     isWorkItem(row) &&
-    (row.status === "Backlog" || row.status == null) &&
+    (row.status === COL.backlog || row.status == null) &&
     // isBlocked consults blocked-by edges directly (#671), so a freshly-unblocked
     // issue is feedable this run even before reconcile updates the label mirror.
     !isBlocked(row) &&
-    !row.labels.includes(NEEDS_INPUT_LABEL) &&   // paused on a human — re-feeding hits the same gate (#715)
+    !WF.isHeld(row.labels) &&   // held (needs-input, blocked by hand, parked): re-feeding hits the same hold (#715)
     // THE BUG TRACK (#717): bugs never enter the Ready queue. "Fixed ASAP" and the
     // epic-major feed contradict each other — the feed would bury a P1 bug in a later
     // epic behind every earlier epic's tail, and Ready bugs crowded out feature slots.
     // Instead `label:bug` IS the bug queue (ordered by derived priority label, then
     // age), consumed directly by a dedicated bug-fix routine (none has a brief yet). Blocked/needs-input/
     // claim semantics and the bug-floor priority derivation all still apply to bugs.
-    !row.labels.includes("bug") &&
+    !row.labels.includes(WF.bug) &&
     !row.labels.includes(PROMOTE_INTENT_LABEL) &&
     hasLane(row.labels) &&   // routed to a lane when grounded; no lane, no routine to take it
     !wontExcluded.has(row.key)
@@ -2087,8 +2118,8 @@ function cmdPromote(argv) {
     if (dryRun) continue;
     if (p.promote) {
       const itemId = ensureOnBoard(p.repo, p.num, false);
-      setSingleSelect(itemId, "Status", "Ready", false);
-      setStatusLabel(p.repo, p.num, "ready", false);       // mirror immediately; reconcile also keeps it in sync
+      setSingleSelect(itemId, "Status", COL.ready, false);
+      setStatusLabel(p.repo, p.num, WF.ready, false);      // mirror immediately; reconcile also keeps it in sync
     }
     removeLabel(p.repo, p.num, PROMOTE_INTENT_LABEL);        // intent consumed either way
   }
@@ -2104,9 +2135,9 @@ function cmdReconcile(argv) {
   const issues = [];
   // Closed-but-not-Done
   for (const row of board().values()) {
-    if (row.state === "CLOSED" && row.status && row.status !== "Done") {
+    if (row.state === "CLOSED" && row.status && row.status !== COL.done) {
       issues.push(`closed-not-done: ${row.key} (Status=${row.status})`);
-      if (!dryRun) setSingleSelect(row.itemId, "Status", "Done", false);
+      if (!dryRun) setSingleSelect(row.itemId, "Status", COL.done, false);
     }
   }
   // Rollup-stale priorities (orphans included — the default P2 floor is a real label)
@@ -2118,13 +2149,26 @@ function cmdReconcile(argv) {
       if (!dryRun) applyPriority(e, false);
     }
   }
-  // Status-label mirror stale (board Status ≠ ready/status: in progress label). This is the
-  // routines' only readiness signal — without it a board-Ready issue is invisible to them. (#335)
+  // Board column behind its labels or state: a claim made over REST, or an item reopened while Done.
+  // Open Done rows are few: read their closing PRs, so merged work left open is not fed again.
+  for (const row of board().values()) if (row.state === "OPEN" && row.status === COL.done) {
+    const prs = closingPrs(row.repo, row.num);
+    row.mergedClosingPr = prs === undefined ? undefined : prs.some((p) => p.state === "MERGED");
+  }
   for (const row of board().values()) {
-    const want = statusMirrorWant(row);
-    const have = row.labels.find((l) => STATUS_MIRROR_LABELS.includes(l)) || null;
-    if ((want || null) !== (have || null)) {
-      issues.push(`status-mirror-stale: ${row.key} label=${have ?? "—"} want=${want ?? "—"}`);
+    const fix = positionFix(row);
+    if (!fix || !row.itemId) continue;
+    issues.push(`position-stale: ${row.key} Status=${row.status ?? "—"} want=${fix}`);
+    if (!dryRun) setSingleSelect(row.itemId, "Status", fix, false);
+  }
+  // Status-label mirror stale (board Status ≠ its mirror label, or more than one mirror label). This is the routines'
+  // only position signal — without it a board-Ready issue is invisible to them. (#335) Compared as a set, so the order
+  // GitHub returns labels in never decides which one survives.
+  for (const row of board().values()) {
+    const want = statusMirrorWant({ ...row, status: positionFix(row) ?? row.status });
+    const have = row.labels.filter((l) => STATUS_MIRROR_LABELS.includes(l));
+    if (!(have.length === (want ? 1 : 0) && (!want || have[0] === want))) {
+      issues.push(`status-mirror-stale: ${row.key} label=${have.join("+") || "—"} want=${want ?? "—"}`);
       if (!dryRun) setStatusLabel(row.repo, row.num, want, false);
     }
   }
@@ -2135,14 +2179,14 @@ function cmdReconcile(argv) {
     if (row.state !== "OPEN") continue;
     const want = blockedLabelWant(row);
     if (want == null) continue;
-    const have = row.labels.includes("blocked");
+    const have = row.labels.includes(WF.blocked);
     if (want === have) continue;
     const open = row.blockedBy.filter((b) => b.state === "OPEN").map((b) => b.key).join(",");
     issues.push(`blocked-stale: ${row.key} ${want ? `set (open blockers: ${open})` : "clear (all blockers closed)"}`);
     if (!dryRun) {
-      try { gh(["issue", "edit", String(row.num), "--repo", `${OWNER}/${row.repo}`, want ? "--add-label" : "--remove-label", "blocked"]); }
+      try { gh(["issue", "edit", String(row.num), "--repo", `${OWNER}/${row.repo}`, want ? "--add-label" : "--remove-label", WF.blocked]); }
       catch { /* label may not exist yet; non-fatal */ }
-      patchRowLabels(row.repo, row.num, want ? ["blocked"] : [], want ? [] : ["blocked"]);
+      patchRowLabels(row.repo, row.num, want ? [WF.blocked] : [], want ? [] : [WF.blocked]);
     }
   }
   // Open bug with no priority
@@ -2190,8 +2234,9 @@ function help() {
   fields                          dump project field/option/iteration IDs
   ensure-fields [--dry-run]       create the MoSCoW field if missing
   ensure-labels [--repo R] [--dry-run]
-                                  create the plain-label mirror set (ready, priority: P0/P1/P2,
-                                  status: in progress) in all ecosystem repos (or one --repo)
+                                  create the plain-label mirror set (the programme's bindings for
+                                  positions, holds, the promote request and priorities) in all
+                                  ecosystem repos (or one --repo)
   board [--repo R --status S --iteration N --open]
   add <repo> <issue#> [--dry-run]
   stories sync [--dry-run]        add open user-story issues to the board
@@ -2245,13 +2290,16 @@ Auth: requires an authenticated \`gh\` CLI, or GITHUB_TOKEN/GH_TOKEN env var (cu
 // Dispatch
 // ---------------------------------------------------------------------------
 // Pure helpers exported for unit tests. Importing the module must NOT run the CLI.
-export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics, bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, planStaleClaims, STALE_CLAIM_HOURS_DEFAULT, planTopup, hasLane, TOPUP_TARGET_DEFAULT, isWorkItem, isConsumableReady, countConsumableReady, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT, hasOpenBlockers, isBlocked, blockedLabelWant };
+export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, positionFix, planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics, bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, planStaleClaims, STALE_CLAIM_HOURS_DEFAULT, planTopup, hasLane, TOPUP_TARGET_DEFAULT, isWorkItem, isConsumableReady, countConsumableReady, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT, hasOpenBlockers, isBlocked, blockedLabelWant };
 
 // Only dispatch when run directly (`node gh-project.mjs ...`), not when imported.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [cmd, ...rest] = process.argv.slice(2);
   const dry = rest.includes("--dry-run");
   if (cmd && cmd !== "help" && !(OWNER && STORY_REPO && PROJECT_NUMBER)) die("no GHP_OWNER/GHP_PROJECT/GHP_STORY_REPO and no programme settings record readable from CLERK_REPO or the cwd");
+  // Commands that read or write a status label or board column need the programme's work-status set (f58db200).
+  const STATUS_FREE = new Set(["fields", "ensure-fields", "epic", "link", "dep", "release-sync", "help", "--help", "-h", undefined]);
+  if (WF.error && !STATUS_FREE.has(cmd)) die(`the programme's work-status set is unreadable (${WF.error}); run where CLERK_REPO or the cwd is the programme repo with the srs CLI (clerk fetch-srs)`);
   try {
     switch (cmd) {
       case "fields": cmdFields(); break;

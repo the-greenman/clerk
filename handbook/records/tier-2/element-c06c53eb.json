@@ -8,11 +8,11 @@
     "title": "Board labels",
     "kind": "label",
     "home": "GitHub (clerk `gh-project.mjs`)",
-    "meaning": "`ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `wg:*`, `intake` (proposed, clerk#56: a request in a level's input queue), `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.",
+    "meaning": "What each status, hold, gate and classification means is the work-status set in the clerk's programme package (decision f58db200); the label text is the programme's `label-binding` records. Today: `ready`, `status: in progress`, `status: in review`, `promote:ready`, `priority: Pn`, `blocked`, `needs-input`, `parked`, `gate:auto-merge`, `gate:owner-merge`, `lane:unattended`, and each group's `wg:*` (from its charter). `intake` is proposed (clerk#56).",
     "read_by": "`board sync`, `queue`, `claim`, `pr-upkeep`, every routine"
   },
   "createdAt": "2026-10-11T18:33:33.128085200+00:00",
-  "updatedAt": "2026-10-12T08:53:44.291433672+00:00",
+  "updatedAt": "2026-10-22T11:32:20.323421620+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",

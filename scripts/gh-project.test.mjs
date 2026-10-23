@@ -6,10 +6,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 // Hermetic: the settings come from env (which wins), not from a programme repo.
 Object.assign(process.env, { GHP_OWNER: "the-greenman", GHP_PROJECT: "6", GHP_STORY_REPO: "semanticops.com",
-  GHP_MIRROR_REPOS: "srs,srs-rust,srs-web,srs-vscode,srs-context,srs-programme,semanticops.com" });
+  GHP_MIRROR_REPOS: "srs,srs-rust,srs-web,srs-vscode,srs-context,srs-programme,semanticops.com",
+  // the work-status set, captured from the programme's definitions and label bindings
+  GHP_WORKFLOW_FILE: new URL("../test/workflow.fixture.json", import.meta.url).pathname });
 const {
   MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs,
-  STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant,
+  STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, positionFix,
   planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics,
   bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT,
   planStaleClaims, STALE_CLAIM_HOURS_DEFAULT,
@@ -649,4 +651,41 @@ test("hasLane: topup feeds only issues routed to a lane (lane:unattended or a wg
   assert.equal(hasLane(["priority: P1", "wg:third-party-ready"]), true);
   assert.equal(hasLane(["priority: P1", "enhancement"]), false);
   assert.equal(hasLane([]), false);
+});
+
+// The work-status set (clerk#121): labels and columns from the programme's bindings; the two moves that close dead ends.
+test("mirror labels and the status map come from the bindings, In review included", () => {
+  assert.deepEqual(STATUS_LABEL_MAP, { Ready: "ready", "In progress": "status: in progress", "In review": "status: in review" });
+  assert.ok(MIRROR_LABELS.some((l) => l.name === "status: in review"));
+  for (const l of MIRROR_LABELS) assert.ok(l.description.length <= 100, `${l.name} description fits GitHub's limit`);
+});
+
+test("planStaleClaims: an In review item goes back to Ready only when its closing PR closed unmerged", () => {
+  const plan = planStaleClaims([
+    srow({ num: 1, status: "In review", closedUnmerged: true }),
+    srow({ num: 2, status: "In review", closedUnmerged: false }), // open, merged, or no closing PR at all
+    srow({ num: 3, status: "In review" }), // lookup failed: left alone
+    srow({ num: 4, status: "Ready", labels: ["status: in review"], closedUnmerged: true }),
+  ], 100 * HOUR, 24 * HOUR);
+  assert.deepEqual(plan.map((p) => [p.num, p.action]), [[1, "pr-closed-unmerged"], [4, "pr-closed-unmerged"]]);
+});
+
+test("positionFix: a claim label wins over Backlog or Ready; an open item in Done was reopened", () => {
+  const r = (o) => row({ labels: [], ...o });
+  assert.equal(positionFix(r({ status: "Ready", labels: ["ready", "status: in progress"] })), "In progress");
+  assert.equal(positionFix(r({ status: null, labels: ["status: in progress"] })), "In progress");
+  assert.equal(positionFix(r({ status: "In review", labels: ["status: in progress"] })), null);
+  assert.equal(positionFix(r({ status: "Done", mergedClosingPr: false })), "Backlog");
+  assert.equal(positionFix(r({ status: "Done", mergedClosingPr: true })), null, "merged work left open is not fed again");
+  assert.equal(positionFix(r({ status: "Done" })), null, "closing PRs unread: left alone");
+  assert.equal(positionFix(r({ status: "Done", mergedClosingPr: false, labels: ["epic"] })), null, "only work items");
+  assert.equal(positionFix(r({ status: "Done", labels: ["status: in progress"] })), "In progress", "a claim wins");
+  assert.equal(positionFix(r({ status: "Done", state: "CLOSED", mergedClosingPr: false })), null);
+  assert.equal(positionFix(r({ status: "Ready", labels: ["ready"] })), null);
+});
+
+test("isConsumableReady: any hold keeps an item out of the queue", () => {
+  const leaf = (labels) => row({ status: "Ready", labels });
+  assert.equal(isConsumableReady(leaf([])), true);
+  for (const hold of ["needs-input", "blocked", "parked"]) assert.equal(isConsumableReady(leaf([hold])), false, hold);
 });
