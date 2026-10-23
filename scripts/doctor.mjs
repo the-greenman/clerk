@@ -9,6 +9,9 @@ import { get, comment } from '../lib/adapters/github.mjs';
 import { loadSettings, issueRef } from '../lib/adapters/settings.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
 import { groupStates } from '../lib/adapters/upkeep.mjs';
+import { loadWorkflow } from '../lib/adapters/workflow.mjs';
+import { list } from '../lib/adapters/github.mjs';
+import { planLabels } from '../lib/practice/labels.mjs';
 import { verdict, healthComment } from '../lib/practice/doctor.mjs';
 import { repoRoot } from './lib/repo-arg.mjs';
 
@@ -25,14 +28,22 @@ probe('GitHub transport', () => `${HAS_GH ? 'gh' : 'curl fallback'}; token ${pro
 let st, cli;
 probe('srs CLI', () => (cli = srsCli(repo)));
 probe('settings', () => { st = loadSettings(repo, cli); return `${st.repos.length} repos`; });
+let W; // the work-status set: every status, hold and gate label the clerk and the routines act on
+probe('work-status set', () => { W = loadWorkflow(repo, cli); return `${W.labels.length} labels bound`; });
 if (st) {
   const O = st.githubOwner;
   // the pulls read is what group-state needs, and a private repo not attached to the session 404s here
   for (const r of st.repos) probe(`repo ${r}`, () => { get(`repos/${O}/${r}/pulls?state=all&per_page=1`); });
+  // a bound label missing from a repo is reported, never a failure: routines keep running (a REST label write creates a
+  // missing label, and board-sync heals the mirror set); `clerk labels --apply` creates the rest
+  if (W) for (const r of st.repos) probe(`labels ${r}`, () => {
+    const missing = planLabels(W, list(`repos/${O}/${r}/labels?per_page=100`)).missing.map((l) => l.name);
+    return missing.length ? `warning: missing ${missing.join(', ')} (clerk labels --apply)` : 'in line';
+  });
   for (const [k, ref] of [['report issue', st.reportIssue], ['digest issue', st.digestIssue]]) probe(`${k} ${ref}`, () => { get(`repos/${issueRef(ref, O).path}`); });
   let groups = [];
-  if (probe('groups', () => `${(groups = loadGroups(repo, cli)).length} chartered`) && groups.length) {
-    const states = groupStates(st, groups);
+  if (probe('groups', () => `${(groups = loadGroups(repo, cli)).length} chartered`) && groups.length && W) {
+    const states = groupStates(st, groups, W.gates);
     for (const g of groups) probe(`group-state ${g.label}`, () => {
       const s = states[g.label];
       if (s.why) throw new Error(s.why);

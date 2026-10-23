@@ -175,7 +175,7 @@ describe('stage 9: priority and queue', () => {
   test('the epic rank reaches the work item as a priority label, and the queue runs P0 first, then oldest', () => {
     const other = { ...issue, number: 11, created_at: '2026-10-01T00:00:00Z', labels: [{ name: 'wg:fixture' }, { name: 'wg:third-party-ready' }, { name: 'ready' }, { name: 'priority: P1' }] };
     const p0 = { ...issue, labels: [...issue.labels, { name: 'wg:third-party-ready' }] };
-    const q = classify([other, p0], [], lanesFrom([]), W.holds);
+    const q = classify([other, p0], [], lanesFrom([], W.lane), W.holds);
     assert.deepEqual(q.queued.map((x) => x.ref), ['fixture#10', 'fixture#11']);
     assert.equal(q.queued[0].priority, e1.priority);
   });
@@ -222,13 +222,13 @@ describe('stage 11: assignment and claim', () => {
   test('an assigned issue, or one with an open PR, is held, not queued', () => {
     const claimed = { ...issue, number: 12, assignees: [{ login: BUILDER }] };
     const pr = { repo: 'fixture', number: 50, title: 'Closes #10', body: '', head: { ref: '10-change-view' } };
-    const q = classify([claimed, issue], [pr], lanesFrom([]), W.holds);
+    const q = classify([claimed, issue], [pr], lanesFrom([], W.lane), W.holds);
     assert.deepEqual(q.queued, []);
     assert.deepEqual(q.held.map((h) => h.held[0]).sort(), [`assigned ${BUILDER}`, 'open PR fixture#50'].sort());
   });
   test('an issue with open blockers (the board mirrors them as `blocked`) is held, not queued', () => {
     const blocked = { ...issue, number: 13, labels: [...issue.labels, { name: 'blocked' }] };
-    const q = classify([blocked], [], lanesFrom([]), W.holds);
+    const q = classify([blocked], [], lanesFrom([], W.lane), W.holds);
     assert.deepEqual(q.queued, []);
     assert.deepEqual(q.held[0].held, ['blocked']);
   });
@@ -286,7 +286,7 @@ describe('stage 13: review and merge', () => {
     assert.match(pause([rep(6), rep(7), rep(8)]), /paused: 3 reports unacknowledged/);
   });
   test('the queue lanes are the chartered groups\' labels', () => {
-    const lanes = lanesFrom(groups);
+    const lanes = lanesFrom(groups, W.lane);
     assert.deepEqual(Object.keys(lanes), ['lane:unattended', 'wg:third-party-ready', 'wg:fixture']);
     assert.deepEqual(classify([issue], [], lanes, W.holds).queued[0].lanes, ['wg']); // issue carries wg:fixture
   });

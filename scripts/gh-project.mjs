@@ -75,7 +75,7 @@ import { pathToFileURL } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { claimActorOf } from "../lib/practice/claim.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
-import { workflowFrom } from "../lib/practice/workflow.mjs";
+import { workflowFrom, labelDescription } from "../lib/practice/workflow.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
@@ -125,8 +125,6 @@ const PROMOTE_INTENT_LABEL = WF.promote;
 // (work_item in_progress says so); the hold stops topup, the consumable count and stale-claims re-feeding it. A human
 // answers and removes it, and the item goes on from where it was.
 const NEEDS_INPUT_LABEL = WF.needsInput;
-// GitHub caps a label description at 100 characters: the first sentence of the definition, cut to fit.
-const labelDescription = (text = "") => { const first = text.split(/(?<=\.)\s/)[0]; return first.length <= 100 ? first : `${first.slice(0, 99)}…`; };
 // Label colours are presentation the board alone uses, so they stay here (f58db200: unless the surface is the only reader).
 const MIRROR_COLORS = { ready: "0E8A16", "priority-p0": "B60205", "priority-p1": "D93F0B", "priority-p2": "FBCA04", in_progress: "1D76DB",
   in_review: "5319E7", "promote-request": "5319E7", blocked: "E4E669", "needs-input": "D876E3" };
@@ -852,7 +850,7 @@ function planStaleClaims(rows, nowMs, thresholdMs, { owner, ownerActor } = {}) {
 // Routing is done when the issue is grounded (D4, D5, D15); topup only feeds issues already routed, so Ready never
 // fills with work no routine takes.
 function hasLane(labels) {
-  return labels.some((l) => l === "lane:unattended" || l.startsWith("wg:"));
+  return labels.some((l) => l === WF.lane || l.startsWith("wg:"));
 }
 
 function planTopup(candidates, readyCount, target) {

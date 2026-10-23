@@ -40,6 +40,7 @@ const TOOLS = {
   charter: ['charter.mjs', 'charter a working group as draft/proposed records for the owner to ratify (--dry-run prints the plan)'],
   domains: ['domains.mjs', 'every domain\'s focus, boundary and tensions (--json); affirm-tension <id> with both poles, place-axes <domain> <t1> <t2> <t3> (--dry-run)'],
   groups: ['groups.mjs', 'print the working groups chartered in the records (--json)'],
+  labels: ['labels.mjs', "every governed repo's labels against the programme's bindings: missing, stale, retired, unknown (--apply; --delete-retired --repo-name <r>; --json)"],
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
   snapshot: ['snapshot.mjs', 'the programme as one snapshot: records, relations, container outlines (--json)'],
   serve: ['serve.mjs', 'the local service for web clients, on loopback (docs/service.md, api/openapi.json): CLERK_PORT, CLERK_SYNC_MINUTES, CLERK_DESK_MINUTES, CLERK_STATE_DIR'],
@@ -170,14 +171,14 @@ if (sub) {
       const reply = arg('--reply-to') && (() => { const m = commentRecs.filter((c) => c.instanceId.startsWith(arg('--reply-to'))); if (m.length !== 1) throw new Error(`no single comment matches "${arg('--reply-to')}"`); return m[0].instanceId; })();
       take(choices, item(find(arg('--on') ?? die('--on <decision id> is required'))), { comment: { text: arg('--text') ?? die('--text is required'), replyTo: reply, cite: arg('--cite'), role: arg('--role-of-cite') } });
     }
-    if (argv[0] === 'comment') { postComments({ cli, programme, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by') }); process.exit(0); } // discussion between sessions: no session record, no quorum
+    if (argv[0] === 'comment') { postComments({ cli, programme, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by'), autoMerge: W.gates.auto }); process.exit(0); } // discussion between sessions: no session record, no quorum
     args('--set-aside').forEach((p) => takeAct(item(pick(p)), { action: 'setaside' }));
     args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => takeAct(item(r), { action: 'ratify' }));
     args('--consider').forEach((p) => takeAct(item(find(p)), {}));
     const [fs, ts] = [args('--field'), args('--text')];
     args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); takeAct(item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
     if (dryRun) console.log(quorumText(quorumNow()));
-    endSession({ cli, programme, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by') });
+    endSession({ cli, programme, now, role, attendees, convened: 'ad-hoc', quorum: quorumNow(), transcript, dryRun, choices, clerkedBy: arg('--clerked-by'), autoMerge: W.gates.auto });
   } catch (e) { die(e.message); }
   process.exit(0);
 }
@@ -212,7 +213,7 @@ const show = (ls) => console.log('\n' + ls.join('\n'));
 let reportsNote = null;
 const { reports, acked } = (() => { if (!isOwner) return { reports: [], acked: new Set() };
   try { return loadReportComments(REPORT_ISSUE, GH_OWNER); } catch (e) { reportsNote = `Reports unread: ${(e.message.split('\n').find((l) => /rate limit|HTTP|gh:/.test(l)) ?? e.message.split('\n')[0]).replace(/^gh: /, '').split('. ')[0]}.`; return { reports: [], acked: new Set() }; } })();
-const prs = !isOwner || !scan ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, 'gate:owner-merge'); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
+const prs = !isOwner || !scan ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, W.gates.owner); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
 
 // Order follows a meeting: decisions since the last session, reports, decisions for this session, merges.
 const sections = {
@@ -220,7 +221,7 @@ const sections = {
   2: { name: 'Reports', items: isOwner ? runReports.flatMap((rr, i) => A.reportItems(rr.records, receivedIds, reports.filter((c) => runReports.some((x) => x.label === A.reportGroup(c)) ? A.reportGroup(c) === rr.label : !i), acked, rr.group)) : [] }, // one report issue per programme: a comment goes to the group its marker tags, else (untagged or unknown tag) to the first group, as on the desk
   3: { name: 'Exercises', items: A.exerciseItems(exerciseRecs, mainLog) },
   4: { name: 'Decisions for this session', items: isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog)) : [] },
-  5: { name: 'Merges', items: A.mergeItems(prs) },
+  5: { name: 'Merges', items: A.mergeItems(prs, W.gates.owner) },
 };
 // Next: the queue behind each group, live via gh REST (owner only; tolerant of failure). State: its pause, merged and budget.
 const next = {}, gstate = {};
@@ -345,6 +346,6 @@ const keep = async () => {
   return (await ask(`type "discard" to drop all ${choices.length} item(s), anything else records them > `)).trim().toLowerCase() !== 'discard';
 };
 if (choices.length && (dryRun || await keep()))
-  endSession({ cli, programme, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by') });
+  endSession({ cli, programme, now, role, attendees, choices, quorum: quorumNow(), transcript, dryRun, clerkedBy: arg('--clerked-by'), autoMerge: W.gates.auto });
 else if (choices.length) console.log('Nothing recorded.');
 if (!TTY) process.stdin.destroy(); // piped mode: end the line reader so the process exits
