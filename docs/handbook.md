@@ -151,18 +151,28 @@ A scout or any participant writes a suggestion under its own actor (`createdBy`)
 
 > **Proposed, not in force** (clerk#158; owner's direction, 2026-10-23). This chapter is Theory until the owner's session ratifies it. The method keeps being refined: change it by decision, not by quiet edits.
 
-A domain is not fully defined until it names its trade-offs (SP-94). The goal is **three foundational axes that are orthogonal**: knowing where a choice sits on one axis tells you nothing about where it sits on another. Orthogonality is rare and hard to see, which is why the method leans on synthetic logic, the practice of mapping a whole with a few complete, independent lenses (sources: greenmans_creation, `Foundational-Synthesis`, `Orthogonality`, `Building-Complete-Complementary-Structures`, the T3 axis generation agent, Systemic Data Ethics). The method is **iterative cross-referencing**, and any domain that is effectively designed can follow it.
+A domain is not fully defined until it names its trade-offs (SP-94). The goal is **three foundational axes that are orthogonal**: knowing where a choice sits on one axis tells you nothing about where it sits on another. Orthogonality is rare and hard to see. That is why the method leans on synthetic logic, the practice of mapping a whole with a few complete, independent lenses (sources: greenmans_creation, `Foundational-Synthesis`, `Orthogonality`, `Building-Complete-Complementary-Structures`, the T3 axis generation agent). The method is **iterative cross-referencing**, and any domain that is effectively designed can follow it.
+
+**Two synthetic systems, two maps.** Two synthetic systems map the same space. They are related, but they are different maps, built from different rubrics. Neither is the other renamed.
+
+- **The trigram (the three axes).** Three lines read from the bottom: line 1 Earth, line 2 Human, line 3 Heaven. It is built directly from tensions, one per line, so it is **the default for a domain**. The T3 stance and the decision ratings use it too.
+- **The zodiac (the SRS decision compass).** Twelve cells from the Pattern Grid (element × level: Individual, Relational, Systemic), giving six opposite-cell axes. Systemic Data Ethics groups them by its own movements (Action, Form, Time). It has twice the axes and a fixed grid, so it is the better map **for finding gaps**: a cell or axis with nothing in it is a question the domain has not asked.
+
+They meet through the I Ching ↔ zodiac alignment: hexagram line k is the zodiac axis that begins at sign k. Moving between them is a **translation**, so say so whenever you do it, and say which translation. The local reference for both, and for the translation, is `srs-programme:source-documents/decision-taxonomy-2026-10-22/three-axes-by-trigram.md`.
 
 **1. Place before judging.** A tension can be weighed only inside a domain. Without one there is no polarity, no foundational status and nothing to test it against. So the first act is to place each tension in the domain whose purpose it trades on. The groups that hold a tension (`holds-tension`) are evidence of where it belongs, not the answer.
 
-**2. Generate the axes; don't just collect them.** Tensions gathered from the bottom up, from the work, cluster. In Programme coordination, three said "one way" and two said "throughput". So derive the candidates from lenses that are independent by construction, and ask what the domain's tension is on each:
-- **Line 1, who acts**: act ↔ observe, authority ↔ witness (Systemic Data Ethics: Action; T3: Energy).
-- **Line 2, stability ↔ change**: continue ↔ evolve, keep ↔ renew (Systemic Data Ethics: Form; T3: Time).
-- **Line 3, specific ↔ whole**: focus ↔ zoom out, expression here ↔ integrity everywhere (Systemic Data Ethics: Time, the present ↔ the vision; T3: Scope).
+**2. Generate the axes from the trigram; don't just collect them.** Tensions gathered from the bottom up, from the work, cluster. In Programme coordination, three said "one way" and two said "throughput". So ask what the domain's tension is on each line, in the owner's definitions:
 
-The decision compass (two axes per line) and Stance (one per line) are built on these lines. The two source vocabularies put different names on lines 2 and 3, so name an axis by its **line**, not by "Form" or "Time".
+- **Line 1, Earth.** Does the energy go out onto the world, or in to change the system itself? Act ↔ Observe.
+- **Line 2, Human.** Do we add energy to change state, or let the system settle? Disrupt ↔ Stabilise.
+- **Line 3, Heaven.** Is the boundary closed and steered by our will, executing a plan? Or is it open, sensing and responding to what is outside? Focus ↔ Zoom out. This line is not about breadth: a small, specific choice can be open, and a system-wide one can be closed.
 
-Collected tensions are then matched to a generated slot. One tension per slot is foundational. The rest are recorded **in prose**, under the axis they refine.
+Collected tensions are then matched to a line. One tension per line is foundational. The rest are recorded **in prose**, under the axis they refine.
+
+Then **use the compass to look for gaps.** Translate the domain's three axes onto the compass, and read the compass's six axes and twelve cells for what the domain has not named. A compass axis with no tension, or a cell with no case, is a candidate for a missing tension or a misplaced one. The compass finds the gap; the trigram holds the answer.
+
+Do not number lines from the compass's own movements or from T3's dimension names (Energy, Time, Space). Those are other triads, and they do not run along the trigram's lines.
 
 **3. Test every pair as a 2×2.** Fill each of the four cells with a **real case from the domain's own history**. If a cell is impossible or unnatural (a "hot winter"), the pair is one axis seen twice. Signs of a duplicate:
 - the two tensions share a pole word ("Throughput" on both);
@@ -170,43 +180,60 @@ Collected tensions are then matched to a generated slot. One tension per slot is
 
 **4. Test the three as a cube.** Name all eight corners, each with a real case. A corner nobody can fill means the set is not orthogonal, or not complete.
 
-**5. Assign yang per domain.** Yang is the pole that is thing over relation, movement over stillness, outward over inward, assertive over reflective, forward looking over retrospective. Yang is **not** the preferred pole: preference is the principle's lean, a separate record. Polarity belongs to the line in its domain, and a narrower domain may flip it (decision cdd272a3). Three cross-checks:
+**5. Assign yang per domain.** Yang is the pole that is thing over relation, movement over stillness, outward over inward, assertive over reflective, forward looking over retrospective. On the trigram lines: Act, Disrupt and Focus are the yang poles. Yang is **not** the preferred pole: preference is the principle's lean, a separate record. Polarity belongs to the line in its domain, and a narrower domain may flip it (decision cdd272a3). Three cross-checks:
 - tensions that refine one axis should lean yang the same way;
-- **across domains, one line should lean yang the same way** unless a domain is known to flip it. A disagreement here is a finding to rule on, not a mistake to hide;
+- **across domains, one line should lean yang the same way** unless a domain is known to flip it. A disagreement here is a finding to rule on, not a mistake to hide. Compare domains on the trigram; compare against the compass only through the translation;
 - yang must not be read as "good". A corner's health is not its count of yang poles.
 
-**6. Cross-reference and revisit.** Edges are blurry. Placing one tension can reopen another placement, or show that a tension belongs to a narrower or wider domain. That is the method working, not failing. Expect three to five passes. Record each pass's evidence (the 2×2 cases, the cube), so the next pass starts from it. A domain's placements are revisited on a cadence, as the dream cycle revisits long-term memory: re-verify the cases, merge tensions that turned out to be one axis, and move tensions whose domain was mis-read.
+**6. Cross-reference and revisit.** Edges are blurry. Placing one tension can reopen another placement, or show that a tension belongs to a narrower or wider domain. That is the method working, not failing. Expect three to five passes. Record each pass's evidence (the 2×2 cases, the cube, the compass gaps), so the next pass starts from it. A domain's placements are revisited on a cadence, as the dream cycle revisits long-term memory: re-verify the cases, merge tensions that turned out to be one axis, and move tensions whose domain was mis-read.
 
 **Things the first pass taught (Programme coordination, 2026-10-23)**:
 - **Correlated leanings are not correlated axes.** The programme prefers both Core once and One way. That is where we choose to stand, and it says nothing about the shape of the space.
 - **Movement between cells is evidence of independence.** Work graduates from the lab (adapter, one way) into the core (core once, one way). It takes on compatibility as clients come to depend on it, and a ruling cuts it clean again. If lines 2 and 3 were one axis, there would be nothing to move between.
-- **The cube locates the failure.** The corner we keep cleaning up is agents · adapter · compatibility (drift), and its poles are mixed.
+- **The cube locates the failure.** The corner we keep cleaning up is agents · compatibility · adapter (drift), and its poles are mixed.
 - **Human forks only.** Every tension has an AI suggestion and a human fork, often with the poles in the opposite order. Place and judge the human fork.
 
-| Line | Programme coordination (yin ↔ yang) | Stance | Decision compass (Semantic records) |
-|---|---|---|---|
-| 1 | Human layer ↔ **Agent throughput** (open: see below) | Observe ↔ **Act** | Testimony ↔ **Office**; Local autonomy ↔ **Shared coherence** |
-| 2 | Compatibility ↔ **One way** | Stabilise ↔ **Disrupt** | Continuity ↔ **Evolution**; Reliability ↔ **Renewal** |
-| 3 | Core once ↔ **Adapter convenience** | Zoom out ↔ **Focus** | Semantic integrity ↔ **Practical expression**; Possession ↔ **Portability** (open: see below) |
+The trigram, lined up across Programme coordination and Stance:
 
-Lined up across the domains, line 2 agrees everywhere: the yang pole is the change pole. Two lines are open for the owner to rule on:
-- **Line 1.** Is yang the one who moves (agents, Act) or the one with authority (the human ruling, Office)? Agent output is testimony, which is yin on the compass (decision b9d7096e), so the compass reading would make the Human layer yang.
-- **Line 3.** Is yang the specific (Focus, Practical expression, Adapter convenience) or the far-reaching (Portability travels everywhere, as Zoom out widens)? Portability is the one pole out of step.
+| Line | Programme coordination (yin ↔ yang) | Stance (yin ↔ yang) |
+|---|---|---|
+| 1, Earth | Human layer ↔ **Agent throughput** (open: see below) | Observe ↔ **Act** |
+| 2, Human | Compatibility ↔ **One way** | Stabilise ↔ **Disrupt** |
+| 3, Heaven | **Core once** ↔ Adapter convenience (open: see below) | Zoom out ↔ **Focus** |
 
-| Corner (line 1 · line 3 · line 2) | Real case |
+The compass translated onto the same lines through the alignment (axis k on line k). This is a translation of a different map, given for comparison and for finding gaps. It is not the compass's own grouping, which pairs its axes by Systemic Data Ethics movement and is not changed here.
+
+| Line | Decision compass (Semantic records), by the alignment |
 |---|---|
-| Human · Core once · One way | the owner rules a clean cut (srs-rust#878: federation removed, no shims) |
-| Human · Core once · Compatibility | the owner accepts a migration path (RFC-043: revision 8 accepted, migration staged) |
-| Human · Adapter · One way | the owner drives the lab (the srs-lab control room, rewritten weekly) |
-| Human · Adapter · Compatibility | a local convenience kept alive (a hand symlink for `node_modules/clerk`, a stale `~/.cargo/bin/srs`) |
-| Agent · Core once · One way | agents execute a ruling in every layer (clerk#114, reworked onto label bindings) |
-| Agent · Core once · Compatibility | agents widen the core's allowance to keep going (clerk#152 raising rule ceilings; srs-rust#866) |
-| Agent · Adapter · One way | agents churn experiments in a client (the lab middleware) |
-| Agent · Adapter · Compatibility | **drift**: shims and local copies kept so work can move (hand-written client types, the mimicry failure) |
+| 1, Earth | Semantic integrity ↔ **Practical expression** (1-7); Testimony ↔ **Office** (4-10) |
+| 2, Human | Continuity ↔ **Evolution** (2-8); Reliability ↔ **Renewal** (5-11) |
+| 3, Heaven | Local autonomy ↔ **Shared coherence** (3-9); Possession ↔ **Portability** (6-12) |
+
+**Line 2 agrees everywhere:** the yang pole is the change pole, on the trigram and on the translated compass alike.
+
+**Two lines are open for the owner to rule on:**
+- **Line 1.** Is yang the one who moves outward (agents, Act, Practical expression) or the one with authority (the human ruling, Office)? Agent output is testimony, which the compass marks yin (decision b9d7096e). Read that way, the compass would make the Human layer yang.
+- **Line 3.** On the owner's definition, Focus is the closed boundary held by our will, and Zoom out is the open boundary that senses.
+  - In Programme coordination, Core once is the closed boundary (meaning held once, by our will). Adapter convenience opens to what each client needs. So the trigram reading marks **Core once** yang. The first pass had marked Adapter convenience yang, reading line 3 as "specific ↔ whole".
+  - The translated compass marks the far-reaching poles yang on this line: Shared coherence and Portability. That is the opposite of Focus.
+
+  Rule both: Programme coordination's pole, and whether the compass flips line 3 or the translation misreads it.
+
+| Corner (line 1 · line 2 · line 3) | Real case |
+|---|---|
+| Human · One way · Core once | the owner rules a clean cut (srs-rust#878: federation removed, no shims) |
+| Human · Compatibility · Core once | the owner accepts a migration path (RFC-043: revision 8 accepted, migration staged) |
+| Human · One way · Adapter | the owner drives the lab (the srs-lab control room, rewritten weekly) |
+| Human · Compatibility · Adapter | a local convenience kept alive (a hand symlink for `node_modules/clerk`, a stale `~/.cargo/bin/srs`) |
+| Agent · One way · Core once | agents execute a ruling in every layer (clerk#114, reworked onto label bindings) |
+| Agent · Compatibility · Core once | agents widen the core's allowance to keep going (clerk#152 raising rule ceilings; srs-rust#866) |
+| Agent · One way · Adapter | agents churn experiments in a client (the lab middleware) |
+| Agent · Compatibility · Adapter | **drift**: shims and local copies kept so work can move (hand-written client types, the mimicry failure) |
 
 Recorded in prose: Reviewable ↔ fast refines line 1, and Mechanism ↔ policy refines line 3. Strict ↔ repairable and Spec-led ↔ implementation-led are proposed for Semantic records, and Depth ↔ overload for Agent memory, each to be tested there.
 
-**Where it is written**: tensions and poles live in srs-programme. A placed axis is an `axis-in-domain` record (line, `yang-pole`, `in-domain`, `refines` the tension; method package 1.1.0, clerk#135), set with `clerk domains set-axis`.
+**Where it is written**: tensions and poles live in srs-programme. A placed axis is an `axis-in-domain` record (line, `yang-pole`, `in-domain`, `refines` the tension; method package 1.1.0, clerk#135), set with `clerk domains set-axis`. Its `line` is the trigram line (1 Earth, 2 Human, 3 Heaven).
+
 
 
 #### How work moves across the boards
