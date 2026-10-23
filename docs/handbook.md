@@ -156,8 +156,11 @@ A domain is not fully defined until it names its trade-offs (SP-94). The goal is
 **1. Place before judging.** A tension can be weighed only inside a domain. Without one there is no polarity, no foundational status and nothing to test it against. So the first act is to place each tension in the domain whose purpose it trades on. The groups that hold a tension (`holds-tension`) are evidence of where it belongs, not the answer.
 
 **2. Generate the axes; don't just collect them.** Tensions gathered from the bottom up, from the work, cluster. In Programme coordination, three said "one way" and two said "throughput". So derive the candidates from lenses that are independent by construction, and ask what the domain's tension is on each:
-- **Action, Form, Time**: who acts, what shape the work takes, how it changes over time. The decision compass is built this way (line 1, 2, 3).
-- **Energy, Scope, Time**: T3's internal ↔ external, concentrate ↔ distribute, equilibrate ↔ activate. Stance is built this way.
+- **Line 1, who acts**: act ↔ observe, authority ↔ witness (Systemic Data Ethics: Action; T3: Energy).
+- **Line 2, stability ↔ change**: continue ↔ evolve, keep ↔ renew (Systemic Data Ethics: Form; T3: Time).
+- **Line 3, specific ↔ whole**: focus ↔ zoom out, expression here ↔ integrity everywhere (Systemic Data Ethics: Time, the present ↔ the vision; T3: Scope).
+
+The decision compass (two axes per line) and Stance (one per line) are built on these lines. The two source vocabularies put different names on lines 2 and 3, so name an axis by its **line**, not by "Form" or "Time".
 
 Collected tensions are then matched to a generated slot. One tension per slot is foundational. The rest are recorded **in prose**, under the axis they refine.
 
@@ -167,25 +170,30 @@ Collected tensions are then matched to a generated slot. One tension per slot is
 
 **4. Test the three as a cube.** Name all eight corners, each with a real case. A corner nobody can fill means the set is not orthogonal, or not complete.
 
-**5. Assign yang per domain.** Yang is the pole that is thing over relation, movement over stillness, outward over inward, assertive over reflective, forward looking over retrospective. Yang is **not** the preferred pole: preference is the principle's lean, a separate record. Polarity belongs to the line in its domain, and a narrower domain may flip it (decision cdd272a3). Two cross-checks:
+**5. Assign yang per domain.** Yang is the pole that is thing over relation, movement over stillness, outward over inward, assertive over reflective, forward looking over retrospective. Yang is **not** the preferred pole: preference is the principle's lean, a separate record. Polarity belongs to the line in its domain, and a narrower domain may flip it (decision cdd272a3). Three cross-checks:
 - tensions that refine one axis should lean yang the same way;
+- **across domains, one line should lean yang the same way** unless a domain is known to flip it. A disagreement here is a finding to rule on, not a mistake to hide;
 - yang must not be read as "good". A corner's health is not its count of yang poles.
 
 **6. Cross-reference and revisit.** Edges are blurry. Placing one tension can reopen another placement, or show that a tension belongs to a narrower or wider domain. That is the method working, not failing. Expect three to five passes. Record each pass's evidence (the 2×2 cases, the cube), so the next pass starts from it. A domain's placements are revisited on a cadence, as the dream cycle revisits long-term memory: re-verify the cases, merge tensions that turned out to be one axis, and move tensions whose domain was mis-read.
 
 **Things the first pass taught (Programme coordination, 2026-10-23)**:
 - **Correlated leanings are not correlated axes.** The programme prefers both Core once and One way. That is where we choose to stand, and it says nothing about the shape of the space.
-- **Movement between cells is evidence of independence.** Work graduates from the lab (adapter, one way) into the core (core once, one way). It takes on compatibility as clients come to depend on it, and a ruling cuts it clean again. If Form and Time were one axis, there would be nothing to move between.
+- **Movement between cells is evidence of independence.** Work graduates from the lab (adapter, one way) into the core (core once, one way). It takes on compatibility as clients come to depend on it, and a ruling cuts it clean again. If lines 2 and 3 were one axis, there would be nothing to move between.
 - **The cube locates the failure.** The corner we keep cleaning up is agents · adapter · compatibility (drift), and its poles are mixed.
 - **Human forks only.** Every tension has an AI suggestion and a human fork, often with the poles in the opposite order. Place and judge the human fork.
 
-| Axis (yin ↔ yang) | Movement |
-|---|---|
-| Human layer ↔ **Agent throughput** | Action |
-| Core once ↔ **Adapter convenience** | Form |
-| Compatibility ↔ **One way** | Time |
+| Line | Programme coordination (yin ↔ yang) | Stance | Decision compass (Semantic records) |
+|---|---|---|---|
+| 1 | Human layer ↔ **Agent throughput** (open: see below) | Observe ↔ **Act** | Testimony ↔ **Office**; Local autonomy ↔ **Shared coherence** |
+| 2 | Compatibility ↔ **One way** | Stabilise ↔ **Disrupt** | Continuity ↔ **Evolution**; Reliability ↔ **Renewal** |
+| 3 | Core once ↔ **Adapter convenience** | Zoom out ↔ **Focus** | Semantic integrity ↔ **Practical expression**; Possession ↔ **Portability** (open: see below) |
 
-| Corner (Action · Form · Time) | Real case |
+Lined up across the domains, line 2 agrees everywhere: the yang pole is the change pole. Two lines are open for the owner to rule on:
+- **Line 1.** Is yang the one who moves (agents, Act) or the one with authority (the human ruling, Office)? Agent output is testimony, which is yin on the compass (decision b9d7096e), so the compass reading would make the Human layer yang.
+- **Line 3.** Is yang the specific (Focus, Practical expression, Adapter convenience) or the far-reaching (Portability travels everywhere, as Zoom out widens)? Portability is the one pole out of step.
+
+| Corner (line 1 · line 3 · line 2) | Real case |
 |---|---|
 | Human · Core once · One way | the owner rules a clean cut (srs-rust#878: federation removed, no shims) |
 | Human · Core once · Compatibility | the owner accepts a migration path (RFC-043: revision 8 accepted, migration staged) |
@@ -196,7 +204,7 @@ Collected tensions are then matched to a generated slot. One tension per slot is
 | Agent · Adapter · One way | agents churn experiments in a client (the lab middleware) |
 | Agent · Adapter · Compatibility | **drift**: shims and local copies kept so work can move (hand-written client types, the mimicry failure) |
 
-Recorded in prose: Reviewable ↔ fast refines the Action axis, and Mechanism ↔ policy refines the Form axis. Strict ↔ repairable and Spec-led ↔ implementation-led are proposed for Semantic records, and Depth ↔ overload for Agent memory, each to be tested there.
+Recorded in prose: Reviewable ↔ fast refines line 1, and Mechanism ↔ policy refines line 3. Strict ↔ repairable and Spec-led ↔ implementation-led are proposed for Semantic records, and Depth ↔ overload for Agent memory, each to be tested there.
 
 **Where it is written**: tensions and poles live in srs-programme. A placed axis is an `axis-in-domain` record (line, `yang-pole`, `in-domain`, `refines` the tension; method package 1.1.0, clerk#135), set with `clerk domains set-axis`.
 
