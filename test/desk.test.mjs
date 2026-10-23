@@ -94,7 +94,9 @@ test('a parked issue that blocks ranked work asks to be re-grounded (clerk#113)'
 
 test('an owner-merge PR that asks nothing leaves Needs you and goes back to an agent (clerk#165)', () => {
   const pr = (number, body) => ({ repo: 'clerk', number, title: `pr ${number}`, body, labels: [{ name: 'gate:owner-merge' }], mergeStateStatus: 'CLEAN', chain: [] });
-  const body = deskBody({ now: NOW, prs: [pr(1, 'plain body'), pr(2, 'Decision asked: pick one.')] });
+  const block = '```srs-decisions\n{"asks":[{"key":"A1","question":"Which way?","options":["A: a","Do nothing: b"]}]}\n```';
+  const body = deskBody({ now: NOW, prs: [pr(1, 'plain body'), pr(2, 'Decision asked: pick one.'), pr(3, block)] });
+  assert.match(needsYou(body), /Owner merge clerk#3:\*\* pr 3 \| Decision asked: Which way\?\. Then merge/);
   assert.doesNotMatch(needsYou(body), /clerk#1\b/);
   assert.match(needsYou(body), /Owner merge clerk#2/);
   assert.match(unthreaded(body), /clerk#1 pr 1 \| misclassified \|/);

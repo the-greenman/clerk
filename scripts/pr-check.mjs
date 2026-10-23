@@ -19,7 +19,7 @@ try {
   const files = list(`repos/${owner}/${repo}/pulls/${n}/files?per_page=100`);
   const recordsInDiff = files.filter((f) => /records\/.*decision-[0-9a-f]{8}\.json$/.test(f.filename)).length;
   const d = parseDecisions(pr.body ?? '');
-  const findings = checkDecisions(d, { body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff, labels: (pr.labels ?? []).map((l) => l.name), gates });
+  const findings = checkDecisions(d, { body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff, labels: pr.labels ?? [], gates, draft: Boolean(pr.draft) });
   if (argv.includes('--json')) console.log(JSON.stringify({ ref, by: d.by, answers: d.answers, made: d.made, asks: d.asks, findings }, null, 2));
   else for (const f of findings) console.log(`${f.level.padEnd(5)} ${f.text}`);
   process.exit(findings.some((f) => f.level === 'error') ? 1 : 0);

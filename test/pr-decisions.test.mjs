@@ -111,6 +111,12 @@ test('an owner-merge PR must ask the owner something, and every PR carries a gat
   assert.equal(asksOwner(parseDecisions('Decision asked: merge after #157.')), true, 'the T9 line counts');
   assert.equal(asksOwner(parseDecisions('Decision asked: none to merge.')), false);
   assert.equal(asksOwner(parseDecisions('```srs-decisions\n{"asks":[]}\n```')), false);
+  assert.equal(asksOwner(parseDecisions('**Decision asked:** **none**')), false);
+  assert.equal(asksOwner(parseDecisions('Decision asked: <one sentence: the question>')), false, 'an unfilled template asks nothing');
+  assert.equal(asksOwner(parseDecisions('Decision asked:\nUnblocks: x')), false, 'an empty line does not borrow the next one');
+  assert.equal(asksOwner(parseDecisions('We noted the decision asked: in passing')), false, 'only a line that starts with it');
+  assert.deepEqual(errs('plain body', [{ name: 'gate:owner-merge' }]).length, 1, 'labels as {name} objects');
+  assert.deepEqual(checkDecisions(parseDecisions('plain'), { body: 'plain', labels: [], gates: G, draft: true }).map((f) => f.level), ['info'], 'a draft is not classified yet');
   assert.match(errs('plain body', ['gate:owner-merge']).join(), /asks the owner nothing/);
   assert.deepEqual(errs(ask, ['gate:owner-merge']), []);
   assert.doesNotMatch(errs('Decision asked: pick one.', ['gate:owner-merge']).join(), /asks the owner nothing/, 'the T9 line is a question (its own block rule still applies)');
