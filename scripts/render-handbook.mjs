@@ -34,7 +34,10 @@ function srs(...args) {
 const { summary } = srs("repo", "validate");
 if (summary.errors > 0) fail(`${summary.errors} validation errors (srs repo validate --repo handbook)`);
 
-const { containerId, identityInstanceId } = JSON.parse(readFileSync(join(REPO, "manifest.json"), "utf8")).container;
+// The root container and its identity record, through the CLI (RFC-052: the manifest names the root by rootContainerId).
+const { rootContainerId: containerId, identity } = srs("repo", "navigation").navigation;
+if (!containerId || !identity?.instanceId) fail("repo navigation names no root container or identity record");
+const identityInstanceId = identity.instanceId;
 const composition = srs("composition", "list").compositions.find((c) => c.name === "handbook");
 if (!composition) fail("no composition named handbook in handbook/");
 const { rendered, diagnostics } = srs("render", "composition", "--view", composition.id, "--container", containerId,
