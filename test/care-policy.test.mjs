@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { policyFrom, checkPolicy, evaluate, itemFacts, problemFacts, technicalPlanOf, parseClause, explain, NS, SIGNALS, REL, problemDomains } from '../lib/practice/care-policy.mjs';
+import { policyFrom, checkPolicy, evaluate, itemFacts, problemFacts, technicalPlanOf, planStepsOf, parseClause, explain, NS, SIGNALS, REL, problemDomains } from '../lib/practice/care-policy.mjs';
 
 // A fixture policy in the shape of the seeded one: three axes, three modes, five rules.
 const vocabularies = [{ namespace: NS, name: 'confidence_level', terms: ['none', 'low', 'medium', 'high'].map((key) => ({ key })) }];
@@ -19,7 +19,7 @@ function fixture({ rules: ruleOver, grades: gradeOver } = {}) {
   const grades = gradeOver ?? [
     ['ax-p', 'high', ['problem.affirmed']], ['ax-p', 'medium', ['problem.suggested.conversation']], ['ax-p', 'low', ['problem.suggested.synthesised', 'answers.none-yet']],
     ['ax-m', 'high', ['ruling.names-fix']], ['ax-m', 'medium', ['epic.ranked']], ['ax-m', 'low', ['epic.any']],
-    ['ax-t', 'high', ['plan.section']], ['ax-t', 'medium', ['owner.directed']],
+    ['ax-t', 'high', ['plan.section']], ['ax-t', 'medium', ['owner.directed', 'plan.steps']],
   ];
   grades.forEach(([axis, level, signal_keys], i) => { records.push(rec(`gr-${i}`, 'confidence-grade', { policy_title: `${axis} ${level}`, confidence_level: level, policy_explanation: '.', signal_keys })); relations.push(rel('grades', `gr-${i}`, axis)); });
   const rules = ruleOver ?? [
@@ -174,12 +174,22 @@ test('the signal catalogue: every signal has the means text the rendered policy 
   assert.deepEqual(REL, { grades: `${NS}/grades`, selects: `${NS}/selects` });
 });
 
-test('a plan in substance counts without the heading: three steps with code references or acceptance criteria', () => {
+test('a plan in substance: three steps with code references or acceptance criteria, but not the heading', () => {
   const steps = '1. Change `checkClaim` in lib/practice/claim.mjs.\n2. Add a case to test/claim.test.mjs.\n3. Update `docs/tools.md`.\n';
-  assert.equal(technicalPlanOf(steps), true);
-  assert.equal(technicalPlanOf('- [ ] read it\n- [ ] think\n- [ ] decide\nDone when the owner agrees.'), true, 'acceptance criteria');
-  assert.equal(technicalPlanOf('1. read it\n2. think\n3. decide'), false, 'steps alone are not a plan');
-  assert.equal(technicalPlanOf('Fix `a` and `b` and `c`.'), false, 'code references alone are not a plan');
+  assert.equal(planStepsOf(steps), true);
+  assert.equal(technicalPlanOf(steps), false, 'only the heading is a written plan');
+  assert.equal(planStepsOf('- [ ] read it\n- [ ] think\n- [ ] decide\nDone when the owner agrees.'), true, 'acceptance criteria');
+  assert.equal(planStepsOf('1. read it\n2. think\n3. decide'), false, 'steps alone are not a plan');
+  assert.equal(planStepsOf('Fix `a` and `b` and `c`.'), false, 'code references alone are not a plan');
+});
+
+test('a plan in substance never builds ungrounded work, even as the owner actor (clerk#157 review B3)', () => {
+  const steps = '1. Change `checkClaim` in lib/practice/claim.mjs.\n2. Add a case to test/claim.test.mjs.\n3. Update `docs/tools.md`.\n';
+  const r = run(steps, { actor: 'human:o' });
+  assert.equal(r.grades.technical_plan, 'medium');
+  assert.notEqual(r.mode.key, 'build');
+  assert.equal(run(`Answers: SP-1\n${steps}`).mode.key === 'build', false, 'nor grounded work: Build needs the written plan');
+  assert.equal(run('body', { comments: [PLAN], actor: 'human:o' }).grades.technical_plan, 'medium', 'a plan in a comment is not the item\'s plan');
 });
 
 test('domain confidence: affirmed problem, suggested problem, group label, repository', () => {
