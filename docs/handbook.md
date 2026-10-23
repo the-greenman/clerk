@@ -166,7 +166,7 @@ They meet through the I Ching ↔ zodiac alignment: hexagram line k is the zodia
 
 - **Line 1, Earth.** Does the energy go out onto the world, or in to change the system itself? Act ↔ Observe.
 - **Line 2, Human.** Do we add energy to change state, or let the system settle? Disrupt ↔ Stabilise.
-- **Line 3, Heaven.** Is the boundary closed and steered by our will, executing a plan? Or is it open, sensing and responding to what is outside? Focus ↔ Zoom out. This line is not about breadth: a small, specific choice can be open, and a system-wide one can be closed.
+- **Line 3, Heaven.** Is the boundary closed and steered by our will, executing a plan? Or is it open, sensing and responding to what is outside? Focus ↔ Zoom out. Traditionally this is where the system's direction comes from: a goal we have chosen (yang), or alignment with other actors (yin). This line is not about breadth: a small, specific choice can be open, and a system-wide one can be closed.
 
 Collected tensions are then matched to a line. One tension per line is foundational. The rest are recorded **in prose**, under the axis they refine.
 
@@ -185,21 +185,23 @@ Do not number lines from the compass's own movements or from T3's dimension name
 - **across domains, one line should lean yang the same way** unless a domain is known to flip it. A disagreement here is a finding to rule on, not a mistake to hide. Compare domains on the trigram; compare against the compass only through the translation;
 - yang must not be read as "good". A corner's health is not its count of yang poles.
 
+**Polarity on the compass is derived by rule, not read.** Yin and yang alternate around the zodiac, starting with Aries as yang, except at 6/7 (Virgo → Libra) and 12/1 (Pisces → Aries), where they do not alternate. So the yang signs are Aries, Gemini, Leo, Scorpio, Capricorn and Pisces. The yang pole is the first sign on axes 1-7, 3-9 and 5-11, and the second sign on 2-8, 4-10 and 6-12. The ratified compass matches this on all twelve signs. The only judgement is the mapping, which comes first: which of the domain's concepts sits in which cell. Two cross-checks follow from the rule. Every element holds both poles, split 2–1, and every level (Individual, Relational, Systemic) splits 2–2. If either fails, a concept is on the wrong cell (owner, 2026-10-23).
+
 **6. Cross-reference and revisit.** Edges are blurry. Placing one tension can reopen another placement, or show that a tension belongs to a narrower or wider domain. That is the method working, not failing. Expect three to five passes. Record each pass's evidence (the 2×2 cases, the cube, the compass gaps), so the next pass starts from it. A domain's placements are revisited on a cadence, as the dream cycle revisits long-term memory: re-verify the cases, merge tensions that turned out to be one axis, and move tensions whose domain was mis-read.
 
 **Things the first pass taught (Programme coordination, 2026-10-23)**:
 - **Correlated leanings are not correlated axes.** The programme prefers both Core once and One way. That is where we choose to stand, and it says nothing about the shape of the space.
 - **Movement between cells is evidence of independence.** Work graduates from the lab (adapter, one way) into the core (core once, one way). It takes on compatibility as clients come to depend on it, and a ruling cuts it clean again. If lines 2 and 3 were one axis, there would be nothing to move between.
-- **The cube locates the failure.** The corner we keep cleaning up is agents · compatibility · adapter (drift), and its poles are mixed.
+- **The cube locates the failure.** The corner we keep cleaning up is deliver · compatibility · adapter (drift), and its poles are mixed.
 - **Human forks only.** Every tension has an AI suggestion and a human fork, often with the poles in the opposite order. Place and judge the human fork.
 
 The trigram, lined up across Programme coordination and Stance:
 
 | Line | Programme coordination (yin ↔ yang) | Stance (yin ↔ yang) |
 |---|---|---|
-| 1, Earth | Human layer ↔ **Agent throughput** (open: see below) | Observe ↔ **Act** |
+| 1, Earth | Refine ↔ **Deliver** (owner, 2026-10-23) | Observe ↔ **Act** |
 | 2, Human | Compatibility ↔ **One way** | Stabilise ↔ **Disrupt** |
-| 3, Heaven | **Core once** ↔ Adapter convenience (open: see below) | Zoom out ↔ **Focus** |
+| 3, Heaven | Adapter convenience ↔ **Core once** (owner, 2026-10-23) | Zoom out ↔ **Focus** |
 
 The compass translated onto the same lines through the alignment (axis k on line k). This is a translation of a different map, given for comparison and for finding gaps. It is not the compass's own grouping, which pairs its axes by Systemic Data Ethics movement and is not changed here.
 
@@ -211,26 +213,24 @@ The compass translated onto the same lines through the alignment (axis k on line
 
 **Line 2 agrees everywhere:** the yang pole is the change pole, on the trigram and on the translated compass alike.
 
-**Two lines are open for the owner to rule on:**
-- **Line 1.** Is yang the one who moves outward (agents, Act, Practical expression) or the one with authority (the human ruling, Office)? Agent output is testimony, which the compass marks yin (decision b9d7096e). Read that way, the compass would make the Human layer yang.
-- **Line 3.** On the owner's definition, Focus is the closed boundary held by our will, and Zoom out is the open boundary that senses.
-  - In Programme coordination, Core once is the closed boundary (meaning held once, by our will). Adapter convenience opens to what each client needs. So the trigram reading marks **Core once** yang. The first pass had marked Adapter convenience yang, reading line 3 as "specific ↔ whole".
-  - The translated compass marks the far-reaching poles yang on this line: Shared coherence and Portability. That is the opposite of Focus.
-
-  Rule both: Programme coordination's pole, and whether the compass flips line 3 or the translation misreads it.
+**The second pass, on the owner's definitions (2026-10-23):**
+- **Line 1 is Refine ↔ Deliver.** Does the change land on the world (shipping the work already defined), or on the programme itself (refining how and whether we are ready to act)? Deliver is yang. The first pass had no line 1 tension, because every named tension was inward. That is the programme's own stuck point (srs-programme discoveries, 13).
+- **Human layer ↔ Agent throughput moves off line 1** (proposed: prose under line 1, beside Reviewable ↔ fast). It is not where the change lands. It is how the energy gets turned inward: a human layer that judges each item before anything ships. Its yang, Agent throughput, goes with Deliver. It is not a line 3 tension either, because agents carry our direction; they do not bring their own.
+- **Line 3 is Adapter convenience ↔ Core once.** The core is control from the centre. Adapters let direction come from outside. Core once is yang.
+- **The translated compass.** On line 3, Shared coherence (3-9, ♊) is a direction chosen at the centre, so the two maps agree. Portability (6-12, ♓) is yang by the zodiac rule, but reads as yin on trigram line 3, because a capability that travels aligns with other actors. That is a translation difference between two maps, not an error in either.
 
 | Corner (line 1 · line 2 · line 3) | Real case |
 |---|---|
-| Human · One way · Core once | the owner rules a clean cut (srs-rust#878: federation removed, no shims) |
-| Human · Compatibility · Core once | the owner accepts a migration path (RFC-043: revision 8 accepted, migration staged) |
-| Human · One way · Adapter | the owner drives the lab (the srs-lab control room, rewritten weekly) |
-| Human · Compatibility · Adapter | a local convenience kept alive (a hand symlink for `node_modules/clerk`, a stale `~/.cargo/bin/srs`) |
-| Agent · One way · Core once | agents execute a ruling in every layer (clerk#114, reworked onto label bindings) |
-| Agent · Compatibility · Core once | agents widen the core's allowance to keep going (clerk#152 raising rule ceilings; srs-rust#866) |
-| Agent · One way · Adapter | agents churn experiments in a client (the lab middleware) |
-| Agent · Compatibility · Adapter | **drift**: shims and local copies kept so work can move (hand-written client types, the mimicry failure) |
+| Deliver · One way · Core once | a clean-cut release from the centre (srs-rust#878: federation removed, no shims) |
+| Deliver · Compatibility · Core once | a release that lands with a migration path (RFC-043: revision 8, migration staged) |
+| Deliver · One way · Adapter | a client ships the shape its users need, with the old form dropped (the control room on clerk serve, srs-lab#19) |
+| Deliver · Compatibility · Adapter | shipping through shims and local copies (hand-written client types: drift) |
+| Refine · One way · Core once | the centre replaces a process (label bindings, f58db200) |
+| Refine · Compatibility · Core once | the centre widens its allowance to keep going (clerk#152 raising rule ceilings; srs-rust#866) |
+| Refine · One way · Adapter | a client reworks its own practice and drops the old one (the lab middleware, rewritten weekly) |
+| Refine · Compatibility · Adapter | proposed practice kept beside live practice (the "Proposed, not in force" chapters) |
 
-Recorded in prose: Reviewable ↔ fast refines line 1, and Mechanism ↔ policy refines line 3. Strict ↔ repairable and Spec-led ↔ implementation-led are proposed for Semantic records, and Depth ↔ overload for Agent memory, each to be tested there.
+Recorded in prose: Human layer ↔ Agent throughput and Reviewable ↔ fast refine line 1, and Mechanism ↔ policy refines line 3. Strict ↔ repairable and Spec-led ↔ implementation-led are proposed for Semantic records, and Depth ↔ overload for Agent memory, each to be tested there.
 
 **Where it is written**: tensions and poles live in srs-programme. A placed axis is an `axis-in-domain` record (line, `yang-pole`, `in-domain`, `refines` the tension; method package 1.1.0, clerk#135), set with `clerk domains set-axis`. Its `line` is the trigram line (1 Earth, 2 Human, 3 Heaven).
 
