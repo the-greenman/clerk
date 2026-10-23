@@ -298,6 +298,14 @@
      "key": "review-requested",
      "label": "Review requested",
      "description": "The owner asks the group reviewer to look at a pull request again."
+    },
+    {
+     "id": "b10c4ed0-0000-4000-8000-000000000113",
+     "version": 1,
+     "namespace": "com.semanticops.programme",
+     "key": "blocks-ranked",
+     "label": "Blocks ranked work",
+     "description": "Derived: parked, yet it blocks ranked work. Re-ground it to that work's problem (owner's desk); auto-clears."
     }
    ],
    "description": "What a work item or pull request is, or who takes it: classification, never position or hold. Also the request that asks for promotion. A working group's own label is its charter's group_label, not a term here.",
@@ -594,6 +602,11 @@
    "binds": "355e0c82-19b5-47ab-b740-ac5f266c8680",
    "binding_status": "active",
    "github_label": "user-story"
+  },
+  {
+   "binds": "b10c4ed0-0000-4000-8000-000000000113",
+   "binding_status": "active",
+   "github_label": "blocks-ranked"
   }
  ]
 }
