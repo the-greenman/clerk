@@ -1,0 +1,23 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "The floor of caution at merge time."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "The merge_gate term key a PR made in this care mode carries at least (auto-merge or owner-merge). A PR's own door and mode can still raise it to owner-merge; never lower it.",
+  "editorHint": "dropdown",
+  "fieldType": {
+    "allowedValues": [
+      "auto-merge",
+      "owner-merge"
+    ],
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "plain",
+    "valueDomain": "closed"
+  },
+  "id": "16acb912-5795-4205-9ff6-a1eab97368d2",
+  "name": "merge_gate",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

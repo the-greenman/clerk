@@ -1,0 +1,17 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "For rules, order is behaviour: moving a rule up changes which mode wins."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "Position among its siblings: axes in reading order, rules in evaluation order (the first rule that matches chooses the mode).",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "number"
+  },
+  "id": "2c5b25b7-91bc-4e07-ab0a-24b425a264c4",
+  "name": "policy_order",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

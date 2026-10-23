@@ -1,0 +1,42 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json",
+  "aiGuidance": {
+    "extraction": "Exactly one `selects` relation to a care-mode.",
+    "negativeGuidance": "Agents never edit policy records: propose a change as a comment on the record, with the evidence.",
+    "purpose": "The tuning surface: reorder, tighten or loosen rules to change how careful work is."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "One ordered rule: when its clauses hold for a work item, it selects a care mode. Rules are tried in policy_order and the first match wins; the last rule has no clauses and catches everything.",
+  "fields": [
+    {
+      "fieldId": "b782003d-7f38-4a75-b122-3ff453511ba1",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "2c5b25b7-91bc-4e07-ab0a-24b425a264c4",
+      "order": 1,
+      "required": true
+    },
+    {
+      "fieldId": "71242168-e3cf-4481-8610-16e3b0e17e55",
+      "order": 2,
+      "required": false
+    },
+    {
+      "fieldId": "d4acf2cd-902e-422d-8564-5f72f4054d54",
+      "order": 3,
+      "required": false
+    },
+    {
+      "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
+      "order": 4,
+      "required": true
+    }
+  ],
+  "id": "03dd0239-e160-494b-8728-da36edf25f16",
+  "identityFieldId": "b782003d-7f38-4a75-b122-3ff453511ba1",
+  "name": "care-rule",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

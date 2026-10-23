@@ -1,0 +1,38 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/composition.json",
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "The Confidence and care policy as one document: the policy container's outline in order (axes with their grades, care modes, rules). Render it with the programme's care_policy_container.",
+  "id": "5e0e58f9-7b92-4cc3-a902-1c790e586b98",
+  "name": "confidence-and-care",
+  "namespace": "com.semanticops.programme",
+  "sections": [
+    {
+      "emptyBehavior": "hide",
+      "order": 0,
+      "ordering": {
+        "source": "arranged"
+      },
+      "relationsPresentation": {
+        "include": [
+          {
+            "directions": "forward",
+            "forwardLabel": "Selects",
+            "relationType": "com.semanticops.programme/selects"
+          }
+        ]
+      },
+      "sectionId": "policy",
+      "source": {
+        "type": "container-subset"
+      },
+      "titleFieldId": "b782003d-7f38-4a75-b122-3ff453511ba1",
+      "typeDispatch": {
+        "com.semanticops.programme/care-mode": "f7a20a28-82a7-4770-bf1e-3cffabdc33ef",
+        "com.semanticops.programme/care-rule": "71af2bd1-625a-4f64-9957-95fa4ca8f816",
+        "com.semanticops.programme/confidence-axis": "bfd65d46-115a-4d04-897e-6c48713385d4",
+        "com.semanticops.programme/confidence-grade": "8747e6c0-786d-4d76-828b-7383a28d8f49"
+      }
+    }
+  ],
+  "version": 1
+}

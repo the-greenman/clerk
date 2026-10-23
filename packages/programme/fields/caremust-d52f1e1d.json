@@ -1,0 +1,18 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "Concrete, checkable obligations: 'open questions as blocks: merge asks', 'gate:owner-merge'."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "What a worker in this care mode must do, one obligation per entry. Briefs read these instead of restating them.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "list",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "d52f1e1d-67d0-468c-88a7-7adbbf9bb347",
+  "name": "care_must",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

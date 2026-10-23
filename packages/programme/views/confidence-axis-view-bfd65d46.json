@@ -1,0 +1,16 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "An axis renders as its question and why it matters, under its title; its grades follow as its children.",
+  "fieldViews": [
+    {
+      "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
+      "labelMode": "none",
+      "order": 0
+    }
+  ],
+  "id": "bfd65d46-115a-4d04-897e-6c48713385d4",
+  "name": "confidence-axis-view",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

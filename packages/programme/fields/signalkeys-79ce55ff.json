@@ -1,0 +1,19 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "extraction": "One signal key per entry, e.g. problem.affirmed.",
+    "purpose": "Tune a grade by adding or removing signals here, never by changing code."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "Signals that earn this grade: any one that holds for a work item gives the item this grade, the highest earned grade wins. Each key names an evaluator the clerk implements (its signal catalogue); an unknown key fails the clerk's policy check.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "list",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "79ce55ff-87c5-414c-9dce-901fd14b7e41",
+  "name": "signal_keys",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

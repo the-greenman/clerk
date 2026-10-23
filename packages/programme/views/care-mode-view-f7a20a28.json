@@ -1,0 +1,26 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "A care mode renders as what the worker does, what it must do, and the least merge gate.",
+  "fieldViews": [
+    {
+      "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
+      "labelMode": "none",
+      "order": 0
+    },
+    {
+      "displayLabel": "Must",
+      "fieldId": "d52f1e1d-67d0-468c-88a7-7adbbf9bb347",
+      "order": 1
+    },
+    {
+      "displayLabel": "Merge gate at least",
+      "fieldId": "16acb912-5795-4205-9ff6-a1eab97368d2",
+      "order": 2
+    }
+  ],
+  "id": "f7a20a28-82a7-4770-bf1e-3cffabdc33ef",
+  "name": "care-mode-view",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

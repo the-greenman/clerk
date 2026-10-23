@@ -3,9 +3,9 @@
   "id": "a71f013f-0207-439f-8e52-2982baa68e86",
   "namespace": "com.semanticops.programme",
   "name": "methodology",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "title": "methodology",
-  "description": "Programme settings; the work-status set (where a work item is: work_item; what holds it: work_hold; how its pull request merges: merge_gate; what it is: work_label), the label-binding type a programme uses to show them, and the set-against relation that places a decision on its compass. The live methodology types still live in srs-programme's primary package.",
+  "description": "Programme settings; the work-status set (where a work item is: work_item; what holds it: work_hold; how its pull request merges: merge_gate; what it is: work_label), the label-binding type a programme uses to show them, the set-against relation that places a decision on its compass; and the Confidence and care policy types (confidence-axis, confidence-grade, care-mode, care-rule, the confidence_level scale, grades and selects) a programme tunes how careful work must be with. The live methodology types still live in srs-programme's primary package.",
   "status": "active",
   "createdAt": "2026-10-10T00:00:00Z",
   "fields": [
@@ -20,17 +20,41 @@
     "fields/githublabel-1ac3e920.json",
     "fields/bindingstatus-c54d2057.json",
     "fields/boardstatus-e3747f9d.json",
-    "fields/binds-fe186145.json"
+    "fields/binds-fe186145.json",
+    "fields/policytitle-b782003d.json",
+    "fields/policykey-b53cd964.json",
+    "fields/policyexplanation-5f0ac112.json",
+    "fields/policyorder-2c5b25b7.json",
+    "fields/confidencelevel-fb3d43a0.json",
+    "fields/signalkeys-79ce55ff.json",
+    "fields/caremust-d52f1e1d.json",
+    "fields/mergegate-16acb912.json",
+    "fields/ruleallof-71242168.json",
+    "fields/ruleanyof-d4acf2cd.json",
+    "fields/carepolicycontainer-bd1fdf74.json"
   ],
   "types": [
     "types/programme-b34ef0e7.json",
-    "types/label-binding-1814db47.json"
+    "types/label-binding-1814db47.json",
+    "types/confidenceaxis-4d24c966.json",
+    "types/confidencegrade-f8f7cddf.json",
+    "types/caremode-4a6abffb.json",
+    "types/carerule-03dd0239.json"
   ],
   "relationTypes": [
-    "relation-types/comsemanticopsprogrammeset-against-23a14f00.json"
+    "relation-types/comsemanticopsprogrammeset-against-23a14f00.json",
+    "relation-types/comsemanticopsprogrammegrades-8afd8e5b.json",
+    "relation-types/comsemanticopsprogrammeselects-44a3024b.json"
   ],
-  "views": [],
-  "compositions": [],
+  "views": [
+    "views/confidence-axis-view-bfd65d46.json",
+    "views/confidence-grade-view-8747e6c0.json",
+    "views/care-mode-view-f7a20a28.json",
+    "views/care-rule-view-71af2bd1.json"
+  ],
+  "compositions": [
+    "compositions/confidence-and-care-5e0e58f9.json"
+  ],
   "blueprints": [],
   "lifecycles": [
     "lifecycles/workitem-e71e57d2.json"
@@ -38,6 +62,7 @@
   "vocabularies": [
     "vocabularies/worklabel-183a8ca6.json",
     "vocabularies/mergegate-36b3c787.json",
-    "vocabularies/workhold-dcf0ee69.json"
+    "vocabularies/workhold-dcf0ee69.json",
+    "vocabularies/confidencelevel-a0e23ab8.json"
   ]
 }

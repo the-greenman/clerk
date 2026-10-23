@@ -1,0 +1,13 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json",
+  "canonicalDirection": "source is the rule; target is the care mode",
+  "category": "association",
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "Source care-rule chooses the target care-mode when it matches.",
+  "id": "44a3024b-929f-4acd-ba7d-d2b70fc2fede",
+  "key": "com.semanticops.programme/selects",
+  "label": "Selects",
+  "namespace": "com.semanticops.programme",
+  "status": "active",
+  "version": 1
+}
