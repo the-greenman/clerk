@@ -3,7 +3,7 @@
   "id": "b34ef0e7-6f33-4c43-85b8-7a2772f456ef",
   "namespace": "com.semanticops.programme",
   "name": "programme",
-  "version": 1,
+  "version": 2,
   "description": "Settings of one programme: whose it is, which repositories it governs, where it reports.",
   "fields": [
     {
@@ -44,6 +44,11 @@
     {
       "fieldId": "44a66dd4-c598-4464-831b-bf2d6874b242",
       "order": 7,
+      "required": false
+    },
+    {
+      "fieldId": "bd1fdf74-1553-4446-a6d1-d181ea05200f",
+      "order": 8,
       "required": false
     }
   ],

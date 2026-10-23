@@ -1,0 +1,26 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "A rule renders as its conditions and why; the mode it selects follows as its selects link.",
+  "fieldViews": [
+    {
+      "displayLabel": "When all of",
+      "fieldId": "71242168-e3cf-4481-8610-16e3b0e17e55",
+      "order": 0
+    },
+    {
+      "displayLabel": "And at least one of",
+      "fieldId": "d4acf2cd-902e-422d-8564-5f72f4054d54",
+      "order": 1
+    },
+    {
+      "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
+      "labelMode": "none",
+      "order": 2
+    }
+  ],
+  "id": "71af2bd1-625a-4f64-9957-95fa4ca8f816",
+  "name": "care-rule-view",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

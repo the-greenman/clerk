@@ -1,0 +1,18 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "The heading a reader sees; keep it short and plain."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "The name of this part of the Confidence and care policy, as the rendered policy shows it.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "b782003d-7f38-4a75-b122-3ff453511ba1",
+  "name": "policy_title",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}
