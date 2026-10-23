@@ -14,6 +14,7 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 import { repoRoot } from "./lib/repo-arg.mjs";
+import { srsCli } from "../lib/adapters/cli.mjs";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { canonOf } from "../lib/practice/canon.mjs";
@@ -99,7 +100,7 @@ export function derive(records, relations, today, affirmed = new Set(), outlines
 }
 
 function load() {
-  const cli = process.env.SRS_CLI_PATH?.trim() || "srs";
+  const cli = srsCli(ROOT);
   const run = (args) => JSON.parse(execFileSync(cli, [...args, "--repo", ROOT], { encoding: "utf8", maxBuffer: 1 << 28 })).payload;
   const listed = run(["container", "list"]).containers.find((x) => x.title === "Affirmed");
   const c = listed && run(["container", "get", listed.containerId]).container;

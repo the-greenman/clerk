@@ -35,7 +35,7 @@ Everything the programme runs, in one place. Programme data lives in srs-program
 
 | Script | Purpose | Reads | Writes | Called by |
 |---|---|---|---|---|
-| render-handbook.mjs | Validate `handbook/` (an SRS repository) and render its `handbook` Composition to `docs/handbook.md`; `--check` exits 1 on drift | `handbook/`, `SRS_CLI_PATH` | `docs/handbook.md` | owner, handbook watcher, validate.yml |
+| render-handbook.mjs | Validate `handbook/` (an SRS repository) and render its `handbook` Composition to `docs/handbook.md`; `--check` exits 1 on drift | `handbook/`, the clerk's pin (or `SRS_CLI_PATH`) | `docs/handbook.md` | owner, handbook watcher, validate.yml |
 | charter.mjs, roadmap.mjs, queue.mjs, steward-check.mjs, check-method.mjs, check-programme-conformance.mjs, fetch-pinned-srs.mjs, gh-project.mjs, upkeep.mjs, group-state.mjs, wt | Behind the commands above | see above | see above | `clerk <name>` |
 | lib/pinned-srs.mjs, lib/repo-arg.mjs | Pin lookup; `--repo` resolution | programme `validate.yml` | | scripts |
 | session | Fresh programme worktree, pinned srs, then open the clerk | srs-programme master | a worktree | owner, `/session` (`.claude/commands/session.md`) |
