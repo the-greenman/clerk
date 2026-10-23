@@ -9,6 +9,7 @@ import { loadSettings } from '../lib/adapters/settings.mjs';
 import { loadProgramme, parentChain } from '../lib/adapters/ground.mjs';
 import { issueWithComments } from '../lib/adapters/github.mjs';
 import { loadPolicy, loadProblemFacts } from '../lib/adapters/care-policy.mjs';
+import { loadGroups } from '../lib/adapters/groups.mjs';
 import { evaluate, itemFacts, epicOf, explain } from '../lib/practice/care-policy.mjs';
 
 const argv = process.argv.slice(2);
@@ -23,7 +24,8 @@ try {
   const ref = `${m[1]}#${m[2]}`, issue = issueWithComments(`${st.githubOwner}/${m[1]}`, Number(m[2]));
   let actor; try { actor = JSON.parse(process.env.SRS_ACTOR ?? '').id; } catch { actor = undefined; }
   const epic = epicOf(epics, [ref, ...parentChain(st.githubOwner, m[1], Number(m[2])).map((p) => p.ref)]);
-  const facts = itemFacts({ item: { body: issue.body, comments: issue.comments }, problems: loadProblemFacts(repo, cli), epic, actor, ownerActor: st.ownerActor });
+  const facts = itemFacts({ item: { body: issue.body, comments: issue.comments }, problems: loadProblemFacts(repo, cli), epic, actor, ownerActor: st.ownerActor,
+    labels: issue.labels, repo: m[1], groups: loadGroups(repo, cli) });
   const result = evaluate(policy, facts);
   if (argv.includes('--json')) console.log(JSON.stringify({ ref, ...result, epic, answers: facts.answers }, null, 2));
   else console.log([`${ref}: ${issue.title}`, ...explain(policy, result)].join('\n'));

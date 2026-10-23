@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { policyFrom, checkPolicy, evaluate, itemFacts, problemFacts, technicalPlanOf, parseClause, explain, NS, SIGNALS, REL } from '../lib/practice/care-policy.mjs';
+import { policyFrom, checkPolicy, evaluate, itemFacts, problemFacts, technicalPlanOf, parseClause, explain, NS, SIGNALS, REL, problemDomains } from '../lib/practice/care-policy.mjs';
 
 // A fixture policy in the shape of the seeded one: three axes, three modes, five rules.
 const vocabularies = [{ namespace: NS, name: 'confidence_level', terms: ['none', 'low', 'medium', 'high'].map((key) => ({ key })) }];
@@ -49,9 +49,9 @@ test('the fixture policy is well formed and ordered', () => {
 });
 
 test('problem facts: layer and basis pooled per problem_id', () => {
-  assert.deepEqual(problems['SP-1'], { layer: 'affirmed', basis: 'conversation' });
-  assert.deepEqual(problems['SP-2'], { layer: 'suggested', basis: 'conversation' }, 'source_ref names a session');
-  assert.deepEqual(problems['SP-3'], { layer: 'suggested', basis: 'synthesised' });
+  assert.deepEqual(problems['SP-1'], { layer: 'affirmed', basis: 'conversation', domains: [] });
+  assert.deepEqual(problems['SP-2'], { layer: 'suggested', basis: 'conversation', domains: [] }, 'source_ref names a session');
+  assert.deepEqual(problems['SP-3'], { layer: 'suggested', basis: 'synthesised', domains: [] });
 });
 
 test('placement grades: affirmed high, conversation medium, synthesised or none-yet low, nothing none', () => {
@@ -168,4 +168,22 @@ test('a plan in substance counts without the heading: three steps with code refe
   assert.equal(technicalPlanOf('- [ ] read it\n- [ ] think\n- [ ] decide\nDone when the owner agrees.'), true, 'acceptance criteria');
   assert.equal(technicalPlanOf('1. read it\n2. think\n3. decide'), false, 'steps alone are not a plan');
   assert.equal(technicalPlanOf('Fix `a` and `b` and `c`.'), false, 'code references alone are not a plan');
+});
+
+test('domain confidence: affirmed problem, suggested problem, group label, repository', () => {
+  const rels = [
+    { relationType: 'com.semanticops.method/held-by', sourceId: 'pa', targetId: 'pid' },
+    { relationType: 'com.semanticops.method/in-domain', sourceId: 'pid', targetId: 'dom' },
+  ];
+  assert.deepEqual(problemDomains(rels), { pa: ['dom'] });
+  const recs = [{ instanceId: 'pa', record: { typeName: 'problem', fieldValues: { problem_id: 'SP-9' } } }];
+  const aff = problemFacts(recs, { affirmed: new Set(['pa']) }, problemDomains(rels)), sug = problemFacts(recs, { suggested: new Set(['pa']) }, problemDomains(rels));
+  const groups = [{ label: 'wg:a', repos: ['srs', 'srs-web'], domains: ['d1'] }, { label: 'wg:b', repos: ['srs-web'], domains: ['d2'] }, { label: 'wg:c', repos: ['clerk'], domains: [] }];
+  const truth = (facts) => Object.keys(SIGNALS).filter((k) => k.startsWith('domain.') && SIGNALS[k].test(facts));
+  assert.deepEqual(truth(itemFacts({ item: { body: 'Answers: SP-9' }, problems: aff })), ['domain.affirmed-problem']);
+  assert.deepEqual(truth(itemFacts({ item: { body: 'Answers: SP-9' }, problems: sug })), ['domain.suggested-problem']);
+  assert.deepEqual(truth(itemFacts({ labels: ['wg:a'], groups })), ['domain.group-label']);
+  assert.deepEqual(truth(itemFacts({ repo: 'srs', groups })), ['domain.repo-one-group']);
+  assert.deepEqual(truth(itemFacts({ repo: 'srs-web', groups })), ['domain.repo-shared'], 'two groups govern srs-web');
+  assert.deepEqual(truth(itemFacts({ repo: 'clerk', labels: ['wg:c'], groups })), [], 'a group that holds no domain places nothing');
 });
