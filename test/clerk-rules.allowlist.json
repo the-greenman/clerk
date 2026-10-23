@@ -11,7 +11,8 @@
     "lib/adapters/desk.mjs: ../../scripts/roadmap.mjs"
   ],
   "4": {
-    "scripts/gh-project.mjs": 2343
+    "scripts/gh-project.mjs": 2411,
+    "scripts/steward-check.mjs": 167
   },
   "5": [
     "lib/practice/agenda.mjs: EXERCISE_TYPE",
@@ -66,7 +67,7 @@
     "bin/clerk.mjs": 2,
     "lib/adapters/desk.mjs": 1,
     "routines/wg-reviewer.md": 1,
-    "scripts/gh-project.mjs": 19,
+    "scripts/gh-project.mjs": 20,
     "scripts/roadmap.mjs": 3,
     "scripts/steward-check.mjs": 2
   },
