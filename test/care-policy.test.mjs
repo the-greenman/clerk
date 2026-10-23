@@ -19,7 +19,7 @@ function fixture({ rules: ruleOver, grades: gradeOver } = {}) {
   const grades = gradeOver ?? [
     ['ax-p', 'high', ['problem.affirmed']], ['ax-p', 'medium', ['problem.suggested.conversation']], ['ax-p', 'low', ['problem.suggested.synthesised', 'answers.none-yet']],
     ['ax-m', 'high', ['ruling.names-fix']], ['ax-m', 'medium', ['epic.ranked']], ['ax-m', 'low', ['epic.any']],
-    ['ax-t', 'high', ['plan.section', 'owner.directed']],
+    ['ax-t', 'high', ['plan.section']], ['ax-t', 'medium', ['owner.directed']],
   ];
   grades.forEach(([axis, level, signal_keys], i) => { records.push(rec(`gr-${i}`, 'confidence-grade', { policy_title: `${axis} ${level}`, confidence_level: level, policy_explanation: '.', signal_keys })); relations.push(rel('grades', `gr-${i}`, axis)); });
   const rules = ruleOver ?? [
@@ -74,10 +74,15 @@ test('a clear technical plan builds once the theory has a conversation behind it
   assert.equal(run(`Answers: SP-3\n${PLAN}`).mode.key, 'careful', 'synthesiser-only theory: careful, not stopped');
 });
 
-test('owner-directed command-line work builds before the theory is affirmed', () => {
-  const r = run('Fix the dangling childContainerIds.', { actor: 'human:o' });
+test('owner-directed work with a written plan builds before the theory is affirmed', () => {
+  const r = run(`Fix the dangling childContainerIds.\n${PLAN}`, { actor: 'human:o' });
   assert.deepEqual([r.grades.technical_plan, r.mode.key, r.rule.order], ['high', 'build', 1]);
   assert.equal(run('Fix it.', { actor: 'agent:synthesiser' }).mode.key, 'probe');
+});
+
+test('the owner actor alone never builds: agents run as it too (clerk#157 review B1)', () => {
+  const r = run('Fix the dangling childContainerIds.', { actor: 'human:o' });
+  assert.deepEqual([r.grades.technical_plan, r.mode.key], ['medium', 'probe']);
 });
 
 test('affirmed theory and a ruling that names the fix build without a plan section', () => {
