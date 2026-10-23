@@ -62,3 +62,20 @@ test('claim: an item in review or held is not claimed', () => {
   assert.match(why(withLabels('needs-input')), /held \(needs-input\)/);
   assert.match(why(withLabels('parked', 'blocked')), /held \(blocked, parked\)|held \(parked, blocked\)/);
 });
+
+test('graded (a care policy in force): uncertainty about the theory is a caution, never a refusal (clerk#156)', () => {
+  const g = (o) => checkClaim({ ...base, graded: true, ...o });
+  const none = g({ issue: { ...issue, body: 'Fix the thing.' } });
+  assert.deepEqual([none.ok, none.reasons, none.cautions], [true, [], ['its body has no "Answers: SP-nn" line']]);
+  assert.equal(g({ affirmed: new Set() }).ok, true, 'an unaffirmed problem only cautions');
+  assert.match(g({ affirmed: new Set() }).cautions[0], /SP-901 is not affirmed/);
+  assert.equal(g({ issue: { ...issue, body: 'No affirmed problem yet: x' } }).ok, true);
+  assert.equal(checkClaim({ ...base, affirmed: new Set() }).ok, false, 'without a policy the old rule refuses');
+});
+
+test('graded: collisions, holds and seats still refuse', () => {
+  const g = (o) => checkClaim({ ...base, graded: true, issue: { ...issue, body: 'no answers' }, ...o });
+  assert.equal(g({ prs: [{ repo: 'fixture', number: 50, title: 'Closes #10' }] }).ok, false);
+  assert.equal(g({ issue: { ...issue, body: 'x', assignees: [{ login: 'someone' }] } }).ok, false);
+  assert.equal(g({ seat: 'reviewer' }).ok, false);
+});
