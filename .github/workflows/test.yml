@@ -11,4 +11,6 @@ jobs:
         with:
           node-version: "20"
       # No test needs the srs CLI or a programme checkout: all run on fixtures (checked by running npm test with no srs on PATH).
+      # npm ci installs devDependencies only (ajv, for validating responses against api/openapi.json); the runtime has none.
+      - run: npm ci
       - run: npm test

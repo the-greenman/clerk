@@ -40,7 +40,7 @@ test('report screen: sections trimmed, escalations point at section 3, pause sho
 });
 test('merge: clean owner-merge PRs, not drafts', () => {
   const p = (n, s, label = 'gate:owner-merge', isDraft = false) => ({ number: n, mergeStateStatus: s, isDraft, labels: [{ name: label }] });
-  assert.deepEqual(A.mergeItems([p(1, 'CLEAN'), p(2, 'BEHIND'), p(3, 'CLEAN', 'gate:auto-merge'), p(4, 'CLEAN', 'gate:owner-merge', true)]).map((x) => x.number), [1]);
+  assert.deepEqual(A.mergeItems([p(1, 'CLEAN'), p(2, 'BEHIND'), p(3, 'CLEAN', 'gate:auto-merge'), p(4, 'CLEAN', 'gate:owner-merge', true)], 'gate:owner-merge').map((x) => x.number), [1]);
 });
 test('screens and status', () => {
   assert.match(A.prScreen({ title: 't', repo: 'srs', number: 5, body: 'x\nDecision asked: ship it?\ny', statusCheckRollup: [{ conclusion: 'SUCCESS' }] }).join('\n'), /Decision asked: ship it\?[\s\S]*all green/);

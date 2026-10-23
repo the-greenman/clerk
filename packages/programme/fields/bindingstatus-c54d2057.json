@@ -1,0 +1,20 @@
+{
+  "aiGuidance": {
+    "purpose": "Retired bindings are the migration list; they go once no item carries them."
+  },
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "active: the programme shows this definition this way. retired: an old label still to migrate to the active binding of the same definition (or with no successor, to remove).",
+  "editorHint": "singleline",
+  "fieldType": {
+    "allowedValues": [
+      "active",
+      "retired"
+    ],
+    "datatype": "string",
+    "valueDomain": "closed"
+  },
+  "id": "c54d2057-e1d3-4b73-b718-91d8ff9521df",
+  "name": "binding_status",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

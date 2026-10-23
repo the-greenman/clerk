@@ -1,0 +1,138 @@
+{
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "Where a work item is in the flow, from filing to done. Position only: what stops an item is a hold (work_hold), and a hold never moves the position. How a programme shows each state (board column, label) is its own data: label-binding records that bind to these states.",
+  "id": "e71e57d2-54cd-41f1-a926-9f8388fd5f5d",
+  "initialState": "backlog",
+  "name": "work_item",
+  "namespace": "com.semanticops.programme",
+  "states": [
+    {
+      "description": "Filed, but not yet judged unblocked, grounded and routed. Routines do not take it. A reopened item returns here.",
+      "id": "21218875-94b2-4156-94ce-0525e1b96c49",
+      "isInitial": true,
+      "key": "backlog",
+      "label": "Backlog",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Unblocked, grounded and routed to a lane: one member may claim it. The routines' work queue.",
+      "id": "8395e6f2-8981-40ff-ba77-52399975a4e7",
+      "key": "ready",
+      "label": "Ready",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Claimed by one member, who is working it. Nobody else starts it while the claim stands. A stop for a human's input keeps the claim and adds the needs-input hold.",
+      "id": "ef2a4108-c790-4e0e-a425-ffa083de3e25",
+      "key": "in_progress",
+      "label": "In progress",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "A pull request that closes it is open. It is not claimable while that pull request is open, including while review asks for changes.",
+      "id": "47aecc4b-9aa7-4ced-a91c-7c401b200cd2",
+      "key": "in_review",
+      "label": "In review",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Closed: completed (landed, or no code was needed) or not planned (dropped or superseded).",
+      "id": "ada52b66-6406-4e98-8125-a3faf790d40e",
+      "key": "done",
+      "label": "Done",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    }
+  ],
+  "transitions": [
+    {
+      "description": "Judged unblocked, grounded and routed. Any member may request it; the clerk makes it.",
+      "from": "backlog",
+      "id": "cf36c9d4-9cd8-4118-8f91-72e0162b7484",
+      "name": "promote",
+      "to": "ready"
+    },
+    {
+      "description": "One member claims it through the clerk.",
+      "from": "ready",
+      "id": "37f816bd-d2f6-42d6-89d2-f96986462314",
+      "name": "claim",
+      "to": "in_progress"
+    },
+    {
+      "description": "The owner's session or a group builder claims an item the feed never promoted.",
+      "from": "backlog",
+      "id": "1777084e-7ab1-47ee-a194-b9ab6130cdb2",
+      "name": "claim-unfed",
+      "to": "in_progress"
+    },
+    {
+      "description": "A pull request that closes it is open.",
+      "from": "in_progress",
+      "id": "a66542a5-3ac5-4ee1-a041-da36c6af1d9b",
+      "name": "open-pr",
+      "to": "in_review"
+    },
+    {
+      "description": "The claim went quiet past the stale-claim window, with no open closing pull request and no needs-input hold.",
+      "from": "in_progress",
+      "id": "a132ec3a-6471-4119-8d4d-f0e9619f60be",
+      "name": "reclaim",
+      "to": "ready"
+    },
+    {
+      "description": "Its pull request closed without merging and no other is open.",
+      "from": "in_review",
+      "id": "fa48c33c-4a85-4076-b659-01e49a4f3dab",
+      "name": "pr-closed-unmerged",
+      "to": "ready"
+    },
+    {
+      "description": "A merged pull request closed it.",
+      "from": "in_review",
+      "id": "c35650c5-1312-4105-9741-abbc17ea2f61",
+      "name": "merge",
+      "to": "done"
+    },
+    {
+      "description": "Closed by hand, not by a merged pull request: no code was needed, not planned, or superseded.",
+      "from": "backlog",
+      "id": "cb58c59a-7378-4df9-b64e-92878400bb96",
+      "name": "close-backlog",
+      "to": "done"
+    },
+    {
+      "description": "Closed by hand, not by a merged pull request: no code was needed, not planned, or superseded.",
+      "from": "ready",
+      "id": "5cc96add-7560-42a4-b6ae-c68016984137",
+      "name": "close-ready",
+      "to": "done"
+    },
+    {
+      "description": "Closed by hand, not by a merged pull request: no code was needed, not planned, or superseded.",
+      "from": "in_progress",
+      "id": "ccc3820e-eb10-468e-bc38-e0fe85fddfc0",
+      "name": "close-in-progress",
+      "to": "done"
+    },
+    {
+      "description": "Closed by hand, not by a merged pull request: no code was needed, not planned, or superseded.",
+      "from": "in_review",
+      "id": "dac18501-9a12-46e8-8e61-27b6cd5204c2",
+      "name": "close-in-review",
+      "to": "done"
+    },
+    {
+      "description": "Reopened; it is judged again before it is fed.",
+      "from": "done",
+      "id": "9b84d8a1-85f9-48ed-b8af-18456c17325c",
+      "name": "reopen",
+      "to": "backlog"
+    }
+  ],
+  "version": 1
+}

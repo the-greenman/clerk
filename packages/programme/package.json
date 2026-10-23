@@ -3,9 +3,9 @@
   "id": "a71f013f-0207-439f-8e52-2982baa68e86",
   "namespace": "com.semanticops.programme",
   "name": "methodology",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "title": "methodology",
-  "description": "Programme settings. The live methodology types still live in srs-programme's primary package.",
+  "description": "Programme settings; the work-status set (where a work item is: work_item; what holds it: work_hold; how its pull request merges: merge_gate; what it is: work_label), the label-binding type a programme uses to show them, and the set-against relation that places a decision on its compass. The live methodology types still live in srs-programme's primary package.",
   "status": "active",
   "createdAt": "2026-10-10T00:00:00Z",
   "fields": [
@@ -16,13 +16,28 @@
     "fields/digestissue-bb3caa33.json",
     "fields/boardproject-851f95cc.json",
     "fields/boardstoryrepo-141a2ee7.json",
-    "fields/owneractor-44a66dd4.json"
+    "fields/owneractor-44a66dd4.json",
+    "fields/githublabel-1ac3e920.json",
+    "fields/bindingstatus-c54d2057.json",
+    "fields/boardstatus-e3747f9d.json",
+    "fields/binds-fe186145.json"
   ],
   "types": [
-    "types/programme-b34ef0e7.json"
+    "types/programme-b34ef0e7.json",
+    "types/label-binding-1814db47.json"
   ],
-  "relationTypes": [],
+  "relationTypes": [
+    "relation-types/comsemanticopsprogrammeset-against-23a14f00.json"
+  ],
   "views": [],
   "compositions": [],
-  "blueprints": []
+  "blueprints": [],
+  "lifecycles": [
+    "lifecycles/workitem-e71e57d2.json"
+  ],
+  "vocabularies": [
+    "vocabularies/worklabel-183a8ca6.json",
+    "vocabularies/mergegate-36b3c787.json",
+    "vocabularies/workhold-dcf0ee69.json"
+  ]
 }

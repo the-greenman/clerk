@@ -18,6 +18,10 @@ import * as A from '../lib/practice/agenda.mjs';
 import * as U from '../lib/practice/upkeep.mjs';
 import { endSession } from '../lib/adapters/session.mjs';
 import { groundPR, i1 } from '../lib/practice/grounding-check.mjs';
+import { readFileSync } from 'node:fs';
+import { workflowFrom } from '../lib/practice/workflow.mjs';
+
+const W = workflowFrom(JSON.parse(readFileSync(new URL('./workflow.fixture.json', import.meta.url), 'utf8')));
 
 // ---- the fixture: one coherent story ----
 const M = 'com.semanticops.method', P = 'com.semanticops.programme';
@@ -171,7 +175,7 @@ describe('stage 9: priority and queue', () => {
   test('the epic rank reaches the work item as a priority label, and the queue runs P0 first, then oldest', () => {
     const other = { ...issue, number: 11, created_at: '2026-10-01T00:00:00Z', labels: [{ name: 'wg:fixture' }, { name: 'wg:third-party-ready' }, { name: 'ready' }, { name: 'priority: P1' }] };
     const p0 = { ...issue, labels: [...issue.labels, { name: 'wg:third-party-ready' }] };
-    const q = classify([other, p0], []);
+    const q = classify([other, p0], [], lanesFrom([], W.lane), W.holds);
     assert.deepEqual(q.queued.map((x) => x.ref), ['fixture#10', 'fixture#11']);
     assert.equal(q.queued[0].priority, e1.priority);
   });
@@ -218,19 +222,19 @@ describe('stage 11: assignment and claim', () => {
   test('an assigned issue, or one with an open PR, is held, not queued', () => {
     const claimed = { ...issue, number: 12, assignees: [{ login: BUILDER }] };
     const pr = { repo: 'fixture', number: 50, title: 'Closes #10', body: '', head: { ref: '10-change-view' } };
-    const q = classify([claimed, issue], [pr]);
+    const q = classify([claimed, issue], [pr], lanesFrom([], W.lane), W.holds);
     assert.deepEqual(q.queued, []);
     assert.deepEqual(q.held.map((h) => h.held[0]).sort(), [`assigned ${BUILDER}`, 'open PR fixture#50'].sort());
   });
   test('an issue with open blockers (the board mirrors them as `blocked`) is held, not queued', () => {
     const blocked = { ...issue, number: 13, labels: [...issue.labels, { name: 'blocked' }] };
-    const q = classify([blocked], []);
+    const q = classify([blocked], [], lanesFrom([], W.lane), W.holds);
     assert.deepEqual(q.queued, []);
     assert.deepEqual(q.held[0].held, ['blocked']);
   });
   test('a clerk command claims an issue: refuses unless free, grounded and the actor holds the seat (clerk claim)', () => {
-    assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder' }).ok, true);
-    assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), branches: ['10-x'], actor: 'agent:fx-builder', seat: 'builder' }).ok, false);
+    assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder', W }).ok, true);
+    assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), branches: ['10-x'], actor: 'agent:fx-builder', seat: 'builder', W }).ok, false);
   });
 });
 
@@ -238,7 +242,7 @@ describe('stage 11: the central group claims work outside any working group', ()
   const ca = { instanceId: 'ca', record: { fieldValues: { title: 'c', brief: 'b', actor_id: 'agent:central-builder', seat: 'builder' } } };
   const central = centralGroupFrom(roles.find((r) => r.instanceId === 'owner-role'), [...agents, ca], [...authorisedBy, { sourceId: 'ca', targetId: 'owner-role' }], 'SemanticOps');
   const open = { ...issue, state: 'open', labels: [{ name: 'ready' }] };
-  const c = (o) => checkClaim({ issue: open, groups, central, affirmed: new Set(['SP-901']), ...o });
+  const c = (o) => checkClaim({ issue: open, groups, central, affirmed: new Set(['SP-901']), W, ...o });
   test('an unlabelled issue is claimable by the owner and by a central-group agent, under "SemanticOps"', () => {
     assert.deepEqual(central.members.map((m) => m.actor), ['agent:central-builder']);
     const o = c({ actor: 'human:owner', seat: 'builder', ownerActor: 'human:owner' });
@@ -282,9 +286,9 @@ describe('stage 13: review and merge', () => {
     assert.match(pause([rep(6), rep(7), rep(8)]), /paused: 3 reports unacknowledged/);
   });
   test('the queue lanes are the chartered groups\' labels', () => {
-    const lanes = lanesFrom(groups);
+    const lanes = lanesFrom(groups, W.lane);
     assert.deepEqual(Object.keys(lanes), ['lane:unattended', 'wg:third-party-ready', 'wg:fixture']);
-    assert.deepEqual(classify([issue], [], lanes).queued[0].lanes, ['wg']); // issue carries wg:fixture
+    assert.deepEqual(classify([issue], [], lanes, W.holds).queued[0].lanes, ['wg']); // issue carries wg:fixture
   });
 });
 

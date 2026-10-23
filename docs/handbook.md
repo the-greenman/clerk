@@ -157,8 +157,8 @@ flowchart TD
   EP --> ST["User story<br/>MoSCoW set by a human"]
   ST --> IS["Implementation issue<br/>priority: Pn label (rollup)"]
   IS -->|"topup nominates (promote:ready)"| PR["promote sets Status = Ready<br/>and the ready label"]
-  PR -->|"clerk claim"| IP["In progress<br/>assignee + status: in progress"]
-  IP -->|PR opened| IR[In review]
+  PR -->|"clerk claim"| IP["In progress<br/>status: in progress"]
+  IP -->|PR opened| IR["In review<br/>status: in review"]
   IR -->|merged| DN[Done]
   IP -.->|"idle 3h (stale-claims)"| PR
   IP -.->|"human gate: needs-input"| HU[Waits for a human]
@@ -166,11 +166,11 @@ flowchart TD
 
 **The levels.** An epic lives in the story repo (`the-greenman/semanticops.com`) with the label `epic` and a title `Epic NN: Name`. Stories hang under it as sub-issues, with the label `user-story` and a MoSCoW. Implementation issues hang under stories, across any governed repo. An epic is a release: whatever it reaches through sub-issues.
 
-**Derived priority.** `clerk board rollup` walks each issue up to the stories it serves. Must gives P0, Should P1, Could or blank P2, and Won't excludes. With no story, the issue inherits its epic's Priority one tier down. A bug is never weaker than P1. `critical-path`, `blocks-gate` and `regression` bump one tier. Rank flows to blockers (clerk#113): an issue that blocks ranked work by a blocked-by edge takes that work's priority. A `parked` blocker (its own label or a parked epic) gets none, since it is still ungrounded; the hourly reconcile labels it `blocks-ranked` and it goes to the desk to be re-grounded. An explicit Won't blocker stays a hard block. So a prerequisite is recorded as an edge (`board dep add`), never only in text; `steward` flags text-only prerequisites.
+**Derived priority.** `clerk board rollup` walks each issue up to the stories it serves. Must gives P0, Should P1, Could or blank P2, and Won't excludes. With no story, the issue inherits its epic's Priority one tier down. A bug is never weaker than P1. `critical-path`, `blocks-gate` and `regression` bump one tier. Rank flows to blockers (clerk#113): an issue that blocks ranked work by a blocked-by edge takes that work's priority. A `parked` blocker (its own label or a parked epic) gets none, since it is still ungrounded; once the programme binds the `blocks-ranked` work label, the hourly reconcile labels it and it goes to the desk to be re-grounded (until then reconcile reports it unlabelled). An explicit Won't blocker stays a hard block. So a prerequisite is recorded as an edge (`board dep add`), never only in text; `steward` flags text-only prerequisites.
 
 **The ready queue.** `topup` keeps about six issues Ready. It nominates the top Backlog candidates in implementation order (epic Priority, started epics first, the `NN` in the title, issue priority, sub-issue position) by writing `promote:ready`. `promote` turns that intent into Status Ready. Blocked issues (an open blocked-by edge, or the `blocked` label), `needs-input` issues and bugs are never nominated. Bugs have their own track: `label:bug`, oldest first.
 
-**One hourly pass.** The srs-programme workflow `board-sync.yml` runs `clerk board sync` every hour: stories sync, rollup, topup, promote, stale claims, reconcile. Only this tool writes Projects v2 fields. Cloud routines cannot reach Projects v2, so they read and write the label mirror (`ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`).
+**One hourly pass.** The srs-programme workflow `board-sync.yml` runs `clerk board sync` every hour: stories sync, rollup, topup, promote, stale claims, reconcile. Only this tool writes Projects v2 fields. Cloud routines cannot reach Projects v2, so they read and write the label mirror: the labels the programme binds to the work-status set (decision f58db200), such as `ready`, `status: in progress`, `status: in review`, `promote:ready`, `blocked` and `needs-input`.
 
 **Claiming.** Before anyone starts, `clerk claim <repo#n> --as <seat>` checks that the issue is open, has no branch, PR or assignee, answers an affirmed problem, falls under a group, and that the actor holds the seat. It then assigns, labels and comments. The same command serves humans, local sessions and routines.
 
@@ -1196,7 +1196,7 @@ What the clerk reads and writes in srs-programme. When a stage changes, these ar
 
 **Defined in**: GitHub (clerk `gh-project.mjs`)
 
-**Meaning**: `ready`, `priority: Pn`, `status: in progress`, `promote:ready`, `blocked`, `needs-input`, `parked`, `blocks-ranked` (derived: a parked blocker of ranked work), `wg:*`, `intake` (proposed, clerk#56: a request in a level's input queue), `lane:unattended`, `gate:auto-merge`, `gate:owner-merge`.
+**Meaning**: What each status, hold, gate and classification means is the work-status set in the clerk's programme package (decision f58db200); the label text is the programme's `label-binding` records. Today: `ready`, `status: in progress`, `status: in review`, `promote:ready`, `priority: Pn`, `blocked`, `needs-input`, `parked`, `blocks-ranked` (derived: a parked blocker of ranked work; once the programme binds it), `gate:auto-merge`, `gate:owner-merge`, `lane:unattended`, and each group's `wg:*` (from its charter). `intake` is proposed (clerk#56).
 
 **Read by**: `board sync`, `queue`, `claim`, `pr-upkeep`, every routine
 

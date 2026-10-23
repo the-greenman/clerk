@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDecisions, checkDecisions, answersFrom, signComment, classifyComment } from '../lib/practice/pr-decisions.mjs';
+import { parseDecisions, checkDecisions, askOptions, answersFrom, signComment, classifyComment } from '../lib/practice/pr-decisions.mjs';
 
 const block = (o) => `Answers: SP-12\n\n\`\`\`srs-decisions\n${JSON.stringify(o)}\n\`\`\`\n`;
 
@@ -91,4 +91,14 @@ test('a decision id named only in the prose is reported, not failed', () => {
   const f = checkDecisions(parseDecisions(body), { body });
   assert.ok(f.some((x) => x.level === 'info' && /9ee14517/.test(x.text) && !/3c8b94d1/.test(x.text)));
   assert.ok(f.some((x) => x.level === 'ok'), 'an info finding does not stop the block being ok');
+});
+
+test('askOptions reads both option forms into one shape and marks the recommendation', () => {
+  const opts = askOptions({ recommend: 'Make them settings', options: [
+    'Do nothing: stalled claims surface as today',
+    { action: 'Make them settings', leads_to: 'each group sets its own rhythm', pole: 'fast' }] });
+  assert.deepEqual(opts, [
+    { action: 'Do nothing', leadsTo: 'stalled claims surface as today', recommended: false },
+    { action: 'Make them settings', leadsTo: 'each group sets its own rhythm', pole: 'fast', recommended: true }]);
+  assert.deepEqual(askOptions({}), []);
 });

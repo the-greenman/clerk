@@ -14,10 +14,10 @@
 // Every comment carries a hidden marker, so reruns are idempotent; an issue that already carries our
 // marker is never reopened again (a human who re-closes it has overruled us).
 // plan() is pure (rows in, actions out); the GitHub I/O is the thin REST layer below (lib/adapters/github.mjs).
-import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { answersOf } from "../lib/practice/grounding.mjs";
+import { gh } from "../lib/adapters/cli.mjs";
 import { issuesSince, list, get, closers } from "../lib/adapters/github.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
@@ -99,12 +99,6 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
   return out;
 }
 
-// ---- thin gh layer ----
-function gh(args, input) {
-  const r = spawnSync("gh", args, { encoding: "utf8", input, timeout: 60000, maxBuffer: 64 << 20 });
-  if (r.status !== 0) throw new Error(`gh ${args.slice(0, 3).join(" ")} failed: ${r.stderr || r.error}`);
-  return r.stdout;
-}
 // Repo-scoped REST only (cloud sessions refuse GraphQL and search): the window's issues, then per closed issue its timeline
 // (closing PRs, commit closer) and, for epics, its sub-issues. Shapes match what plan() reads.
 const comments = (OWNER, repo, n) => list(`repos/${OWNER}/${repo}/issues/${n}/comments?per_page=100`).map((c) => c.body);

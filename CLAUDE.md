@@ -12,7 +12,7 @@ The handbook is an SRS repository, `handbook/`; `docs/handbook.md` is rendered f
 
 ## Gates and git
 
-- `npm test`, judged by exit code, never a piped tail.
+- `npm ci && npm test`, judged by exit code, never a piped tail. The runtime (`bin`, `lib`, `scripts`) imports only Node built-ins: workflows and routines run it with no `npm install` (`test/runtime-imports.test.mjs`). Dependencies are for tests only.
 - Default branch is `main`. Commits are SSH-signed with plain `git commit` (never `--no-gpg-sign`); end messages with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 - Review the diff before opening a PR; the owner reviews and merges.
 - Worktrees only via `scripts/wt new clerk <issue#-slug>`.
