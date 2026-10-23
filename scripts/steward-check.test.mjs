@@ -86,4 +86,6 @@ test("prereq-edge: text-only prerequisite comments once; an edge or our marker i
   assert.equal(p({ ...open, blockedBy: ["srs-rust#1333"] }).length, 0);
   assert.equal(p({ ...open, comments: ["<!-- steward-check:prereq-edge -->"] }).length, 0);
   assert.equal(p({ ...open, createdAt: old }).length, 0);
+  // the edges could not be read (null = unknown): skipped, never flagged on a guess
+  assert.equal(p({ ...open, blockedBy: null }).length, 0);
 });

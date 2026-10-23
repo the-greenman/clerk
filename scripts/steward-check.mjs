@@ -89,7 +89,7 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
     if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !answersOf(i.body || "").stated && !(i.comments || []).some((c) => answersOf(c).stated) && !hasMarker(i, M.answers))
       out.push({ rule: "answers", ref, repo: i.repo, number: i.number, reopen: false,
         comment: `${M.answers}\nsteward-check: this issue has no \`Answers:\` line. State \`Answers: SP-nn\` or \`No affirmed problem yet: <one-line problem>\` in the description (see srs-programme CLAUDE.md, "Filing issues").` });
-    if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !hasMarker(i, M.prereq)) {
+    if (i.state === "OPEN" && !i.bot && i.blockedBy !== null && i.createdAt && Date.parse(i.createdAt) >= since && !hasMarker(i, M.prereq)) {
       const missing = prereqRefs(i.body, i.repo).filter((r) => r !== ref && !(i.blockedBy || []).includes(r));
       if (missing.length)
         out.push({ rule: "prereq-edge", ref, repo: i.repo, number: i.number, reopen: false,
@@ -121,10 +121,13 @@ export function fetchIssues(repo, days, cutoff = SINCE, OWNER) {
     const { closingPrs, closer } = state === "CLOSED" ? closers(OWNER, repo, n.number) : { closingPrs: [], closer: null };
     const cs = n.comments ? comments(OWNER, repo, n.number) : [];
     const landedPrs = state === "CLOSED" ? landedRefs(cs, repo).map((r) => ({ ...r, merged: mergedPr(OWNER, r) })) : [];
-    // Edges are read only where the text names a prerequisite (one REST call per such open issue).
-    const blockedBy = state === "OPEN" && prereqRefs(n.body, repo).length
-      ? list(`repos/${OWNER}/${repo}/issues/${n.number}/dependencies/blocked_by?per_page=100`).map((b) => `${b.repository_url?.split("/").pop() ?? repo}#${b.number}`)
-      : [];
+    // Edges are read only where the text names a prerequisite (one REST call per such open issue). Unreadable is unknown
+    // (null), never "no edges": the prereq-edge rule then skips the issue instead of flagging it, and the run goes on.
+    let blockedBy = [];
+    if (state === "OPEN" && prereqRefs(n.body, repo).length) {
+      try { blockedBy = list(`repos/${OWNER}/${repo}/issues/${n.number}/dependencies/blocked_by?per_page=100`).map((b) => `${b.repository_url?.split("/").pop() ?? repo}#${b.number}`); }
+      catch { blockedBy = null; }
+    }
     return { repo, number: n.number, title: n.title, body: n.body, state, stateReason: n.state_reason?.toUpperCase() ?? null,
       createdAt: n.created_at, closedAt: n.closed_at, labels, comments: cs, blockedBy,
       closingPrs, landedPrs, closer, bot: n.user?.type === "Bot", openChildren };

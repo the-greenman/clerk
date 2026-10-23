@@ -1089,7 +1089,8 @@ function pullBlockers(entries) {
   while (changed) {
     changed = false;
     for (const e of entries) {
-      if (!e.p) continue;
+      // only grounded, ranked work pulls: a parked or Won't issue (a parked bug keeps the bug floor's P1) feeds nothing
+      if (!e.p || e.stages.wontExcluded) continue;
       for (const b of e.row.blockedBy ?? []) {
         const be = b.state === "OPEN" ? byKey.get(b.key) : null;
         if (!be) continue;

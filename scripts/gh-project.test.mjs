@@ -697,6 +697,23 @@ test("hasLane: topup feeds only issues routed to a lane (lane:unattended or a wg
     assert.equal(parkedBlockers.size, 0);
   });
 
+  test("pullBlockers: a parked issue pulls nothing, even a parked bug that keeps the bug floor's priority", () => {
+    const parkedBug = ent("srs-web#7", "P1", { row: { blockedBy: by("srs-rust#8") }, stages: { wontExcluded: true, parked: true } });
+    const blocker = ent("srs-rust#8", "P2");
+    const { pulled } = pullBlockers([parkedBug, blocker]);
+    assert.equal(blocker.p, "P2");
+    assert.equal(pulled.length, 0);
+  });
+
+  test("pullBlockers: a blocked-by cycle terminates, pulling each issue at most once", () => {
+    const a = ent("srs#1", "P0", { row: { blockedBy: by("srs#2") } });
+    const b = ent("srs#2", "P2", { row: { blockedBy: by("srs#1") } });
+    const { pulled } = pullBlockers([a, b]);
+    assert.equal(b.p, "P0");
+    assert.equal(a.p, "P0");
+    assert.equal(pulled.length, 1);
+  });
+
   test("derivePriority marks parked apart from Won't", () => {
     const row = { key: "srs-rust#1", labels: ["parked"], blockedBy: [] };
     assert.equal(derivePriority(row, new Set(), new Map(), null).stages.parked, true);
