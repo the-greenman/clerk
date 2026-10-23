@@ -5,19 +5,21 @@ import { get, list } from '../lib/adapters/github.mjs';
 import { repoRoot } from './lib/repo-arg.mjs';
 import { srsCli } from '../lib/adapters/cli.mjs';
 import { loadSettings } from '../lib/adapters/settings.mjs';
+import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 import { parseDecisions, checkDecisions, answersFrom } from '../lib/practice/pr-decisions.mjs';
 
 const argv = process.argv.slice(2);
 try {
   const ref = argv.find((a) => /^[\w.-]+#\d+$/.test(a));
   if (!ref) throw new Error('give <repo#n>');
-  const [repo, n] = ref.split('#'), programme = repoRoot(), owner = loadSettings(programme, srsCli(programme)).githubOwner;
+  const [repo, n] = ref.split('#'), programme = repoRoot(), cli = srsCli(programme), owner = loadSettings(programme, cli).githubOwner;
+  const { gates } = loadWorkflow(programme, cli);
   const pr = get(`repos/${owner}/${repo}/pulls/${n}`);
   const comments = list(`repos/${owner}/${repo}/issues/${n}/comments?per_page=100`).map((c) => c.body ?? '');
   const files = list(`repos/${owner}/${repo}/pulls/${n}/files?per_page=100`);
   const recordsInDiff = files.filter((f) => /records\/.*decision-[0-9a-f]{8}\.json$/.test(f.filename)).length;
   const d = parseDecisions(pr.body ?? '');
-  const findings = checkDecisions(d, { body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff });
+  const findings = checkDecisions(d, { body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff, labels: (pr.labels ?? []).map((l) => l.name), gates });
   if (argv.includes('--json')) console.log(JSON.stringify({ ref, by: d.by, answers: d.answers, made: d.made, asks: d.asks, findings }, null, 2));
   else for (const f of findings) console.log(`${f.level.padEnd(5)} ${f.text}`);
   process.exit(findings.some((f) => f.level === 'error') ? 1 : 0);

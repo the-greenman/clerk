@@ -32,6 +32,8 @@ So the richer a group's soil (affirmed tensions, principles, its trigram), the m
 |---|---|
 | error | Decision language in the PR prose ("we decided", "chose", "instead of", "Decision asked", "trade-off") with no `srs-decisions` block. |
 | error | A `ruling` or `escalation` with no record `id`. |
+| error | A `gate:owner-merge` PR that asks the owner nothing: no ask with a question, and no `Decision asked:` line (clerk#165). The desk and the upkeep digest send it back to an agent instead of listing it for the owner. |
+| error | A PR with no gate label and no working-group label (clerk#165): classify it `gate:auto-merge` or `gate:owner-merge`. A group PR gets its gate from the group's reviewer. |
 | error | An `ask` with no question, or with `blocks: "merge"` and no answer, on a PR that is about to merge. |
 | warn | A `choice` that says it constrains later work (`constrains: true`): it should be a ruling. |
 | warn | A `choice` with no `principle` or `lean` on a PR whose group has a trigram: say which way it leans, or make it a ruling. |
@@ -107,4 +109,4 @@ Every comment an agent posts ends with its actor, on its own line, because agent
 
 A review request also adds the label `review:requested`. The WG reviewer routine already fires on `labeled`. To honour the request it must skip its idempotence exit once while that label is present, then remove the label. `routines/wg-reviewer.md` step 2 does this.
 
-Status: proposed. The rulings are srs-programme#160 (bbb23e36, e3505ded, 70a84bb7, 21ee9352, ea96a678); until an owner session ratifies them, this is the convention agents try, not a rule.
+Status: in force. The rulings are srs-programme#160 (bbb23e36, e3505ded, 70a84bb7, 21ee9352, ea96a678), all ratified.
