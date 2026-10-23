@@ -161,3 +161,11 @@ test('the signal catalogue: every signal has the means text the rendered policy 
   }
   assert.deepEqual(REL, { grades: `${NS}/grades`, selects: `${NS}/selects` });
 });
+
+test('a plan in substance counts without the heading: three steps with code references or acceptance criteria', () => {
+  const steps = '1. Change `checkClaim` in lib/practice/claim.mjs.\n2. Add a case to test/claim.test.mjs.\n3. Update `docs/tools.md`.\n';
+  assert.equal(technicalPlanOf(steps), true);
+  assert.equal(technicalPlanOf('- [ ] read it\n- [ ] think\n- [ ] decide\nDone when the owner agrees.'), true, 'acceptance criteria');
+  assert.equal(technicalPlanOf('1. read it\n2. think\n3. decide'), false, 'steps alone are not a plan');
+  assert.equal(technicalPlanOf('Fix `a` and `b` and `c`.'), false, 'code references alone are not a plan');
+});
