@@ -219,4 +219,5 @@ test('careNote: the claim comment names the mode, the rule, the cautions and the
   const r = run('Fix it.');
   assert.match(careNote(r, ['its body has no "Answers: SP-nn" line']), /^Care mode: probe, by rule 5 \(.*\)\. Cautions: its body has no "Answers: SP-nn" line\./);
   assert.equal(careNote({ mode: null }), 'Care mode: none (the policy selected no mode)');
+  assert.match(careNote({ mode: { key: 'build', must: [] }, rule: { order: 1, title: 'Rule 1: a clear plan builds' } }), /^Care mode: build, by rule 1 \(a clear plan builds\)\.$/);
 });
