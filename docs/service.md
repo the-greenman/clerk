@@ -91,7 +91,6 @@ After=network-online.target
 ExecStart=/usr/bin/node %h/dev/semanticops/clerk/bin/clerk.mjs serve --repo %h/dev/semanticops/srs-programme
 # signed commits (later acts) and gh need the owner's agent and login
 Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket
-Environment=SRS_CLI_PATH=%h/.cargo/bin/srs
 Restart=on-failure
 # exit 75 after the sync updates the clerk: restart onto the new code
 RestartSec=2

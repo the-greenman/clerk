@@ -94,7 +94,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | programme-ground.yml | Grounding report (I1), last 7 days | daily, dispatch | `ground --since` (7 days) to the job summary | GITHUB_TOKEN | nothing |
 | test.yml (clerk) | The clerk's own tests | push, PR | `npm ci`, `npm test` | | nothing |
 | serve-integration.yml (clerk) | Tier 2 for `clerk serve`: a real service against the real srs-programme (checked out read-only) with the programme's pinned srs; every GET response validated against `api/openapi.json` | push, PR | `npm run test:integration -- programme` | GITHUB_TOKEN | nothing |
-| validate.yml (clerk) | The handbook is valid and `docs/handbook.md` matches its records; holds the clerk's own pin `SRS_RUST_CLI_TAG`, bumped in the same PR as srs-programme's `validate.yml` pin so the handbook and the programme read with one build | push, PR | `fetch-pinned-srs --repo .`, `render-handbook --check` | GITHUB_TOKEN | nothing |
+| validate.yml (clerk) | The handbook is valid and `docs/handbook.md` matches its records; holds the clerk's own pin `SRS_RUST_CLI_TAG`, bumped together with (its PR merged together with) srs-programme's `validate.yml` pin so the handbook and the programme read with one build | push, PR | `fetch-pinned-srs --repo .`, `render-handbook --check` | GITHUB_TOKEN | nothing |
 
 ## Routines (cloud, briefs in `routines/`; lifecycle in [routines.md](routines.md))
 

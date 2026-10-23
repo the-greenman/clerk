@@ -25,7 +25,7 @@ import { repoRoot } from "./lib/repo-arg.mjs";
 import { srsCli } from "../lib/adapters/cli.mjs";
 const ROOT = repoRoot();
 const MARKER = join(ROOT, ".srs");
-const CLI = srsCli(ROOT);
+let CLI;
 
 function fail(msg) {
   console.error(`\n✗ ${msg}`);
@@ -50,6 +50,7 @@ async function assertMarker() {
 }
 
 function runValidate() {
+  try { CLI = srsCli(ROOT); } catch (error) { fail(`cannot resolve the pinned srs CLI for ${ROOT} (set SRS_CLI_PATH): ${error.message.split("\n")[0]}`); }
   return new Promise((resolvePromise) => {
     const child = spawn(CLI, ["repo", "validate", "--repo", ROOT, "--format", "json"], {
       cwd: ROOT,
