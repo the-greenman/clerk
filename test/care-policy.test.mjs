@@ -95,7 +95,18 @@ test('a ranked epic with suggested theory is careful (srs-rust#1132 shape)', () 
   assert.deepEqual(r.mode.must, ['assumptions block', 'gate:owner-merge']);
 });
 
-test('Answers: in a comment counts', () => assert.equal(run('body', { comments: ['Answers: SP-1'] }).grades.placement, 'high'));
+test('Answers: is read from the body only, as claim reads it', () => {
+  assert.equal(run('body', { comments: ['Answers: SP-1'] }).grades.placement, 'none');
+  assert.equal(run('Answers: SP-1', { comments: ['body'] }).grades.placement, 'high');
+});
+test('a conversation basis is an Owner credit or a whole word', () => {
+  const basis = (ref) => problemFacts([{ instanceId: 'x', record: { typeName: 'problem', fieldValues: { problem_id: 'SP-9', source_ref: ref } } }])['SP-9'].basis;
+  assert.equal(basis('Owner, 2026-10-21'), 'conversation');
+  assert.equal(basis('notes from a call with the owner'), 'conversation');
+  assert.equal(basis('srs-context:A mounted MCP server keeps the old srs binary until the session restarts'), 'synthesised');
+  assert.equal(basis('principles.md (Portability over possession)'), 'synthesised');
+  assert.equal(basis('recall of a callback via chatgpt'), 'synthesised');
+});
 
 test('tuning is data: moving rule 3 to probe changes the mode, no code', () => {
   const tuned = fixture({ rules: [[1, ['technical_plan>=high'], ['placement>=medium', 'signal:owner.directed'], 'mo-b'], [3, ['technical_plan>=high'], [], 'mo-p'], [5, [], [], 'mo-p']] });
@@ -149,6 +160,7 @@ test('a ruling names the fix only with a Ruling: id and a Fix: line', async () =
   assert.deepEqual(rulingOf(['Ruling: rfc-decision-1a2b3c4d\nFix: drop the id from the parent']), { cited: ['rfc-decision-1a2b3c4d'], namesFix: true });
   assert.equal(rulingOf(['Ruling: decision-1a2b3c4d (wants a fix)']).namesFix, false, 'no Fix: line');
   assert.equal(rulingOf(['Fix: something', 'Ruling: the owner said so']).namesFix, false, 'no record id');
+  assert.equal(rulingOf(['Ruling: decision-1a2b3c4d', 'Fix: in another comment']).namesFix, false, 'Ruling: and Fix: in different texts');
   assert.equal(run('Answers: SP-1\nRuling: decision-f799b6bc\nFix: split checkClaim').mode.key, 'build', 'read from the item when not given');
   assert.deepEqual(epicOf([{ refs: ['s#1'], parked: false }, { refs: ['s#2'], parked: true }], ['r#9', 's#2', 's#1']), { ref: 's#2', ranked: false }, 'nearest epic wins');
   assert.equal(epicOf([], ['r#9']), null);
@@ -186,4 +198,9 @@ test('domain confidence: affirmed problem, suggested problem, group label, repos
   assert.deepEqual(truth(itemFacts({ repo: 'srs', groups })), ['domain.repo-one-group']);
   assert.deepEqual(truth(itemFacts({ repo: 'srs-web', groups })), ['domain.repo-shared'], 'two groups govern srs-web');
   assert.deepEqual(truth(itemFacts({ repo: 'clerk', labels: ['wg:c'], groups })), [], 'a group that holds no domain places nothing');
+});
+
+test('explain drops the labels seed titles carry', () => {
+  const r = { grades: {}, because: {}, mode: { title: 'Care mode: Build', key: 'build', must: [] }, rule: { order: 1, title: 'Rule 1: a clear plan builds' } };
+  assert.deepEqual(explain({ axes: [] }, r), ['Mode: Build (build), by rule 1: a clear plan builds']);
 });
