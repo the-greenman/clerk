@@ -54,3 +54,13 @@ test('I1 counts', () => {
   assert.deepEqual([s.total, s.grounded, s.full, s.share, s.fullShare], [4, 2, 1, 0.5, 0.25]);
   assert.equal(i1([]).share, null);
 });
+
+test('an issue this token cannot read is unknown: reported, never counted as ungrounded', () => {
+  const u = g({ issue: { ref: 'srs-context#50', unreadable: true } });
+  assert.equal(u.unknown, true);
+  assert.equal(u.grounded, false);
+  assert.match(u.reasons[0], /srs-context#50 could not be read/);
+  const ok = g({ pr: { labels: ['wg:x'] }, issue: issue({ parents: [{ ref: 'r#100', labels: [] }] }) });
+  const s = i1([ok, u]);
+  assert.deepEqual([s.total, s.grounded, s.share, s.unknown], [1, 1, 1, 1]);
+});

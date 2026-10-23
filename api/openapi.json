@@ -1315,6 +1315,10 @@
          "problem",
          "problem+persona+domain"
         ]
+       },
+       "unknown": {
+        "type": "number",
+        "description": "PRs whose closing issue could not be read; left out of total and the shares"
        }
       },
       "additionalProperties": false,
@@ -1387,6 +1391,10 @@
           "string",
           "null"
          ]
+        },
+        "unknown": {
+         "type": "boolean",
+         "description": "the closing issue could not be read with this token"
         }
        },
        "required": [

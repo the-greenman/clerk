@@ -7,6 +7,7 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 import { repoRoot } from "./lib/repo-arg.mjs";
+import { srsCli } from "../lib/adapters/cli.mjs";
 import { canonOf } from "../lib/practice/canon.mjs";
 const ROOT = repoRoot();
 const MNS = "com.semanticops.method";
@@ -102,7 +103,7 @@ export function checkGates(records, relations, affirmed, setAside, today = new D
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const cli = process.env.SRS_CLI_PATH?.trim() || "srs";
+  const cli = srsCli(ROOT);
   const run = (args) => JSON.parse(execFileSync(cli, [...args, "--repo", ROOT], { encoding: "utf8", maxBuffer: 1 << 28 })).payload;
   const records = run(["record", "list"]).records, relations = run(["relation", "list"]).relations;
   const members = (title) => {

@@ -10,9 +10,8 @@
  *   2. `srs repo validate --repo .` reports zero errors. Diagnostics live in the payload, not the
  *      exit code, so this asserts on `payload.summary.errors`, never on process exit status alone.
  *
- * Resolves the `srs` binary from SRS_CLI_PATH if set, else falls back to `srs` on PATH. This repo
- * is local-only (no CI), so there is no pinned-release-tag machinery to consume here — just point
- * SRS_CLI_PATH at a known-good build if the one on PATH is stale.
+ * Resolves the `srs` binary from SRS_CLI_PATH if set, else the programme's pinned build
+ * (srsCli in lib/adapters/cli.mjs), never a possibly stale `srs` on PATH.
  *
  *   node scripts/check-programme-conformance.mjs
  */
@@ -23,9 +22,10 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 
 import { repoRoot } from "./lib/repo-arg.mjs";
+import { srsCli } from "../lib/adapters/cli.mjs";
 const ROOT = repoRoot();
 const MARKER = join(ROOT, ".srs");
-const CLI = process.env.SRS_CLI_PATH?.trim() || "srs";
+let CLI;
 
 function fail(msg) {
   console.error(`\n✗ ${msg}`);
@@ -50,6 +50,7 @@ async function assertMarker() {
 }
 
 function runValidate() {
+  try { CLI = srsCli(ROOT); } catch (error) { fail(`cannot resolve the pinned srs CLI for ${ROOT} (set SRS_CLI_PATH): ${error.message.split("\n")[0]}`); }
   return new Promise((resolvePromise) => {
     const child = spawn(CLI, ["repo", "validate", "--repo", ROOT, "--format", "json"], {
       cwd: ROOT,

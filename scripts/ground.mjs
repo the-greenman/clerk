@@ -28,5 +28,6 @@ try {
     for (const r of rows) console.log(`${r.ref.padEnd(26)} ${r.level.padEnd(24)} ${r.sp ?? "-"}  ${r.reasons[0] ?? ""}`);
     console.log(`\nI1 (${since ? `merged since ${since}` : one}): ${stats.grounded}/${stats.total} grounded to a problem (${pct(stats.share)}); ${stats.full}/${stats.total} with affirmed persona and domain (${pct(stats.fullShare)})`);
     console.log("by level: " + Object.entries(stats.byLevel).map(([l, n]) => `${l} ${n}`).join(", "));
+    if (stats.unknown) console.log(`unknown: ${stats.unknown} PR(s) close an issue this token cannot read; left out of I1`);
   }
 } catch (e) { console.error("clerk ground: " + e.message); process.exit(1); }
