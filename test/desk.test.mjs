@@ -85,3 +85,9 @@ test('a proposed decision in no log is flagged; one in the owner log is to ratif
   assert.match(body, /1 proposed decision to ratify:\*\* Logged \[aaaaaaaa\]/);
   assert.match(body, /1 proposed decision in no log:\*\* Orphan \[bbbbbbbb\]/);
 });
+
+test('a parked issue that blocks ranked work asks to be re-grounded (clerk#113)', () => {
+  const body = deskBody({ now: NOW, parkedBlockers: [{ repo: 'srs-rust', number: 1333, title: 't', url: 'https://x/1333', blocks: ['srs-web#593'] }] });
+  assert.match(needsYou(body), /\*\*1 parked issue blocking ranked work:\*\* \[srs-rust#1333\]\(https:\/\/x\/1333\) \(blocks srs-web#593\)/);
+  assert.match(needsYou(body), /Re-ground each/);
+});

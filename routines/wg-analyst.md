@@ -15,7 +15,9 @@ Environment gaps, the CLI and signing notes are as in `routines/unattended-worke
 
 **Target:** fill to about two cycles (20 ready). **At most 12 new issues per run.**
 
-**Every run walks every source in full, from source 1.** Never shorten a run to "what changed since the last run": an earlier run may have used an older brief, and affirmations land in srs-programme without touching the issue repos. Source 1 means opening the domain outline and reading each affirmed problem, every run; a report that says "domain 0" names the problems it checked and why each yielded nothing.
+**There is no duplicate-run exit.** The only exits are the two gate checks above. A second run on the same day, a manual fire, or an earlier report saying the sources ran dry are never reasons to stop or to shorten the run: an earlier run may have used an older brief, and affirmations land in srs-programme without touching the issue repos. Every run walks every source in full, starting with source 1, and every run that passes the gate posts the section 5 report.
+
+**Source 1 leaves evidence.** Before anything else in section 2, list the affirmed problems in the domain with one command and keep the output for the report: their `SP-nn`, title and cluster. The report carries that list, one line per problem, each with what it yielded (an issue, a problem suggestion, an exercise, or why nothing).
 
 ## 2. Sources, in this order
 
@@ -41,7 +43,7 @@ After filing: `gh workflow run board-sync.yml -R the-greenman/srs-programme`.
 
 ## 5. Report
 
-One comment on #31: "Queue fed: filed N (domain D, rulings Y, conformance X, drift table Z), unparked U, exercises W, problem suggestions P; ready now R (about K cycles)". If the sources ran dry, say so plainly, and name what waiting on the owner would open the feed (unaffirmed clusters or remedies, problem suggestions, rulings not yet recorded as decisions); that tells the owner what to do.
+One comment on #31, every run that passes the gate: "Queue fed: filed N (domain D, rulings Y, conformance X, drift table Z), unparked U, exercises W, problem suggestions P; ready now R (about K cycles)". Then the source 1 list (one line per affirmed problem). If the sources ran dry, say so plainly, and name what waiting on the owner would open the feed (unaffirmed clusters or remedies, problem suggestions, rulings not yet recorded as decisions); that tells the owner what to do.
 
 ## Hard rules
 
@@ -52,5 +54,5 @@ Never build or review, never merge, never set a priority, never file work that n
 - Name: `wg-third-party-ready-analyst`
 - Cron: `0 12 * * *` (daily 12:00 UTC, after the 11:30 cycle report)
 - Sources: the-greenman/{semanticops.com, srs, srs-rust, srs-web, srs-vscode, srs-programme, srs-context, muDemocracy.org, clerk} (every repo in the settings record's `repos`: `clerk group-state` and `clerk upkeep` count group PRs across all of them, and one unreadable repo makes the count unknown, so the group reads as paused)
-- Model: sonnet
+- Model: opus (switched 2026-10-20: two Sonnet runs invented a duplicate-run exit and skipped source 1)
 - Prompt: "You are the Analyst (scout) of the WG Third-party ready working group (semanticops.com#31), running as SRS_ACTOR agent:tpr-analyst. Read and follow routines/wg-analyst.md in the-greenman/clerk (default branch), after reading the settings record in the-greenman/srs-programme. RATIFYING_DECISION_ID is not an environment variable: it is written in routines/unattended-worker.md, section Working groups; exit if it reads unset. The check-then-exit gate comes first: unless the latest wg-report on semanticops.com#31 says 'Queue running dry' and fewer than 10 issues are ready, exit with one line. Otherwise find ruling-backed work grounded in the Semantic records domain's affirmed problems, then unimplemented rulings and conformance gaps (falling back to the 2026-10-08 drift table), run the duplicate guard, file at most 12 issues in the group's shape, record anything needing a new ruling as an exercise, and post the one-line queue report. Never build, review, merge or set a priority."

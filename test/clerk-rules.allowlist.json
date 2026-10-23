@@ -1,0 +1,75 @@
+{
+  "1": [
+    ".claude/commands/roadmap.md",
+    ".claude/commands/stories.md",
+    ".claude/commands/triage.md",
+    ".github/workflows/serve-integration.yml",
+    ".github/workflows/validate.yml",
+    "routines/handbook-watcher.md"
+  ],
+  "3": [
+    "lib/adapters/desk.mjs: ../../scripts/roadmap.mjs"
+  ],
+  "4": {
+    "scripts/gh-project.mjs": 2411,
+    "scripts/steward-check.mjs": 167
+  },
+  "5": [
+    "lib/practice/agenda.mjs: EXERCISE_TYPE",
+    "lib/practice/agenda.mjs: REPORT_MARK",
+    "lib/practice/agenda.mjs: STALLED_DEFAULTS",
+    "lib/practice/agenda.mjs: checksState",
+    "lib/practice/agenda.mjs: escalationScreen",
+    "lib/practice/agenda.mjs: fullScreen",
+    "lib/practice/agenda.mjs: fv",
+    "lib/practice/agenda.mjs: parseReport",
+    "lib/practice/agenda.mjs: reportTitle",
+    "lib/practice/agenda.mjs: stalledLines",
+    "lib/practice/agenda.mjs: unloggedItems",
+    "lib/practice/api.mjs: error",
+    "lib/practice/api.mjs: fail",
+    "lib/practice/api.mjs: ok",
+    "lib/practice/canon.mjs: canonOf",
+    "lib/practice/charter.mjs: validateCharter",
+    "lib/practice/claim.mjs: openClaim",
+    "lib/practice/claim.mjs: refersTo",
+    "lib/practice/desk.mjs: DESK_LABEL",
+    "lib/practice/desk.mjs: ageDays",
+    "lib/practice/desk.mjs: heldBecause",
+    "lib/practice/desk.mjs: threadOf",
+    "lib/practice/discussion.mjs: COMMENTS_ON",
+    "lib/practice/discussion.mjs: COMMENT_TYPE",
+    "lib/practice/discussion.mjs: fullDiscussion",
+    "lib/practice/doctor.mjs: MARKER",
+    "lib/practice/grounding-check.mjs: LEVELS",
+    "lib/practice/roles.mjs: OWNER_LOG",
+    "lib/practice/session.mjs: EX_FIELDS",
+    "lib/practice/session.mjs: FIELDS",
+    "lib/practice/session.mjs: MAIN_LOG",
+    "lib/practice/session.mjs: PREFIX",
+    "lib/practice/session.mjs: RATIFYING",
+    "lib/practice/session.mjs: actLine",
+    "lib/practice/session.mjs: needsTranscript",
+    "lib/practice/session.mjs: plan",
+    "lib/practice/upkeep.mjs: QUORUM_MARK",
+    "lib/practice/workflow.mjs: BINDING_TYPE",
+    "lib/practice/workflow.mjs: NS"
+  ],
+  "6": [
+    "<!-- wg-quorum: lib/practice/pr-decisions.mjs, lib/practice/upkeep.mjs"
+  ],
+  "8": [
+    "package.json: no exports map"
+  ],
+  "9": {
+    ".claude/commands/session.md": 1,
+    ".claude/commands/ship.md": 1,
+    "bin/clerk.mjs": 2,
+    "lib/adapters/desk.mjs": 1,
+    "routines/wg-reviewer.md": 1,
+    "scripts/gh-project.mjs": 20,
+    "scripts/roadmap.mjs": 3,
+    "scripts/steward-check.mjs": 2
+  },
+  "_": "Today's exceptions to the ten clerk rules (decision 926c059f), checked by test/clerk-rules.test.mjs. This list only shrinks: fix an entry and remove it here; a new exception needs a reason in its PR. Rules 4 and 9 hold a per-file ceiling (lines, writes) that may fall but never rise."
+}

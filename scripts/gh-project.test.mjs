@@ -653,6 +653,77 @@ test("hasLane: topup feeds only issues routed to a lane (lane:unattended or a wg
   assert.equal(hasLane([]), false);
 });
 
+// Rank flows to blockers (clerk#113, SP-97).
+{
+  const { pullBlockers, BLOCKS_RANKED_LABEL } = await import("./gh-project.mjs");
+  const ent = (key, p, o = {}) => ({ row: { key, labels: [], blockedBy: [], ...o.row }, p, stages: { wontExcluded: false, ...o.stages } });
+  const by = (...keys) => keys.map((key) => ({ key, state: "OPEN" }));
+
+  test("pullBlockers: a ranked issue raises its open blocker, transitively", () => {
+    const a = ent("srs-web#1", "P0", { row: { blockedBy: by("srs-rust#2") } });
+    const b = ent("srs-rust#2", "P2", { row: { blockedBy: by("srs#3") } });
+    const c = ent("srs#3", null);
+    const { pulled, parkedBlockers } = pullBlockers([a, b, c]);
+    assert.equal(b.p, "P0");
+    assert.equal(b.stages.pulledBy, "srs-web#1");
+    assert.equal(c.p, "P0");
+    assert.equal(pulled.length, 2);
+    assert.equal(parkedBlockers.size, 0);
+  });
+
+  test("pullBlockers: a parked blocker gets no priority, only collected for the desk", () => {
+    const a = ent("srs-web#1", "P1", { row: { blockedBy: by("srs-rust#1333") } });
+    const parked = ent("srs-rust#1333", null, { row: { labels: ["parked"] }, stages: { wontExcluded: true, parked: true } });
+    const { parkedBlockers } = pullBlockers([a, parked]);
+    assert.equal(parked.p, null);
+    assert.deepEqual(parkedBlockers.get("srs-rust#1333"), ["srs-web#1"]);
+  });
+
+  test("pullBlockers: no pull from unranked work, closed edges or a weaker rank", () => {
+    const unranked = ent("srs-web#1", null, { row: { blockedBy: by("srs-rust#2") } });
+    const closed = ent("srs-web#2", "P0", { row: { blockedBy: [{ key: "srs-rust#2", state: "CLOSED" }] } });
+    const weaker = ent("srs-web#3", "P2", { row: { blockedBy: by("srs-rust#2") } });
+    const blocker = ent("srs-rust#2", "P1");
+    const { pulled } = pullBlockers([unranked, closed, weaker, blocker]);
+    assert.equal(blocker.p, "P1");
+    assert.equal(pulled.length, 0);
+  });
+
+  test("pullBlockers: an explicit Won't blocker is a hard block, neither pulled nor collected", () => {
+    const a = ent("srs-web#1", "P1", { row: { blockedBy: by("srs-rust#9") } });
+    const wont = ent("srs-rust#9", null, { stages: { wontExcluded: true, parked: false } });
+    const { parkedBlockers } = pullBlockers([a, wont]);
+    assert.equal(wont.p, null);
+    assert.equal(parkedBlockers.size, 0);
+  });
+
+  test("pullBlockers: a parked issue pulls nothing, even a parked bug that keeps the bug floor's priority", () => {
+    const parkedBug = ent("srs-web#7", "P1", { row: { blockedBy: by("srs-rust#8") }, stages: { wontExcluded: true, parked: true } });
+    const blocker = ent("srs-rust#8", "P2");
+    const { pulled } = pullBlockers([parkedBug, blocker]);
+    assert.equal(blocker.p, "P2");
+    assert.equal(pulled.length, 0);
+  });
+
+  test("pullBlockers: a blocked-by cycle terminates, pulling each issue at most once", () => {
+    const a = ent("srs#1", "P0", { row: { blockedBy: by("srs#2") } });
+    const b = ent("srs#2", "P2", { row: { blockedBy: by("srs#1") } });
+    const { pulled } = pullBlockers([a, b]);
+    assert.equal(b.p, "P0");
+    assert.equal(a.p, "P0");
+    assert.equal(pulled.length, 1);
+  });
+
+  test("derivePriority marks parked apart from Won't", () => {
+    const row = { key: "srs-rust#1", labels: ["parked"], blockedBy: [] };
+    assert.equal(derivePriority(row, new Set(), new Map(), null).stages.parked, true);
+  });
+
+  test("blocks-ranked comes from the bindings, and once bound it is a mirror label the tool creates", () => {
+    assert.equal(BLOCKS_RANKED_LABEL, "blocks-ranked"); // bound in test/workflow.fixture.json
+    assert.ok(MIRROR_LABELS.some((l) => l.name === BLOCKS_RANKED_LABEL));
+  });
+}
 // The work-status set (clerk#121): labels and columns from the programme's bindings; the two moves that close dead ends.
 test("mirror labels and the status map come from the bindings, In review included", () => {
   assert.deepEqual(STATUS_LABEL_MAP, { Ready: "ready", "In progress": "status: in progress", "In review": "status: in review" });

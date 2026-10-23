@@ -25,8 +25,9 @@ const argv = process.argv.slice(2);
 const TOOLS = {
   roadmap: ['roadmap.mjs', 'derive epic priority from the period ranking (--json, --explain, --apply)'],
   claim: ['claim.mjs', 'claim an issue as a seat of its working group: clerk claim <repo#n> --as <seat> [--branch <name>] [--dry-run]'],
-  queue: ['queue.mjs', 'report what the unattended lane would take next'],
+  queue: ['queue.mjs', 'report what the unattended lane would take next (--bugs: the bug queue the bug fixer takes from; --json)'],
   care: ['care.mjs', 'how confident the programme is in one work item and the care mode its Confidence and care policy gives it: clerk care <repo#n> [--json]'],
+  'render-policy': ['render-policy.mjs', 'check a programme\'s Confidence and care policy and render it to <programme>/docs/confidence-and-care.md (--check: exit 1 on drift or a policy the clerk cannot act on)'],
   upkeep: ['upkeep.mjs', 'keep open PRs moving: merge or update-branch by gate label; group PRs on a quorum for their head commit (--digest, --apply)'],
   'group-state': ['group-state.mjs', "a working group's pause, cycle, merges and room: clerk group-state <wg:label> [--json]"],
   steward: ['steward-check.mjs', 'guard against false closes: reopen issues closed without a merged PR (--fix acts)'],
@@ -93,7 +94,7 @@ const sub = argv[0] === 'session' || argv[0] === 'comment';
 const arg = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
 const args = (n) => argv.flatMap((v, i) => (v === n ? [argv[i + 1]] : []));
 const die = (m) => { console.error('clerk: ' + m); process.exit(1); };
-const USAGE = 'usage: clerk [session] --repo <srs-programme path> --as <role> [--dry-run]\n  clerk session ... [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]... [--transcript <file>]\n                   clerk comment --repo <path> --as <role> --on <id> --text <text> [--reply-to <commentId>] [--cite <docId|url|transcript>] [--role-of-cite quoted-from|evidence]\n                   [--edit <id> --field <resolution|why|options|review|question> --text <text>]...  (--ratify/--set-aside need the context\'s quorum)';
+const USAGE = 'usage: clerk [session] --repo <srs-programme path> --as <role> [--dry-run] [--scan]\n  clerk session ... [--attendee <record-id>]... [--ratify <id|all>]... [--set-aside <id>]... [--consider <id>]... [--transcript <file>]\n                   clerk comment --repo <path> --as <role> --on <id> --text <text> [--reply-to <commentId>] [--cite <docId|url|transcript>] [--role-of-cite quoted-from|evidence]\n                   [--edit <id> --field <resolution|why|options|review|question> --text <text>]...  (--ratify/--set-aside need the context\'s quorum)';
 if (!arg('--as')) die(USAGE);
 const repo = resolve(arg('--repo') ?? die('--repo is required'));
 const cli = srsCli(repo);
@@ -103,6 +104,9 @@ let W; try { W = loadWorkflow(repo, cli); } catch (e) { die(e.message); }
 let roleCfg; try { roleCfg = authorise(arg('--as'), process.env.SRS_ACTOR, settings.ownerActor, rolesFor(groups)); } catch (e) { die(e.message); }
 const isOwner = arg('--as') === 'owner';
 const dryRun = argv.includes('--dry-run');
+// GitHub scans of PRs and branches (merges, group state and queues, stalled work) are opt-in: they cost many calls per repo.
+// The desk carries the same picture. --scan (or CLERK_SCAN=1) reads them.
+const scan = argv.includes('--scan') || process.env.CLERK_SCAN === '1';
 
 const REPOS = settings.repos;
 const GH_OWNER = settings.githubOwner;
@@ -159,7 +163,7 @@ if (sub) {
     if ((args('--ratify').length || args('--set-aside').length) && !quorumNow().met) throw new Error(`${quorumText(quorumNow())}: --ratify/--set-aside refused; --consider and --edit are still allowed`);
     const items = A.ratifyItems(records, mainLog, parentLogs);
     const pick = (p) => { const m = items.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single proposed decision matches "${p}"`); return m[0]; };
-    const pool = [...items, ...(isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog)) : [])];
+    const pool = [...items, ...(isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog, A.stewardsOf(g))) : [])];
     const find = (p) => { const m = pool.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single decision on the agenda matches "${p}"`); return m[0]; };
     const item = (r) => ({ instanceId: r.instanceId, title: A.fv(r).title });
     const choices = [];
@@ -206,32 +210,35 @@ if (TTY) {
 }
 const show = (ls) => console.log('\n' + ls.join('\n'));
 
-const owner = isOwner ? JSON.parse(gh(['api', 'user'])).login : '';
-const { reports, acked } = isOwner ? loadReportComments(REPORT_ISSUE, owner) : { reports: [], acked: new Set() };
-const prs = !isOwner ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, W.gates.owner); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
+// the owner's login is the settings' GitHub owner (upkeep acks by it too); a failed read of the report issue (rate limit, offline)
+// leaves the Reports section empty with a note, never ends the session
+let reportsNote = null;
+const { reports, acked } = (() => { if (!isOwner) return { reports: [], acked: new Set() };
+  try { return loadReportComments(REPORT_ISSUE, GH_OWNER); } catch (e) { reportsNote = `Reports unread: ${(e.message.split('\n').find((l) => /rate limit|HTTP|gh:/.test(l)) ?? e.message.split('\n')[0]).replace(/^gh: /, '').split('. ')[0]}.`; return { reports: [], acked: new Set() }; } })();
+const prs = !isOwner || !scan ? [] : REPOS.flatMap((r) => { try { return openPRsLabelled(GH_OWNER, r, W.gates.owner); } catch (e) { console.error(`Merges: ${r} unreadable (${e.message.split('\n')[0]})`); return []; } });
 
 // Order follows a meeting: decisions since the last session, reports, decisions for this session, merges.
 const sections = {
   1: { name: 'Decisions since the last session', items: A.ratifyItems(records, mainLog, parentLogs) },
   2: { name: 'Reports', items: isOwner ? runReports.flatMap((rr, i) => A.reportItems(rr.records, receivedIds, reports.filter((c) => runReports.some((x) => x.label === A.reportGroup(c)) ? A.reportGroup(c) === rr.label : !i), acked, rr.group)) : [] }, // one report issue per programme: a comment goes to the group its marker tags, else (untagged or unknown tag) to the first group, as on the desk
   3: { name: 'Exercises', items: A.exerciseItems(exerciseRecs, mainLog) },
-  4: { name: 'Decisions for this session', items: isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog)) : [] },
+  4: { name: 'Decisions for this session', items: isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog, A.stewardsOf(g))) : [] },
   5: { name: 'Merges', items: A.mergeItems(prs, W.gates.owner) },
 };
 // Next: the queue behind each group, live via gh REST (owner only; tolerant of failure). State: its pause, merged and budget.
 const next = {}, gstate = {};
-for (const gr of isOwner ? groupLogs : []) {
+for (const gr of isOwner && scan ? groupLogs : []) {
   gstate[gr.title] = await groupState(repo, gr);
   const q = groupQueue(GH_OWNER, gr, records, gstate[gr.title], W); if (q) next[gr.title] = q;
 }
-const stalled = isOwner ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), { ...(Number(process.env.CLERK_STALLED_DAYS) > 0 && { days: Number(process.env.CLERK_STALLED_DAYS) }), ...(Number(process.env.CLERK_STALLED_CLAIM_DAYS) > 0 && { claimDays: Number(process.env.CLERK_STALLED_CLAIM_DAYS) }) }, W) : [];
+const stalled = isOwner && scan ? loadStalled(GH_OWNER, REPOS, records.filter((r) => r.record.typeName === 'epic').flatMap((r) => A.fv(r).issue_ref ?? []).filter(Boolean), Date.now(), { ...(Number(process.env.CLERK_STALLED_DAYS) > 0 && { days: Number(process.env.CLERK_STALLED_DAYS) }), ...(Number(process.env.CLERK_STALLED_CLAIM_DAYS) > 0 && { claimDays: Number(process.env.CLERK_STALLED_CLAIM_DAYS) }) }, W) : [];
 const header = () => console.log(`\nSession: ${stamp(now)} (ad hoc) · attendees: ${attendees.map((a) => a.name).join(', ')} · ${quorumText(quorumNow())}`);
 const acted = { merge: 0 }; const doneIds = { 5: new Set() };
 const isDec = (n) => n === 1 || n === 3 || n === 4; // record-backed items (3 = exercises: never ratified)
 const doneCount = (n) => (n === 5 ? doneIds[5].size : sections[n].items.filter((it) => choices.some((c) => c.id === it.instanceId && (n !== 2 || c.action === 'receive'))).length);
 const agenda = () => { header(); show(A.agendaLines({ done: { 1: doneCount(1), 2: doneCount(2), 3: doneCount(3), 4: doneCount(4), 5: doneCount(5) }, tally: A.tallyLine(choices, acted),
   stalled, ratify: sections[1].items, reports: sections[2].items, exercises: sections[3].items, decide: sections[4].items, merge: sections[5].items,
-  status: groupLogs.filter(() => isOwner).flatMap((gr) => { const g = gstate[gr.title], n = next[gr.title]; return [A.statusLine(gr.title, g.pause, g.merged, g.budget), ...(n && A.isDry(n.ready.length, n.budget) ? [A.forecast(n.ready.length, n.budget)] : [])]; }) })); };
+  status: [...(reportsNote ? [reportsNote] : []), ...(isOwner && !scan ? ['Not scanned: merges, group state and queues, stalled branches. Run with --scan to read them from GitHub (the desk has them too).'] : groupLogs.filter(() => isOwner).flatMap((gr) => { const g = gstate[gr.title], n = next[gr.title]; return [A.statusLine(gr.title, g.pause, g.merged, g.budget), ...(n && A.isDry(n.ready.length, n.budget) ? [A.forecast(n.ready.length, n.budget)] : [])]; }))] })); };
 
 const choices = [];
 const plusOne = (id) => { if (!dryRun) gh(['api', '-X', 'POST', `repos/${REPORT_ISSUE.split('/issues')[0]}/issues/comments/${id}/reactions`, '-f', 'content=+1']); };

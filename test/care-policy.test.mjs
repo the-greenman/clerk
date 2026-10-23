@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { policyFrom, checkPolicy, evaluate, itemFacts, problemFacts, technicalPlanOf, parseClause, explain, NS } from '../lib/practice/care-policy.mjs';
+import { policyFrom, checkPolicy, evaluate, itemFacts, problemFacts, technicalPlanOf, parseClause, explain, NS, SIGNALS, REL } from '../lib/practice/care-policy.mjs';
 
 // A fixture policy in the shape of the seeded one: three axes, three modes, five rules.
 const vocabularies = [{ namespace: NS, name: 'confidence_level', terms: ['none', 'low', 'medium', 'high'].map((key) => ({ key })) }];
@@ -147,4 +147,12 @@ test('a ruling names the fix only with a Ruling: id and a Fix: line', async () =
   assert.equal(run('Answers: SP-1\nRuling: decision-f799b6bc\nFix: split checkClaim').mode.key, 'build', 'read from the item when not given');
   assert.deepEqual(epicOf([{ refs: ['s#1'], parked: false }, { refs: ['s#2'], parked: true }], ['r#9', 's#2', 's#1']), { ref: 's#2', ranked: false }, 'nearest epic wins');
   assert.equal(epicOf([], ['r#9']), null);
+});
+
+test('the signal catalogue: every signal has the means text the rendered policy prints and a test; relations are namespaced', () => {
+  for (const [k, s] of Object.entries(SIGNALS)) {
+    assert.equal(typeof s.means, 'string', k); assert.ok(s.means.length > 10, k);
+    assert.equal(typeof s.test, 'function', k);
+  }
+  assert.deepEqual(REL, { grades: `${NS}/grades`, selects: `${NS}/selects` });
 });

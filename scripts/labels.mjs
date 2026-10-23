@@ -8,8 +8,7 @@
 //   node scripts/labels.mjs --repo <programme> [--repo-name <r>] [--apply | --migrate | --delete-retired] [--json]
 // exit 0 in line (or acted cleanly), 1 drift found or a read/act failed, 2 usage
 import { parseArgs } from 'node:util';
-import { gh } from '../lib/adapters/cli.mjs';
-import { list } from '../lib/adapters/github.mjs';
+import { list, addLabels, removeLabel, createLabel, describeLabel, deleteLabel } from '../lib/adapters/github.mjs';
 import { loadSettings } from '../lib/adapters/settings.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
 import { loadWorkflow } from '../lib/adapters/workflow.mjs';
@@ -24,7 +23,6 @@ let st, W, groupLabels;
 try { st = loadSettings(a.repo); W = loadWorkflow(a.repo); groupLabels = loadGroups(a.repo).map((g) => g.label); }
 catch (e) { console.error(`clerk labels: ${e.message}`); process.exit(1); }
 const O = st.githubOwner, repos = a['repo-name'] ? [a['repo-name']] : st.repos;
-const api = (...args) => gh(['api', ...args]);
 let failed = 0;
 const act = (what, f) => { try { f(); console.log(`DID   ${what}`); } catch (e) { failed++; console.log(`FAIL  ${what} (${String(e.stderr || e.message).trim().split('\n')[0]})`); } };
 
@@ -47,19 +45,19 @@ for (const r of repos) {
   }
   const slug = `${O}/${r}`;
   if (a.apply) {
-    for (const l of plan.missing) act(`${r}: create ${l.name}`, () => api('-X', 'POST', `repos/${slug}/labels`, '-f', `name=${l.name}`, '-f', 'color=ededed', '-f', `description=${l.description}`));
-    for (const l of plan.stale) act(`${r}: describe ${l.name}`, () => api('-X', 'PATCH', `repos/${slug}/labels/${encodeURIComponent(l.name)}`, '-f', `description=${l.description}`));
+    for (const l of plan.missing) act(`${r}: create ${l.name}`, () => createLabel(slug, l.name, l.description));
+    for (const l of plan.stale) act(`${r}: describe ${l.name}`, () => describeLabel(slug, l.name, l.description));
   }
   if (a.migrate) {
     for (const x of plan.retired.filter((x) => x.open)) for (const i of list(`repos/${slug}/issues?labels=${encodeURIComponent(x.name)}&state=open&per_page=100`))
       act(`${r}#${i.number}: ${x.name} -> ${x.successor ?? '(removed)'}`, () => {
-        if (x.successor) api('-X', 'POST', `repos/${slug}/issues/${i.number}/labels`, '-f', `labels[]=${x.successor}`);
-        api('-X', 'DELETE', `repos/${slug}/issues/${i.number}/labels/${encodeURIComponent(x.name)}`);
+        if (x.successor) addLabels(slug, i.number, [x.successor]);
+        removeLabel(slug, i.number, x.name);
       });
   }
   if (a['delete-retired']) for (const x of plan.retired)
     if (x.open) console.log(`KEEP  ${r}: ${x.name} (${x.open} open still carry it; run --migrate first)`);
-    else act(`${r}: delete ${x.name}`, () => api('-X', 'DELETE', `repos/${slug}/labels/${encodeURIComponent(x.name)}`));
+    else act(`${r}: delete ${x.name}`, () => deleteLabel(slug, x.name));
 }
 if (a.json) console.log(JSON.stringify(report, null, 2));
 const drift = Object.values(report).some((p) => p.missing.length || p.stale.length || p.retired.length), acting = a.apply || a.migrate || a['delete-retired'];

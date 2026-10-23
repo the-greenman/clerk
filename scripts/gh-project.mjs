@@ -42,8 +42,8 @@
 // (external blocks). Judges write edges over REST (`dep add`), like sub-issue links.
 // THE BUG TRACK (#717): `bug`-labeled issues never enter the Ready queue — "fixed
 // ASAP" and the epic-major feed contradict each other. `label:bug` IS the bug queue
-// (derived priority label first, oldest first), consumed by a dedicated bug-fix routine (none has a brief yet)
-// routine every 2h. Bug-floor derivation, blocked/needs-input, claims, and stale-claim
+// (derived priority label first, oldest first), consumed by the bug fixer every 2h
+// (routines/bug-fixer.md, `clerk queue --bugs`). Bug-floor derivation, blocked/needs-input, claims, and stale-claim
 // recovery all still apply to bugs; they just ride their own track, un-mixed.
 //
 // API strategy (board-sync runs hourly; quota matters):
@@ -127,10 +127,16 @@ const PROMOTE_INTENT_LABEL = WF.promote;
 const NEEDS_INPUT_LABEL = WF.needsInput;
 // Label colours are presentation the board alone uses, so they stay here (f58db200: unless the surface is the only reader).
 const MIRROR_COLORS = { ready: "0E8A16", "priority-p0": "B60205", "priority-p1": "D93F0B", "priority-p2": "FBCA04", in_progress: "1D76DB",
-  in_review: "5319E7", "promote-request": "5319E7", blocked: "E4E669", "needs-input": "D876E3" };
+  in_review: "5319E7", "promote-request": "5319E7", blocked: "E4E669", "needs-input": "D876E3", "blocks-ranked": "B60205" };
 // The mirror set the routines read and write: every repo a routine touches must carry it, or a label write hard-fails.
 const MIRROR_LABELS = WF.labels.filter((l) => MIRROR_COLORS[l.key])
   .map((l) => ({ name: l.name, color: MIRROR_COLORS[l.key], description: labelDescription(l.description) }));
+// `blocks-ranked` (clerk#113, SP-97): derived by reconcile, never by hand. A parked (own label or parked epic) issue that
+// blocks open ranked work gets no priority of its own (it is still ungrounded), so the label is how it reaches the owner's
+// desk to be re-grounded. Like every label it comes from the programme's bindings (f58db200: work_label key
+// `blocks-ranked`); until one is bound, reconcile does not label and says so once, and the rollup's priority pull works
+// regardless. A blocker not on the board is invisible here.
+const BLOCKS_RANKED_LABEL = WF.blocksRanked;
 // Repos whose merges/routines depend on the mirror set existing. Overridable for tests/forks.
 const MIRROR_REPOS = (process.env.GHP_MIRROR_REPOS || (SETTINGS.repos ?? []).join(","))
   .split(",").map((s) => s.trim()).filter(Boolean);
@@ -1068,7 +1074,45 @@ function derivePriority(row, served, storiesByNum, epicInfo = null) {
   }
 
   const kind = servedArr.length ? "story-derived" : isBug ? "bug-floor" : epicFallback.applied ? "epic-derived" : "orphaned";
-  return { p, stages: { kind, isBug, served: servedArr, storyValues, base, wontExcluded, epicFallback, bugFloor, defaultFloor, bump, final: p } };
+  return { p, stages: { kind, isBug, served: servedArr, storyValues, base, wontExcluded, parked, epicFallback, bugFloor, defaultFloor, bump, final: p } };
+}
+
+// Rank flows to blockers (clerk#113, SP-97). entries: [{row, p, stages}] for every open work
+// item. A ranked entry's open blocker that is itself an entry takes the higher priority
+// (transitively: a pulled blocker pulls its own blockers); a parked or Won't-excluded blocker is
+// not fed, only collected. Mutates p/stages in place; returns
+// { pulled: [{key, from, to, by}], parkedBlockers: Map<blockerKey, [blocked keys]> }.
+function pullBlockers(entries) {
+  const byKey = new Map(entries.map((e) => [e.row.key, e]));
+  const pulled = [], parkedBlockers = new Map();
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const e of entries) {
+      // only grounded, ranked work pulls: a parked or Won't issue (a parked bug keeps the bug floor's P1) feeds nothing
+      if (!e.p || e.stages.wontExcluded) continue;
+      for (const b of e.row.blockedBy ?? []) {
+        const be = b.state === "OPEN" ? byKey.get(b.key) : null;
+        if (!be) continue;
+        // Parked (own label or parked epic): collected for the desk to re-ground. An explicit Won't
+        // is a ruling, not a wait: it stays a hard block, neither pulled nor collected.
+        if (be.stages.wontExcluded) {
+          if (!be.stages.parked) continue;
+          const xs = parkedBlockers.get(be.row.key) ?? [];
+          if (!xs.includes(e.row.key)) parkedBlockers.set(be.row.key, [...xs, e.row.key]);
+          continue;
+        }
+        const to = higher(e.p, be.p);
+        if (to === be.p) continue;
+        pulled.push({ key: be.row.key, from: be.p, to, by: e.row.key });
+        be.p = to;
+        be.stages.pulledBy = e.row.key;
+        be.stages.final = to;
+        changed = true;
+      }
+    }
+  }
+  return { pulled, parkedBlockers };
 }
 
 function computeRollup() {
@@ -1105,12 +1149,13 @@ function computeRollup() {
       derived.push({ row, p, stages, basis: `epic #${stages.epicFallback.epic} ${stages.epicFallback.epicPriority}${stages.epicFallback.defaulted ? "*" : ""}→${stages.epicFallback.to}` });
     else unlinked.push({ row, p, stages, basis: "default floor (orphaned — link to a story/epic)" });
   }
+  const { pulled, parkedBlockers } = pullBlockers([...derived, ...bugs, ...unlinked]);
   const uncovered = [...storiesByNum.values()].filter(
     (s) => ![...descendants.values()].some((set) => set.has(s.num))
   );
   // epicDesc/epicByNum let consumers (summary) group rows by claiming epic without a
   // second graph walk — the Release field that used to carry this grouping is retired (#720).
-  return { derived, bugs, unlinked, uncovered, storiesByNum, epicDesc, epicByNum };
+  return { derived, bugs, unlinked, uncovered, storiesByNum, epicDesc, epicByNum, pulled, parkedBlockers };
 }
 
 function applyPriority(entry, dryRun) {
@@ -1816,6 +1861,15 @@ function cmdExplain(argv) {
         : `    signal present (${s.bump.labels.join(", ")}) but already at P0`
       : "    none"
   );
+  L.push("Stage 7b · blocker pull (rank flows to what blocks ranked work, clerk#113)");
+  const holds = r.parkedBlockers.get(key);
+  L.push(
+    s.pulledBy
+      ? `    applied: blocks ${s.pulledBy} → ${p}`
+      : holds
+        ? `    parked, yet blocks ranked work (${holds.join(", ")}): no priority; ${BLOCKS_RANKED_LABEL ? `labelled ${BLOCKS_RANKED_LABEL} for the desk` : "unlabelled (no blocks-ranked binding)"} — re-ground it`
+        : "    none"
+  );
   L.push("Stage 8 · final");
   const label = row.labels.find((l) => l.startsWith("priority: ")) ?? "(no label)";
   const sync = (p ? `priority: ${p}` : "(none)") === label && (p ?? null) === (row.priority ?? null);
@@ -2082,7 +2136,7 @@ function cmdTopup(argv) {
     // epic-major feed contradict each other — the feed would bury a P1 bug in a later
     // epic behind every earlier epic's tail, and Ready bugs crowded out feature slots.
     // Instead `label:bug` IS the bug queue (ordered by derived priority label, then
-    // age), consumed directly by a dedicated bug-fix routine (none has a brief yet). Blocked/needs-input/
+    // age), consumed directly by the bug fixer (routines/bug-fixer.md, `clerk queue --bugs`). Blocked/needs-input/
     // claim semantics and the bug-floor priority derivation all still apply to bugs.
     !row.labels.includes(WF.bug) &&
     !row.labels.includes(PROMOTE_INTENT_LABEL) &&
@@ -2189,6 +2243,22 @@ function cmdReconcile(argv) {
       patchRowLabels(row.repo, row.num, want ? [WF.blocked] : [], want ? [] : [WF.blocked]);
     }
   }
+  // blocks-ranked derivation (clerk#113): tool-owned on every open row; set iff the row is a
+  // parked blocker of ranked work, cleared otherwise (the edge closed, the work lost its rank,
+  // or the issue was re-grounded out of parking).
+  if (!BLOCKS_RANKED_LABEL && r.parkedBlockers.size)
+    issues.push(`blocks-ranked-unbound: ${r.parkedBlockers.size} parked blocker(s) of ranked work, unlabelled: bind work_label blocks-ranked in the programme (f58db200); explain shows them`);
+  for (const row of BLOCKS_RANKED_LABEL ? board().values() : []) {
+    if (row.state !== "OPEN") continue;
+    const want = r.parkedBlockers.has(row.key);
+    if (want === row.labels.includes(BLOCKS_RANKED_LABEL)) continue;
+    issues.push(`blocks-ranked-stale: ${row.key} ${want ? `set (blocks ${r.parkedBlockers.get(row.key).join(",")})` : "clear"}`);
+    if (!dryRun) {
+      try { gh(["issue", "edit", String(row.num), "--repo", `${OWNER}/${row.repo}`, want ? "--add-label" : "--remove-label", BLOCKS_RANKED_LABEL]); }
+      catch { /* label may not exist yet; non-fatal */ }
+      patchRowLabels(row.repo, row.num, want ? [BLOCKS_RANKED_LABEL] : [], want ? [] : [BLOCKS_RANKED_LABEL]);
+    }
+  }
   // Open bug with no priority
   for (const e of r.bugs) {
     if (!e.row.priority && !e.row.labels.some((l) => l.startsWith("priority: ")))
@@ -2290,7 +2360,7 @@ Auth: requires an authenticated \`gh\` CLI, or GITHUB_TOKEN/GH_TOKEN env var (cu
 // Dispatch
 // ---------------------------------------------------------------------------
 // Pure helpers exported for unit tests. Importing the module must NOT run the CLI.
-export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, positionFix, planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics, bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, planStaleClaims, STALE_CLAIM_HOURS_DEFAULT, planTopup, hasLane, TOPUP_TARGET_DEFAULT, isWorkItem, isConsumableReady, countConsumableReady, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT, hasOpenBlockers, isBlocked, blockedLabelWant };
+export { MIRROR_LABELS, MIRROR_REPOS, labelCreateArgs, STATUS_LABEL_MAP, STATUS_MIRROR_LABELS, statusMirrorWant, positionFix, planPromotions, PROMOTE_INTENT_LABEL, NEEDS_INPUT_LABEL, epicRank, epicFeedRank, epicRoadmapSeq, startedEpics, bandTargets, SIZE_WEIGHT, derivePriority, parseIssueRef, planStaleClaims, STALE_CLAIM_HOURS_DEFAULT, planTopup, hasLane, TOPUP_TARGET_DEFAULT, isWorkItem, isConsumableReady, countConsumableReady, MOSCOW_DEFAULT, EPIC_PRIORITY_DEFAULT, hasOpenBlockers, isBlocked, blockedLabelWant, pullBlockers, BLOCKS_RANKED_LABEL };
 
 // Only dispatch when run directly (`node gh-project.mjs ...`), not when imported.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

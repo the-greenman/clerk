@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { plan, rehomed, landedRefs } from "./steward-check.mjs";
+import { plan, rehomed, landedRefs, prereqRefs } from "./steward-check.mjs";
 
 const now = Date.parse("2026-10-09T00:00:00Z");
 const recent = "2026-10-07T00:00:00Z", old = "2026-09-01T00:00:00Z";
@@ -67,4 +67,25 @@ test("landedRefs reads repo#n, bare #n after a repo ref, and only text after Lan
   assert.deepEqual(key(landedRefs(["Landed: method (srs-programme#17), visualiser (#23), srs#921 and #923."], "x")),
     ["srs-programme#17", "srs-programme#23", "srs#921", "srs#923"]);
   assert.deepEqual(key(landedRefs(["Landed in #7", "- landed_as: https://github.com/o/r/pull/118", "see #9"], "r")), ["r#7"]);
+});
+
+// clerk#113: a prerequisite named in text must also be a blocked-by edge.
+test("prereqRefs: Blocked-by lines and 'once X lands', bare #n in the issue's repo", () => {
+  assert.deepEqual(prereqRefs("x\nBlocked by: the-greenman/srs-rust#1333, then an srs-rust release.\n", "srs-web"), ["srs-rust#1333"]);
+  assert.deepEqual(prereqRefs("Blocked by #4 and srs#9", "srs-web"), ["srs-web#4", "srs#9"]);
+  assert.deepEqual(prereqRefs("Blocked by: srs-rust#1333, #1334", "srs-web"), ["srs-rust#1333", "srs-rust#1334"]);
+  assert.deepEqual(prereqRefs("file text once srs-rust#1333 lands (the UI says so)", "srs-web"), ["srs-rust#1333"]);
+  assert.deepEqual(prereqRefs("nothing blocks this", "srs-web"), []);
+});
+test("prereq-edge: text-only prerequisite comments once; an edge or our marker is quiet", () => {
+  const open = { repo: "srs-web", state: "OPEN", stateReason: null, closedAt: null, createdAt: recent, body: "Answers: SP-57\nBlocked by: srs-rust#1333" };
+  const r = p(open);
+  assert.equal(r.length, 1);
+  assert.equal(r[0].rule, "prereq-edge");
+  assert.match(r[0].comment, /clerk board dep add srs-web#1 srs-rust#1333/);
+  assert.equal(p({ ...open, blockedBy: ["srs-rust#1333"] }).length, 0);
+  assert.equal(p({ ...open, comments: ["<!-- steward-check:prereq-edge -->"] }).length, 0);
+  assert.equal(p({ ...open, createdAt: old }).length, 0);
+  // the edges could not be read (null = unknown): skipped, never flagged on a guess
+  assert.equal(p({ ...open, blockedBy: null }).length, 0);
 });

@@ -58,4 +58,4 @@ jobs:
           # fails on no active period, overlapping periods, or objective_rank pointing at a non-objective
           clerk roadmap --json > /dev/null
           # the Confidence and care policy is one the clerk can act on, and its rendered document matches the records
-          if [ -f docs/confidence-and-care.md ]; then node "$RUNNER_TEMP/clerk/scripts/render-policy.mjs" --repo "$GITHUB_WORKSPACE" --check; fi
+          if [ -f docs/confidence-and-care.md ]; then clerk render-policy --check; fi

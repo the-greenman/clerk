@@ -9,6 +9,8 @@
 // The refs run to the end of that line; a bare #n takes the repo of the ref before it on the line, else the issue's own repo.
 // Each is checked as a merged PR (REST pulls/{n}); a named issue or an unmerged PR is no evidence.
 //   answers        OPEN and opened without an `Answers:` / `No affirmed problem yet` line -> one comment
+//   prereq-edge    OPEN, and its body names a prerequisite ("Blocked by: X", "once X lands") that is not a
+//                  blocked-by edge -> one comment asking for the edge (clerk#113: ranked work pulls its blockers)
 // Every comment carries a hidden marker, so reruns are idempotent; an issue that already carries our
 // marker is never reopened again (a human who re-closes it has overruled us).
 // plan() is pure (rows in, actions out); the GitHub I/O is the thin REST layer below (lib/adapters/github.mjs).
@@ -22,7 +24,7 @@ import { repoRoot } from "./lib/repo-arg.mjs";
 // Go-forward only: history before this is never acted on (the weekly audit, srs-programme#38, reports it).
 export const SINCE = "2026-10-09T00:00:00Z";
 const RESET_RE = /Closed in the SemanticOps roadmap reset/;
-const M = { noPr: "<!-- steward-check:reopen-no-pr -->", epic: "<!-- steward-check:reopen-epic -->", answers: "<!-- steward-check:answers -->" };
+const M = { noPr: "<!-- steward-check:reopen-no-pr -->", epic: "<!-- steward-check:reopen-epic -->", answers: "<!-- steward-check:answers -->", prereq: "<!-- steward-check:prereq-edge -->" };
 const REHOME_RE = /(re-?hom|moved to|moving to|tracked (in|by)|now (in|under|tracked))/i;
 const REF_RE = /(?:[\w.-]+\/)?[\w.-]*#(\d+)/g;
 
@@ -42,6 +44,17 @@ export function landedRefs(comments, repo) {
   return [...out.values()];
 }
 
+// Prerequisites named in text (clerk#113): refs on a "Blocked by:" line, and "once <ref> lands".
+const BLOCKED_BY_RE = /^\W*Blocked by\b:?([^\n]*)/gim;
+const ONCE_RE = /\bonce\s+((?:[\w.-]+\/)?[\w.-]*#\d+)\s+lands\b/gi;
+export function prereqRefs(body, repo) {
+  // A bare #n takes the repo of the ref before it on the line, else the issue's own (as landedRefs).
+  const out = new Set(), add = (tail) => { let last = repo; for (const m of tail.matchAll(LANDED_REF_RE)) { last = m[2] ?? last; out.add(`${last}#${m[3]}`); } };
+  for (const [, tail] of String(body ?? "").matchAll(BLOCKED_BY_RE)) add(tail);
+  for (const [, ref] of String(body ?? "").matchAll(ONCE_RE)) add(ref);
+  return [...out];
+}
+
 const names = (xs) => (xs || []).map((l) => l.name);
 const hasMarker = (issue, m) => (issue.comments || []).some((c) => c.includes(m));
 
@@ -54,7 +67,8 @@ export function rehomed(child) {
 }
 
 // issue: {repo, number, title, body, state, stateReason, createdAt, closedAt, labels:[name], comments:[body],
-//         closingPrs:[{merged}], landedPrs:[{repo, number, merged}] (from landedRefs), openChildren:[{number, comments:[body]}]}
+//         closingPrs:[{merged}], landedPrs:[{repo, number, merged}] (from landedRefs), openChildren:[{number, comments:[body]}],
+//         blockedBy:[ref] (blocked-by edges, read only when the body names a prerequisite)}
 export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE } = {}) {
   const since = Math.max(Date.parse(cutoff), now - days * 864e5);
   const out = [];
@@ -75,6 +89,12 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
     if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !answersOf(i.body || "").stated && !(i.comments || []).some((c) => answersOf(c).stated) && !hasMarker(i, M.answers))
       out.push({ rule: "answers", ref, repo: i.repo, number: i.number, reopen: false,
         comment: `${M.answers}\nsteward-check: this issue has no \`Answers:\` line. State \`Answers: SP-nn\` or \`No affirmed problem yet: <one-line problem>\` in the description (see srs-programme CLAUDE.md, "Filing issues").` });
+    if (i.state === "OPEN" && !i.bot && i.blockedBy !== null && i.createdAt && Date.parse(i.createdAt) >= since && !hasMarker(i, M.prereq)) {
+      const missing = prereqRefs(i.body, i.repo).filter((r) => r !== ref && !(i.blockedBy || []).includes(r));
+      if (missing.length)
+        out.push({ rule: "prereq-edge", ref, repo: i.repo, number: i.number, reopen: false,
+          comment: `${M.prereq}\nsteward-check: this issue names ${missing.join(", ")} as a prerequisite in text only. Record each as a blocked-by edge so the board sees it (a parked blocker of ranked work then reaches the owner's desk): ${missing.map((m) => `\`clerk board dep add ${ref} ${m}\``).join(", ")}.` });
+    }
   }
   return out;
 }
@@ -101,8 +121,15 @@ export function fetchIssues(repo, days, cutoff = SINCE, OWNER) {
     const { closingPrs, closer } = state === "CLOSED" ? closers(OWNER, repo, n.number) : { closingPrs: [], closer: null };
     const cs = n.comments ? comments(OWNER, repo, n.number) : [];
     const landedPrs = state === "CLOSED" ? landedRefs(cs, repo).map((r) => ({ ...r, merged: mergedPr(OWNER, r) })) : [];
+    // Edges are read only where the text names a prerequisite (one REST call per such open issue). Unreadable is unknown
+    // (null), never "no edges": the prereq-edge rule then skips the issue instead of flagging it, and the run goes on.
+    let blockedBy = [];
+    if (state === "OPEN" && prereqRefs(n.body, repo).length) {
+      try { blockedBy = list(`repos/${OWNER}/${repo}/issues/${n.number}/dependencies/blocked_by?per_page=100`).map((b) => `${b.repository_url?.split("/").pop() ?? repo}#${b.number}`); }
+      catch { blockedBy = null; }
+    }
     return { repo, number: n.number, title: n.title, body: n.body, state, stateReason: n.state_reason?.toUpperCase() ?? null,
-      createdAt: n.created_at, closedAt: n.closed_at, labels, comments: cs,
+      createdAt: n.created_at, closedAt: n.closed_at, labels, comments: cs, blockedBy,
       closingPrs, landedPrs, closer, bot: n.user?.type === "Bot", openChildren };
   });
 }

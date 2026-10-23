@@ -3,8 +3,8 @@
 // are the source of truth; docs/confidence-and-care.md in the programme repo is their `confidence-and-care` Composition,
 // rendered, plus the clerk's signal catalogue (what each signal key a grade names means). Never edit the markdown.
 //
-//   node scripts/render-policy.mjs --repo <programme>           # check the policy, then write docs/confidence-and-care.md
-//   node scripts/render-policy.mjs --repo <programme> --check   # exit 1 if the file differs from the records
+//   clerk render-policy --repo <programme>                       # check the policy, then write docs/confidence-and-care.md
+//   clerk render-policy --repo <programme> --check         # exit 1 if the file differs from the records
 //
 // Uses SRS_CLI_PATH, else fetches the programme's pinned CLI.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -41,7 +41,7 @@ try {
     '',
     '### Changing the policy',
     '',
-    'The owner changes the records, with the pinned srs CLI, the MCP server or the editor; a change that alters how workers behave is recorded as a decision in a session. Agents never edit these records: they propose a change as a comment on the record (com.semanticops.comments, comments-on), with the evidence, such as which items a rule sent to which mode and how they went. Then run `node scripts/render-policy.mjs --repo <programme>` from the clerk and commit the records and this file together.',
+    'The owner changes the records, with the pinned srs CLI, the MCP server or the editor; a change that alters how workers behave is recorded as a decision in a session. Agents never edit these records: they propose a change as a comment on the record (com.semanticops.comments, comments-on), with the evidence, such as which items a rule sent to which mode and how they went. Then run `clerk render-policy --repo <programme>` and commit the records and this file together.',
     '',
   ].join('\n');
 } catch (e) { fail(e.message); }
@@ -49,7 +49,7 @@ try {
 if (process.argv.includes('--check')) {
   let current = '';
   try { current = readFileSync(OUT, 'utf8'); } catch {}
-  if (current !== text) fail('docs/confidence-and-care.md differs from the policy records. Edit the records, then run node scripts/render-policy.mjs --repo <programme> from the clerk.');
+  if (current !== text) fail('docs/confidence-and-care.md differs from the policy records. Edit the records, then run clerk render-policy --repo <programme>.');
   console.log('docs/confidence-and-care.md matches the policy records');
 } else {
   mkdirSync(join(REPO, 'docs'), { recursive: true });
