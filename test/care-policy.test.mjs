@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { policyFrom, checkPolicy, evaluate, itemFacts, problemFacts, technicalPlanOf, planStepsOf, parseClause, explain, NS, SIGNALS, REL, problemDomains } from '../lib/practice/care-policy.mjs';
+import { policyFrom, checkPolicy, evaluate, itemFacts, problemFacts, technicalPlanOf, planStepsOf, parseClause, explain, NS, SIGNALS, REL, problemDomains, careNote } from '../lib/practice/care-policy.mjs';
 
 // A fixture policy in the shape of the seeded one: three axes, three modes, five rules.
 const vocabularies = [{ namespace: NS, name: 'confidence_level', terms: ['none', 'low', 'medium', 'high'].map((key) => ({ key })) }];
@@ -213,4 +213,11 @@ test('domain confidence: affirmed problem, suggested problem, group label, repos
 test('explain drops the labels seed titles carry', () => {
   const r = { grades: {}, because: {}, mode: { title: 'Care mode: Build', key: 'build', must: [] }, rule: { order: 1, title: 'Rule 1: a clear plan builds' } };
   assert.deepEqual(explain({ axes: [] }, r), ['Mode: Build (build), by rule 1: a clear plan builds']);
+});
+
+test('careNote: the claim comment names the mode, the rule, the cautions and the obligations', () => {
+  const r = run('Fix it.');
+  assert.match(careNote(r, ['its body has no "Answers: SP-nn" line']), /^Care mode: probe, by rule 5 \(.*\)\. Cautions: its body has no "Answers: SP-nn" line\./);
+  assert.equal(careNote({ mode: null }), 'Care mode: none (the policy selected no mode)');
+  assert.match(careNote({ mode: { key: 'build', must: [] }, rule: { order: 1, title: 'Rule 1: a clear plan builds' } }), /^Care mode: build, by rule 1 \(a clear plan builds\)\.$/);
 });
