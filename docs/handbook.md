@@ -147,6 +147,60 @@ A scout or any participant writes a suggestion under its own actor (`createdBy`)
 **Where it stands** changes week by week. The stages Domain, Persona, Problem and Remedy, in "Stage by stage", hold the current state.
 
 
+#### A domain's axes: three orthogonal trade-offs
+
+> **Proposed, not in force** (clerk#158; owner's direction, 2026-10-23). This chapter is Theory until the owner's session ratifies it. The method keeps being refined: change it by decision, not by quiet edits.
+
+A domain is not fully defined until it names its trade-offs (SP-94). The goal is **three foundational axes that are orthogonal**: knowing where a choice sits on one axis tells you nothing about where it sits on another. Orthogonality is rare and hard to see, which is why the method leans on synthetic logic, the practice of mapping a whole with a few complete, independent lenses (sources: greenmans_creation, `Foundational-Synthesis`, `Orthogonality`, `Building-Complete-Complementary-Structures`, the T3 axis generation agent, Systemic Data Ethics). The method is **iterative cross-referencing**, and any domain that is effectively designed can follow it.
+
+**1. Place before judging.** A tension can be weighed only inside a domain. Without one there is no polarity, no foundational status and nothing to test it against. So the first act is to place each tension in the domain whose purpose it trades on. The groups that hold a tension (`holds-tension`) are evidence of where it belongs, not the answer.
+
+**2. Generate the axes; don't just collect them.** Tensions gathered from the bottom up, from the work, cluster. In Programme coordination, three said "one way" and two said "throughput". So derive the candidates from lenses that are independent by construction, and ask what the domain's tension is on each:
+- **Action, Form, Time**: who acts, what shape the work takes, how it changes over time. The decision compass is built this way (line 1, 2, 3).
+- **Energy, Scope, Time**: T3's internal ↔ external, concentrate ↔ distribute, equilibrate ↔ activate. Stance is built this way.
+
+Collected tensions are then matched to a generated slot. One tension per slot is foundational. The rest are recorded **in prose**, under the axis they refine.
+
+**3. Test every pair as a 2×2.** Fill each of the four cells with a **real case from the domain's own history**. If a cell is impossible or unnatural (a "hot winter"), the pair is one axis seen twice. Signs of a duplicate:
+- the two tensions share a pole word ("Throughput" on both);
+- one tension is the *how* of the other (mechanism over policy is *how* semantics stay in the core once).
+
+**4. Test the three as a cube.** Name all eight corners, each with a real case. A corner nobody can fill means the set is not orthogonal, or not complete.
+
+**5. Assign yang per domain.** Yang is the pole that is thing over relation, movement over stillness, outward over inward, assertive over reflective, forward looking over retrospective. Yang is **not** the preferred pole: preference is the principle's lean, a separate record. Polarity belongs to the line in its domain, and a narrower domain may flip it (decision cdd272a3). Two cross-checks:
+- tensions that refine one axis should lean yang the same way;
+- yang must not be read as "good". A corner's health is not its count of yang poles.
+
+**6. Cross-reference and revisit.** Edges are blurry. Placing one tension can reopen another placement, or show that a tension belongs to a narrower or wider domain. That is the method working, not failing. Expect three to five passes. Record each pass's evidence (the 2×2 cases, the cube), so the next pass starts from it. A domain's placements are revisited on a cadence, as the dream cycle revisits long-term memory: re-verify the cases, merge tensions that turned out to be one axis, and move tensions whose domain was mis-read.
+
+**Things the first pass taught (Programme coordination, 2026-10-23)**:
+- **Correlated leanings are not correlated axes.** The programme prefers both Core once and One way. That is where we choose to stand, and it says nothing about the shape of the space.
+- **Movement between cells is evidence of independence.** Work graduates from the lab (adapter, one way) into the core (core once, one way). It takes on compatibility as clients come to depend on it, and a ruling cuts it clean again. If Form and Time were one axis, there would be nothing to move between.
+- **The cube locates the failure.** The corner we keep cleaning up is agents · adapter · compatibility (drift), and its poles are mixed.
+- **Human forks only.** Every tension has an AI suggestion and a human fork, often with the poles in the opposite order. Place and judge the human fork.
+
+| Axis (yin ↔ yang) | Movement |
+|---|---|
+| Human layer ↔ **Agent throughput** | Action |
+| Core once ↔ **Adapter convenience** | Form |
+| Compatibility ↔ **One way** | Time |
+
+| Corner (Action · Form · Time) | Real case |
+|---|---|
+| Human · Core once · One way | the owner rules a clean cut (srs-rust#878: federation removed, no shims) |
+| Human · Core once · Compatibility | the owner accepts a migration path (RFC-043: revision 8 accepted, migration staged) |
+| Human · Adapter · One way | the owner drives the lab (the srs-lab control room, rewritten weekly) |
+| Human · Adapter · Compatibility | a local convenience kept alive (a hand symlink for `node_modules/clerk`, a stale `~/.cargo/bin/srs`) |
+| Agent · Core once · One way | agents execute a ruling in every layer (clerk#114, reworked onto label bindings) |
+| Agent · Core once · Compatibility | agents widen the core's allowance to keep going (clerk#152 raising rule ceilings; srs-rust#866) |
+| Agent · Adapter · One way | agents churn experiments in a client (the lab middleware) |
+| Agent · Adapter · Compatibility | **drift**: shims and local copies kept so work can move (hand-written client types, the mimicry failure) |
+
+Recorded in prose: Reviewable ↔ fast refines the Action axis, and Mechanism ↔ policy refines the Form axis. Strict ↔ repairable and Spec-led ↔ implementation-led are proposed for Semantic records, and Depth ↔ overload for Agent memory, each to be tested there.
+
+**Where it is written**: tensions and poles live in srs-programme. A placed axis is an `axis-in-domain` record (line, `yang-pole`, `in-domain`, `refines` the tension; method package 1.1.0, clerk#135), set with `clerk domains set-axis`.
+
+
 #### How work moves across the boards
 
 The boards are GitHub Project #6 "SemanticOps" and a set of plain labels that mirror it. Priority is **derived, never hand-set**: it flows down from the period ranking.
