@@ -42,8 +42,8 @@
 // (external blocks). Judges write edges over REST (`dep add`), like sub-issue links.
 // THE BUG TRACK (#717): `bug`-labeled issues never enter the Ready queue — "fixed
 // ASAP" and the epic-major feed contradict each other. `label:bug` IS the bug queue
-// (derived priority label first, oldest first), consumed by a dedicated bug-fix routine (none has a brief yet)
-// routine every 2h. Bug-floor derivation, blocked/needs-input, claims, and stale-claim
+// (derived priority label first, oldest first), consumed by the bug fixer every 2h
+// (routines/bug-fixer.md, `clerk queue --bugs`). Bug-floor derivation, blocked/needs-input, claims, and stale-claim
 // recovery all still apply to bugs; they just ride their own track, un-mixed.
 //
 // API strategy (board-sync runs hourly; quota matters):
@@ -2136,7 +2136,7 @@ function cmdTopup(argv) {
     // epic-major feed contradict each other — the feed would bury a P1 bug in a later
     // epic behind every earlier epic's tail, and Ready bugs crowded out feature slots.
     // Instead `label:bug` IS the bug queue (ordered by derived priority label, then
-    // age), consumed directly by a dedicated bug-fix routine (none has a brief yet). Blocked/needs-input/
+    // age), consumed directly by the bug fixer (routines/bug-fixer.md, `clerk queue --bugs`). Blocked/needs-input/
     // claim semantics and the bug-floor priority derivation all still apply to bugs.
     !row.labels.includes(WF.bug) &&
     !row.labels.includes(PROMOTE_INTENT_LABEL) &&

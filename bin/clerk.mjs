@@ -25,7 +25,7 @@ const argv = process.argv.slice(2);
 const TOOLS = {
   roadmap: ['roadmap.mjs', 'derive epic priority from the period ranking (--json, --explain, --apply)'],
   claim: ['claim.mjs', 'claim an issue as a seat of its working group: clerk claim <repo#n> --as <seat> [--branch <name>] [--dry-run]'],
-  queue: ['queue.mjs', 'report what the unattended lane would take next'],
+  queue: ['queue.mjs', 'report what the unattended lane would take next (--bugs: the bug queue the bug fixer takes from; --json)'],
   upkeep: ['upkeep.mjs', 'keep open PRs moving: merge or update-branch by gate label; group PRs on a quorum for their head commit (--digest, --apply)'],
   'group-state': ['group-state.mjs', "a working group's pause, cycle, merges and room: clerk group-state <wg:label> [--json]"],
   steward: ['steward-check.mjs', 'guard against false closes: reopen issues closed without a merged PR (--fix acts)'],
