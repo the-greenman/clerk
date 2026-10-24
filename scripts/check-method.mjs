@@ -52,7 +52,7 @@ export function checkMethod(records, relations, since = BOUNDARY_RULES_FROM) {
 /**
  * Affirmed / Set aside gates. affirmed, setAside: Sets of member instance ids.
  * Errors: an AI-authored member of either human layer; a duplicate problem_id within one layer (forks legitimately repeat it across layers); an affirmed remedy that answers no
- * affirmed problem or has no falsifier. Warning: an epic serving a ranked objective that answers no affirmed problem
+ * affirmed problem or has no falsifier; an affirmed tension containing a suggested pole whose affirmed fork exists. Warning: an epic serving a ranked objective that answers no affirmed problem
  * (directly, or through a remedy it implements).
  */
 export function checkGates(records, relations, affirmed, setAside, today = new Date().toISOString().slice(0, 10)) {
@@ -65,6 +65,11 @@ export function checkGates(records, relations, affirmed, setAside, today = new D
     const layer = affirmed.has(r.instanceId) ? "Affirmed" : setAside.has(r.instanceId) ? "Set aside" : null;
     if (layer && r.record.createdBy?.kind === "ai") errors.push(`${label(r)} is in ${layer} but was created by an AI actor (${r.record.createdBy.id}); fork it as a human`);
   }
+  // a tension affirmed before its poles keeps contains to the suggestions; a principle forked onto it then leans off-tension
+  const affirmedFork = new Map(relations.filter((x) => x.relationType === "derived-from" && affirmed.has(x.sourceId)).map((x) => [x.targetId, x.sourceId]));
+  for (const t of records.filter((r) => r.record.typeName === "tension" && affirmed.has(r.instanceId)))
+    for (const p of out(t.instanceId, "contains").filter((p) => isType(p, "pole") && !affirmed.has(p) && affirmedFork.has(p)))
+      errors.push(`${label(t)} is affirmed but contains the suggested pole ${p.slice(0, 8)}, not its affirmed fork ${affirmedFork.get(p).slice(0, 8)}`);
   const seen = new Map();
   for (const r of records.filter((r) => r.record.typeName === "problem" && r.record.fieldValues.problem_id)) {
     // a fork keeps its problem_id, so the same id across layers is expected; twice in one layer is not

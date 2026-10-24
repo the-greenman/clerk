@@ -27,6 +27,11 @@ test("epic on ranked objective without affirmed problem warns", () => {
   assert.equal(r.errors.length, 0);
   assert.match(r.warnings[0], /answers no affirmed problem/);
 });
+test("affirmed tension still containing a suggested pole whose fork is affirmed", () => assert.match(run((b) => {
+  b.records.push(rec("t", "tension", { title: "T" }), rec("pa", "pole"), rec("pb", "pole"), rec("pa2", "pole"), rec("pb2", "pole"));
+  b.relations.push(rel("t", "pa", "contains"), rel("t", "pb2", "contains"), rel("pa2", "pa", "derived-from"), rel("pb2", "pb", "derived-from"));
+  for (const id of ["t", "pa2", "pb2"]) b.affirmed.add(id);
+}).errors[0], /contains the suggested pole pa, not its affirmed fork pa2/));
 test("same problem_id across layers (a fork) is fine", () => assert.deepEqual(run((b) => b.records.push(rec("p2", "problem", { problem_id: "SP-1" }))).errors, []));
 test("record in both layers", () => assert.match(run((b) => { b.setAside = new Set(["p1"]); }).errors[0], /both Affirmed and Set aside/));
 test("unaffirmed remedy does not satisfy the epic", () => assert.match(run((b) => { b.affirmed.delete("r1"); }).warnings[0], /answers no affirmed problem/));
