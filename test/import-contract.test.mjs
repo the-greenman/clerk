@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
 
 const CONTRACT = {
   '../lib/practice/pr-decisions.mjs': ['parseDecisions', 'classifyComment', 'checkDecisions', 'askOptions'],
-  '../lib/practice/domain-field.mjs': ['domainField', 'canAffirmTension', 'canPlaceAxes'],
+  '../lib/practice/domain-field.mjs': ['domainField', 'canAffirmTension', 'canSetAxis', 'canUnsetAxis'],
+  '../lib/practice/pr-tree.mjs': ['prTree'],
   '../lib/practice/desk.mjs': ['deskBody'],
   '../lib/adapters/desk.mjs': ['gatherDesk'],
   '../lib/adapters/settings.mjs': ['loadSettings'],

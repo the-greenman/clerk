@@ -1,0 +1,20 @@
+{
+  "id": "88d9b5da-418b-4bf1-a3e3-97bd14a52a9c",
+  "namespace": "com.semanticops.method",
+  "name": "axis-in-domain",
+  "version": 1,
+  "description": "A tension as one of a domain's three axes: which line it is and which of its poles is yang there. Refines the tension; the domain is given by in-domain, the yang pole by yang-pole.",
+  "fields": [
+    { "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0", "order": 0, "required": true },
+    { "fieldId": "481bf75b-0e08-4687-babb-2f55f12890a0", "order": 1, "required": true },
+    { "fieldId": "0a273307-bfcf-4007-a4fc-dc6fe61e1e01", "order": 2, "required": false }
+  ],
+  "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
+  "aiGuidance": {
+    "purpose": "Polarity is judged in relation: within one domain, on one axis. This record holds that judgement. It refines exactly one tension, is in-domain exactly one domain record, and names exactly one yang-pole, one of the two poles its tension contains. A domain has at most three affirmed axes, on distinct lines. A narrower domain may hold its own axis for the same tension with the other pole as yang.",
+    "extraction": "Title as '<tension> in <domain>'. Line 1-3. A one-sentence summary of why this tension is an axis here.",
+    "negativeGuidance": "Do not name the domain, the tension or the yang pole in a text field; link them. Do not infer polarity from relation order or from an archetype's name."
+  },
+  "createdAt": "2026-10-22T12:00:00+00:00",
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json"
+}
