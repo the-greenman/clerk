@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { domainField, canAffirmTension, canPlaceAxes } from '../lib/practice/domain-field.mjs';
+import { domainField, canAffirmTension, canSetAxis, canUnsetAxis } from '../lib/practice/domain-field.mjs';
 
 const M = 'com.semanticops.method', A = 'com.mudemocracy.argument';
 const rec = (id, typeName, title, ns = M, extra = {}) => ({ instanceId: id, record: { typeName, typeNamespace: ns, fieldValues: { title, ...extra } } });
@@ -75,11 +75,57 @@ test('a tension is affirmed with both its poles, poles first; never twice', () =
   assert.match(canAffirmTension(field(), 'evolution').reasons[0], /not a tension/);
 });
 
-test('axes need a domain record and three distinct tensions affirmed with both poles', () => {
-  const done = new Set(['sr-fork', 'evo', 'evolution', 'continuity', 'succ', 'renewal', 'reliability']);
-  assert.match(canPlaceAxes(field({ affirmed: done }), 'sr', ['evo', 'succ', 'evo']).reasons.join(), /distinct/);
-  assert.match(canPlaceAxes(field(), 'sr', ['evo', 'succ', 'change']).reasons.join(), /not affirmed with both poles/);
-  assert.match(canPlaceAxes(field(), 'wg', ['succ', 'succ', 'succ']).reasons.join(), /no domain record/);
-  const ok = canPlaceAxes(field({ affirmed: done }), 'stance', ['change', 'change', 'change']);
-  assert.ok(!ok.ok); // distinct, and Change is not affirmed here
+// axes (decision cdd272a3): Semantic records holds Identity as line 2 with Evolution yang; "Narrow" refines it and flips the pole
+const axisData = () => {
+  const rs = [...records, rec('ax', 'axis-in-domain', 'Identity in Semantic records', M, { line: 2 }), rec('narrow', 'domain', 'Narrow'),
+    rec('ax2', 'axis-in-domain', 'Identity in Narrow', M, { line: 1 }), rec('kid', 'domain', 'Kid')];
+  const ls = [...relations, rel('refines', 'ax', 'evo'), rel(`${M}/in-domain`, 'ax', 'sr-fork'), rel(`${M}/yang-pole`, 'ax', 'evolution'),
+    rel('refines', 'narrow', 'sr'), rel(`${M}/holds-tension`, 'narrow', 'evo'), rel('contains', 'narrow', 'evo'),
+    rel('refines', 'ax2', 'evo'), rel(`${M}/in-domain`, 'ax2', 'narrow'), rel(`${M}/yang-pole`, 'ax2', 'continuity'), rel('refines', 'kid', 'narrow')];
+  return { rs, ls };
+};
+const done = new Set(['sr-fork', 'narrow', 'kid', 'ax', 'ax2', 'evo', 'evolution', 'continuity', 'succ', 'renewal', 'reliability']);
+const axField = (affirmed = done) => { const { rs, ls } = axisData(); return domainField({ records: rs, relations: ls, groups, affirmed }); };
+
+test('an axis record names the line and the yang pole; the other pole is yin there', () => {
+  const sr = ctx(axField(), 'Semantic records');
+  assert.deepEqual(sr.axes.map((a) => [a.line, a.tension.title, a.yang.title, a.yin.title]), [[2, 'Identity', 'Evolution', 'Continuity']]);
+  assert.deepEqual(sr.tensions.find((t) => t.title === 'Identity').axis.yang.title, 'Evolution');
+  assert.equal(sr.tensions.find((t) => t.title === 'Succession').axis, null); // not an axis: no polarity here
+});
+
+test('a narrower domain flips the pole with its own axis; one with none inherits its parent\'s', () => {
+  const f = axField();
+  assert.equal(ctx(f, 'Narrow').axes[0].yang.title, 'Continuity');
+  assert.equal(ctx(f, 'Semantic records').axes[0].yang.title, 'Evolution');
+  const kid = ctx(f, 'Kid');
+  assert.deepEqual([kid.axes[0].yang.title, kid.axes[0].inherited.title], ['Continuity', 'Narrow']);
+});
+
+test('a suggested axis is offered, not counted', () => {
+  const sr = ctx(axField(new Set([...done].filter((x) => x !== 'ax'))), 'Semantic records');
+  assert.deepEqual([sr.axes.length, sr.suggestedAxes[0].tension.title], [0, 'Identity']);
+});
+
+test('set-axis needs a tension affirmed with both poles, one of its poles as yang, a free line and a domain record', () => {
+  const f = axField();
+  assert.ok(canSetAxis(f, 'sr', 'succ', 1, 'renewal').ok);
+  assert.match(canSetAxis(f, 'sr', 'succ', 2, 'renewal').reasons.join(), /line 2 of Semantic records is Identity/);
+  assert.match(canSetAxis(f, 'sr', 'succ', 1, 'evolution').reasons.join(), /must be one of/);
+  assert.match(canSetAxis(f, 'sr', 'evo', 1, 'evolution').reasons.join(), /already an axis/);
+  assert.match(canSetAxis(f, 'sr', 'succ', 4, 'renewal').reasons.join(), /1, 2 or 3/);
+  assert.match(canSetAxis(axField(new Set(['sr-fork'])), 'sr', 'succ', 1, 'renewal').reasons.join(), /not affirmed with both poles/);
+  assert.match(canSetAxis(f, 'wg', 'succ', 1, 'renewal').reasons.join(), /no domain record/);
+  assert.equal(canSetAxis(axField(new Set([...done].filter((x) => x !== 'ax'))), 'sr', 'evo', 2, 'continuity').suggestion.recordId, 'ax');
+});
+
+test('unset-axis takes only an affirmed axis of a context\'s own', () => {
+  assert.equal(canUnsetAxis(axField(), 'ax').recordId, 'ax');
+  assert.ok(!canUnsetAxis(axField(new Set(['sr-fork'])), 'ax').ok);
+});
+
+test('set-axis says, by identity, whether the owner kept the suggestion\'s line and yang', () => {
+  const f = axField(new Set([...done].filter((x) => x !== 'ax')));
+  assert.deepEqual([canSetAxis(f, 'sr', 'evo', 2, 'evolution').suggestion.sameYang, canSetAxis(f, 'sr', 'evo', 2, 'continuity').suggestion.sameYang], [true, false]);
+  assert.equal(canSetAxis(f, 'sr', 'evo', 3, 'evolution').suggestion.sameLine, false);
 });

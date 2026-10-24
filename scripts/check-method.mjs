@@ -99,6 +99,26 @@ export function checkGates(records, relations, affirmed, setAside, today = new D
     });
     if (!grounded) p2.push(`${label(r)} is affirmed but no affirmed persona-in-domain holding it has exactly one in-domain reaching an affirmed domain`);
   }
+  // Axes (decision cdd272a3): an axis-in-domain refines one tension, is in-domain one domain and names one yang-pole, a pole of
+  // that tension; a domain's affirmed axes are at most three, on distinct lines 1-3, with distinct tensions.
+  const axes = records.filter((r) => r.record.typeName === "axis-in-domain");
+  // each copy's own edges: an affirmed fork may name a different yang-pole than the suggestion it came from
+  const one = (r, t, n) => { const x = [...new Set(out(r.instanceId, t).map(canon))].filter((y) => typeOf(y, n)); return x.length === 1 ? x[0] : (errors.push(`${label(r)} has ${x.length} ${t.split("/").pop()} to a ${n}, expected exactly 1`), null); };
+  const byDomain = new Map();
+  for (const a of axes) {
+    const t = one(a, "refines", "tension"), d = one(a, `${MNS}/in-domain`, "domain"), y = one(a, `${MNS}/yang-pole`, "pole");
+    const line = Number(a.record.fieldValues.line);
+    if (![1, 2, 3].includes(line)) errors.push(`${label(a)} is on line ${a.record.fieldValues.line}, expected 1, 2 or 3`);
+    if (t && y && !reach(t, "contains").includes(canon(y))) errors.push(`${label(a)} names a yang-pole that is not one of its tension's poles`);
+    if (d && affirmed.has(a.instanceId)) (byDomain.get(d) ?? byDomain.set(d, []).get(d)).push({ a, t, line });
+  }
+  for (const [d, xs] of byDomain) {
+    if (xs.length > 3) errors.push(`${label(records.find((r) => r.instanceId === d) ?? xs[0].a)} has ${xs.length} affirmed axes, expected at most 3`);
+    for (const k of ["line", "t"]) {
+      const seen = new Set();
+      for (const x of xs) { if (seen.has(x[k])) errors.push(`${label(x.a)} repeats ${k === "line" ? `line ${x.line}` : "a tension"} among its domain's affirmed axes`); seen.add(x[k]); }
+    }
+  }
   return { errors, warnings };
 }
 
@@ -116,8 +136,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   gates.warnings.forEach((w) => console.warn(`! ${w}`));
   // advisory (SP-94, SP-98, clerk#129): a domain is not fully defined until three of its tensions are placed as axes
   const { loadField } = await import("../lib/adapters/domain-field.mjs");
-  for (const c of loadField(ROOT, cli).contexts.filter((c) => c.domain && c.axes.length < 3))
-    console.warn(`! domain ${c.title} has ${c.axes.length} of 3 axes placed (clerk domains)`);
+  for (const c of loadField(ROOT, cli).contexts.filter((c) => c.domain && c.axes.filter((a) => a.state === "affirmed" && !a.inherited).length < 3))
+    console.warn(`! domain ${c.title} has ${c.axes.filter((a) => a.state === "affirmed" && !a.inherited).length} of 3 affirmed axes (clerk domains)`);
   const errors = [...checkMethod(records, relations), ...gates.errors];
   if (errors.length) { errors.forEach((e) => console.error(`✗ ${e}`)); process.exit(1); }
   console.log("✓ method: every tension has 2 poles; every principle governs one tension and leans toward one of its poles.");
