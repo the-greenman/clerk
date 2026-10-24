@@ -101,3 +101,19 @@ test('an owner-merge PR that asks nothing leaves Needs you and goes back to an a
   assert.match(needsYou(body), /Owner merge clerk#2/);
   assert.match(unthreaded(body), /clerk#1 pr 1 \| misclassified \|/);
 });
+
+test('an owner merge that asks nothing is named on its epic thread, and the Needs-you line is the real question', () => {
+  const pr = (number, body) => ({ repo: 'clerk', number, title: `pr ${number}`, body, labels: [{ name: 'gate:owner-merge' }], mergeStateStatus: 'CLEAN', chain: ['clerk#19'] });
+  const block = '```srs-decisions\n{"asks":[{"key":"A1","question":"Which way?"}]}\n```\nDecision asked: none to merge.';
+  const body = deskBody({ now: NOW, prs: [pr(1, 'Closes clerk#12'), pr(2, block)], epics: [{ ref: 'clerk#19', refs: ['clerk#19'], title: 'Clerk process', rank: 1 }] });
+  assert.match(needsYou(body), /Owner merge clerk#2:\*\* pr 2 \| Decision asked: Which way\?\. Then merge/);
+  assert.match(body, /Clerk process.*\| waiting on you \|.*Answer or merge clerk#2 \(Needs you\); owner merge that asks nothing: clerk#1/);
+  const alone = deskBody({ now: NOW, prs: [pr(1, 'Closes clerk#12')], epics: [{ ref: 'clerk#19', refs: ['clerk#19'], title: 'Clerk process', rank: 1 }] });
+  assert.match(alone, /Clerk process.*\| misclassified \|.*Owner merge that asks nothing: clerk#1 .*\| agent \|/);
+});
+
+test('a non-owner PR with "**Decision asked:** **none**" or an empty line asks nothing', () => {
+  const pr = (number, body) => ({ repo: 'clerk', number, title: `pr ${number}`, body, labels: [{ name: 'gate:auto-merge' }], chain: [] });
+  const body = deskBody({ now: NOW, prs: [pr(1, '**Decision asked:** **none**'), pr(2, 'Decision asked:\nUnblocks: x')] });
+  assert.doesNotMatch(needsYou(body), /Decision asked in/);
+});

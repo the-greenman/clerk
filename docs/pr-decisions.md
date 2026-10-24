@@ -32,8 +32,8 @@ So the richer a group's soil (affirmed tensions, principles, its trigram), the m
 |---|---|
 | error | Decision language in the PR prose ("we decided", "chose", "instead of", "Decision asked", "trade-off") with no `srs-decisions` block. |
 | error | A `ruling` or `escalation` with no record `id`. |
-| error | A `gate:owner-merge` PR that asks the owner nothing: no ask with a question, and no `Decision asked:` line (clerk#165). The desk and the upkeep digest send it back to an agent instead of listing it for the owner. |
-| error | A PR with no gate label and no working-group label (clerk#165): classify it `gate:auto-merge` or `gate:owner-merge`. A group PR gets its gate from the group's reviewer. |
+| error | A `gate:owner-merge` PR that asks the owner nothing (clerk#165). With an `srs-decisions` block, only a block ask with a question counts: the block is authoritative, so `asks: []` asks nothing. Without one, a `Decision asked:` line counts unless it says nothing ("none", "nothing", "n/a", "no decision", a dash or an unfilled `<…>`). The desk and the upkeep digest send it back to an agent instead of listing it for the owner. |
+| error | A PR with no gate label and no chartered working-group label (clerk#165; a `wg:` label no group holds does not count, as upkeep routes it): classify it `gate:auto-merge` or `gate:owner-merge`. A group PR gets its gate from the group's reviewer. |
 | error | An `ask` with no question, or with `blocks: "merge"` and no answer, on a PR that is about to merge. |
 | warn | A `choice` that says it constrains later work (`constrains: true`): it should be a ruling. |
 | warn | A `choice` with no `principle` or `lean` on a PR whose group has a trigram: say which way it leans, or make it a ruling. |
