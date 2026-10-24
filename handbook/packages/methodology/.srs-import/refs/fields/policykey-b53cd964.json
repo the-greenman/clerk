@@ -1,0 +1,18 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "What rules and code refer to. Lowercase, underscores."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "The stable machine key of this axis or care mode (e.g. placement, technical_plan, build). Rule clauses and the clerk name it; never rename it without changing the rules that cite it.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "b53cd964-42d5-41ab-999c-d2538783eb21",
+  "name": "policy_key",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

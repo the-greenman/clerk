@@ -1,0 +1,18 @@
+{
+  "id": "05e8d8e5-4b0c-4918-bcdd-75e8d0cdccb0",
+  "namespace": "com.semanticops.programme",
+  "name": "report_issue",
+  "version": 1,
+  "description": "The issue where the programme posts working-group reports, as <repo>#<n>.",
+  "aiGuidance": {
+    "purpose": "Where session and cycle reports are commented.",
+    "extraction": "Short form repo#number, e.g. semanticops.com#31. Convert URLs to short form."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-10T00:00:00Z"
+}

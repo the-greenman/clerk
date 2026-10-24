@@ -1,0 +1,15 @@
+{
+  "id": "45245ff3-3466-4a13-bbc4-f9eef3eb80e0",
+  "namespace": "com.semanticops.handbook",
+  "name": "remedies",
+  "version": 1,
+  "description": "The rules, changes and issues that act on this step.",
+  "aiGuidance": {
+    "purpose": "Audit ids (H1-H8, C1-C13) and issue refs, e.g. 'C6 clerk#164; H1'."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-24T12:29:10.604524050+00:00"
+}

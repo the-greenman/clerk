@@ -1,0 +1,28 @@
+{
+  "instanceId": "bbb3f14a-d257-4493-9bfe-f64aa52c349d",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Ruled in conversation, never recorded",
+    "flow": "decision",
+    "moved_by": "the owner in chat, an issue or a PR comment",
+    "mover_kind": "none",
+    "gaps": [
+      "The ruling cannot be cited, so the question comes back (SP-99, suggested)."
+    ],
+    "remedies": "decision 4445b9cf; clerk#179",
+    "measure": "rulings.unrecorded",
+    "confidence_level": "medium",
+    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); owner, 2026-10-24"
+  },
+  "createdAt": "2026-10-24T12:33:00.707272111+00:00",
+  "updatedAt": "2026-10-24T12:33:36.451125230+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -1,0 +1,163 @@
+{
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "What a work item or pull request is, or who takes it: classification, never position or hold. Also the request that asks for promotion. A working group's own label is its charter's group_label, not a term here.",
+  "id": "183a8ca6-7e5f-430b-a76c-884516131cf7",
+  "mode": "closed",
+  "name": "work_label",
+  "namespace": "com.semanticops.programme",
+  "terms": [
+    {
+      "description": "Asks for the promote transition; board-sync makes it.",
+      "id": "c00f4e51-70ae-44d6-b6da-0704324f99d5",
+      "key": "promote-request",
+      "label": "Promote request",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Something does not work. Bugs ride their own track, never the Ready feed, and are never weaker than P1.",
+      "id": "7f5af99c-1150-482f-b13f-220f2bff08c9",
+      "key": "bug",
+      "label": "Bug",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "A tracking item whose sub-issues are the work.",
+      "id": "8a0231a4-773f-47e7-8914-166546c96dac",
+      "key": "epic",
+      "label": "Epic",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "A design brief, not a work item.",
+      "id": "b0713cf9-28c0-49c5-85ed-063cb8abe926",
+      "key": "plan",
+      "label": "Plan",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "A user-facing story that work serves.",
+      "id": "355e0c82-19b5-47ab-b740-ac5f266c8680",
+      "key": "user-story",
+      "label": "User story",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Routines may run it without the owner present.",
+      "id": "719e56d9-fa11-4bbf-adab-4e9539d8efcb",
+      "key": "lane-unattended",
+      "label": "Unattended lane",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Derived priority P0; never set by hand.",
+      "id": "08266227-79fa-4f7b-ac6d-a25a6e4b3491",
+      "key": "priority-p0",
+      "label": "Priority P0",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Derived priority P1; never set by hand.",
+      "id": "fffed2dd-f79c-44a8-97c8-ec4eb27100d0",
+      "key": "priority-p1",
+      "label": "Priority P1",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Derived priority P2; never set by hand.",
+      "id": "9a931d66-019d-4e2c-a885-f9d088cc9004",
+      "key": "priority-p2",
+      "label": "Priority P2",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Effort estimate: small.",
+      "id": "963a8b67-1880-43df-bb8c-140666b5b067",
+      "key": "size-small",
+      "label": "Size small",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Effort estimate: medium.",
+      "id": "b5fced42-e328-47b1-ab1d-a9bb77e01c08",
+      "key": "size-medium",
+      "label": "Size medium",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Effort estimate: large.",
+      "id": "306af961-3e6a-4caa-a71d-e6cf853d85d1",
+      "key": "size-large",
+      "label": "Size large",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Effort estimate: xl.",
+      "id": "1eb4f6f0-191c-406f-b560-67d936f1fefc",
+      "key": "size-xl",
+      "label": "Size xl",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "On the critical path of a ranked change: raises derived priority one tier.",
+      "id": "90a69d0a-5821-4f7b-bc08-bb18750f4468",
+      "key": "critical-path",
+      "label": "Critical path",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Blocks a gate: raises derived priority one tier.",
+      "id": "55afe7d4-b98e-4e99-b6fe-7404fde3ddbb",
+      "key": "blocks-gate",
+      "label": "Blocks a gate",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Something that worked broke: raises derived priority one tier.",
+      "id": "7e823ebd-9f86-4939-8c96-1250e3a4a8ee",
+      "key": "regression",
+      "label": "Regression",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Closed as completed with no code change.",
+      "id": "2cacbb3d-b5b7-496d-962c-4a4c796ebb93",
+      "key": "no-code",
+      "label": "No code",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "The owner's desk item.",
+      "id": "bc618dbc-4dc9-412b-97e4-f20cb602e241",
+      "key": "desk",
+      "label": "Desk",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "The owner asks the group reviewer to look at a pull request again.",
+      "id": "7cbc18c6-4144-4ea1-8bff-f07b4818887a",
+      "key": "review-requested",
+      "label": "Review requested",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    }
+  ],
+  "version": 1
+}

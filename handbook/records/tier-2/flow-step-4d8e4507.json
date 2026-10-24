@@ -1,0 +1,33 @@
+{
+  "instanceId": "4d8e4507-edbb-4884-a323-c26fd3fc4a50",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Placed: layer, domain and boundary",
+    "flow": "decision",
+    "moved_by": "the builder; for the spec, the /rfc Charter Check (an LLM procedure)",
+    "mover_kind": "none",
+    "needs": "the change's layer and the boundary it is made in",
+    "theory": "The level test and six layer rules (srs/docs/charter/decision-compass.md). A rule holds at the boundary that made it (owner, 2026-10-09 and 10-12).",
+    "gaps": [
+      "Only the spec places its decisions. No programme decision links to a domain, so every one reads as global (SP-69; taxonomy discoveries §2)."
+    ],
+    "remedies": "clerk#63",
+    "measure": "decisions.unscoped",
+    "confidence_level": "medium",
+    "evidence": "decision-compass.md; srs-programme source-documents/decision-taxonomy-2026-10-22/discoveries.md; clerk#63",
+    "maintained_by": [
+      "command: /rfc (Charter Check, the spec only)"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:59.205321422+00:00",
+  "updatedAt": "2026-10-24T16:19:08.134963124+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -1,0 +1,34 @@
+{
+  "instanceId": "79d79ade-6979-44a6-9387-7dfbdc1d400c",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Ratified once, at its level",
+    "flow": "decision",
+    "moved_by": "the owner's session (`/session`); for the spec, RFC acceptance",
+    "mover_kind": "manual",
+    "needs": "a `proposed` decision recorded in a decision log",
+    "theory": "Ratified in exactly one session, at the level that owns it, with that level's quorum (handbook, Decisions).",
+    "gaps": [
+      "Two ratification models (sessions for the programme, RFC acceptance for the spec). Merges taken in a session are not minuted; interrupted sessions leave partial minutes; exercises never close (0 of 5)."
+    ],
+    "remedies": "H6; C11 clerk#166",
+    "measure": "decisions.proposed",
+    "confidence_level": "medium",
+    "evidence": "handbook; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk session (/session)",
+      "record: programme/session"
+    ]
+  },
+  "createdAt": "2026-10-24T12:33:00.133497361+00:00",
+  "updatedAt": "2026-10-24T16:19:08.329019615+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}
