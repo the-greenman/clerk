@@ -149,3 +149,10 @@ test('a non-owner PR with "**Decision asked:** **none**" or an empty line asks n
   const body = deskBody({ now: NOW, prs: [pr(1, '**Decision asked:** **none**'), pr(2, 'Decision asked:\nUnblocks: x')] });
   assert.doesNotMatch(needsYou(body), /Decision asked in/);
 });
+
+test('an owner merge that cites the decision it applies is on Needs you to review against it, not misclassified', () => {
+  const pr = { repo: 'clerk', number: 5, title: 'pr 5', body: '```srs-decisions\n{"made":[{"class":"ruling","id":"e745e9b2aaaa","title":"reach"}]}\n```', labels: [{ name: 'gate:owner-merge' }], mergeStateStatus: 'CLEAN', chain: [] };
+  const body = deskBody({ now: NOW, prs: [pr] });
+  assert.match(needsYou(body), /Owner merge clerk#5:\*\* pr 5 \| Review it against e745e9b2, then merge/);
+  assert.doesNotMatch(body, /misclassified/);
+});

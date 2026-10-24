@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDecisions, checkDecisions, askOptions, answersFrom, signComment, classifyComment, asksOwner, ownerQuestion } from '../lib/practice/pr-decisions.mjs';
+import { parseDecisions, checkDecisions, askOptions, answersFrom, signComment, classifyComment, asksOwner, ownerQuestion, appliedDecisions, ownerHasWork } from '../lib/practice/pr-decisions.mjs';
 
 const block = (o) => `Answers: SP-12\n\n\`\`\`srs-decisions\n${JSON.stringify(o)}\n\`\`\`\n`;
 
@@ -141,4 +141,16 @@ test('only a chartered group label gates a PR, as upkeep routes it', () => {
   const errs = (labels) => checkDecisions(parseDecisions('plain'), { body: 'plain', labels, gates: G, groupLabels: ['wg:spec'] }).filter((f) => f.level === 'error').map((f) => f.text);
   assert.deepEqual(errs(['wg:spec']), []);
   assert.match(errs(['wg:old-group']).join(), /no chartered working-group label \(wg:old-group is no chartered group's\)/);
+});
+
+test('a decision already taken is cited, never asked again: an owner merge that applies one passes the gate', () => {
+  const G = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' };
+  const cites = '```srs-decisions\n{"by":"agent:a","made":[{"class":"ruling","id":"e745e9b2","title":"reach"}]}\n```';
+  const d = parseDecisions(cites);
+  assert.deepEqual(appliedDecisions(d), ['e745e9b2']);
+  assert.equal(asksOwner(d), false);
+  assert.equal(ownerHasWork(d), true);
+  assert.deepEqual(checkDecisions(d, { body: cites, labels: ['gate:owner-merge'], gates: G }).filter((f) => f.level === 'error'), []);
+  const reask = '```srs-decisions\n{"made":[{"class":"ruling","id":"e745e9b2","title":"reach"}],"asks":[{"key":"A1","id":"e745e9b2","question":"Is reach enough?","options":["Keep: x","Do nothing: y"]}]}\n```';
+  assert.match(checkDecisions(parseDecisions(reask), { body: reask }).map((f) => f.text).join(), /asks again a decision the PR says it applies/);
 });
