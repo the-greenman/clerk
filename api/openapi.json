@@ -728,6 +728,10 @@
       "items": {
        "type": "string"
       }
+     },
+     "carePolicyContainer": {
+      "type": "string",
+      "description": "The container holding the programme's Confidence and care policy (settings type v2, optional)."
      }
     },
     "required": [
