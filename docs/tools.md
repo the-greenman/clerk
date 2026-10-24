@@ -113,6 +113,7 @@ Reusable (`on: workflow_call`) in `.github/workflows/`; the programme repo holds
 | synthesiser.md | Group a domain's unclustered problems into named clusters (suggests only; affirmed clusters are the owner's) | weekly, Tuesday 06:00 UTC (trigger not yet created) | domain containers, problems, clusters, Suggestions | clusters and outline moves in Suggestions (a programme PR), run report, comment on the digest issue |
 | wg-reviewer.md | Review open group PRs (up to 3 per run), post quorum | hourly :40 UTC, `trig_017sfYgXA1PXoZRmHDzG69Jz` (scheduled, same reason) | PRs | quorum comment, `gate:auto-merge` |
 | bug-fixer.md | Fix one bug from `clerk queue --bugs`, terminal at the PR | every 2 h (trigger to be created; replaces the paused `trig_01HjsX1ohcEytbrLpWtbsENg`) | bug issues, the target repo | branch, PR, run report |
+| flow-keeper.md | Keep the flow joined: sweep the governed repositories with `clerk flow --open`, join every `auto` dot citing its rule, report the choices left (standing job 9c0ce5f8) | daily, before the board sync that fills Ready (trigger to be created) | open issues, their parents and dependencies, programme records | labels, sub-issue and blocked-by links, one comment per joined issue, a report on the digest issue |
 | canary.md | Test the clerk where routines run; leave a marker either way, so a broken cloud is seen the same day | daily (trigger to be created) | settings, every settings repo, group state | one `clerk-doctor` comment on the digest issue |
 | working-groups.md | Overview of the group's rules | | | |
 
