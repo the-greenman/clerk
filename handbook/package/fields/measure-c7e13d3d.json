@@ -1,0 +1,14 @@
+{
+  "id": "c7e13d3d-2b29-4121-bb7d-566b188641f0",
+  "namespace": "com.semanticops.handbook",
+  "name": "measure",
+  "version": 1,
+  "description": "Key of the live measure clerk flow evaluates for this step.",
+  "aiGuidance": {
+    "purpose": "A key from the measure catalogue in lib/practice/flow.mjs; unknown keys are reported, never guessed."
+  },
+  "fieldType": {
+    "datatype": "string"
+  },
+  "createdAt": "2026-10-24T12:29:10.569548861+00:00"
+}

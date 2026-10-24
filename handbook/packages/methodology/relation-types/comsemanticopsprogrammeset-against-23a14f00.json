@@ -1,0 +1,13 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json",
+  "canonicalDirection": "source is the decision; target is a principle or a governance decision it rests on",
+  "category": "association",
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "Source decision is set against the target principle or standing decision: the compass it was weighed on. Its rationale says whether it applies the principle or departs from it, and why.",
+  "id": "23a14f00-88d4-4ad3-ab95-c9a67e35d11b",
+  "key": "com.semanticops.programme/set-against",
+  "label": "Set against",
+  "namespace": "com.semanticops.programme",
+  "status": "active",
+  "version": 1
+}

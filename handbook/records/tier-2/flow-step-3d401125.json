@@ -1,0 +1,29 @@
+{
+  "instanceId": "3d401125-8a93-4f1a-8cec-c7798efdfa1d",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Answered",
+    "flow": "decision",
+    "moved_by": "the owner: in the control room (`srs:answer`), in chat, in a session",
+    "mover_kind": "manual",
+    "theory": "Your answer is the act; the system finishes the job (H1).",
+    "gaps": [
+      "Only 6 of 41 asks in PRs merged since 10-10 got an `srs:answer`. Nothing reads an answer except `pr-check --merging`, which no workflow passes, and the desk never clears an answered PR."
+    ],
+    "remedies": "C6 clerk#164; H1",
+    "measure": "asks.unanswered",
+    "confidence_level": "medium",
+    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:44,58"
+  },
+  "createdAt": "2026-10-24T12:32:59.875370383+00:00",
+  "updatedAt": "2026-10-24T12:33:35.945612603+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

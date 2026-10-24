@@ -1,0 +1,29 @@
+{
+  "instanceId": "36efcf12-0ce1-480c-ae08-ffac1b8ef592",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Claim and build",
+    "flow": "work",
+    "moved_by": "nightly worker (00:00, up to 3, `lane:unattended`); WG builder (hourly at :10, one `wg:` issue)",
+    "mover_kind": "routine",
+    "needs": "`ready` and a lane, no assignee, no open PR or branch; within budget, group not paused; the care mode from the policy",
+    "gaps": [
+      "A stopped run keeps its claim and `needs-input`, so the issue stays in progress unseen (clerk#25 since 2026-10-17). Worktrees are left behind."
+    ],
+    "remedies": "H4, H5; C8 clerk#169, C9 clerk#170, C10",
+    "measure": "claims.stuck",
+    "confidence_level": "medium",
+    "evidence": "the former hand-typed Flow at a glance table, row 9 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+  },
+  "createdAt": "2026-10-24T12:32:58.031572727+00:00",
+  "updatedAt": "2026-10-24T12:33:35.883573909+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

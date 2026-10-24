@@ -1,0 +1,27 @@
+{
+  "instanceId": "594a2419-eccf-4fd8-881a-f6e044198936",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Merged without a minute",
+    "flow": "decision",
+    "moved_by": "the owner on GitHub, or the agenda's Merges `[m]`",
+    "mover_kind": "none",
+    "gaps": [
+      "The merge is recorded only by GitHub (and clerk serve's acts.jsonl, which nothing reads); the decision it carried is lost."
+    ],
+    "remedies": "C11 clerk#166",
+    "confidence_level": "medium",
+    "evidence": "mechanics survey 2026-10-24 (bin/clerk.mjs:321)"
+  },
+  "createdAt": "2026-10-24T12:33:00.455126566+00:00",
+  "updatedAt": "2026-10-24T12:33:00.455132037+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -1,0 +1,19 @@
+{
+  "instanceId": "339397e2-30b7-451b-89e2-9be1241e2ad6",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "How an issue reaches a group",
+    "body": "**Ruled** (decisions D4, D5 and D15, ratified in the owner's session of 2026-10-16; `claim` already enforces the affirmed problem, routing is not yet automatic). An issue is not work until it is grounded and routed. Before any routine may take it:\n\n1. **Grounded.** Its first line is `Answers: SP-nn`, naming an affirmed problem. The problem is `held-by` an affirmed persona-in-domain, and that persona's `in-domain` reaches an affirmed domain. An issue that reveals a problem nobody has recorded yields a problem *suggestion* in the domain, and stays parked against it until the problem is affirmed.\n2. **Routed.** The problem's domain decides the group: the group whose charter names that domain (a `com.semanticops.method/holds-domain` relation from the group's role to the domain record) takes it through its input queue (its `wg:` label); a domain no group holds goes to the central group (`lane:unattended`).\n3. **Ranked.** Its epic serves a ranked objective, which gives its priority. An issue under no ranked objective stays `parked`.\n\n`parked` means \"waiting for meaning\", not \"rejected\": the 2026-10 backlog was parked so that domains, problems and personas are established first. Issues come out of parking only by passing steps 1 to 3, a domain at a time, never in bulk.\n\n#### Where flow stops, and how to see it\n\n| Symptom | Usual cause | See it with |\n|---|---|---|\n| Hundreds of issues, an empty queue | domains and personas not affirmed, so nothing can be grounded (Domain to Problem) | `clerk check`, `clerk roadmap --explain` |\n| `ready` issues nobody takes | no lane label (Routing to a group), or the routine cannot reach the repo | `clerk queue`, the routine's run log |\n| A group merges nothing | builder or reviewer trigger missing or disabled | `clerk routines --check <dump>` |\n| A decision you were asked for never appears in a session | it exists only as PR text, or is in no decision log | `clerk desk` (\"in no log\") |\n| A group stops | two unreceived reports | `clerk desk`, then a session's Reports |"
+  },
+  "createdAt": "2026-10-24T12:32:56.073542915+00:00",
+  "updatedAt": "2026-10-24T12:32:56.073552829+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

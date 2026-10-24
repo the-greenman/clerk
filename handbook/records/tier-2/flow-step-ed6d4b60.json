@@ -1,0 +1,30 @@
+{
+  "instanceId": "ed6d4b60-dbcb-4edb-9589-388d54709e05",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Routing to a group",
+    "flow": "work",
+    "moved_by": "the filer, then topup",
+    "mover_kind": "none",
+    "needs": "the group whose charter holds the problem's domain gets its `wg:` label; a domain no group holds goes to `lane:unattended`",
+    "theory": "Ruled: D4, D5 and D15 (ratified 2026-10-16).",
+    "gaps": [
+      "Topup does not route by meaning, so real-use issues (srs-web#587 to #590) land in no queue."
+    ],
+    "remedies": "C13 clerk#124; H7",
+    "measure": "issues.unrouted",
+    "confidence_level": "medium",
+    "evidence": "the former hand-typed Flow at a glance table, row 7 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+  },
+  "createdAt": "2026-10-24T12:32:57.640770533+00:00",
+  "updatedAt": "2026-10-24T12:33:36.708547362+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

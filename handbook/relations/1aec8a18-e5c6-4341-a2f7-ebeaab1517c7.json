@@ -1,0 +1,13 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation.json",
+  "relationId": "1aec8a18-e5c6-4341-a2f7-ebeaab1517c7",
+  "relationType": "com.semanticops.handbook/flows-to",
+  "sourceInstanceId": "08910f98-963c-4b36-bca4-d884f7d4f63a",
+  "targetInstanceId": "79fc31eb-4f1e-46cc-9718-0d733d0077e4",
+  "createdAt": "2026-10-24T12:33:01.831223803+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  }
+}

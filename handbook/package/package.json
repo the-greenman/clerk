@@ -20,18 +20,29 @@
     "fields/kind-bb1d6bca.json",
     "fields/home-2eacf27f.json",
     "fields/meaning-21641147.json",
-    "fields/readby-1cf6f901.json"
+    "fields/readby-1cf6f901.json",
+    "fields/movedby-d346a2c9.json",
+    "fields/needs-bbd40307.json",
+    "fields/moverkind-4f5c1cb1.json",
+    "fields/measure-c7e13d3d.json",
+    "fields/remedies-45245ff3.json",
+    "fields/evidence-cd0512ef.json",
+    "fields/flow-21b97e1a.json"
   ],
   "types": [
     "types/chapter-1b1c9741.json",
     "types/stage-700789ba.json",
-    "types/element-ad49acae.json"
+    "types/element-ad49acae.json",
+    "types/flow-step-918b144e.json"
   ],
-  "relationTypes": [],
+  "relationTypes": [
+    "relation-types/comsemanticopshandbookflows-to-425e9040.json"
+  ],
   "views": [
     "views/chapter-view-1db1fffa.json",
     "views/stage-view-c8c023aa.json",
-    "views/element-view-7a3fc701.json"
+    "views/element-view-7a3fc701.json",
+    "views/flow-step-view-33f5ee6f.json"
   ],
   "compositions": [
     "compositions/handbook-4194e973.json"

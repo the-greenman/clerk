@@ -1,0 +1,80 @@
+{
+  "id": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "namespace": "com.semanticops.handbook",
+  "name": "flow-step",
+  "version": 1,
+  "description": "One step of a flow (work or decision): what moves it, what it needs, whether that mover is live, how sure we are, and what acts on it.",
+  "fields": [
+    {
+      "fieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "21b97e1a-ab33-405d-a937-3d917ec0a644",
+      "order": 1,
+      "required": true,
+      "displayLabel": "Flow"
+    },
+    {
+      "fieldId": "d346a2c9-191b-4749-bdf6-e86f6bf17818",
+      "order": 2,
+      "required": true,
+      "displayLabel": "Moved by"
+    },
+    {
+      "fieldId": "4f5c1cb1-bb5b-49a5-a5f3-65b2ba9b595c",
+      "order": 3,
+      "required": true,
+      "displayLabel": "Mover"
+    },
+    {
+      "fieldId": "bbd40307-e429-44bd-a62a-6ffa3feee3e6",
+      "order": 4,
+      "required": false,
+      "displayLabel": "Needs before it moves"
+    },
+    {
+      "fieldId": "20082e9d-6807-474c-a1f1-ad5f809f396a",
+      "order": 5,
+      "required": false,
+      "displayLabel": "Theory"
+    },
+    {
+      "fieldId": "8901b97c-1728-4545-9aad-e89b8682b4e7",
+      "order": 6,
+      "required": false,
+      "displayLabel": "Gap"
+    },
+    {
+      "fieldId": "45245ff3-3466-4a13-bbc4-f9eef3eb80e0",
+      "order": 7,
+      "required": false,
+      "displayLabel": "Acting on it"
+    },
+    {
+      "fieldId": "c7e13d3d-2b29-4121-bb7d-566b188641f0",
+      "order": 8,
+      "required": false,
+      "displayLabel": "Measure"
+    },
+    {
+      "fieldId": "fb3d43a0-445f-4594-82fc-52ec99759fb0",
+      "order": 9,
+      "required": true,
+      "displayLabel": "Confidence"
+    },
+    {
+      "fieldId": "cd0512ef-53f7-404d-b739-5e5ac8319686",
+      "order": 10,
+      "required": true,
+      "displayLabel": "Evidence"
+    }
+  ],
+  "identityFieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
+  "aiGuidance": {
+    "purpose": "A step of the work or decision flow. Confidence says how sure we are this description matches reality: low for an agent's reading of code, medium for what the owner said, high once the owner stands behind it. clerk flow derives live counts, dead ends and the critical path from these records; nothing derived is stored here."
+  },
+  "createdAt": "2026-10-24T12:29:23.206653414+00:00",
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json"
+}

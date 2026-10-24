@@ -1,0 +1,29 @@
+{
+  "instanceId": "d3dbae9b-2bc6-4695-9316-6e160d0f643a",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Ready",
+    "flow": "work",
+    "moved_by": "`board sync` hourly: topup writes `promote:ready`, promote sets `ready`",
+    "mover_kind": "auto",
+    "needs": "routed to a lane, not blocked, not `needs-input`, on the board; target about six",
+    "gaps": [
+      "Feeds only routed issues; 19 issues wait on `needs-input`, the oldest 93 days."
+    ],
+    "remedies": "H5, C10 (held questions reach the owner)",
+    "measure": "issues.needs-input",
+    "confidence_level": "medium",
+    "evidence": "the former hand-typed Flow at a glance table, row 8 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+  },
+  "createdAt": "2026-10-24T12:32:57.835090019+00:00",
+  "updatedAt": "2026-10-24T12:33:36.514868896+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

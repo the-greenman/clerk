@@ -1,0 +1,29 @@
+{
+  "instanceId": "15acb7f6-1bb4-4dd4-af76-96e108aa0cd1",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Asked",
+    "flow": "decision",
+    "moved_by": "the builder in a PR; the steward in a group log and report; the analyst in an exercise; a held claim as `needs-input`",
+    "mover_kind": "routine",
+    "theory": "One decision with its stakes, options and recommendation, never a flood (handbook, Decisions).",
+    "gaps": [
+      "Asks are scattered: PR bodies, group logs, report text, exercises and `needs-input` issues. The agenda's Merges section ignores block asks."
+    ],
+    "remedies": "C10; C11 clerk#166",
+    "measure": "asks.open",
+    "confidence_level": "medium",
+    "evidence": "mechanics survey 2026-10-24 (lib/practice/agenda.mjs:197-200)"
+  },
+  "createdAt": "2026-10-24T12:32:59.752357239+00:00",
+  "updatedAt": "2026-10-24T12:32:59.752365736+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

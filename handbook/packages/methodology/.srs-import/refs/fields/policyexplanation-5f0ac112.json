@@ -1,0 +1,18 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "The text the rendered policy shows. Write it for the owner tuning the policy, not for code."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "What this part of the policy means, in plain words: for an axis the question it asks and why it matters; for a grade what earns it; for a mode what the worker does; for a rule why it chooses its mode.",
+  "editorHint": "textarea",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "id": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
+  "name": "policy_explanation",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

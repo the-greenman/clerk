@@ -1,0 +1,47 @@
+{
+  "id": "33f5ee6f-c3d3-4f8f-861d-2ac97c5ca897",
+  "namespace": "com.semanticops.handbook",
+  "name": "flow-step-view",
+  "version": 1,
+  "description": "A flow step renders what moves it, whether that mover is live, the gap, what acts on it, its measure, confidence and evidence.",
+  "fieldViews": [
+    {
+      "fieldId": "d346a2c9-191b-4749-bdf6-e86f6bf17818",
+      "order": 0
+    },
+    {
+      "fieldId": "4f5c1cb1-bb5b-49a5-a5f3-65b2ba9b595c",
+      "order": 1
+    },
+    {
+      "fieldId": "bbd40307-e429-44bd-a62a-6ffa3feee3e6",
+      "order": 2
+    },
+    {
+      "fieldId": "20082e9d-6807-474c-a1f1-ad5f809f396a",
+      "order": 3
+    },
+    {
+      "fieldId": "8901b97c-1728-4545-9aad-e89b8682b4e7",
+      "order": 4
+    },
+    {
+      "fieldId": "45245ff3-3466-4a13-bbc4-f9eef3eb80e0",
+      "order": 5
+    },
+    {
+      "fieldId": "c7e13d3d-2b29-4121-bb7d-566b188641f0",
+      "order": 6
+    },
+    {
+      "fieldId": "fb3d43a0-445f-4594-82fc-52ec99759fb0",
+      "order": 7
+    },
+    {
+      "fieldId": "cd0512ef-53f7-404d-b739-5e5ac8319686",
+      "order": 8
+    }
+  ],
+  "createdAt": "2026-10-24T12:30:33.157289344+00:00",
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json"
+}

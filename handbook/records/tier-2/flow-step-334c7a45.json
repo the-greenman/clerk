@@ -1,0 +1,30 @@
+{
+  "instanceId": "334c7a45-6b94-4670-8e42-dc7751128d44",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Recorded",
+    "flow": "decision",
+    "moved_by": "an agent writes the decision record when asked; no code turns an answer or a ruling into a record",
+    "mover_kind": "none",
+    "needs": "a decision record in the log of the boundary it is made in",
+    "theory": "An owner ruling written anywhere else is recorded as a decision before it is cited (0b1c25b1).",
+    "gaps": [
+      "2 of 41 asks became records; 21 of 31 owner rulings in 30 days have no record that cites them."
+    ],
+    "remedies": "decision 4445b9cf (proposed); clerk#179",
+    "measure": "rulings.unrecorded",
+    "confidence_level": "medium",
+    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)"
+  },
+  "createdAt": "2026-10-24T12:33:00.003517468+00:00",
+  "updatedAt": "2026-10-24T12:33:35.818827755+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

@@ -1,0 +1,19 @@
+{
+  "instanceId": "ce6fee13-7555-44f8-ae48-acce00178d37",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "Decision flow at a glance: how a decision is settled and cited",
+    "body": "How a decision arises, is settled and is cited, step by step, beside the theory each step rests on: the compass, the layers, domains and tensions, and the framing standard. The decision flow joins the work flow where a claim or a review raises an ask, and where an answer or a ratification lets work move again. The last three steps are side exits: a decision that goes there does not come back."
+  },
+  "createdAt": "2026-10-24T12:32:56.002399065+00:00",
+  "updatedAt": "2026-10-24T12:32:56.002412719+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

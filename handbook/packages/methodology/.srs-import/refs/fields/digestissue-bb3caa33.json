@@ -1,0 +1,18 @@
+{
+  "id": "bb3caa33-3ae0-4b53-9bc7-d7b5556c00af",
+  "namespace": "com.semanticops.programme",
+  "name": "digest_issue",
+  "version": 1,
+  "description": "The issue where the daily PR digest is posted, as <repo>#<n>.",
+  "aiGuidance": {
+    "purpose": "Where pr-upkeep writes its daily digest comment.",
+    "extraction": "Short form repo#number, e.g. semanticops.com#33."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-10T00:00:00Z"
+}

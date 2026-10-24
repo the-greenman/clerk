@@ -1,0 +1,29 @@
+{
+  "instanceId": "80808568-d308-466c-8da1-a2c890611629",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Problem",
+    "flow": "work",
+    "moved_by": "anyone suggests; the owner affirms",
+    "mover_kind": "manual",
+    "needs": "`held-by` a persona-in-domain (the principle 2 gate, warn level)",
+    "gaps": [
+      "Problems are nearly all affirmed (97 of 100 suggestions have an affirmed copy). Real-use problems reach issues but no queue."
+    ],
+    "remedies": "H7 (real use is an occasion)",
+    "measure": "problems.suggested-only",
+    "confidence_level": "medium",
+    "evidence": "the former hand-typed Flow at a glance table, row 3 (live 2026-10-16); decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)"
+  },
+  "createdAt": "2026-10-24T12:32:56.810208258+00:00",
+  "updatedAt": "2026-10-24T12:33:36.071239935+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

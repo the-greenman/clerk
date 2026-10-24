@@ -1,0 +1,29 @@
+{
+  "instanceId": "08910f98-963c-4b36-bca4-d884f7d4f63a",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Review",
+    "flow": "work",
+    "moved_by": "central lane: a self-review subagent; a group: the reviewer (hourly at :40) posts the quorum",
+    "mover_kind": "routine",
+    "needs": "gates green by exit code, within the mandate",
+    "gaps": [
+      "The quorum's `mandate=` is parsed and never checked; a cited `Mandate:` is never resolved (lib/practice/upkeep.mjs:20-31, pr-decisions.mjs:33)."
+    ],
+    "remedies": "clerk#63 (precedent along the boundary chain)",
+    "measure": "prs.unreviewed",
+    "confidence_level": "low",
+    "evidence": "mechanics survey 2026-10-24; the former hand-typed Flow at a glance table, row 10 (live 2026-10-16)"
+  },
+  "createdAt": "2026-10-24T12:32:58.246155794+00:00",
+  "updatedAt": "2026-10-24T12:33:35.692521705+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

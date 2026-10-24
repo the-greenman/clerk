@@ -1,0 +1,27 @@
+{
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "How a pull request may merge. One per gated pull request. The rules for which applies are the owner's (a8bc55ef).",
+  "id": "36b3c787-7249-4cca-8d4a-51e91efa4dd6",
+  "mode": "closed",
+  "name": "merge_gate",
+  "namespace": "com.semanticops.programme",
+  "terms": [
+    {
+      "description": "Merges itself once every gate is green: mode clear or complicated, and Door 1 or non-normative. In a working group only its reviewer sets it, with the quorum.",
+      "id": "c815f578-f3da-4f02-9f17-6cb4213d5142",
+      "key": "auto-merge",
+      "label": "Auto-merge",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Held for the owner to merge: mode complex, Door 2 or 3, a new dependency, a user-visible product change, or anything the builder is unsure of.",
+      "id": "d033bfb0-0fbc-4ae3-9bd0-2d66cd3dbc22",
+      "key": "owner-merge",
+      "label": "Owner merge",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    }
+  ],
+  "version": 1
+}
