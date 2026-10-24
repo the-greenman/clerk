@@ -854,8 +854,7 @@ function planStaleClaims(rows, nowMs, thresholdMs, { owner, ownerActor } = {}) {
 // returns the first `deficit` candidates as nominees. Caller writes `promote:ready` on each;
 // `promote --fix` (run next in board-sync) converts them to board Status=Ready immediately.
 // Returns { toNominate, deficit, currentReady, target }.
-// Routed to a lane a routine reads (D4, D5, D15), by the one rule clerk flow uses (lib/practice/flow.mjs routed): topup
-// feeds only those, so Ready never fills with work no routine takes. Groups unreadable: any wg: label counts.
+// Routed to a lane a routine reads (D4, D5, D15; clerk flow's routed rule): topup feeds and counts only those. Groups unreadable: any wg: label.
 let GROUPS; const hasLane = (labels, repo) => routed(labels, { lane: WF.lane, repo, groups: GROUPS === undefined ? (GROUPS = (() => { try { return loadGroups(resolve(process.env.CLERK_REPO || process.cwd())); } catch { return null; } })()) : GROUPS });
 
 function planTopup(candidates, readyCount, target) {
@@ -950,8 +949,8 @@ function isConsumableReady(row) {
   return row.state === "OPEN"
     && isWorkItem(row)
     && !row.labels.includes(WF.inProgress)
-    // A held issue (work_hold: needs-input, blocked, parked) is not pickable — counting it would clog the queue (#715).
-    && !WF.isHeld(row.labels)
+    // Held (#715), unrouted or already under an open PR: no routine picks it, so counting it would clog the queue (clerk flow's routed rule).
+    && !WF.isHeld(row.labels) && hasLane(row.labels, row.repo) && !row.openClosingPr
     // Bugs ride the DEDICATED BUG TRACK (#717), not the Ready queue — see cmdTopup.
     && !row.labels.includes(WF.bug)
     && (row.status === COL.ready || row.labels.includes(PROMOTE_INTENT_LABEL));
@@ -2109,7 +2108,8 @@ function cmdTopup(argv) {
   }
   if (!dryRun) for (const repo of MIRROR_REPOS) ensureLabels(repo);
 
-  const b = board();
+  const b = board(); // an open PR that closes a Ready item takes its slot from the queue (one lookup per Ready item)
+  for (const row of b.values()) if (row.state === "OPEN" && row.status === COL.ready && isWorkItem(row)) row.openClosingPr = openClosingPr(row.repo, row.num);
   const readyCount = countConsumableReady([...b.values()]);
 
   // Feed candidates in IMPLEMENTATION ORDER — epic-major: epic Priority, started epics
