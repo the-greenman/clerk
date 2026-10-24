@@ -26,6 +26,7 @@ const TOOLS = {
   roadmap: ['roadmap.mjs', 'derive epic priority from the period ranking (--json, --explain, --apply)'],
   claim: ['claim.mjs', 'claim an issue as a seat of its working group: clerk claim <repo#n> --as <seat> [--branch <name>] [--dry-run]'],
   queue: ['queue.mjs', 'report what the unattended lane would take next (--bugs: the bug queue the bug fixer takes from; --json)'],
+  flow: ['flow.mjs', 'the dots an item needs before work can flow, and which an agent can join by rule: clerk flow --chain <repo#n> | --open <repo> [--json] (read-only)'],
   care: ['care.mjs', 'how confident the programme is in one work item and the care mode its Confidence and care policy gives it: clerk care <repo#n> [--json]'],
   'render-policy': ['render-policy.mjs', 'check a programme\'s Confidence and care policy and render it to <programme>/docs/confidence-and-care.md (--check: exit 1 on drift or a policy the clerk cannot act on)'],
   merge: ['merge.mjs', 'the owner merges one PR at the head they reviewed: clerk merge <repo#n> --sha <head> [--json] (as the owner only; refuses unless open, clean and at that head; exit 3)'],

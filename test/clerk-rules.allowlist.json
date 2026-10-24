@@ -11,7 +11,7 @@
     "lib/adapters/desk.mjs: ../../scripts/roadmap.mjs"
   ],
   "4": {
-    "scripts/gh-project.mjs": 2411,
+    "scripts/gh-project.mjs": 2410,
     "scripts/steward-check.mjs": 167
   },
   "5": [

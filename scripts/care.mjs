@@ -13,6 +13,7 @@ try {
   const m = /^([\w.-]+)#(\d+)$/.exec(argv[0] ?? '');
   if (!m) throw new Error('usage: clerk care <repo#n> [--repo <programme>] [--json]');
   const repo = repoRoot(), cli = srsCli(repo), st = loadSettings(repo, cli);
+  if (!st.carePolicyContainer) throw new Error('the programme settings name no care_policy_container (Confidence and care policy)');
   const { policy, issue, epic, facts, result } = careFor(repo, cli, st, m[1], Number(m[2]));
   const ref = `${m[1]}#${m[2]}`;
   if (argv.includes('--json')) console.log(JSON.stringify({ ref, ...result, epic, answers: facts.answers }, null, 2));

@@ -76,6 +76,8 @@ import { loadSettings } from "../lib/adapters/settings.mjs";
 import { claimActorOf } from "../lib/practice/claim.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { workflowFrom, labelDescription } from "../lib/practice/workflow.mjs";
+import { routed } from "../lib/practice/flow.mjs";
+import { loadGroups } from "../lib/adapters/groups.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
@@ -852,12 +854,9 @@ function planStaleClaims(rows, nowMs, thresholdMs, { owner, ownerActor } = {}) {
 // returns the first `deficit` candidates as nominees. Caller writes `promote:ready` on each;
 // `promote --fix` (run next in board-sync) converts them to board Status=Ready immediately.
 // Returns { toNominate, deficit, currentReady, target }.
-// An issue has a lane when a routine will take it once Ready: `lane:unattended` or a working group's `wg:` label.
-// Routing is done when the issue is grounded (D4, D5, D15); topup only feeds issues already routed, so Ready never
-// fills with work no routine takes.
-function hasLane(labels) {
-  return labels.some((l) => l === WF.lane || l.startsWith("wg:"));
-}
+// Routed to a lane a routine reads (D4, D5, D15), by the one rule clerk flow uses (lib/practice/flow.mjs routed): topup
+// feeds only those, so Ready never fills with work no routine takes. Groups unreadable: any wg: label counts.
+let GROUPS; const hasLane = (labels, repo) => routed(labels, { lane: WF.lane, repo, groups: GROUPS === undefined ? (GROUPS = (() => { try { return loadGroups(resolve(process.env.CLERK_REPO || process.cwd())); } catch { return null; } })()) : GROUPS });
 
 function planTopup(candidates, readyCount, target) {
   const deficit = Math.max(0, target - readyCount);
@@ -2140,7 +2139,7 @@ function cmdTopup(argv) {
     // claim semantics and the bug-floor priority derivation all still apply to bugs.
     !row.labels.includes(WF.bug) &&
     !row.labels.includes(PROMOTE_INTENT_LABEL) &&
-    hasLane(row.labels) &&   // routed to a lane when grounded; no lane, no routine to take it
+    hasLane(row.labels, row.repo) &&   // routed to a lane when grounded; no lane, no routine to take it
     !wontExcluded.has(row.key)
   );
   candidates.sort((x, y) => (orderIndex.get(x.key) ?? Infinity) - (orderIndex.get(y.key) ?? Infinity));
