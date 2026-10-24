@@ -6,10 +6,10 @@
   "typeName": "chapter",
   "fieldValues": {
     "title": "Where things are documented",
-    "body": "| Topic | Doc |\n|---|---|\n| Method chain, sessions, minutes | [README.md](../README.md) |\n| Board, priority rollup, queue | [board.md](board.md) |\n| Every command, script, workflow, routine and label | [tools.md](tools.md) |\n| What goes in the decision log | [decision-log.md](decision-log.md) |\n| Routine lifecycle | [routines.md](routines.md) |\n| Working groups | [routines/working-groups.md](../routines/working-groups.md) and `routines/wg-*.md` |\n| Unattended lane | [routines/unattended-worker.md](../routines/unattended-worker.md) |\n| Handbook watcher | [routines/handbook-watcher.md](../routines/handbook-watcher.md) |\n| Two-domain walk | [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md) |\n| Clerked owner session | `.claude/commands/session.md` |\n| Programme data rules | srs-programme `CLAUDE.md` |\n| Concept and boundary mapping | srs-programme `source-documents/agent-democracy-2026-10-10/`, `boundaries-2026-10-09/` |"
+    "body": "| Topic | Doc |\n|---|---|\n| Method chain, sessions, minutes | [README.md](../README.md) |\n| Board, priority rollup, queue | [board.md](board.md) |\n| Every command, script, workflow, routine and label | [tools.md](tools.md) |\n| What goes in the decision log | [decision-log.md](decision-log.md) |\n| Routine lifecycle | [routines.md](routines.md) |\n| Working groups | [routines/working-groups.md](../routines/working-groups.md) and `routines/wg-*.md` |\n| Unattended lane | [routines/unattended-worker.md](../routines/unattended-worker.md) |\n| Handbook watcher | [routines/handbook-watcher.md](../routines/handbook-watcher.md) |\n| Two-domain walk | [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md) |\n| Clerked owner session | `.claude/commands/session.md` |\n| Narrative explorations (the owner's vignettes) | srs-programme `Narrative explorations` container (`80b283ef`); this handbook, *Narrative explorations: how meaning grows* |\n| Programme data rules | srs-programme `CLAUDE.md` |\n| Concept and boundary mapping | srs-programme `source-documents/agent-democracy-2026-10-10/`, `boundaries-2026-10-09/` |"
   },
   "createdAt": "2026-10-11T18:33:33.367183787+00:00",
-  "updatedAt": "2026-10-11T18:33:33.367192883+00:00",
+  "updatedAt": "2026-10-24T19:40:19.084999195+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",
