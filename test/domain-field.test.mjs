@@ -70,6 +70,10 @@ test('a tension is affirmed with both its poles, poles first; never twice', () =
   const r = canAffirmTension(field(), 'evo');
   assert.ok(r.ok);
   assert.deepEqual(r.forks, ['evolution', 'continuity', 'evo']);
+  assert.equal(r.repoint, null);
+  // the tension affirmed in an earlier act: only the poles fork, and its contains move to them
+  const later = canAffirmTension(field({ affirmed: new Set(['sr-fork', 'evo']) }), 'evo');
+  assert.deepEqual([later.forks, later.repoint], [['evolution', 'continuity'], 'evo']);
   const all = new Set(['sr-fork', 'evo', 'evolution', 'continuity']);
   assert.match(canAffirmTension(field({ affirmed: all }), 'evo').reasons[0], /already affirmed/);
   assert.match(canAffirmTension(field(), 'evolution').reasons[0], /not a tension/);
