@@ -188,12 +188,12 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Needs before it moves**: `Answers: SP-nn` naming a problem; how sure the grounding is sets the care mode
 
-**Theory**: Confidence grades care, it does not gate work (clerk#156, not yet ratified): an ungrounded issue is probed, never refused.
+**Theory**: Confidence grades care, it does not gate work (decision 9d50126b, proposed; clerk#156): an issue that names a suggested problem is worked in the care mode the policy gives; only no problem, or an unknown or set-aside one, stops it.
 
 **Gap**:
-- `claim` reads the care policy; `clerk queue` and the briefs do not yet.
+- /ship stopped on any unaffirmed problem while the routines' claim graded care; clerk#184 aligns it. `clerk queue` and the briefs do not read the care mode yet (clerk#156 phase 4).
 
-**Acting on it**: clerk#156 phase 4 (briefs follow the modes)
+**Acting on it**: clerk#156 phase 4; clerk#184; decision 9d50126b; clerk#183 (clerk flow)
 
 **Measure**: issues.ungrounded
 
@@ -663,13 +663,13 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 #### How an issue reaches a group
 
-**Ruled** (decisions D4, D5 and D15, ratified in the owner's session of 2026-10-16; `claim` already enforces the affirmed problem, routing is not yet automatic). An issue is not work until it is grounded and routed. Before any routine may take it:
+**Ruled** (decisions D4, D5 and D15, ratified in the owner's session of 2026-10-16), with step 1 revised in practice: since clerk#162 `claim` grades care instead of refusing, and decision 9d50126b (*Confidence grades care, it does not gate work*, proposed) records that ruling for a session. `clerk flow --chain <repo#n>` shows each step below as a dot, and agents join the mechanical ones by these rules.
 
-1. **Grounded.** Its first line is `Answers: SP-nn`, naming an affirmed problem. The problem is `held-by` an affirmed persona-in-domain, and that persona's `in-domain` reaches an affirmed domain. An issue that reveals a problem nobody has recorded yields a problem *suggestion* in the domain, and stays parked against it until the problem is affirmed.
+1. **Grounded.** Its first line is `Answers: SP-nn`, naming the problem it answers. As ratified, the problem must be affirmed: `held-by` an affirmed persona-in-domain whose `in-domain` reaches an affirmed domain. As practised (9d50126b), a suggested problem is enough: how sure the grounding is sets the care mode (`clerk care`), and the work proceeds in that mode; only an unknown or set-aside problem, or none, stops it. An issue that reveals a problem nobody has recorded yields a problem *suggestion* in the domain, named in `Answers:`.
 2. **Routed.** The problem's domain decides the group: the group whose charter names that domain (a `com.semanticops.method/holds-domain` relation from the group's role to the domain record) takes it through its input queue (its `wg:` label); a domain no group holds goes to the central group (`lane:unattended`).
 3. **Ranked.** Its epic serves a ranked objective, which gives its priority. An issue under no ranked objective stays `parked`.
 
-`parked` means "waiting for meaning", not "rejected": the 2026-10 backlog was parked so that domains, problems and personas are established first. Issues come out of parking only by passing steps 1 to 3, a domain at a time, never in bulk.
+`parked` means "waiting for meaning", not "rejected": the 2026-10 backlog was parked so that domains, problems and personas are established first. Issues come out of parking by passing steps 1 to 3, a domain at a time, never in bulk.
 
 #### Where flow stops, and how to see it
 
