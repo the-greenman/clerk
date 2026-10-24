@@ -75,6 +75,6 @@ test('query checks derive from the spec: required, pattern, unknown names', () =
   assert.equal(checkQuery(r('ground'), { since: 'yesterday' }).code, 'bad-parameter');
 });
 
-test('only POST /api/sync is an act', () => {
-  assert.deepEqual(routes(SPEC).filter((r) => r.act).map((r) => `${r.method} ${r.path}`), ['POST /api/sync']);
+test('the acts are POST /api/sync and POST /api/clerk/merge', () => {
+  assert.deepEqual(routes(SPEC).filter((r) => r.act).map((r) => `${r.method} ${r.path}`), ['POST /api/sync', 'POST /api/clerk/merge']);
 });
