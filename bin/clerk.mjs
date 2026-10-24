@@ -35,7 +35,7 @@ const TOOLS = {
   conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
   board: ['gh-project.mjs', 'story-driven priority on the GitHub Project (many subcommands, see its help)'],
   routines: ['routines.mjs', 'drift between cloud triggers (a dump), standing-job records and briefs (--check <dump.json>)'],
-  'pr-check': ['pr-check.mjs', "a PR's decisions against the standard: srs-decisions block, classes, records, merge-blocking asks (exit 1 on error) (<repo#n> [--merging] [--json])"],
+  'pr-check': ['pr-check.mjs', "a PR's decisions against the standard: srs-decisions block, classes, records, merge-blocking asks, and its gate (an owner merge must ask a question; every PR carries a gate or a chartered wg: label) (exit 1 on error) (<repo#n> [--merging] [--json])"],
   ground: ['ground.mjs', 'advisory PR grounding check and indicator I1: issue -> problem -> persona/domain -> epic -> group (--pr <repo#n> | --since YYYY-MM-DD, --json)'],
   wt: ['wt', 'create, list and prune git worktrees'],
   settings: ['settings.mjs', 'print the programme settings record (--json)'],

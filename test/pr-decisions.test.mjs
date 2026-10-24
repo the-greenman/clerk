@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDecisions, checkDecisions, askOptions, answersFrom, signComment, classifyComment, asksOwner } from '../lib/practice/pr-decisions.mjs';
+import { parseDecisions, checkDecisions, askOptions, answersFrom, signComment, classifyComment, asksOwner, ownerQuestion, appliedDecisions, ownerHasWork } from '../lib/practice/pr-decisions.mjs';
 
 const block = (o) => `Answers: SP-12\n\n\`\`\`srs-decisions\n${JSON.stringify(o)}\n\`\`\`\n`;
 
@@ -124,4 +124,32 @@ test('an owner-merge PR must ask the owner something, and every PR carries a gat
   assert.deepEqual(errs('plain body', ['wg:x']), [], 'a group PR gets its gate from its reviewer');
   assert.deepEqual(errs('plain body', ['gate:auto-merge']), []);
   assert.deepEqual(checkDecisions(parseDecisions('plain body'), { body: 'plain body' }).map((f) => f.level), ['info'], 'without labels the gate is not checked');
+});
+
+test('ownerQuestion: the block is authoritative, and a T9 line that says nothing asks nothing', () => {
+  const q = (b) => ownerQuestion(parseDecisions(b));
+  assert.equal(q('```srs-decisions\n{"asks":[{"question":"Which way?"}]}\n```\nDecision asked: none to merge.'), 'Which way?', 'the block question, not the none line');
+  assert.equal(q('```srs-decisions\n{"asks":[]}\n```\nDecision asked: merge after #157'), null, 'a block with no ask asks nothing');
+  assert.equal(q('**Decision asked:** pick one.'), 'pick one');
+  for (const b of ['n/a', 'nothing, just merge', 'no decision', '-', '—', 'None.']) assert.equal(q(`Decision asked: ${b}`), null, b);
+  assert.equal(q('Decision asked: now or later?'), 'now or later?', '"no" only as a word');
+});
+
+test('only a chartered group label gates a PR, as upkeep routes it', () => {
+  const G = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' };
+  const errs = (labels) => checkDecisions(parseDecisions('plain'), { body: 'plain', labels, gates: G, groupLabels: ['wg:spec'] }).filter((f) => f.level === 'error').map((f) => f.text);
+  assert.deepEqual(errs(['wg:spec']), []);
+  assert.match(errs(['wg:old-group']).join(), /no chartered working-group label \(wg:old-group is no chartered group's\)/);
+});
+
+test('a decision already taken is cited, never asked again: an owner merge that applies one passes the gate', () => {
+  const G = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' };
+  const cites = '```srs-decisions\n{"by":"agent:a","made":[{"class":"ruling","id":"e745e9b2","title":"reach"}]}\n```';
+  const d = parseDecisions(cites);
+  assert.deepEqual(appliedDecisions(d), ['e745e9b2']);
+  assert.equal(asksOwner(d), false);
+  assert.equal(ownerHasWork(d), true);
+  assert.deepEqual(checkDecisions(d, { body: cites, labels: ['gate:owner-merge'], gates: G }).filter((f) => f.level === 'error'), []);
+  const reask = '```srs-decisions\n{"made":[{"class":"ruling","id":"e745e9b2","title":"reach"}],"asks":[{"key":"A1","id":"e745e9b2","question":"Is reach enough?","options":["Keep: x","Do nothing: y"]}]}\n```';
+  assert.match(checkDecisions(parseDecisions(reask), { body: reask }).map((f) => f.text).join(), /asks again a decision the PR says it applies/);
 });
