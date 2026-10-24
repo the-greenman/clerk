@@ -14,7 +14,7 @@ permissions:
 env:
   # The pinned srs-rust release supplying the srs CLI. Declared once, here; `clerk fetch-srs` reads it.
   # Advance it in its own commit, stating why.
-  SRS_RUST_CLI_TAG: v0.1.0-build.545
+  SRS_RUST_CLI_TAG: v0.1.0-build.554
 
 jobs:
   validate:
