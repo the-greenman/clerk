@@ -28,6 +28,7 @@ const TOOLS = {
   queue: ['queue.mjs', 'report what the unattended lane would take next (--bugs: the bug queue the bug fixer takes from; --json)'],
   care: ['care.mjs', 'how confident the programme is in one work item and the care mode its Confidence and care policy gives it: clerk care <repo#n> [--json]'],
   'render-policy': ['render-policy.mjs', 'check a programme\'s Confidence and care policy and render it to <programme>/docs/confidence-and-care.md (--check: exit 1 on drift or a policy the clerk cannot act on)'],
+  merge: ['merge.mjs', 'the owner merges one PR at the head they reviewed: clerk merge <repo#n> --sha <head> [--json] (as the owner only; refuses unless open, clean and at that head; exit 3)'],
   upkeep: ['upkeep.mjs', 'keep open PRs moving: merge or update-branch by gate label; group PRs on a quorum for their head commit (--digest, --apply)'],
   'group-state': ['group-state.mjs', "a working group's pause, cycle, merges and room: clerk group-state <wg:label> [--json]"],
   steward: ['steward-check.mjs', 'guard against false closes: reopen issues closed without a merged PR (--fix acts)'],

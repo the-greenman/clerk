@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "clerk serve",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The clerk's local service (docs/service.md). One function per operation, no semantics in the server: each read runs the clerk command of the same name. This document is the single source of the contract (decision 46bb7a8c): routes and parameter checks derive from it, clients generate their types from it. Bound to loopback only (decision e745e9b2)."
  },
  "servers": [
@@ -534,6 +534,70 @@
       }
      }
     }
+   }
+  },
+  "/api/clerk/merge": {
+   "post": {
+    "operationId": "merge",
+    "summary": "clerk merge <ref> --sha <sha> --json: the owner merges one PR at the head they reviewed. Refused (409, refused) unless the service runs as the owner (SRS_ACTOR), the repo is governed and the PR is open, clean and still at sha. Needs the x-control-room header.",
+    "parameters": [
+     {
+      "name": "ref",
+      "in": "query",
+      "required": true,
+      "description": "repo#n",
+      "schema": {
+       "type": "string",
+       "pattern": "^[A-Za-z0-9_.-]+#[0-9]+$"
+      }
+     },
+     {
+      "name": "sha",
+      "in": "query",
+      "required": true,
+      "description": "the PR head the owner reviewed (40 hex)",
+      "schema": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{40}$"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ok",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "ok": {
+           "const": true
+          },
+          "payload": {
+           "$ref": "#/components/schemas/Merged"
+          }
+         },
+         "required": [
+          "ok",
+          "payload"
+         ],
+         "additionalProperties": false
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "refused or failed",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Failure"
+        }
+       }
+      }
+     }
+    },
+    "x-clerk-act": true
    }
   }
  },
@@ -2347,6 +2411,26 @@
      "queued",
      "unreadable"
     ]
+   },
+   "Merged": {
+    "type": "object",
+    "properties": {
+     "ref": {
+      "type": "string"
+     },
+     "sha": {
+      "type": "string"
+     },
+     "merged": {
+      "const": true
+     }
+    },
+    "required": [
+     "merged",
+     "ref",
+     "sha"
+    ],
+    "additionalProperties": false
    }
   }
  }

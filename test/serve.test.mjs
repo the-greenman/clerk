@@ -166,3 +166,21 @@ test('clerk serve binds to a literal loopback address only, and refuses any othe
     assert.match(r.stderr, /loopback only/);
   }
 });
+
+test('merge is an act: it runs clerk merge, logs what it merged, and a refusal is a 409', async () => {
+  const sha = 'a'.repeat(40), path = `/api/clerk/merge?ref=srs%2342&sha=${sha}`;
+  let exit = 0;
+  const s = await serve({ clerk: () => (exit ? { exit, stdout: '', stderr: 'clerk merge: srs#42 not merged: it is a draft\n' } : { exit: 0, stdout: JSON.stringify({ ref: 'srs#42', sha, merged: true }), stderr: '' }) });
+  try {
+    assert.equal((await s.req('POST', path)).body.errors[0].code, 'act-needs-header');
+    assert.equal(s.calls.length, 0);
+    conforms('merge', await s.req('POST', path, { 'x-control-room': '1' }), 200);
+    assert.deepEqual(s.calls, [['merge', 'srs#42', '--sha', sha, '--json']]);
+    assert.deepEqual(s.acts.at(-1).query, { ref: 'srs#42', sha });
+    exit = 3;
+    const r = await s.req('POST', path, { 'x-control-room': '1' });
+    conforms('merge', r, 409);
+    assert.deepEqual(r.body.errors[0], { code: 'refused', message: 'srs#42 not merged: it is a draft' });
+    assert.equal((await s.req('POST', '/api/clerk/merge?ref=srs%2342&sha=abc', { 'x-control-room': '1' })).status, 400);
+  } finally { await s.close(); }
+});

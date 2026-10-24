@@ -51,11 +51,17 @@ export const HANDLERS = {
   ground: async (q, ctx) => ((q.ref === undefined) === (q.since === undefined)
     ? fail(error('bad-parameter', 'give exactly one of "ref" or "since"'))
     : json(q.ref ? ['ground', '--pr', q.ref, '--json'] : ['ground', '--since', q.since, '--json'])(q, ctx)),
+  // exit 3: clerk merge refused (not the owner, not governed, not open, clean and at sha); its reason is the message
+  merge: async (q, { clerk }) => {
+    const r = await clerk(['merge', q.ref, '--sha', q.sha, '--json']);
+    if (r.exit === 3) return fail(error('refused', r.stderr.trim().replace(/^clerk merge: /, '').slice(0, 500)));
+    return json(['merge', q.ref, '--sha', q.sha, '--json'])(q, { clerk: async () => r });
+  },
   programmeSnapshot: snapshot('programme'),
   deskSnapshot: snapshot('desk'),
 };
 
-const STATUS = { 'bad-host': 403, 'unknown-parameter': 400, 'missing-parameter': 400, 'bad-parameter': 400, 'not-found': 404, 'not-synced': 404, 'method-not-allowed': 405, 'act-needs-header': 403 };
+const STATUS = { 'bad-host': 403, 'unknown-parameter': 400, 'missing-parameter': 400, 'bad-parameter': 400, 'not-found': 404, 'not-synced': 404, 'method-not-allowed': 405, 'act-needs-header': 403, refused: 409 };
 
 // the Host names a request may carry: the loopback names on our port, plus the names the owner publishes the service under
 export const allowedHosts = (port, extra = []) => new Set([`127.0.0.1:${port}`, `[::1]:${port}`, `localhost:${port}`, ...extra]);
@@ -83,7 +89,7 @@ export function createService({ spec = SPEC, handlers = HANDLERS, clerk, sync, l
       const query = Object.fromEntries(url.searchParams);
       const bad = checkQuery(route, query);
       if (bad) return send(fail(bad));
-      if (route.act && actLog) actLog({ at: new Date().toISOString(), op: route.operationId, remote: req.socket?.remoteAddress ?? null });
+      if (route.act && actLog) actLog({ at: new Date().toISOString(), op: route.operationId, query, remote: req.socket?.remoteAddress ?? null });
       send(await handlers[route.operationId](query, { clerk, sync, live, startedAt }));
     } catch (e) { send(fail(error('internal', String(e.message).slice(0, 500)))); }
   };
