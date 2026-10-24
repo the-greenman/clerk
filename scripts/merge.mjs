@@ -20,8 +20,10 @@ const st = loadSettings(a.values.repo);
 try { authorise('owner', process.env.SRS_ACTOR, st.ownerActor); } catch (e) { say(3, e.message); }
 if (!st.repos.includes(m[1])) say(3, `${m[1]} is not a governed repo (${st.repos.join(', ')})`);
 const slug = `${st.githubOwner}/${m[1]}`;
-let pr;
-try { pr = get(`repos/${slug}/pulls/${m[2]}`); } catch (e) { say(1, `${ref} unreadable: ${e.message.split('\n')[0]}`); }
+const read = () => { try { return get(`repos/${slug}/pulls/${m[2]}`); } catch (e) { say(1, `${ref} unreadable: ${e.message.split('\n')[0]}`); } };
+let pr = read();
+// the first read after a base change starts GitHub computing mergeability: give it one moment, then read again
+if (pr.mergeable_state === 'unknown') { await new Promise((ok) => setTimeout(ok, 2000)); pr = read(); }
 const why = mergeRefusal(pr, sha);
 if (why) say(3, `${ref} not merged: ${why}`);
 try { mergePR(slug, m[2], sha); } catch (e) { say(1, `${ref}: GitHub refused the merge: ${e.message.split('\n')[0]}`); }
