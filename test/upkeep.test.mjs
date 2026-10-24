@@ -135,3 +135,11 @@ test('upkeep refuses to route without both gate labels: no merge rule runs on a 
   assert.throws(() => routePR(P2, { ...ctx, gates: { auto: 'gate:auto-merge' } }), /merge-gate labels missing/);
   assert.throws(() => upkeepPlan([{ repo: 'r', defaultBranch: 'main', prs: [P2] }], {}), /merge-gate labels missing/);
 });
+
+test('an owner-merge PR that asks nothing is listed back to an agent, never merged (clerk#165)', () => {
+  const pr = (number, body) => ({ number, title: `pr ${number}`, headSha: HEAD, body, ...P(['gate:owner-merge']) });
+  const plan = upkeepPlan([{ repo: 'r', defaultBranch: 'main', prs: [pr(1, 'plain'), pr(2, 'Decision asked: pick one.')] }], {}, GATES);
+  assert.deepEqual(plan.unasked, ['r#1 pr 1']);
+  assert.deepEqual(plan.actions, []);
+  assert.match(digestBody(plan, {}, '2026-10-23', GATES), /Owner merge that asks the owner nothing .*:\n- r#1 pr 1/);
+});

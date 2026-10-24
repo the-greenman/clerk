@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDecisions, checkDecisions, askOptions, answersFrom, signComment, classifyComment } from '../lib/practice/pr-decisions.mjs';
+import { parseDecisions, checkDecisions, askOptions, answersFrom, signComment, classifyComment, asksOwner } from '../lib/practice/pr-decisions.mjs';
 
 const block = (o) => `Answers: SP-12\n\n\`\`\`srs-decisions\n${JSON.stringify(o)}\n\`\`\`\n`;
 
@@ -101,4 +101,27 @@ test('askOptions reads both option forms into one shape and marks the recommenda
     { action: 'Do nothing', leadsTo: 'stalled claims surface as today', recommended: false },
     { action: 'Make them settings', leadsTo: 'each group sets its own rhythm', pole: 'fast', recommended: true }]);
   assert.deepEqual(askOptions({}), []);
+});
+
+test('an owner-merge PR must ask the owner something, and every PR carries a gate (clerk#165)', () => {
+  const G = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' };
+  const ask = '```srs-decisions\n{"by":"agent:a","asks":[{"key":"A1","question":"Which?","options":["Do it: x","Do nothing: y"],"recommend":"Do it"}]}\n```';
+  const errs = (body, labels) => checkDecisions(parseDecisions(body), { body, labels, gates: G }).filter((f) => f.level === 'error').map((f) => f.text);
+  assert.equal(asksOwner(parseDecisions(ask)), true);
+  assert.equal(asksOwner(parseDecisions('Decision asked: merge after #157.')), true, 'the T9 line counts');
+  assert.equal(asksOwner(parseDecisions('Decision asked: none to merge.')), false);
+  assert.equal(asksOwner(parseDecisions('```srs-decisions\n{"asks":[]}\n```')), false);
+  assert.equal(asksOwner(parseDecisions('**Decision asked:** **none**')), false);
+  assert.equal(asksOwner(parseDecisions('Decision asked: <one sentence: the question>')), false, 'an unfilled template asks nothing');
+  assert.equal(asksOwner(parseDecisions('Decision asked:\nUnblocks: x')), false, 'an empty line does not borrow the next one');
+  assert.equal(asksOwner(parseDecisions('We noted the decision asked: in passing')), false, 'only a line that starts with it');
+  assert.deepEqual(errs('plain body', [{ name: 'gate:owner-merge' }]).length, 1, 'labels as {name} objects');
+  assert.deepEqual(checkDecisions(parseDecisions('plain'), { body: 'plain', labels: [], gates: G, draft: true }).map((f) => f.level), ['info'], 'a draft is not classified yet');
+  assert.match(errs('plain body', ['gate:owner-merge']).join(), /asks the owner nothing/);
+  assert.deepEqual(errs(ask, ['gate:owner-merge']), []);
+  assert.doesNotMatch(errs('Decision asked: pick one.', ['gate:owner-merge']).join(), /asks the owner nothing/, 'the T9 line is a question (its own block rule still applies)');
+  assert.match(errs('plain body', []).join(), /no gate label and no working-group label/);
+  assert.deepEqual(errs('plain body', ['wg:x']), [], 'a group PR gets its gate from its reviewer');
+  assert.deepEqual(errs('plain body', ['gate:auto-merge']), []);
+  assert.deepEqual(checkDecisions(parseDecisions('plain body'), { body: 'plain body' }).map((f) => f.level), ['info'], 'without labels the gate is not checked');
 });
