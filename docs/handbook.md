@@ -610,6 +610,8 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Evidence**: decision-taxonomy discoveries §2-3; mechanics survey 2026-10-24
 
+**Flows to**: Claim and build
+
 
 ##### Merged without a minute
 
