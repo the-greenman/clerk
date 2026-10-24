@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "clerk serve",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "The clerk's local service (docs/service.md). One function per operation, no semantics in the server: each read runs the clerk command of the same name. This document is the single source of the contract (decision 46bb7a8c): routes and parameter checks derive from it, clients generate their types from it. Bound to loopback only (decision e745e9b2)."
  },
  "servers": [
@@ -1500,6 +1500,26 @@
      "closedDays": {
       "type": "number"
      },
+     "gates": {
+      "type": [
+       "object",
+       "null"
+      ],
+      "description": "The programme's merge-gate labels (work-status bindings).",
+      "properties": {
+       "auto": {
+        "type": "string"
+       },
+       "owner": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "auto",
+       "owner"
+      ],
+      "additionalProperties": false
+     },
      "needs": {
       "type": "array",
       "items": {
@@ -1659,6 +1679,20 @@
           "string",
           "null"
          ]
+        },
+        "base": {
+         "type": [
+          "string",
+          "null"
+         ],
+         "description": "The branch the PR merges into."
+        },
+        "headRef": {
+         "type": [
+          "string",
+          "null"
+         ],
+         "description": "The PR's own branch; another PR whose base is this branch is stacked on it."
         },
         "approved": {
          "type": "boolean"

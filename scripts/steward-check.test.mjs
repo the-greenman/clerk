@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { plan, rehomed, landedRefs, prereqRefs } from "./steward-check.mjs";
+import { plan, rehomed, landedRefs } from "./steward-check.mjs";
+import { prereqRefs, REF_RE } from "../lib/practice/refs.mjs";
 
 const now = Date.parse("2026-10-09T00:00:00Z");
 const recent = "2026-10-07T00:00:00Z", old = "2026-09-01T00:00:00Z";
@@ -88,4 +89,8 @@ test("prereq-edge: text-only prerequisite comments once; an edge or our marker i
   assert.equal(p({ ...open, createdAt: old }).length, 0);
   // the edges could not be read (null = unknown): skipped, never flagged on a guess
   assert.equal(p({ ...open, blockedBy: null }).length, 0);
+});
+
+test("REF_RE reads owner/repo#n, repo#n and a bare #n", () => {
+  assert.deepEqual([..."the-greenman/clerk#1 srs#2 #3".matchAll(REF_RE)].map((m) => [m[2] ?? null, m[3]]), [["clerk", "1"], ["srs", "2"], [null, "3"]]);
 });

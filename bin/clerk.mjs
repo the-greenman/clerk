@@ -36,6 +36,7 @@ const TOOLS = {
   conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
   board: ['gh-project.mjs', 'story-driven priority on the GitHub Project (many subcommands, see its help)'],
   routines: ['routines.mjs', 'drift between cloud triggers (a dump), standing-job records and briefs (--check <dump.json>)'],
+  'pr-tree': ['pr-tree.mjs', 'open PRs as merge chains from the desk snapshot: stacked, depends and file-overlap edges, merge order, each PR\'s next act and its decisions ([--desk <file>] [--json])'],
   'pr-check': ['pr-check.mjs', "a PR's decisions against the standard: srs-decisions block, classes, records, merge-blocking asks (exit 1 on error) (<repo#n> [--merging] [--json])"],
   ground: ['ground.mjs', 'advisory PR grounding check and indicator I1: issue -> problem -> persona/domain -> epic -> group (--pr <repo#n> | --since YYYY-MM-DD, --json)'],
   wt: ['wt', 'create, list and prune git worktrees'],
@@ -57,7 +58,7 @@ if (argv[0] === 'help' || argv[0] === '--help') {
 }
 if (TOOLS[argv[0]] || argv[0] === 'desk') {
   // Every tool but wt works on a programme repo (an SRS repo, so it has .srs/). Say so plainly instead of failing deep inside.
-  if (argv[0] !== "wt") {
+  if (argv[0] !== "wt" && argv[0] !== "pr-tree") {
     const i = argv.indexOf("--repo");
     const repo = resolve(argv[0] === "board" ? process.env.CLERK_REPO || "." : i >= 0 ? argv[i + 1] : ".");
     if (!existsSync(resolve(repo, ".srs"))) {

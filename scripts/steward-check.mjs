@@ -17,6 +17,7 @@
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { answersOf } from "../lib/practice/grounding.mjs";
+import { prereqRefs, REF_RE as LANDED_REF_RE } from "../lib/practice/refs.mjs";
 import { gh } from "../lib/adapters/cli.mjs";
 import { issuesSince, list, get, closers } from "../lib/adapters/github.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
@@ -29,7 +30,6 @@ const REHOME_RE = /(re-?hom|moved to|moving to|tracked (in|by)|now (in|under|tra
 const REF_RE = /(?:[\w.-]+\/)?[\w.-]*#(\d+)/g;
 
 const LANDED_RE = /\bLanded\b([^\n]*)/g;
-const LANDED_REF_RE = /(?:([\w.-]+)\/)?([\w.-]+)?#(\d+)/g;
 
 // Refs named after "Landed" in any comment -> [{repo, number}], deduped. repo: the issue's own repo, for a bare #n with no repo before it.
 export function landedRefs(comments, repo) {
@@ -42,17 +42,6 @@ export function landedRefs(comments, repo) {
     }
   }
   return [...out.values()];
-}
-
-// Prerequisites named in text (clerk#113): refs on a "Blocked by:" line, and "once <ref> lands".
-const BLOCKED_BY_RE = /^\W*Blocked by\b:?([^\n]*)/gim;
-const ONCE_RE = /\bonce\s+((?:[\w.-]+\/)?[\w.-]*#\d+)\s+lands\b/gi;
-export function prereqRefs(body, repo) {
-  // A bare #n takes the repo of the ref before it on the line, else the issue's own (as landedRefs).
-  const out = new Set(), add = (tail) => { let last = repo; for (const m of tail.matchAll(LANDED_REF_RE)) { last = m[2] ?? last; out.add(`${last}#${m[3]}`); } };
-  for (const [, tail] of String(body ?? "").matchAll(BLOCKED_BY_RE)) add(tail);
-  for (const [, ref] of String(body ?? "").matchAll(ONCE_RE)) add(ref);
-  return [...out];
 }
 
 const names = (xs) => (xs || []).map((l) => l.name);
