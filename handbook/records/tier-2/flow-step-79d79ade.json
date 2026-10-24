@@ -17,10 +17,14 @@
     "remedies": "H6; C11 clerk#166",
     "measure": "decisions.proposed",
     "confidence_level": "medium",
-    "evidence": "handbook; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+    "evidence": "handbook; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk session (/session)",
+      "record: programme/session"
+    ]
   },
   "createdAt": "2026-10-24T12:33:00.133497361+00:00",
-  "updatedAt": "2026-10-24T12:33:36.007843681+00:00",
+  "updatedAt": "2026-10-24T16:19:08.329019615+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

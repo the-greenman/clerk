@@ -16,10 +16,13 @@
     ],
     "remedies": "clerk#178 (cite instead of ask), clerk#179, clerk#63",
     "confidence_level": "medium",
-    "evidence": "decision-taxonomy discoveries §2-3; mechanics survey 2026-10-24"
+    "evidence": "decision-taxonomy discoveries §2-3; mechanics survey 2026-10-24",
+    "maintained_by": [
+      "command: clerk pr-check (a made entry with its id)"
+    ]
   },
   "createdAt": "2026-10-24T12:33:00.327909247+00:00",
-  "updatedAt": "2026-10-24T12:33:00.327914667+00:00",
+  "updatedAt": "2026-10-24T16:19:08.265339885+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

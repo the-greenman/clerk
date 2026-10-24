@@ -17,10 +17,14 @@
     "remedies": "exercise b430b7e0 (a taxonomy by practice)",
     "measure": "decisions.unkinded",
     "confidence_level": "medium",
-    "evidence": "clerk/docs/pr-decisions.md; decision-compass.md; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)"
+    "evidence": "clerk/docs/pr-decisions.md; decision-compass.md; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)",
+    "maintained_by": [
+      "command: clerk pr-check",
+      "block: srs-decisions made"
+    ]
   },
   "createdAt": "2026-10-24T12:32:59.484659668+00:00",
-  "updatedAt": "2026-10-24T12:33:36.579095923+00:00",
+  "updatedAt": "2026-10-24T16:19:08.965983134+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

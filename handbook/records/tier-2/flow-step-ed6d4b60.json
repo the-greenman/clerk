@@ -17,10 +17,17 @@
     "remedies": "C13 clerk#124; H7",
     "measure": "issues.unrouted",
     "confidence_level": "medium",
-    "evidence": "the former hand-typed Flow at a glance table, row 7 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+    "evidence": "the former hand-typed Flow at a glance table, row 7 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk flow (the lane dot)",
+      "command: clerk board (topup)",
+      "label: lane-unattended",
+      "label: the group's wg: label",
+      "record: governance/role (holds-domain)"
+    ]
   },
   "createdAt": "2026-10-24T12:32:57.640770533+00:00",
-  "updatedAt": "2026-10-24T12:33:36.708547362+00:00",
+  "updatedAt": "2026-10-24T16:19:09.160136570+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

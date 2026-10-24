@@ -81,6 +81,12 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Confidence**: medium
 
+**Maintained by**:
+- client: srs-web Method editor
+- client: srs-lab control room (affirmation rounds)
+- command: clerk domains
+- command: clerk check
+
 **Evidence**: the former hand-typed Flow at a glance table, row 1 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); `clerk check` 2026-10-24
 
 **Flows to**: Persona in domain
@@ -104,6 +110,11 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Measure**: problems.no-affirmed-persona
 
 **Confidence**: medium
+
+**Maintained by**:
+- client: srs-web Method editor
+- client: srs-lab control room (affirmation rounds)
+- command: clerk check
 
 **Evidence**: the former hand-typed Flow at a glance table, row 2 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
@@ -129,6 +140,12 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Confidence**: medium
 
+**Maintained by**:
+- routine: wg-analyst (suggests; standing job 3cb9ff9b)
+- routine: synthesiser (names clusters; standing job 0e366cfd)
+- client: srs-web Method editor
+- command: clerk check
+
 **Evidence**: the former hand-typed Flow at a glance table, row 3 (live 2026-10-16); decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)
 
 **Flows to**: Remedy
@@ -151,6 +168,10 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Confidence**: medium
 
+**Maintained by**:
+- client: srs-web Method editor
+- command: clerk check
+
 **Evidence**: the former hand-typed Flow at a glance table, row 4 (live 2026-10-16); decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)
 
 **Flows to**: Objective, period, epic
@@ -172,6 +193,11 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Measure**: epics.ungrounded
 
 **Confidence**: medium
+
+**Maintained by**:
+- command: clerk roadmap --apply
+- workflow: derive-priority.yml
+- record: programme/period, programme/objective, programme/epic
 
 **Evidence**: the former hand-typed Flow at a glance table, row 5 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
@@ -199,6 +225,13 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Confidence**: medium
 
+**Maintained by**:
+- command: clerk flow --chain
+- command: clerk care
+- routine: wg-analyst (files; standing job 3cb9ff9b)
+- routine: handbook-watcher (files; standing job e8109ff8)
+- command: /ship
+
 **Evidence**: the former hand-typed Flow at a glance table, row 6 (live 2026-10-16); clerk#156; work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
 **Flows to**: Routing to a group
@@ -225,6 +258,13 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Confidence**: medium
 
+**Maintained by**:
+- command: clerk flow (the lane dot)
+- command: clerk board (topup)
+- label: lane-unattended
+- label: the group's wg: label
+- record: governance/role (holds-domain)
+
 **Evidence**: the former hand-typed Flow at a glance table, row 7 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
 **Flows to**: Ready
@@ -248,6 +288,12 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Measure**: issues.needs-input
 
 **Confidence**: medium
+
+**Maintained by**:
+- command: clerk board (topup, promote)
+- workflow: board-sync.yml
+- label: ready
+- label: promote-request
 
 **Evidence**: the former hand-typed Flow at a glance table, row 8 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
@@ -273,6 +319,14 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Confidence**: medium
 
+**Maintained by**:
+- command: clerk claim
+- command: clerk group-state
+- routine: unattended-worker (standing job 2aee4156)
+- routine: wg-builder (standing jobs 63def3a3, a12f5821)
+- routine: bug-fixer (no standing job yet)
+- command: /ship
+
 **Evidence**: the former hand-typed Flow at a glance table, row 9 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
 **Flows to**: A decision arises, Review
@@ -297,6 +351,10 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Confidence**: low
 
+**Maintained by**:
+- routine: wg-reviewer (standing jobs 49d82dc1, f3ecdcc0)
+- command: clerk pr-check
+
 **Evidence**: mechanics survey 2026-10-24; the former hand-typed Flow at a glance table, row 10 (live 2026-10-16)
 
 **Flows to**: A decision arises, Merge on green, Owner merge
@@ -320,6 +378,11 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Measure**: prs.auto-waiting
 
 **Confidence**: medium
+
+**Maintained by**:
+- command: clerk upkeep
+- workflow: programme-pr-upkeep.yml
+- label: gate:auto-merge
 
 **Evidence**: the former hand-typed Flow at a glance table, row 11 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
@@ -347,6 +410,12 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Confidence**: medium
 
+**Maintained by**:
+- command: clerk merge (POST /api/clerk/merge)
+- client: srs-lab control room (PR page)
+- command: clerk desk
+- label: gate:owner-merge
+
 **Evidence**: work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); mechanics survey 2026-10-24
 
 **Flows to**: Report
@@ -370,6 +439,11 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Measure**: reports.unreceived
 
 **Confidence**: medium
+
+**Maintained by**:
+- routine: wg-steward (standing jobs 53ba8d1b, 312a26b1)
+- record: stewardship/run-report
+- command: clerk upkeep (the pause rule)
 
 **Evidence**: the former hand-typed Flow at a glance table, row 12 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
@@ -396,6 +470,11 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Confidence**: medium
 
+**Maintained by**:
+- record: governance/decision
+- record: governance/exercise
+- block: srs-decisions in a PR body
+
 **Evidence**: mechanics survey 2026-10-24; owner, 2026-10-24
 
 **Flows to**: Placed: layer, domain and boundary
@@ -419,6 +498,9 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 **Measure**: decisions.unscoped
 
 **Confidence**: medium
+
+**Maintained by**:
+- command: /rfc (Charter Check, the spec only)
 
 **Evidence**: decision-compass.md; srs-programme source-documents/decision-taxonomy-2026-10-22/discoveries.md; clerk#63
 
@@ -444,6 +526,10 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Confidence**: medium
 
+**Maintained by**:
+- command: /rfc (Charter Check step 4, the spec only)
+- routine: wg-steward (names a repeated ruling)
+
 **Evidence**: decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:92,101
 
 **Flows to**: Cited thereafter, Classed: choice, ruling or escalation
@@ -467,6 +553,10 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 **Measure**: decisions.unkinded
 
 **Confidence**: medium
+
+**Maintained by**:
+- command: clerk pr-check
+- block: srs-decisions made
 
 **Evidence**: clerk/docs/pr-decisions.md; decision-compass.md; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)
 
@@ -492,6 +582,9 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Confidence**: medium
 
+**Maintained by**:
+- command: clerk pr-check
+
 **Evidence**: clerk/docs/pr-decisions.md; srs-lab/control-room/spec/decision-standard.md
 
 **Flows to**: Asked
@@ -514,6 +607,13 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Confidence**: medium
 
+**Maintained by**:
+- block: srs-decisions asks
+- record: governance/exercise
+- label: needs-input
+- command: clerk desk
+- client: srs-lab control room (PR page)
+
 **Evidence**: mechanics survey 2026-10-24 (lib/practice/agenda.mjs:197-200)
 
 **Flows to**: Answered, Escalation deferred
@@ -535,6 +635,10 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 **Measure**: asks.unanswered
 
 **Confidence**: medium
+
+**Maintained by**:
+- client: srs-lab control room (srs:answer)
+- command: clerk pr-check --merging
 
 **Evidence**: decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:44,58
 
@@ -560,6 +664,11 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Confidence**: medium
 
+**Maintained by**:
+- record: governance/decision
+- container: SemanticOps decision log
+- container: the group's decision log
+
 **Evidence**: decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)
 
 **Flows to**: Ratified once, at its level
@@ -583,6 +692,10 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 **Measure**: decisions.proposed
 
 **Confidence**: medium
+
+**Maintained by**:
+- command: clerk session (/session)
+- record: programme/session
 
 **Evidence**: handbook; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
@@ -608,6 +721,9 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Confidence**: medium
 
+**Maintained by**:
+- command: clerk pr-check (a made entry with its id)
+
 **Evidence**: decision-taxonomy discoveries §2-3; mechanics survey 2026-10-24
 
 **Flows to**: Claim and build
@@ -626,6 +742,10 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Confidence**: medium
 
+**Maintained by**:
+- command: clerk merge
+- command: clerk (agenda Merges)
+
 **Evidence**: mechanics survey 2026-10-24 (bin/clerk.mjs:321)
 
 
@@ -639,6 +759,9 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 - Defer only skips the item; nothing is recorded, so it returns unchanged.
 
 **Confidence**: low
+
+**Maintained by**:
+- command: clerk (agenda [d]efer)
 
 **Evidence**: bin/clerk.mjs:272
 
@@ -659,6 +782,22 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 **Confidence**: medium
 
 **Evidence**: decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); owner, 2026-10-24
+
+
+#### Keeping the flow: the dots, and who joins them
+
+Work flows when every dot an issue needs is joined; confidence never stops it, it sets the care mode (decision 9d50126b, proposed). Every command and brief reads the same dots, `clerk flow --chain <repo#n>` shows them, and `clerk flow --open <repo>` sweeps a repository. A dot a recorded rule supplies is joined by whoever finds it missing, citing the rule; any other missing dot is a choice for a person.
+
+| Dot | Holds when | Rule that joins it | Producers (file it joined) | Consumers (check before claim) |
+|---|---|---|---|---|
+| Problem | `Answers: SP-nn` names a suggested or affirmed problem | none: a person or a brief names it | wg-analyst, handbook-watcher, /ship, the steward's escalations | claim (collisions, the problem), then the care mode |
+| Epic | the issue, or its top parent, is a sub-issue of a ranked epic | "Part of" names the parent, when the issue has none | every producer: `Part of` and the sub-issue link | clerk flow |
+| Lane | `lane:unattended`, or the label of a group that works in the issue's repository | the group that holds the problem's domain, else the central lane (D4, D5, D15); two holders are a choice | every producer | clerk flow; topup feeds only routed issues (the same `routed` rule) |
+| Plan | a `## Technical plan` section, or written steps | none: a person or a brief writes it | wg-analyst, handbook-watcher where the fix is known | a missing plan lowers the care mode, it does not stop the work |
+| Blockers | every `Blocked by` is recorded, and none is open | "Blocked by" names the dependency | every producer: the line and the link | clerk flow, then the board's blocked mirror |
+| Hold | no `needs-input`, `parked` or `blocked` | none | | claim, queue and topup |
+
+The elements that keep each step moving are listed on the step (Maintained by). An element named there that does not exist (a routine with no standing job, a command that is gone) is a gap in the flow itself: the bug fixer has no standing job yet, and no job sweeps the governed repositories to join the mechanical dots.
 
 
 #### How an issue reaches a group

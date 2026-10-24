@@ -27,7 +27,8 @@
     "fields/measure-c7e13d3d.json",
     "fields/remedies-45245ff3.json",
     "fields/evidence-cd0512ef.json",
-    "fields/flow-21b97e1a.json"
+    "fields/flow-21b97e1a.json",
+    "fields/maintainedby-59709e3d.json"
   ],
   "types": [
     "types/chapter-1b1c9741.json",

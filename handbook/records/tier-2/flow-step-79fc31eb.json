@@ -14,10 +14,15 @@
       "Decisions arise in at least nine places (PR bodies and comments, chat, issues, run reports, sessions, exercises, srs RFCs, srs-rust ADRs, srs-context) and nothing gathers them."
     ],
     "confidence_level": "medium",
-    "evidence": "mechanics survey 2026-10-24; owner, 2026-10-24"
+    "evidence": "mechanics survey 2026-10-24; owner, 2026-10-24",
+    "maintained_by": [
+      "record: governance/decision",
+      "record: governance/exercise",
+      "block: srs-decisions in a PR body"
+    ]
   },
   "createdAt": "2026-10-24T12:32:59.068367710+00:00",
-  "updatedAt": "2026-10-24T12:32:59.068376038+00:00",
+  "updatedAt": "2026-10-24T16:19:08.388822137+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

@@ -14,10 +14,14 @@
     ],
     "remedies": "C11 clerk#166",
     "confidence_level": "medium",
-    "evidence": "mechanics survey 2026-10-24 (bin/clerk.mjs:321)"
+    "evidence": "mechanics survey 2026-10-24 (bin/clerk.mjs:321)",
+    "maintained_by": [
+      "command: clerk merge",
+      "command: clerk (agenda Merges)"
+    ]
   },
   "createdAt": "2026-10-24T12:33:00.455126566+00:00",
-  "updatedAt": "2026-10-24T12:33:00.455132037+00:00",
+  "updatedAt": "2026-10-24T16:19:08.198623377+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

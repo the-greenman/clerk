@@ -17,10 +17,16 @@
     "remedies": "H1, H2 (in force through pr-check, clerk#172), H3; C6 clerk#164; C11 clerk#166 (clerk#174, srs-lab#25)",
     "measure": "prs.owner-waiting",
     "confidence_level": "medium",
-    "evidence": "work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); mechanics survey 2026-10-24"
+    "evidence": "work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); mechanics survey 2026-10-24",
+    "maintained_by": [
+      "command: clerk merge (POST /api/clerk/merge)",
+      "client: srs-lab control room (PR page)",
+      "command: clerk desk",
+      "label: gate:owner-merge"
+    ]
   },
   "createdAt": "2026-10-24T12:32:58.662749337+00:00",
-  "updatedAt": "2026-10-24T12:32:58.662756684+00:00",
+  "updatedAt": "2026-10-24T16:19:07.826116301+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

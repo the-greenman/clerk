@@ -17,10 +17,13 @@
     "remedies": "clerk#63",
     "measure": "decisions.unscoped",
     "confidence_level": "medium",
-    "evidence": "decision-compass.md; srs-programme source-documents/decision-taxonomy-2026-10-22/discoveries.md; clerk#63"
+    "evidence": "decision-compass.md; srs-programme source-documents/decision-taxonomy-2026-10-22/discoveries.md; clerk#63",
+    "maintained_by": [
+      "command: /rfc (Charter Check, the spec only)"
+    ]
   },
   "createdAt": "2026-10-24T12:32:59.205321422+00:00",
-  "updatedAt": "2026-10-24T12:32:59.205331610+00:00",
+  "updatedAt": "2026-10-24T16:19:08.134963124+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json",
   "id": "918b144e-6e3c-4128-acea-e8282f28bfd5",
   "namespace": "com.semanticops.handbook",
   "name": "flow-step",
@@ -69,12 +70,17 @@
       "order": 10,
       "required": true,
       "displayLabel": "Evidence"
+    },
+    {
+      "fieldId": "59709e3d-8048-4918-aafe-4fd97c700c95",
+      "order": 11,
+      "required": false,
+      "displayLabel": "Maintained by"
     }
   ],
   "identityFieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
   "aiGuidance": {
     "purpose": "A step of the work or decision flow. Confidence says how sure we are this description matches reality: low for an agent's reading of code, medium for what the owner said, high once the owner stands behind it. clerk flow derives live counts, dead ends and the critical path from these records; nothing derived is stored here."
   },
-  "createdAt": "2026-10-24T12:29:23.206653414+00:00",
-  "$schema": "https://srs.semanticops.com/schema/2.0/type.json"
+  "createdAt": "2026-10-24T12:29:23.206653414+00:00"
 }

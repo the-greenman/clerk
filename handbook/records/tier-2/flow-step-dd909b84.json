@@ -17,10 +17,14 @@
     "remedies": "clerk#179, clerk#178, clerk#63; decision 4445b9cf (proposed); affirm principles and poles",
     "measure": "principles.unaffirmed",
     "confidence_level": "medium",
-    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:92,101"
+    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:92,101",
+    "maintained_by": [
+      "command: /rfc (Charter Check step 4, the spec only)",
+      "routine: wg-steward (names a repeated ruling)"
+    ]
   },
   "createdAt": "2026-10-24T12:32:59.353293957+00:00",
-  "updatedAt": "2026-10-24T12:33:36.645301463+00:00",
+  "updatedAt": "2026-10-24T16:19:09.028150461+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

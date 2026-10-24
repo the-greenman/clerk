@@ -16,10 +16,17 @@
     "remedies": "C10; C11 clerk#166",
     "measure": "asks.open",
     "confidence_level": "medium",
-    "evidence": "mechanics survey 2026-10-24 (lib/practice/agenda.mjs:197-200)"
+    "evidence": "mechanics survey 2026-10-24 (lib/practice/agenda.mjs:197-200)",
+    "maintained_by": [
+      "block: srs-decisions asks",
+      "record: governance/exercise",
+      "label: needs-input",
+      "command: clerk desk",
+      "client: srs-lab control room (PR page)"
+    ]
   },
   "createdAt": "2026-10-24T12:32:59.752357239+00:00",
-  "updatedAt": "2026-10-24T12:32:59.752365736+00:00",
+  "updatedAt": "2026-10-24T16:19:07.763879997+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

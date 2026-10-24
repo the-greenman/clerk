@@ -1,4 +1,5 @@
 {
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
   "id": "33f5ee6f-c3d3-4f8f-861d-2ac97c5ca897",
   "namespace": "com.semanticops.handbook",
   "name": "flow-step-view",
@@ -38,10 +39,13 @@
       "order": 7
     },
     {
-      "fieldId": "cd0512ef-53f7-404d-b739-5e5ac8319686",
+      "fieldId": "59709e3d-8048-4918-aafe-4fd97c700c95",
       "order": 8
+    },
+    {
+      "fieldId": "cd0512ef-53f7-404d-b739-5e5ac8319686",
+      "order": 9
     }
   ],
-  "createdAt": "2026-10-24T12:30:33.157289344+00:00",
-  "$schema": "https://srs.semanticops.com/schema/2.0/view.json"
+  "createdAt": "2026-10-24T12:30:33.157289344+00:00"
 }

@@ -17,10 +17,13 @@
     "remedies": "clerk#178",
     "measure": "asks.unframed",
     "confidence_level": "medium",
-    "evidence": "clerk/docs/pr-decisions.md; srs-lab/control-room/spec/decision-standard.md"
+    "evidence": "clerk/docs/pr-decisions.md; srs-lab/control-room/spec/decision-standard.md",
+    "maintained_by": [
+      "command: clerk pr-check"
+    ]
   },
   "createdAt": "2026-10-24T12:32:59.615193055+00:00",
-  "updatedAt": "2026-10-24T12:32:59.615202172+00:00",
+  "updatedAt": "2026-10-24T16:19:09.094383424+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

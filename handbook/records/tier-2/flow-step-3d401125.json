@@ -16,10 +16,14 @@
     "remedies": "C6 clerk#164; H1",
     "measure": "asks.unanswered",
     "confidence_level": "medium",
-    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:44,58"
+    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:44,58",
+    "maintained_by": [
+      "client: srs-lab control room (srs:answer)",
+      "command: clerk pr-check --merging"
+    ]
   },
   "createdAt": "2026-10-24T12:32:59.875370383+00:00",
-  "updatedAt": "2026-10-24T12:33:35.945612603+00:00",
+  "updatedAt": "2026-10-24T16:19:08.074445653+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

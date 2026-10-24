@@ -16,10 +16,15 @@
     "remedies": "C5 (practice data auto-merges); C3 srs-programme#227 (govern srs-lab)",
     "measure": "prs.auto-waiting",
     "confidence_level": "medium",
-    "evidence": "the former hand-typed Flow at a glance table, row 11 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+    "evidence": "the former hand-typed Flow at a glance table, row 11 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk upkeep",
+      "workflow: programme-pr-upkeep.yml",
+      "label: gate:auto-merge"
+    ]
   },
   "createdAt": "2026-10-24T12:32:58.455171385+00:00",
-  "updatedAt": "2026-10-24T12:33:35.754020248+00:00",
+  "updatedAt": "2026-10-24T16:19:07.886739665+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

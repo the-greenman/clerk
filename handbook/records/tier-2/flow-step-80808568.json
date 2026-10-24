@@ -16,10 +16,16 @@
     "remedies": "H7 (real use is an occasion)",
     "measure": "problems.suggested-only",
     "confidence_level": "medium",
-    "evidence": "the former hand-typed Flow at a glance table, row 3 (live 2026-10-16); decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)"
+    "evidence": "the former hand-typed Flow at a glance table, row 3 (live 2026-10-16); decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)",
+    "maintained_by": [
+      "routine: wg-analyst (suggests; standing job 3cb9ff9b)",
+      "routine: synthesiser (names clusters; standing job 0e366cfd)",
+      "client: srs-web Method editor",
+      "command: clerk check"
+    ]
   },
   "createdAt": "2026-10-24T12:32:56.810208258+00:00",
-  "updatedAt": "2026-10-24T12:33:36.071239935+00:00",
+  "updatedAt": "2026-10-24T16:19:08.458253636+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

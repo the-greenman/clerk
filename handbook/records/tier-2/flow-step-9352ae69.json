@@ -16,10 +16,16 @@
     "remedies": "Axes PRs clerk#135, srs-programme#206, srs-lab#18, srs-context#58 (unblocked by cdd272a3, ratified 2026-10-24)",
     "measure": "domains.axes-unplaced",
     "confidence_level": "medium",
-    "evidence": "the former hand-typed Flow at a glance table, row 1 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); `clerk check` 2026-10-24"
+    "evidence": "the former hand-typed Flow at a glance table, row 1 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); `clerk check` 2026-10-24",
+    "maintained_by": [
+      "client: srs-web Method editor",
+      "client: srs-lab control room (affirmation rounds)",
+      "command: clerk domains",
+      "command: clerk check"
+    ]
   },
   "createdAt": "2026-10-24T12:32:56.375331383+00:00",
-  "updatedAt": "2026-10-24T12:33:36.261857474+00:00",
+  "updatedAt": "2026-10-24T16:19:08.655798186+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

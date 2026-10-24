@@ -16,10 +16,14 @@
     "remedies": "clerk#63 (precedent along the boundary chain)",
     "measure": "prs.unreviewed",
     "confidence_level": "low",
-    "evidence": "mechanics survey 2026-10-24; the former hand-typed Flow at a glance table, row 10 (live 2026-10-16)"
+    "evidence": "mechanics survey 2026-10-24; the former hand-typed Flow at a glance table, row 10 (live 2026-10-16)",
+    "maintained_by": [
+      "routine: wg-reviewer (standing jobs 49d82dc1, f3ecdcc0)",
+      "command: clerk pr-check"
+    ]
   },
   "createdAt": "2026-10-24T12:32:58.246155794+00:00",
-  "updatedAt": "2026-10-24T12:33:35.692521705+00:00",
+  "updatedAt": "2026-10-24T16:19:07.699267713+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

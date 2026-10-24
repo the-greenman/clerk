@@ -16,10 +16,18 @@
     "remedies": "H4, H5; C8 clerk#169, C9 clerk#170, C10",
     "measure": "claims.stuck",
     "confidence_level": "medium",
-    "evidence": "the former hand-typed Flow at a glance table, row 9 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+    "evidence": "the former hand-typed Flow at a glance table, row 9 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk claim",
+      "command: clerk group-state",
+      "routine: unattended-worker (standing job 2aee4156)",
+      "routine: wg-builder (standing jobs 63def3a3, a12f5821)",
+      "routine: bug-fixer (no standing job yet)",
+      "command: /ship"
+    ]
   },
   "createdAt": "2026-10-24T12:32:58.031572727+00:00",
-  "updatedAt": "2026-10-24T12:33:35.883573909+00:00",
+  "updatedAt": "2026-10-24T16:19:08.011573115+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

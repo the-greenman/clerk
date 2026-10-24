@@ -16,10 +16,16 @@
     "remedies": "H5, C10 (held questions reach the owner)",
     "measure": "issues.needs-input",
     "confidence_level": "medium",
-    "evidence": "the former hand-typed Flow at a glance table, row 8 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+    "evidence": "the former hand-typed Flow at a glance table, row 8 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk board (topup, promote)",
+      "workflow: board-sync.yml",
+      "label: ready",
+      "label: promote-request"
+    ]
   },
   "createdAt": "2026-10-24T12:32:57.835090019+00:00",
-  "updatedAt": "2026-10-24T12:33:36.514868896+00:00",
+  "updatedAt": "2026-10-24T16:19:08.904433273+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

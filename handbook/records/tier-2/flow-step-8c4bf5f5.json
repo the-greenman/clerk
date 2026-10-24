@@ -16,10 +16,15 @@
     "remedies": "Finish the domain walks (audit, session item)",
     "measure": "problems.no-affirmed-persona",
     "confidence_level": "medium",
-    "evidence": "the former hand-typed Flow at a glance table, row 2 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+    "evidence": "the former hand-typed Flow at a glance table, row 2 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "client: srs-web Method editor",
+      "client: srs-lab control room (affirmation rounds)",
+      "command: clerk check"
+    ]
   },
   "createdAt": "2026-10-24T12:32:56.599619292+00:00",
-  "updatedAt": "2026-10-24T12:33:36.131139371+00:00",
+  "updatedAt": "2026-10-24T16:19:08.528268182+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

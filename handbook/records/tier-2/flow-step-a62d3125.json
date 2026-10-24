@@ -17,10 +17,17 @@
     "remedies": "clerk#156 phase 4; clerk#184; decision 9d50126b; clerk#183 (clerk flow)",
     "measure": "issues.ungrounded",
     "confidence_level": "medium",
-    "evidence": "the former hand-typed Flow at a glance table, row 6 (live 2026-10-16); clerk#156; work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)"
+    "evidence": "the former hand-typed Flow at a glance table, row 6 (live 2026-10-16); clerk#156; work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk flow --chain",
+      "command: clerk care",
+      "routine: wg-analyst (files; standing job 3cb9ff9b)",
+      "routine: handbook-watcher (files; standing job e8109ff8)",
+      "command: /ship"
+    ]
   },
   "createdAt": "2026-10-24T12:32:57.432848436+00:00",
-  "updatedAt": "2026-10-24T16:14:02.606466516+00:00",
+  "updatedAt": "2026-10-24T16:19:08.846687030+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

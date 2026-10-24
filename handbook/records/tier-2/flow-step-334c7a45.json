@@ -17,10 +17,15 @@
     "remedies": "decision 4445b9cf (proposed); clerk#179",
     "measure": "rulings.unrecorded",
     "confidence_level": "medium",
-    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)"
+    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)",
+    "maintained_by": [
+      "record: governance/decision",
+      "container: SemanticOps decision log",
+      "container: the group's decision log"
+    ]
   },
   "createdAt": "2026-10-24T12:33:00.003517468+00:00",
-  "updatedAt": "2026-10-24T12:33:35.818827755+00:00",
+  "updatedAt": "2026-10-24T16:19:07.948207876+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",
