@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { authorityActs, unproven } from '../lib/practice/guard.mjs';
+import { authorityActs, unproven, crossesRevision } from '../lib/practice/guard.mjs';
 
 const OWNER = 'human:the-greenman';
 const settings = { ownerActor: OWNER };
@@ -127,4 +127,10 @@ test('renaming Affirmed does not hide a new member', () => {
   const fork = rec('p3', { by: agent });
   const acts = run(snap([], [], [box('c-aff', 'Affirmed', [])]), snap([fork], [], [box('c-aff', 'Renamed', ['p3'])]));
   assert.equal(unproven(acts).length, 1);
+});
+
+test('a change that crosses a dataModelRevision is detected; a missing revision counts as 0', () => {
+  assert.equal(crossesRevision({ dataModelRevision: 10 }, { dataModelRevision: 11 }), true);
+  assert.equal(crossesRevision({ dataModelRevision: 11 }, { dataModelRevision: 11 }), false);
+  assert.equal(crossesRevision({}, { dataModelRevision: 0 }), false);
 });
