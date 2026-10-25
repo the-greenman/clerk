@@ -1,0 +1,21 @@
+{
+  "id": "4f5c1cb1-bb5b-49a5-a5f3-65b2ba9b595c",
+  "namespace": "com.semanticops.handbook",
+  "name": "mover_kind",
+  "version": 1,
+  "description": "How the move happens today.",
+  "aiGuidance": {
+    "purpose": "auto: code on a schedule or event. routine: an LLM routine or brief. manual: a person's act. none: nothing moves it (theory only, or a dead end)."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "valueDomain": "closed",
+    "allowedValues": [
+      "auto",
+      "routine",
+      "manual",
+      "none"
+    ]
+  },
+  "createdAt": "2026-10-24T12:29:10.533690027+00:00"
+}

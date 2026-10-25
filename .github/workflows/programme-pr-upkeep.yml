@@ -1,8 +1,8 @@
 name: Programme PR upkeep
 
 # Reusable. Merge green gate:auto-merge PRs and keep gated PRs up to date across the estate
-# (clerk upkeep); with digest, also post the review digest on the settings digest_issue and
-# rewrite the owner's desk (clerk desk --post, the one open `desk` issue in that repo).
+# (clerk upkeep); with digest, also post the review digest on the settings digest_issue. Every
+# run that applies rewrites the owner's desk (clerk desk --post, the one open `desk` issue; clerk#203).
 # Triggers (15-minute cron, daily digest cron, push, workflow_run, dispatch) and the concurrency
 # group stay in the caller. github.event_name and github.event.schedule are the caller's.
 # digest-cron must equal the caller's digest cron expression.
@@ -75,10 +75,12 @@ jobs:
           if [ "$SCHEDULE" = "$DIGEST_CRON" ] || [ "$DIGEST" = true ]; then args+=(--digest); fi
           node "$RUNNER_TEMP/clerk/bin/clerk.mjs" upkeep "${args[@]}"
 
-      # The owner's desk (clerk#64): rewrite the pinned desk issue's body, on the digest run only. Like upkeep, it writes
-      # only when the run applies (scheduled runs, or a dispatch with apply); a dry-run dispatch prints the body instead (clerk#93).
+      # The owner's desk (clerk#64): rewrite the pinned desk issue's body on every run that applies (schedule, push,
+      # workflow_run, or a dispatch with apply or digest), not only the digest run: GitHub drops most scheduled runs and
+      # fires the daily digest late or not at all, so a digest-only desk was a day old at best (clerk#203). A dry-run
+      # dispatch prints the body instead (clerk#93).
       - name: Desk
-        if: github.event.schedule == inputs.digest-cron || inputs.digest
+        if: github.event_name != 'workflow_dispatch' || inputs.apply || inputs.digest
         env:
           GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
           IS_AUTO: ${{ github.event_name != 'workflow_dispatch' }}

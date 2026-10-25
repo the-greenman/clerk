@@ -1,0 +1,34 @@
+{
+  "instanceId": "277c5940-fa09-473a-8fd9-025698428437",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Merge on green",
+    "flow": "work",
+    "moved_by": "`pr-upkeep` every 15 minutes",
+    "mover_kind": "auto",
+    "needs": "`gate:auto-merge` and clean; for a group, a valid quorum, within budget, not paused",
+    "gaps": [
+      "Few PRs take this path: in the week to 10-23 every one of 254 merges went through the owner's account."
+    ],
+    "remedies": "C5 (practice data auto-merges); C3 srs-programme#227 (govern srs-lab)",
+    "measure": "prs.auto-waiting",
+    "confidence_level": "medium",
+    "evidence": "the former hand-typed Flow at a glance table, row 11 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk upkeep",
+      "workflow: programme-pr-upkeep.yml",
+      "label: gate:auto-merge"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:58.455171385+00:00",
+  "updatedAt": "2026-10-24T16:19:07.886739665+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

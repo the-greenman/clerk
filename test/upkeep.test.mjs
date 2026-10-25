@@ -122,6 +122,24 @@ test('a run: group merges need quorum, budget and no pause, and use up budget as
   assert.match(digestBody(plan, groups, '2026-10-20', GATES), /Working group: running - waiting \(`wg:x`, 2 of 2 merged this cycle\):\n- r#2/);
 });
 
+test('clerk#208: in the programme repo every PR merges on green; native auto-merge is armed until it is CLEAN', () => {
+  const prog = { ...ctx, programme: true };
+  assert.equal(routePR(P([]), prog).action, 'merge', 'no gate label reads as auto');
+  assert.equal(routePR(P([]), prog).ungated, false);
+  assert.deepEqual(routePR(P([], 'BLOCKED'), prog), { kind: 'ordinary', action: null, ungated: false, arm: true });
+  assert.deepEqual(routePR(P(['gate:auto-merge'], 'BEHIND'), prog), { kind: 'ordinary', action: 'update-branch', ungated: false, arm: true });
+  assert.equal(routePR(P([], 'BLOCKED', { autoMerge: true }), prog).arm, undefined, 'already armed');
+  assert.equal(routePR(P(['gate:auto-merge']), prog).arm, undefined, 'CLEAN merges now');
+  assert.deepEqual(routePR(P(['gate:owner-merge'], 'BLOCKED'), prog), { kind: 'owner', action: null }, 'owner merge still wins');
+  assert.equal(routePR(P(['wg:x'], 'BLOCKED'), prog).kind, 'group');
+  assert.equal(routePR(P([], 'BLOCKED'), ctx).arm, undefined, 'not outside the programme');
+  const pr = (number, labels, state) => ({ number, title: `pr ${number}`, headSha: HEAD, ...P(labels, state) });
+  const plan = upkeepPlan([{ repo: 'p', defaultBranch: 'main', programme: true, prs: [pr(1, [], 'BEHIND'), pr(2, [], 'CLEAN')] },
+    { repo: 'r', defaultBranch: 'main', prs: [pr(3, [], 'BLOCKED')] }], {}, GATES);
+  assert.deepEqual(plan.actions.map((a) => [a.do, a.repo, a.number]), [['update-branch', 'p', 1], ['auto-merge', 'p', 1], ['merge', 'p', 2]]);
+  assert.deepEqual(plan.ungated, ['r#3 pr 3']);
+});
+
 test('upkeep reads its gate labels from the bindings, so a renamed gate still routes and the old name no longer merges', () => {
   const renamed = { ...ctx, gates: { auto: 'merge:auto', owner: 'merge:owner' } };
   const P2 = (labels) => ({ labels, draft: false, base: 'main', state: 'CLEAN', autoMerge: false });

@@ -1,0 +1,17 @@
+{
+  "aiGuidance": {
+    "purpose": "Presentation only; work_item states only."
+  },
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "The board Status option the programme uses for this state.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "e3747f9d-72f6-42ec-9ae5-671f7e673b87",
+  "name": "board_status",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

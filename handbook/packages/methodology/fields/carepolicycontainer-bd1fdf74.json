@@ -1,0 +1,18 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "The clerk reads the policy from here; nothing about confidence is hard-coded."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "Id of the container holding this programme's Confidence and care policy records (axes, grades, care modes, rules).",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "bd1fdf74-1553-4446-a6d1-d181ea05200f",
+  "name": "care_policy_container",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/type.json",
+  "aiGuidance": {
+    "extraction": "One record per mode; rules point at it with `selects`.",
+    "negativeGuidance": "Agents never edit policy records: propose a change as a comment on the record, with the evidence.",
+    "purpose": "What a worker does in this mode. Briefs follow the record, so tuning it retunes every worker."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "One way of working, chosen by the care rules: how careful a worker must be at the confidence a work item has.",
+  "fields": [
+    {
+      "fieldId": "b782003d-7f38-4a75-b122-3ff453511ba1",
+      "order": 0,
+      "required": true
+    },
+    {
+      "fieldId": "b53cd964-42d5-41ab-999c-d2538783eb21",
+      "order": 1,
+      "required": true
+    },
+    {
+      "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
+      "order": 2,
+      "required": true
+    },
+    {
+      "fieldId": "d52f1e1d-67d0-468c-88a7-7adbbf9bb347",
+      "order": 3,
+      "required": false
+    },
+    {
+      "fieldId": "16acb912-5795-4205-9ff6-a1eab97368d2",
+      "order": 4,
+      "required": true
+    }
+  ],
+  "id": "4a6abffb-618f-4ed9-8009-c5ce1318961d",
+  "identityFieldId": "b782003d-7f38-4a75-b122-3ff453511ba1",
+  "name": "care-mode",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

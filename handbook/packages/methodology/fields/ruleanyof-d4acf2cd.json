@@ -1,0 +1,18 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "Use for alternatives, e.g. placement>=medium or signal:owner.directed."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "Clauses of which at least one must hold, in the same grammar as rule_all_of. Empty means no any-of condition. A rule with both lists empty always matches: the fallback.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "list",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "d4acf2cd-902e-422d-8564-5f72f4054d54",
+  "name": "rule_any_of",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

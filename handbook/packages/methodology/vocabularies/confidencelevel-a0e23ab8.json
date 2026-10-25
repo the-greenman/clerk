@@ -1,0 +1,43 @@
+{
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "The one ordinal scale every confidence axis grades on, lowest first. The order of the terms is the order of the scale: a rule clause `axis>=medium` holds for medium and high.",
+  "id": "a0e23ab8-ab4b-496c-a651-4c8556e85035",
+  "mode": "closed",
+  "name": "confidence_level",
+  "namespace": "com.semanticops.programme",
+  "terms": [
+    {
+      "description": "Nothing to go on: no claim, no plan, no ranking.",
+      "id": "9e7118a7-171c-4db7-b71d-c8d014a864db",
+      "key": "none",
+      "label": "None",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Some basis, but thin: one agent's suggestion, or an unranked placement.",
+      "id": "67c3851a-588a-455a-8e3c-2a67fabaf185",
+      "key": "low",
+      "label": "Low",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "A reasonable basis that is not yet affirmed: a suggestion with a conversation behind it, or a ranked epic with an open choice.",
+      "id": "b6c0dfd2-9bb4-44af-aabc-a28be45160cd",
+      "key": "medium",
+      "label": "Medium",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Affirmed, ranked, or concrete: a human has stood behind it.",
+      "id": "dd68fb99-a4fb-4534-8229-5e48a5670814",
+      "key": "high",
+      "label": "High",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    }
+  ],
+  "version": 1
+}
