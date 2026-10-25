@@ -5,29 +5,33 @@
   "typeNamespace": "com.semanticops.handbook",
   "typeName": "flow-step",
   "fieldValues": {
-    "title": "Issue admission",
+    "title": "Placement and sequence",
     "flow": "work",
-    "moved_by": "the filer (analyst, scout, owner)",
+    "moved_by": "the filer: the session agent, analyst, scout or owner",
     "mover_kind": "manual",
-    "needs": "`Answers: SP-nn` naming a problem; how sure the grounding is sets the care mode",
-    "theory": "Confidence grades care, it does not gate work (decision 9d50126b, ratified 2026-10-24; clerk#156): an issue that names a suggested problem is worked in the care mode the policy gives; only no problem, or an unknown or set-aside one, stops it.",
+    "needs": "`Answers: SP-nn` naming a suggested or affirmed problem; the problem's domain and the group that holds it; a remedy where one fits; `Part of` an epic or story, with the sub-issue link; where work has steps, a sequence: a tracking issue whose sub-issues are its tasks, with `Blocked by` links where order matters; proved with `clerk flow --chain`, `clerk care` and `clerk claim --dry-run`",
+    "theory": "Confidence grades care, it does not gate work (decision 9d50126b, ratified 2026-10-24): an issue that names a suggested problem is worked in the care mode the policy gives; only no problem, or an unknown or set-aside one, stops it. A unit of work that must survive a closed chat is a sequence (clerk#197 is the first); the desk lists it until clerk#112 makes it a unit of its own.",
     "gaps": [
-      "/ship stopped on any unaffirmed problem while the routines' claim graded care; clerk#184 aligns it. `clerk queue` and the briefs do not read the care mode yet (clerk#156 phase 4)."
+      "No command suggests a placement (problem, domain, group, epic) for a new item (clerk#200).",
+      "`clerk queue` and the briefs do not read the care mode yet (clerk#156 phase 4)."
     ],
-    "remedies": "clerk#156 phase 4; clerk#184; decision 9d50126b; clerk#183 (clerk flow)",
+    "remedies": "clerk#200 (clerk place); clerk#156 phase 4; clerk#112; decision 9d50126b",
     "measure": "issues.ungrounded",
     "confidence_level": "medium",
     "evidence": "the former hand-typed Flow at a glance table, row 6 (live 2026-10-16); clerk#156; work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
     "maintained_by": [
       "command: clerk flow --chain",
       "command: clerk care",
+      "command: clerk claim --dry-run",
+      "command: clerk board link",
+      "command: clerk board dep add",
       "routine: wg-analyst (files; standing job 3cb9ff9b)",
       "routine: handbook-watcher (files; standing job e8109ff8)",
       "command: /ship"
     ]
   },
   "createdAt": "2026-10-24T12:32:57.432848436+00:00",
-  "updatedAt": "2026-10-24T16:44:09.036340814+00:00",
+  "updatedAt": "2026-10-25T10:46:24.002314111+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",
