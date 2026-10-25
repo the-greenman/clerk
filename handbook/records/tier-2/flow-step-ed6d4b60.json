@@ -7,18 +7,20 @@
   "fieldValues": {
     "title": "Routing to a group",
     "flow": "work",
-    "moved_by": "the filer, then topup",
-    "mover_kind": "none",
+    "moved_by": "the flow keeper (joins the lane dot by its rule), then topup",
+    "mover_kind": "manual",
     "needs": "the group whose charter holds the problem's domain gets its `wg:` label; a domain no group holds goes to `lane:unattended`",
     "theory": "Ruled: D4, D5 and D15 (ratified 2026-10-16).",
     "gaps": [
-      "Topup does not route by meaning, so real-use issues (srs-web#587 to #590) land in no queue."
+      "The flow keeper has run by hand but has no schedule yet (clerk#201); until it does, an unrouted item waits for the next session that joins it.",
+      "Two holding groups, or a domain read only from the repository, is a choice for a person, listed in the flow keeper's report."
     ],
-    "remedies": "C13 clerk#124; H7",
+    "remedies": "clerk#201; clerk#196 (strength slots in topup); C13 clerk#124",
     "measure": "issues.unrouted",
     "confidence_level": "medium",
     "evidence": "the former hand-typed Flow at a glance table, row 7 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
     "maintained_by": [
+      "routine: flow-keeper (standing job 9c0ce5f8)",
       "command: clerk flow (the lane dot)",
       "command: clerk board (topup)",
       "label: lane-unattended",
@@ -27,7 +29,7 @@
     ]
   },
   "createdAt": "2026-10-24T12:32:57.640770533+00:00",
-  "updatedAt": "2026-10-24T16:19:09.160136570+00:00",
+  "updatedAt": "2026-10-25T10:54:09.084472449+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",
