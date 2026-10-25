@@ -16,6 +16,6 @@ The handbook is an SRS repository, `handbook/`; `docs/handbook.md` is rendered f
 
 - `npm ci && npm test`, judged by exit code, never a piped tail. The runtime (`bin`, `lib`, `scripts`) imports only Node built-ins: workflows and routines run it with no `npm install` (`test/runtime-imports.test.mjs`). Dependencies are for tests only.
 - Default branch is `main`. Commits are SSH-signed with plain `git commit` (never `--no-gpg-sign`); end messages with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Review the diff before opening a PR; the owner reviews and merges.
+- Review the diff before opening a PR. Who merges is srs-programme decision 949ae72d (merge rights follow decision mode and door, the same in every governed repository); label the PR `gate:auto-merge` or `gate:owner-merge` by it, and do not restate the rule here.
 - Worktrees only via `scripts/wt new clerk <issue#-slug>`.
 - Never run write modes (`roadmap --apply`, `steward --fix`, `upkeep --apply`, `board` writes) to test.
