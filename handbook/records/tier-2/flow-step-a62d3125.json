@@ -9,7 +9,7 @@
     "flow": "work",
     "moved_by": "the filer: the session agent, analyst, scout or owner",
     "mover_kind": "manual",
-    "needs": "`Answers: SP-nn` naming a suggested or affirmed problem; the problem's domain and the group that holds it; a remedy where one fits; `Part of` an epic or story, with the sub-issue link; where work has steps, a sequence: a tracking issue whose sub-issues are its tasks, with `Blocked by` links where order matters; proved with `clerk flow --chain`, `clerk care` and `clerk claim --dry-run`",
+    "needs": "`Answers: SP-nn` naming a suggested or affirmed problem; the problem's domain and the group that holds it; a remedy where one fits; `Part of` an epic or story, with the sub-issue link (a new epic goes up as a proposed decision: *Escalating*); where work has steps, a sequence: a tracking issue whose sub-issues are its tasks, with `Blocked by` links where order matters; the issue carries `Answers:`, `Part of`, a `## Technical plan` and `## Acceptance`; proved with `clerk flow --chain`, `clerk care`, `clerk claim --dry-run` and `clerk board explain`",
     "theory": "Confidence grades care, it does not gate work (decision 9d50126b, ratified 2026-10-24): an issue that names a suggested problem is worked in the care mode the policy gives; only no problem, or an unknown or set-aside one, stops it. A unit of work that must survive a closed chat is a sequence (clerk#197 is the first); the desk lists it until clerk#112 makes it a unit of its own.",
     "gaps": [
       "No command suggests a placement (problem, domain, group, epic) for a new item (clerk#200).",
@@ -27,11 +27,12 @@
       "command: clerk board dep add",
       "routine: wg-analyst (files; standing job 3cb9ff9b)",
       "routine: handbook-watcher (files; standing job e8109ff8)",
-      "command: /ship"
+      "command: /ship",
+      "command: clerk board explain"
     ]
   },
   "createdAt": "2026-10-24T12:32:57.432848436+00:00",
-  "updatedAt": "2026-10-25T10:46:24.002314111+00:00",
+  "updatedAt": "2026-10-25T10:54:08.057058695+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

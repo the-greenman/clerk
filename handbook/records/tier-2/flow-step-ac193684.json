@@ -10,7 +10,7 @@
     "moved_by": "every session that resumes work, or has no task: `clerk desk`, then the open sequence it lists, then that sequence's next task free to take, run through `clerk flow --chain`",
     "mover_kind": "manual",
     "needs": "the desk is current (rewritten on every upkeep run, clerk#203) and shows all active work: each epic's open sequences with the next task free to take, the central lane's queue, and claims with no PR (clerk#204); read the vignettes behind the work before acting",
-    "theory": "Work run in a chat window is lost when the window closes. Work that is in the flow (an issue, placed, in a sequence) is found again from the desk by any session (owner, 2026-10-25). The srs-context brief \"Resuming work\" points every new session here.",
+    "theory": "Work run in a chat window is lost when the window closes. Work that is in the flow (an issue, placed, in a sequence) is found again from the desk by any session (owner, 2026-10-25). The srs-context brief \"Resuming work\" points every new session here. From Find, a session resuming a sequence goes to its next task (Claim and build); new work starts at Story.",
     "gaps": [
       "The flow keeper, which joins the dots the desk reads, has no schedule yet (clerk#201)."
     ],
@@ -26,7 +26,7 @@
     ]
   },
   "createdAt": "2026-10-25T10:46:23.039568230+00:00",
-  "updatedAt": "2026-10-25T10:46:23.039575964+00:00",
+  "updatedAt": "2026-10-25T10:54:08.958021538+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

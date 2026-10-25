@@ -10,7 +10,7 @@
     "moved_by": "agents",
     "mover_kind": "manual",
     "needs": "each record that comes from a vignette (problem, remedy, domain, decision, exercise) is a suggestion `derived-from` it, or an existing record gets an `evidences` link from it; look before you create",
-    "theory": "Records follow the narrative (decision 77e04b19). Affirming them is not a step of this flow: it is its own layer (*The affirmation layer*), and work never waits on it.",
+    "theory": "Records follow the narrative (decision 77e04b19, proposed). Affirming them is not a step of this flow: it is its own layer (*The affirmation layer*), and work never waits on it.",
     "gaps": [
       "Nothing lists the vignettes that have no derived or linked record yet (clerk#199)."
     ],
@@ -23,7 +23,7 @@
     ]
   },
   "createdAt": "2026-10-25T10:46:23.184839076+00:00",
-  "updatedAt": "2026-10-25T10:46:23.184844590+00:00",
+  "updatedAt": "2026-10-25T10:54:09.281022431+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

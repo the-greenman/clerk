@@ -8,7 +8,7 @@
     "title": "Routing to a group",
     "flow": "work",
     "moved_by": "the flow keeper (joins the lane dot by its rule), then topup",
-    "mover_kind": "routine",
+    "mover_kind": "manual",
     "needs": "the group whose charter holds the problem's domain gets its `wg:` label; a domain no group holds goes to `lane:unattended`",
     "theory": "Ruled: D4, D5 and D15 (ratified 2026-10-16).",
     "gaps": [
@@ -29,7 +29,7 @@
     ]
   },
   "createdAt": "2026-10-24T12:32:57.640770533+00:00",
-  "updatedAt": "2026-10-25T10:46:24.151313100+00:00",
+  "updatedAt": "2026-10-25T10:54:09.084472449+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",
