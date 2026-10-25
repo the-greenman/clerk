@@ -1597,7 +1597,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 #### Work item
 
-**Theory**: An issue names the problem it answers (`Answers: SP-nn`, or "No affirmed problem yet: ..."), sits under a story or epic from the moment it is filed, and is small enough for one session.
+**Theory**: A work item names the problem it answers (`Answers: SP-nn`; when none is recorded, suggest the problem first and name it), and sits under a story or epic from the moment it is filed, and is small enough for one session. A bug is not a work item in this sense: bugs need no problem (owner, 2026-10-25: "bugs are bugs"); it carries the bug shape (T5).
 
 **Status**: partial
 
@@ -1854,7 +1854,7 @@ Then: request closed | waits on <decision id>
 **T5. Bug** (an issue in a governed repo, filed from T4)
 
 ```
-Answers: SP-nn | No affirmed problem yet: <one line>
+(no Answers: line: a bug needs no problem; owner, 2026-10-25)
 Found while: <task, issue or session>
 Version: <build or commit>
 Steps: 1. ... 2. ...

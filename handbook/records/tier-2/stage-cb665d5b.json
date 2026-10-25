@@ -6,7 +6,7 @@
   "typeName": "stage",
   "fieldValues": {
     "title": "Work item",
-    "theory": "An issue names the problem it answers (`Answers: SP-nn`, or \"No affirmed problem yet: ...\"), sits under a story or epic from the moment it is filed, and is small enough for one session.",
+    "theory": "A work item names the problem it answers (`Answers: SP-nn`; when none is recorded, suggest the problem first and name it), and sits under a story or epic from the moment it is filed, and is small enough for one session. A bug is not a work item in this sense: bugs need no problem (owner, 2026-10-25: \"bugs are bugs\"); it carries the bug shape (T5).",
     "status": "partial",
     "practice": "- GitHub issues on the governed repos; stories carry MoSCoW.\n- `clerk steward` comments on an issue with no `Answers:` line, and reopens false closes.\n- `clerk claim` refuses an issue whose `Answers:` is not an affirmed problem.\n- `clerk ground` walks a merged PR to its issue, problem, persona and domain, epic and group, and reports the level reached.\n- The analyst files issues in the group's issue shape (`routines/wg-analyst.md`). Board model: [board.md](board.md).",
     "gaps": [
@@ -19,7 +19,7 @@
     "test": "Stage 8: 1 passing; pending: problem link as a record."
   },
   "createdAt": "2026-10-11T18:33:29.346979062+00:00",
-  "updatedAt": "2026-10-11T18:33:29.346986710+00:00",
+  "updatedAt": "2026-10-25T17:46:10.229865497+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",
