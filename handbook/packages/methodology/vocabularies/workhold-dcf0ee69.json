@@ -1,0 +1,35 @@
+{
+  "createdAt": "2026-10-22T00:00:00Z",
+  "description": "What stops a work item from being fed, claimed or built, whatever its position (work_item). An item that carries any of these is held; removing it lets the item go on from where it was. An assignee or an open pull request is not a hold: it is a position.",
+  "id": "dcf0ee69-ddda-478d-b5c9-4491d58aad1c",
+  "mode": "closed",
+  "name": "work_hold",
+  "namespace": "com.semanticops.programme",
+  "terms": [
+    {
+      "description": "Stopped at a question only a human can answer; the question is in the comments. Set by the member who stops; a human answers and clears it.",
+      "id": "559fddda-de74-4f42-b643-4810c301aa93",
+      "key": "needs-input",
+      "label": "Needs input",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Waiting on other work. Derived from blocked-by edges when there are any; set and cleared by hand only for a block outside the tracker, such as a spec RFC not yet accepted.",
+      "id": "39c9db8d-20e1-48eb-b4e8-93d07349ec30",
+      "key": "blocked",
+      "label": "Blocked",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
+      "description": "Serves no ranked objective in the active period. It returns when a period ranks it, or when ranked work depends on it.",
+      "id": "5518c847-05f8-4574-9df3-1c60226c3972",
+      "key": "parked",
+      "label": "Parked",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    }
+  ],
+  "version": 1
+}

@@ -15,13 +15,28 @@
       "typeDispatch": {
         "com.semanticops.handbook/chapter": "1db1fffa-388b-4f48-bfa1-b308cac468ba",
         "com.semanticops.handbook/element": "7a3fc701-97b3-44ce-8ce7-11d8689170ac",
+        "com.semanticops.handbook/flow-step": "33f5ee6f-c3d3-4f8f-861d-2ac97c5ca897",
         "com.semanticops.handbook/stage": "c8c023aa-08ce-4ce0-8836-0873595abaea"
       },
       "titleFieldId": "9f37ca46-6e84-4e2b-b9bc-96e6b8412bfa",
       "ordering": {
         "source": "arranged"
       },
-      "emptyBehavior": "hide"
+      "emptyBehavior": "hide",
+      "relationsPresentation": {
+        "include": [
+          {
+            "relationType": "com.semanticops.handbook/flows-to",
+            "directions": "forward",
+            "forwardLabel": "Flows to"
+          },
+          {
+            "relationType": "refines",
+            "directions": "forward",
+            "forwardLabel": "Part of stage"
+          }
+        ]
+      }
     }
   ],
   "createdAt": "2026-10-11T00:00:00Z"

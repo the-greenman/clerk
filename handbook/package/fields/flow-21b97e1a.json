@@ -1,0 +1,19 @@
+{
+  "id": "21b97e1a-ab33-405d-a937-3d917ec0a644",
+  "namespace": "com.semanticops.handbook",
+  "name": "flow",
+  "version": 1,
+  "description": "Which flow the step belongs to.",
+  "aiGuidance": {
+    "purpose": "work: the chain from domain to merge. decision: how a decision arises, is settled and is cited."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "valueDomain": "closed",
+    "allowedValues": [
+      "work",
+      "decision"
+    ]
+  },
+  "createdAt": "2026-10-24T12:29:10.675964445+00:00"
+}

@@ -59,40 +59,763 @@ Three rules shape everything that follows:
 
 #### Flow at a glance: what moves each stage
 
-One table for the whole flow: what moves each stage, what it needs before it moves, and whether that mover runs today. Read it top to bottom; work stops at the first row whose input is waiting and whose mover is not live. `clerk desk` shows the same picture day to day.
+Each step below is one `flow-step` record (clerk#126). Read it top to bottom: work stops at the first step whose input is waiting and whose mover is not live. `clerk flow` derives the live counts, dead ends and the critical path from these records; `clerk desk` shows the same picture day to day.
 
-| # | Stage | Moved by | Needs before it moves | Live (2026-10-16) |
+Each step says how sure we are of it. Low is an agent's reading of the code, medium is what the owner has said or written, high is a step the owner stands behind. Correct a step by updating its record, and its confidence rises.
+
+
+##### Domain
+
+**Moved by**: agents suggest; the owner affirms (control-room affirmation rounds; CLI `record fork` fallback)
+
+**Mover**: manual
+
+**Needs before it moves**: purpose, in scope and out of scope
+
+**Gap**:
+- All seven domains are affirmed (by 2026-10-20), but every domain has 0 of 3 axes placed, so no group lean can settle a choice.
+
+**Acting on it**: Axes PRs clerk#135, srs-programme#206, srs-lab#18, srs-context#58 (unblocked by cdd272a3, ratified 2026-10-24)
+
+**Measure**: domains.axes-unplaced
+
+**Confidence**: medium
+
+**Maintained by**:
+- client: srs-web Method editor
+- client: srs-lab control room (affirmation rounds)
+- command: clerk domains
+- command: clerk check
+
+**Evidence**: the former hand-typed Flow at a glance table, row 1 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); `clerk check` 2026-10-24
+
+**Flows to**: Persona in domain
+
+**Part of stage**: Domain
+
+
+##### Persona in domain
+
+**Moved by**: agents suggest; the owner affirms
+
+**Mover**: manual
+
+**Needs before it moves**: `refines` a shared persona, `in-domain` exactly one domain
+
+**Gap**:
+- Four problems are held by no affirmed persona-in-domain.
+
+**Acting on it**: Finish the domain walks (audit, session item)
+
+**Measure**: problems.no-affirmed-persona
+
+**Confidence**: medium
+
+**Maintained by**:
+- client: srs-web Method editor
+- client: srs-lab control room (affirmation rounds)
+- command: clerk check
+
+**Evidence**: the former hand-typed Flow at a glance table, row 2 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: Problem
+
+**Part of stage**: Persona
+
+
+##### Problem
+
+**Moved by**: anyone suggests; the owner affirms
+
+**Mover**: manual
+
+**Needs before it moves**: `held-by` a persona-in-domain (the principle 2 gate, warn level)
+
+**Gap**:
+- Problems are nearly all affirmed (97 of 100 suggestions have an affirmed copy). Real-use problems reach issues but no queue.
+
+**Acting on it**: H7 (real use is an occasion)
+
+**Measure**: problems.suggested-only
+
+**Confidence**: medium
+
+**Maintained by**:
+- routine: wg-analyst (suggests; standing job 3cb9ff9b)
+- routine: synthesiser (names clusters; standing job 0e366cfd)
+- client: srs-web Method editor
+- command: clerk check
+
+**Evidence**: the former hand-typed Flow at a glance table, row 3 (live 2026-10-16); decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)
+
+**Flows to**: Remedy
+
+**Part of stage**: Problem
+
+
+##### Remedy
+
+**Moved by**: agents suggest 1 to 3 per domain; the owner affirms
+
+**Mover**: manual
+
+**Needs before it moves**: `answers` affirmed problems, a falsifier
+
+**Gap**:
+- The decision problems (SP-64, SP-69, SP-71, SP-72, SP-91, SP-92, SP-93) have no remedy; only SP-63 has one, the owner desk.
+
+**Measure**: problems.unanswered
+
+**Confidence**: medium
+
+**Maintained by**:
+- client: srs-web Method editor
+- command: clerk check
+
+**Evidence**: the former hand-typed Flow at a glance table, row 4 (live 2026-10-16); decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)
+
+**Flows to**: Objective, period, epic
+
+**Part of stage**: Remedy
+
+
+##### Objective, period, epic
+
+**Moved by**: the owner ranks; `roadmap --apply` (daily) derives priority
+
+**Mover**: auto
+
+**Needs before it moves**: an epic `implements` a remedy and `serves` a ranked objective
+
+**Gap**:
+- Epic 5746dee3 answers no affirmed problem. Four of the seven roadmap epics sit in semanticops.com, which has had no commit since 2026-10-07.
+
+**Measure**: epics.ungrounded
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk roadmap --apply
+- workflow: derive-priority.yml
+- record: programme/period, programme/objective, programme/epic
+
+**Evidence**: the former hand-typed Flow at a glance table, row 5 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: Issue admission
+
+**Part of stage**: Objective and period
+
+
+##### Issue admission
+
+**Moved by**: the filer (analyst, scout, owner)
+
+**Mover**: manual
+
+**Needs before it moves**: `Answers: SP-nn` naming a problem; how sure the grounding is sets the care mode
+
+**Theory**: Confidence grades care, it does not gate work (decision 9d50126b, ratified 2026-10-24; clerk#156): an issue that names a suggested problem is worked in the care mode the policy gives; only no problem, or an unknown or set-aside one, stops it.
+
+**Gap**:
+- /ship stopped on any unaffirmed problem while the routines' claim graded care; clerk#184 aligns it. `clerk queue` and the briefs do not read the care mode yet (clerk#156 phase 4).
+
+**Acting on it**: clerk#156 phase 4; clerk#184; decision 9d50126b; clerk#183 (clerk flow)
+
+**Measure**: issues.ungrounded
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk flow --chain
+- command: clerk care
+- routine: wg-analyst (files; standing job 3cb9ff9b)
+- routine: handbook-watcher (files; standing job e8109ff8)
+- command: /ship
+
+**Evidence**: the former hand-typed Flow at a glance table, row 6 (live 2026-10-16); clerk#156; work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: Routing to a group
+
+**Part of stage**: Intake
+
+
+##### Routing to a group
+
+**Moved by**: the filer, then topup
+
+**Mover**: none
+
+**Needs before it moves**: the group whose charter holds the problem's domain gets its `wg:` label; a domain no group holds goes to `lane:unattended`
+
+**Theory**: Ruled: D4, D5 and D15 (ratified 2026-10-16).
+
+**Gap**:
+- Topup does not route by meaning, so real-use issues (srs-web#587 to #590) land in no queue.
+
+**Acting on it**: C13 clerk#124; H7
+
+**Measure**: issues.unrouted
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk flow (the lane dot)
+- command: clerk board (topup)
+- label: lane-unattended
+- label: the group's wg: label
+- record: governance/role (holds-domain)
+
+**Evidence**: the former hand-typed Flow at a glance table, row 7 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: Ready
+
+**Part of stage**: Working groups
+
+
+##### Ready
+
+**Moved by**: `board sync` hourly: topup writes `promote:ready`, promote sets `ready`
+
+**Mover**: auto
+
+**Needs before it moves**: routed to a lane, not blocked, not `needs-input`, on the board; target about six
+
+**Gap**:
+- Feeds only routed issues; 19 issues wait on `needs-input`, the oldest 93 days.
+
+**Acting on it**: H5, C10 (held questions reach the owner)
+
+**Measure**: issues.needs-input
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk board (topup, promote)
+- workflow: board-sync.yml
+- label: ready
+- label: promote-request
+
+**Evidence**: the former hand-typed Flow at a glance table, row 8 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: Claim and build
+
+**Part of stage**: Priority and queue
+
+
+##### Claim and build
+
+**Moved by**: nightly worker (00:00, up to 3, `lane:unattended`); WG builder (hourly at :10, one `wg:` issue)
+
+**Mover**: routine
+
+**Needs before it moves**: `ready` and a lane, no assignee, no open PR or branch; within budget, group not paused; the care mode from the policy
+
+**Gap**:
+- A stopped run keeps its claim and `needs-input`, so the issue stays in progress unseen (clerk#25 since 2026-10-17). Worktrees are left behind.
+
+**Acting on it**: H4, H5; C8 clerk#169, C9 clerk#170, C10
+
+**Measure**: claims.stuck
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk claim
+- command: clerk group-state
+- routine: unattended-worker (standing job 2aee4156)
+- routine: wg-builder (standing jobs 63def3a3, a12f5821)
+- routine: bug-fixer (no standing job yet)
+- command: /ship
+
+**Evidence**: the former hand-typed Flow at a glance table, row 9 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: A decision arises, Review
+
+**Part of stage**: Assignment and claim
+
+
+##### Review
+
+**Moved by**: central lane: a self-review subagent; a group: the reviewer (hourly at :40) posts the quorum
+
+**Mover**: routine
+
+**Needs before it moves**: gates green by exit code, within the mandate
+
+**Gap**:
+- The quorum's `mandate=` is parsed and never checked; a cited `Mandate:` is never resolved (lib/practice/upkeep.mjs:20-31, pr-decisions.mjs:33).
+
+**Acting on it**: clerk#63 (precedent along the boundary chain)
+
+**Measure**: prs.unreviewed
+
+**Confidence**: low
+
+**Maintained by**:
+- routine: wg-reviewer (standing jobs 49d82dc1, f3ecdcc0)
+- command: clerk pr-check
+
+**Evidence**: mechanics survey 2026-10-24; the former hand-typed Flow at a glance table, row 10 (live 2026-10-16)
+
+**Flows to**: A decision arises, Merge on green, Owner merge
+
+**Part of stage**: Review and merge
+
+
+##### Merge on green
+
+**Moved by**: `pr-upkeep` every 15 minutes
+
+**Mover**: auto
+
+**Needs before it moves**: `gate:auto-merge` and clean; for a group, a valid quorum, within budget, not paused
+
+**Gap**:
+- Few PRs take this path: in the week to 10-23 every one of 254 merges went through the owner's account.
+
+**Acting on it**: C5 (practice data auto-merges); C3 srs-programme#227 (govern srs-lab)
+
+**Measure**: prs.auto-waiting
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk upkeep
+- workflow: programme-pr-upkeep.yml
+- label: gate:auto-merge
+
+**Evidence**: the former hand-typed Flow at a glance table, row 11 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: Report
+
+**Part of stage**: Review and merge
+
+
+##### Owner merge
+
+**Moved by**: the owner, on GitHub; from the control room once clerk#174 lands
+
+**Mover**: manual
+
+**Needs before it moves**: `gate:owner-merge`, its asks answered, green and clean
+
+**Theory**: H1: an owner act is the last step of its work. H2: a PR reaches the owner only with a question only the owner can answer.
+
+**Gap**:
+- About 78 merged PRs carried `gate:owner-merge` in a week; an answer does not merge the PR, so every answered PR still needs a second act.
+
+**Acting on it**: H1, H2 (in force through pr-check, clerk#172), H3; C6 clerk#164; C11 clerk#166 (clerk#174, srs-lab#25)
+
+**Measure**: prs.owner-waiting
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk merge (POST /api/clerk/merge)
+- client: srs-lab control room (PR page)
+- command: clerk desk
+- label: gate:owner-merge
+
+**Evidence**: work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); mechanics survey 2026-10-24
+
+**Flows to**: Report
+
+**Part of stage**: Review and merge
+
+
+##### Report
+
+**Moved by**: WG steward daily at 11:30 (run-report record and #31 comment); worker run reports on issues
+
+**Mover**: routine
+
+**Needs before it moves**: the cycle's merged PRs
+
+**Gap**:
+- Receiving a report still means a thumbs-up on semanticops.com#31; two unreceived reports pause a group.
+
+**Acting on it**: C12 clerk#167
+
+**Measure**: reports.unreceived
+
+**Confidence**: medium
+
+**Maintained by**:
+- routine: wg-steward (standing jobs 53ba8d1b, 312a26b1)
+- record: stewardship/run-report
+- command: clerk upkeep (the pause rule)
+
+**Evidence**: the former hand-typed Flow at a glance table, row 12 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: Ratified once, at its level
+
+**Part of stage**: Report, session and ratification
+
+
+#### Decision flow at a glance: how a decision is settled and cited
+
+How a decision arises, is settled and is cited, step by step, beside the theory each step rests on: the compass, the layers, domains and tensions, and the framing standard. The decision flow joins the work flow where a claim or a review raises an ask, and where an answer or a ratification lets work move again. The last three steps are side exits: a decision that goes there does not come back.
+
+
+##### A decision arises
+
+**Moved by**: anyone: a builder or reviewer in a PR, the steward in a report, the owner in chat or an issue, a session, an RFC
+
+**Mover**: manual
+
+**Theory**: A decision exists when making a commitment will reduce future options (muDemocracy foundation 4.1). Decisions rarely stand alone: most follow from principles.
+
+**Gap**:
+- Decisions arise in at least nine places (PR bodies and comments, chat, issues, run reports, sessions, exercises, srs RFCs, srs-rust ADRs, srs-context) and nothing gathers them.
+
+**Confidence**: medium
+
+**Maintained by**:
+- record: governance/decision
+- record: governance/exercise
+- block: srs-decisions in a PR body
+
+**Evidence**: mechanics survey 2026-10-24; owner, 2026-10-24
+
+**Flows to**: Placed: layer, domain and boundary
+
+
+##### Placed: layer, domain and boundary
+
+**Moved by**: the builder; for the spec, the /rfc Charter Check (an LLM procedure)
+
+**Mover**: none
+
+**Needs before it moves**: the change's layer and the boundary it is made in
+
+**Theory**: The level test and six layer rules (srs/docs/charter/decision-compass.md). A rule holds at the boundary that made it (owner, 2026-10-09 and 10-12).
+
+**Gap**:
+- Only the spec places its decisions. No programme decision links to a domain, so every one reads as global (SP-69; taxonomy discoveries §2).
+
+**Acting on it**: clerk#63
+
+**Measure**: decisions.unscoped
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: /rfc (Charter Check, the spec only)
+
+**Evidence**: decision-compass.md; srs-programme source-documents/decision-taxonomy-2026-10-22/discoveries.md; clerk#63
+
+**Flows to**: Precedent and principles consulted
+
+
+##### Precedent and principles consulted
+
+**Moved by**: nothing in code; the spec's Charter Check step 4 and the steward brief by judgement
+
+**Mover**: none
+
+**Needs before it moves**: the decision logs in scope, the compass cell and axis, the group's lean on its tensions
+
+**Theory**: Clear and complicated decisions are settled by rule: cite the cell, apply the preference. A choice that follows the group's lean needs no one (clerk/docs/pr-decisions.md).
+
+**Gap**:
+- No code searches earlier decisions. pr-check never passes groupHasLean. Principles 7 of 25 and poles 6 of 36 are affirmed and no axes are placed, so no lean can settle anything: everything escalates.
+
+**Acting on it**: clerk#179, clerk#178, clerk#63; decision 4445b9cf (proposed); affirm principles and poles
+
+**Measure**: principles.unaffirmed
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: /rfc (Charter Check step 4, the spec only)
+- routine: wg-steward (names a repeated ruling)
+
+**Evidence**: decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:92,101
+
+**Flows to**: Cited thereafter, Classed: choice, ruling or escalation
+
+
+##### Classed: choice, ruling or escalation
+
+**Moved by**: the builder (srs-decisions `made[].class`; Mode and Door lines)
+
+**Mover**: routine
+
+**Needs before it moves**: the mandate and the lean
+
+**Theory**: Choice: the builder decides, never ratified. Ruling: inside the mandate, in the group's log. Escalation: outside it, a framed ask to the parent. Mode (clear, complicated, complex, chaotic) and door (1, 2, 3) set who merges.
+
+**Gap**:
+- `made` choices are never promoted to records; doors are not enforced (srs#589); 33 of 92 decisions have no kind and the kinds themselves are in question.
+
+**Acting on it**: exercise b430b7e0 (a taxonomy by practice)
+
+**Measure**: decisions.unkinded
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk pr-check
+- block: srs-decisions made
+
+**Evidence**: clerk/docs/pr-decisions.md; decision-compass.md; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)
+
+**Flows to**: Claim and build, Framed, Recorded
+
+
+##### Framed
+
+**Moved by**: the asker, checked by `pr-check` (run only by the reviewer routine)
+
+**Mover**: auto
+
+**Needs before it moves**: a question, two or more options including doing nothing, what each leads to, a recommendation, the tension or why it is unplaced
+
+**Theory**: The four tests and seven kinds (clerk/docs/decision-log.md); well-formed asks (clerk/docs/pr-decisions.md).
+
+**Gap**:
+- Two formats run side by side (the block and the `Decision asked:` line); the control room's copy of the standard is stale; asks are framed without the principles behind them.
+
+**Acting on it**: clerk#178
+
+**Measure**: asks.unframed
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk pr-check
+
+**Evidence**: clerk/docs/pr-decisions.md; srs-lab/control-room/spec/decision-standard.md
+
+**Flows to**: Asked
+
+
+##### Asked
+
+**Moved by**: the builder in a PR; the steward in a group log and report; the analyst in an exercise; a held claim as `needs-input`
+
+**Mover**: routine
+
+**Theory**: One decision with its stakes, options and recommendation, never a flood (handbook, Decisions).
+
+**Gap**:
+- Asks are scattered: PR bodies, group logs, report text, exercises and `needs-input` issues. The agenda's Merges section ignores block asks.
+
+**Acting on it**: C10; C11 clerk#166
+
+**Measure**: asks.open
+
+**Confidence**: medium
+
+**Maintained by**:
+- block: srs-decisions asks
+- record: governance/exercise
+- label: needs-input
+- command: clerk desk
+- client: srs-lab control room (PR page)
+
+**Evidence**: mechanics survey 2026-10-24 (lib/practice/agenda.mjs:197-200)
+
+**Flows to**: Answered, Escalation deferred
+
+
+##### Answered
+
+**Moved by**: the owner: in the control room (`srs:answer`), in chat, in a session
+
+**Mover**: manual
+
+**Theory**: Your answer is the act; the system finishes the job (H1).
+
+**Gap**:
+- Only 6 of 41 asks in PRs merged since 10-10 got an `srs:answer`. Nothing reads an answer except `pr-check --merging`, which no workflow passes, and the desk never clears an answered PR.
+
+**Acting on it**: C6 clerk#164; H1
+
+**Measure**: asks.unanswered
+
+**Confidence**: medium
+
+**Maintained by**:
+- client: srs-lab control room (srs:answer)
+- command: clerk pr-check --merging
+
+**Evidence**: decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:44,58
+
+**Flows to**: Merged without a minute, Owner merge, Recorded, Ruled in conversation, never recorded
+
+
+##### Recorded
+
+**Moved by**: an agent writes the decision record when asked; no code turns an answer or a ruling into a record
+
+**Mover**: none
+
+**Needs before it moves**: a decision record in the log of the boundary it is made in
+
+**Theory**: An owner ruling written anywhere else is recorded as a decision before it is cited (0b1c25b1).
+
+**Gap**:
+- 2 of 41 asks became records; 21 of 31 owner rulings in 30 days have no record that cites them.
+
+**Acting on it**: decision 4445b9cf (proposed); clerk#179
+
+**Measure**: rulings.unrecorded
+
+**Confidence**: medium
+
+**Maintained by**:
+- record: governance/decision
+- container: SemanticOps decision log
+- container: the group's decision log
+
+**Evidence**: decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)
+
+**Flows to**: Ratified once, at its level
+
+
+##### Ratified once, at its level
+
+**Moved by**: the owner's session (`/session`); for the spec, RFC acceptance
+
+**Mover**: manual
+
+**Needs before it moves**: a `proposed` decision recorded in a decision log
+
+**Theory**: Ratified in exactly one session, at the level that owns it, with that level's quorum (handbook, Decisions).
+
+**Gap**:
+- Two ratification models (sessions for the programme, RFC acceptance for the spec). Merges taken in a session are not minuted; interrupted sessions leave partial minutes; exercises never close (0 of 5).
+
+**Acting on it**: H6; C11 clerk#166
+
+**Measure**: decisions.proposed
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk session (/session)
+- record: programme/session
+
+**Evidence**: handbook; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
+
+**Flows to**: Cited thereafter, Ready
+
+**Part of stage**: Report, session and ratification
+
+
+##### Cited thereafter
+
+**Moved by**: the next builder, reviewer or session, by reading the logs
+
+**Mover**: none
+
+**Needs before it moves**: the recorded decision holds where the change lands
+
+**Theory**: A decision already taken is cited, never asked again (4445b9cf, proposed).
+
+**Gap**:
+- rfc-decisions, ADRs and srs-context decisions are invisible to the clerk; the same question has been decided twice (1e5df0d9 and a5c769be; 2637af0a and 0b1c25b1).
+
+**Acting on it**: clerk#178 (cite instead of ask), clerk#179, clerk#63
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk pr-check (a made entry with its id)
+
+**Evidence**: decision-taxonomy discoveries §2-3; mechanics survey 2026-10-24
+
+**Flows to**: Claim and build
+
+
+##### Merged without a minute
+
+**Moved by**: the owner on GitHub, or the agenda's Merges `[m]`
+
+**Mover**: none
+
+**Gap**:
+- The merge is recorded only by GitHub (and clerk serve's acts.jsonl, which nothing reads); the decision it carried is lost.
+
+**Acting on it**: C11 clerk#166
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk merge
+- command: clerk (agenda Merges)
+
+**Evidence**: mechanics survey 2026-10-24 (bin/clerk.mjs:321)
+
+
+##### Escalation deferred
+
+**Moved by**: the owner's `[d]efer` in the agenda
+
+**Mover**: none
+
+**Gap**:
+- Defer only skips the item; nothing is recorded, so it returns unchanged.
+
+**Confidence**: low
+
+**Maintained by**:
+- command: clerk (agenda [d]efer)
+
+**Evidence**: bin/clerk.mjs:272
+
+
+##### Ruled in conversation, never recorded
+
+**Moved by**: the owner in chat, an issue or a PR comment
+
+**Mover**: none
+
+**Gap**:
+- The ruling cannot be cited, so the question comes back (SP-99, suggested).
+
+**Acting on it**: decision 4445b9cf; clerk#179
+
+**Measure**: rulings.unrecorded
+
+**Confidence**: medium
+
+**Evidence**: decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); owner, 2026-10-24
+
+
+#### Keeping the flow: the dots, and who joins them
+
+Work flows when every dot an issue needs is joined; confidence never stops it, it sets the care mode (decision 9d50126b, ratified 2026-10-24). Every command and brief reads the same dots, `clerk flow --chain <repo#n>` shows them, and `clerk flow --open <repo>` sweeps a repository. A dot a recorded rule supplies is joined by whoever finds it missing, citing the rule; any other missing dot is a choice for a person.
+
+| Dot | Holds when | Rule that joins it | Producers (file it joined) | Consumers (check before claim) |
 |---|---|---|---|---|
-| 1 | Domain | agents suggest; the owner affirms (Method editor, CLI `record fork` fallback) | purpose, in and out of scope | suggested only: no domain is affirmed |
-| 2 | Persona in domain | agents suggest; the owner affirms | `refines` a shared persona, `in-domain` exactly one domain | suggested in one domain only |
-| 3 | Problem | anyone suggests; the owner affirms | `held-by` a persona-in-domain (the principle 2 gate, warn level) | affirmed problems exist; most still held by shared personas |
-| 4 | Remedy | agents suggest 1 to 3 per domain; the owner affirms | `answers` affirmed problems, a falsifier | suggested in two domains |
-| 5 | Objective, period, epic | the owner ranks; `roadmap --apply` (daily) derives priority | an epic `implements` a remedy and `serves` a ranked objective | working |
-| 6 | **Issue admission** | the filer (analyst, scout, owner) | `Answers: SP-nn` naming an affirmed problem whose persona and domain are affirmed | `claim` checks the affirmed problem only |
-| 7 | **Routing to a group** | the filer, then topup | the group whose charter holds the problem's domain (`holds-domain`, role to domain) gets its `wg:` label; a domain no group holds goes to `lane:unattended` | ruled (D4, D5, D15, ratified 2026-10-16); charters name domains (`clerk groups`); topup does not route yet |
-| 8 | Ready | `board sync` hourly: topup writes `promote:ready`, promote sets `ready` | routed to a lane (`lane:unattended` or a `wg:` label), not blocked, not `needs-input`, on the board; target about six | working; feeds only routed issues |
-| 9 | Claim and build | nightly worker (00:00, up to 3, `lane:unattended`); WG builder (hourly at :10, one `wg:` issue) | `ready` + a lane, no assignee, no open PR or branch; within budget, group not paused | nightly working; WG builder live from 2026-10-16 |
-| 10 | Review | central lane: a self-review subagent; WG: the reviewer (hourly at :40) posts the quorum | gates green by exit code, within the mandate | WG reviewer live from 2026-10-16 |
-| 11 | Merge | `pr-upkeep` every 15 minutes | `gate:auto-merge` and clean; for a group, a valid quorum, within budget, not paused | working |
-| 12 | Report | WG steward daily at 11:30 (run-report record and #31 comment); worker run reports on issues | the cycle's merged PRs | working |
-| 13 | Ratify | the owner's session (`/session`) | a `proposed` decision **recorded in a decision log** | working; decisions only in PR text never reach it |
+| Problem | `Answers: SP-nn` names a suggested or affirmed problem | none: a person or a brief names it | wg-analyst, handbook-watcher, /ship, the steward's escalations | claim (collisions, the problem), then the care mode |
+| Epic | the issue, or its top parent, is a sub-issue of a ranked epic | "Part of" names the parent, when the issue has none | every producer: `Part of` and the sub-issue link | clerk flow |
+| Lane | `lane:unattended`, or the label of a group that works in the issue's repository | the group that holds the problem's domain, else the central lane (D4, D5, D15); two holders are a choice | every producer | clerk flow; topup feeds only routed issues (the same `routed` rule) |
+| Plan | a `## Technical plan` section, or written steps | none: a person or a brief writes it | wg-analyst, handbook-watcher where the fix is known | a missing plan lowers the care mode, it does not stop the work |
+| Blockers | every `Blocked by` is recorded, and none is open | "Blocked by" names the dependency | every producer: the line and the link | clerk flow, then the board's blocked mirror |
+| Hold | no `needs-input`, `parked` or `blocked` | none | | claim, queue and topup |
+
+The elements that keep each step moving are listed on the step (Maintained by). An element named there that does not exist (a routine with no standing job, a command that is gone) is a gap in the flow itself: the bug fixer has no standing job yet, and no job sweeps the governed repositories to join the mechanical dots.
+
 
 #### How an issue reaches a group
 
-**Ruled** (decisions D4, D5 and D15, ratified in the owner's session of 2026-10-16; `claim` already enforces the affirmed problem, routing is not yet automatic). An issue is not work until it is grounded and routed. Before any routine may take it:
+**Ruled** (decisions D4, D5 and D15, ratified in the owner's session of 2026-10-16; step 1 revised by decision 9d50126b, *Confidence grades care, it does not gate work*, ratified in the owner's session of 2026-10-24). `clerk flow --chain <repo#n>` shows each step below as a dot, and agents join the mechanical ones by these rules.
 
-1. **Grounded.** Its first line is `Answers: SP-nn`, naming an affirmed problem. The problem is `held-by` an affirmed persona-in-domain, and that persona's `in-domain` reaches an affirmed domain. An issue that reveals a problem nobody has recorded yields a problem *suggestion* in the domain, and stays parked against it until the problem is affirmed.
+1. **Grounded.** Its first line is `Answers: SP-nn`, naming the problem it answers, suggested or affirmed. How sure the grounding is sets the care mode (`clerk care`), and the work proceeds in that mode; only an unknown or set-aside problem, or none, stops it. An issue that reveals a problem nobody has recorded yields a problem *suggestion* in the domain, named in `Answers:`.
 2. **Routed.** The problem's domain decides the group: the group whose charter names that domain (a `com.semanticops.method/holds-domain` relation from the group's role to the domain record) takes it through its input queue (its `wg:` label); a domain no group holds goes to the central group (`lane:unattended`).
 3. **Ranked.** Its epic serves a ranked objective, which gives its priority. An issue under no ranked objective stays `parked`.
 
-`parked` means "waiting for meaning", not "rejected": the 2026-10 backlog was parked so that domains, problems and personas are established first. Issues come out of parking only by passing steps 1 to 3, a domain at a time, never in bulk.
+`parked` means "waiting for meaning", not "rejected": the 2026-10 backlog was parked so that domains, problems and personas are established first. Issues come out of parking by passing steps 1 to 3, a domain at a time, never in bulk.
 
 #### Where flow stops, and how to see it
 
 | Symptom | Usual cause | See it with |
 |---|---|---|
-| Hundreds of issues, an empty queue | domains and personas not affirmed, so nothing can be grounded (rows 1 to 3) | `clerk check`, `clerk roadmap --explain` |
-| `ready` issues nobody takes | no lane label (row 7), or the routine cannot reach the repo | `clerk queue`, the routine's run log |
+| Hundreds of issues, an empty queue | domains and personas not affirmed, so nothing can be grounded (Domain to Problem) | `clerk check`, `clerk roadmap --explain` |
+| `ready` issues nobody takes | no lane label (Routing to a group), or the routine cannot reach the repo | `clerk queue`, the routine's run log |
 | A group merges nothing | builder or reviewer trigger missing or disabled | `clerk routines --check <dump>` |
 | A decision you were asked for never appears in a session | it exists only as PR text, or is in no decision log | `clerk desk` ("in no log") |
 | A group stops | two unreceived reports | `clerk desk`, then a session's Reports |
@@ -1330,7 +2053,7 @@ On 2026-10-11 it ran 60 tests: 36 passing, 24 todo, none failing.
 
 #### How this handbook is made
 
-The handbook is an SRS repository in `handbook/`, with its own package `com.semanticops.handbook`: a `chapter` (title, body), a `stage` (theory, status, practice, gaps, open questions, test) and an `element` (kind, home, meaning, read by). The root container's outline is the order of the document. The composition `handbook` renders it.
+The handbook is an SRS repository in `handbook/`, with its own package `com.semanticops.handbook`: a `chapter` (title, body), a `stage` (theory, status, practice, gaps, open questions, test), an `element` (kind, home, meaning, read by) and a `flow-step` (flow, moved by, mover, needs, theory, gap, what acts on it, measure, confidence, evidence), joined by `flows-to` and `refines` to the stage it belongs to. Confidence uses the clerk's `confidence_level` from the installed `com.semanticops.programme` methodology package (`handbook/packages/methodology`, a copy refreshed with `srs package upgrade`). `clerk flow` reads the flow steps (clerk#126); nothing derived is stored in them. The root container's outline is the order of the document. The composition `handbook` renders it.
 
 ```mermaid
 flowchart LR

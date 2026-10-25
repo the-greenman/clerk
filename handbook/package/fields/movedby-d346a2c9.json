@@ -1,0 +1,15 @@
+{
+  "id": "d346a2c9-191b-4749-bdf6-e86f6bf17818",
+  "namespace": "com.semanticops.handbook",
+  "name": "moved_by",
+  "version": 1,
+  "description": "Who or what moves work out of this step.",
+  "aiGuidance": {
+    "purpose": "Name the routine, command, role or person, with its cadence."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-24T12:29:10.461238781+00:00"
+}

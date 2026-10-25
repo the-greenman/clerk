@@ -1,0 +1,18 @@
+{
+  "id": "f37bceb4-568b-457c-9d3f-31c7e65d88a7",
+  "namespace": "com.semanticops.programme",
+  "name": "programme_title",
+  "version": 1,
+  "description": "Short label naming the programme.",
+  "aiGuidance": {
+    "purpose": "The programme's name as a reader scans it.",
+    "extraction": "Use the programme's plain name, e.g. \"SemanticOps programme\"."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-10T00:00:00Z"
+}

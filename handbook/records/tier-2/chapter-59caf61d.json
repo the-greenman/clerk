@@ -1,0 +1,19 @@
+{
+  "instanceId": "59caf61d-3b13-429d-89dd-4d9001f4b4ba",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "Keeping the flow: the dots, and who joins them",
+    "body": "Work flows when every dot an issue needs is joined; confidence never stops it, it sets the care mode (decision 9d50126b, ratified 2026-10-24). Every command and brief reads the same dots, `clerk flow --chain <repo#n>` shows them, and `clerk flow --open <repo>` sweeps a repository. A dot a recorded rule supplies is joined by whoever finds it missing, citing the rule; any other missing dot is a choice for a person.\n\n| Dot | Holds when | Rule that joins it | Producers (file it joined) | Consumers (check before claim) |\n|---|---|---|---|---|\n| Problem | `Answers: SP-nn` names a suggested or affirmed problem | none: a person or a brief names it | wg-analyst, handbook-watcher, /ship, the steward's escalations | claim (collisions, the problem), then the care mode |\n| Epic | the issue, or its top parent, is a sub-issue of a ranked epic | \"Part of\" names the parent, when the issue has none | every producer: `Part of` and the sub-issue link | clerk flow |\n| Lane | `lane:unattended`, or the label of a group that works in the issue's repository | the group that holds the problem's domain, else the central lane (D4, D5, D15); two holders are a choice | every producer | clerk flow; topup feeds only routed issues (the same `routed` rule) |\n| Plan | a `## Technical plan` section, or written steps | none: a person or a brief writes it | wg-analyst, handbook-watcher where the fix is known | a missing plan lowers the care mode, it does not stop the work |\n| Blockers | every `Blocked by` is recorded, and none is open | \"Blocked by\" names the dependency | every producer: the line and the link | clerk flow, then the board's blocked mirror |\n| Hold | no `needs-input`, `parked` or `blocked` | none | | claim, queue and topup |\n\nThe elements that keep each step moving are listed on the step (Maintained by). An element named there that does not exist (a routine with no standing job, a command that is gone) is a gap in the flow itself: the bug fixer has no standing job yet, and no job sweeps the governed repositories to join the mechanical dots."
+  },
+  "createdAt": "2026-10-24T16:19:28.826848787+00:00",
+  "updatedAt": "2026-10-24T16:44:08.908321167+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (on the owner's instruction, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

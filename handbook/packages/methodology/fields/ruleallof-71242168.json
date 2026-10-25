@@ -1,0 +1,19 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "extraction": "One clause per entry.",
+    "purpose": "Empty means no all-of condition."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "Clauses that must all hold for this rule to match. A clause is `<axis_key>>=<level>` (e.g. technical_plan>=high) or `signal:<signal_key>`.",
+  "editorHint": "singleline",
+  "fieldType": {
+    "cardinality": "list",
+    "datatype": "string",
+    "format": "plain"
+  },
+  "id": "71242168-e3cf-4481-8610-16e3b0e17e55",
+  "name": "rule_all_of",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

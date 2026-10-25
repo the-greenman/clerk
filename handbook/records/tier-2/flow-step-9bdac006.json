@@ -1,0 +1,29 @@
+{
+  "instanceId": "9bdac006-1385-491f-acfd-f70cc2e10334",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Escalation deferred",
+    "flow": "decision",
+    "moved_by": "the owner's `[d]efer` in the agenda",
+    "mover_kind": "none",
+    "gaps": [
+      "Defer only skips the item; nothing is recorded, so it returns unchanged."
+    ],
+    "confidence_level": "low",
+    "evidence": "bin/clerk.mjs:272",
+    "maintained_by": [
+      "command: clerk (agenda [d]efer)"
+    ]
+  },
+  "createdAt": "2026-10-24T12:33:00.578310765+00:00",
+  "updatedAt": "2026-10-24T16:19:08.721367702+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

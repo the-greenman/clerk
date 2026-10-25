@@ -1,0 +1,34 @@
+{
+  "instanceId": "d80135e3-0afb-46a5-b94f-7a9d4bb31ed7",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Classed: choice, ruling or escalation",
+    "flow": "decision",
+    "moved_by": "the builder (srs-decisions `made[].class`; Mode and Door lines)",
+    "mover_kind": "routine",
+    "needs": "the mandate and the lean",
+    "theory": "Choice: the builder decides, never ratified. Ruling: inside the mandate, in the group's log. Escalation: outside it, a framed ask to the parent. Mode (clear, complicated, complex, chaotic) and door (1, 2, 3) set who merges.",
+    "gaps": [
+      "`made` choices are never promoted to records; doors are not enforced (srs#589); 33 of 92 decisions have no kind and the kinds themselves are in question."
+    ],
+    "remedies": "exercise b430b7e0 (a taxonomy by practice)",
+    "measure": "decisions.unkinded",
+    "confidence_level": "medium",
+    "evidence": "clerk/docs/pr-decisions.md; decision-compass.md; decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)",
+    "maintained_by": [
+      "command: clerk pr-check",
+      "block: srs-decisions made"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:59.484659668+00:00",
+  "updatedAt": "2026-10-24T16:19:08.965983134+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

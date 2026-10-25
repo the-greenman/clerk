@@ -1,0 +1,34 @@
+{
+  "instanceId": "8c4bf5f5-00c1-4f79-9c81-7c0d84359173",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Persona in domain",
+    "flow": "work",
+    "moved_by": "agents suggest; the owner affirms",
+    "mover_kind": "manual",
+    "needs": "`refines` a shared persona, `in-domain` exactly one domain",
+    "gaps": [
+      "Four problems are held by no affirmed persona-in-domain."
+    ],
+    "remedies": "Finish the domain walks (audit, session item)",
+    "measure": "problems.no-affirmed-persona",
+    "confidence_level": "medium",
+    "evidence": "the former hand-typed Flow at a glance table, row 2 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "client: srs-web Method editor",
+      "client: srs-lab control room (affirmation rounds)",
+      "command: clerk check"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:56.599619292+00:00",
+  "updatedAt": "2026-10-24T16:19:08.528268182+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

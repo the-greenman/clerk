@@ -1,0 +1,33 @@
+{
+  "instanceId": "e9761411-753b-483c-a96a-8b3b17af3f03",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Framed",
+    "flow": "decision",
+    "moved_by": "the asker, checked by `pr-check` (run only by the reviewer routine)",
+    "mover_kind": "auto",
+    "needs": "a question, two or more options including doing nothing, what each leads to, a recommendation, the tension or why it is unplaced",
+    "theory": "The four tests and seven kinds (clerk/docs/decision-log.md); well-formed asks (clerk/docs/pr-decisions.md).",
+    "gaps": [
+      "Two formats run side by side (the block and the `Decision asked:` line); the control room's copy of the standard is stale; asks are framed without the principles behind them."
+    ],
+    "remedies": "clerk#178",
+    "measure": "asks.unframed",
+    "confidence_level": "medium",
+    "evidence": "clerk/docs/pr-decisions.md; srs-lab/control-room/spec/decision-standard.md",
+    "maintained_by": [
+      "command: clerk pr-check"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:59.615193055+00:00",
+  "updatedAt": "2026-10-24T16:19:09.094383424+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

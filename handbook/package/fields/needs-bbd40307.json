@@ -1,0 +1,15 @@
+{
+  "id": "bbd40307-e429-44bd-a62a-6ffa3feee3e6",
+  "namespace": "com.semanticops.handbook",
+  "name": "needs",
+  "version": 1,
+  "description": "What must hold before the step moves.",
+  "aiGuidance": {
+    "purpose": "The input conditions, as the mover checks them."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-24T12:29:10.499577280+00:00"
+}

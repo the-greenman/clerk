@@ -1,0 +1,20 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/field.json",
+  "aiGuidance": {
+    "purpose": "One grade record per level an axis can reach."
+  },
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "The level on the confidence_level scale this grade gives its axis.",
+  "editorHint": "dropdown",
+  "fieldType": {
+    "cardinality": "single",
+    "datatype": "string",
+    "format": "plain",
+    "valueDomain": "closed",
+    "vocabularyRef": "a0e23ab8-ab4b-496c-a651-4c8556e85035"
+  },
+  "id": "fb3d43a0-445f-4594-82fc-52ec99759fb0",
+  "name": "confidence_level",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

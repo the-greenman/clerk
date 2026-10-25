@@ -1,11 +1,17 @@
 {
+  "rootContainerId": "8c686bc8-1018-4196-990b-dd62f19a2f92",
   "$schema": "https://srs.semanticops.com/schema/2.0/manifest.json",
   "createdAt": "2026-10-11T18:33:26.232942085+00:00",
   "dataModelRevision": 11,
   "description": "How a programme run by the clerk works. The records are the source of truth; docs/handbook.md is a rendered Composition.",
   "namespace": "com.semanticops.handbook",
+  "packageRefs": [
+    {
+      "mode": "local",
+      "path": "packages/methodology"
+    }
+  ],
   "repositoryId": "8c686bc8-1018-4196-990b-dd62f19a2f92",
   "srsVersion": "2.0-draft",
-  "title": "Clerk handbook",
-  "rootContainerId": "8c686bc8-1018-4196-990b-dd62f19a2f92"
+  "title": "Clerk handbook"
 }

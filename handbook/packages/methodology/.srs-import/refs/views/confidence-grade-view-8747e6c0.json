@@ -1,0 +1,26 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/view.json",
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "A grade renders as its level, what earns it, and the signals that do.",
+  "fieldViews": [
+    {
+      "displayLabel": "Level",
+      "fieldId": "fb3d43a0-445f-4594-82fc-52ec99759fb0",
+      "order": 0
+    },
+    {
+      "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
+      "labelMode": "none",
+      "order": 1
+    },
+    {
+      "displayLabel": "Earned by any of",
+      "fieldId": "79ce55ff-87c5-414c-9dce-901fd14b7e41",
+      "order": 2
+    }
+  ],
+  "id": "8747e6c0-786d-4d76-828b-7383a28d8f49",
+  "name": "confidence-grade-view",
+  "namespace": "com.semanticops.programme",
+  "version": 1
+}

@@ -1,0 +1,15 @@
+{
+  "id": "cd0512ef-53f7-404d-b739-5e5ac8319686",
+  "namespace": "com.semanticops.handbook",
+  "name": "evidence",
+  "version": 1,
+  "description": "Where this step's description comes from.",
+  "aiGuidance": {
+    "purpose": "file:line references, record ids, source documents."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "format": "markdown"
+  },
+  "createdAt": "2026-10-24T12:29:10.641789078+00:00"
+}

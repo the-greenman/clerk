@@ -1,0 +1,32 @@
+{
+  "instanceId": "9ef142a1-c1a8-4432-b266-144174c7035d",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Remedy",
+    "flow": "work",
+    "moved_by": "agents suggest 1 to 3 per domain; the owner affirms",
+    "mover_kind": "manual",
+    "needs": "`answers` affirmed problems, a falsifier",
+    "gaps": [
+      "The decision problems (SP-64, SP-69, SP-71, SP-72, SP-91, SP-92, SP-93) have no remedy; only SP-63 has one, the owner desk."
+    ],
+    "measure": "problems.unanswered",
+    "confidence_level": "medium",
+    "evidence": "the former hand-typed Flow at a glance table, row 4 (live 2026-10-16); decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126)",
+    "maintained_by": [
+      "client: srs-web Method editor",
+      "command: clerk check"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:57.037171827+00:00",
+  "updatedAt": "2026-10-24T16:19:08.783104396+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}
