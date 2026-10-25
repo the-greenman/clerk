@@ -70,7 +70,7 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Mover**: manual
 
-**Needs before it moves**: the desk is current (rewritten on every upkeep run, clerk#203) and shows all active work: each epic's open sequences with the next task free to take, the central lane's queue, and claims with no PR (clerk#204); read the vignettes behind the work before acting
+**Needs before it moves**: the desk is current (rewritten on every upkeep run, clerk#203) and shows all active work: each epic's open sequences with the next task free to take, the central lane's queue, and claims with no PR (clerk#204). The desk's Needs you is the owner's queue: an agent never takes an item from it as its next task (it may unblock its own PR listed there) and resumes the first `↳ sequence` row showing `next:`, else the central lane or a group queue (srs-context brief "Resuming work"). Read the vignettes behind the work before acting
 
 **Theory**: Work run in a chat window is lost when the window closes. Work that is in the flow (an issue, placed, in a sequence) is found again from the desk by any session (owner, 2026-10-25). The srs-context brief "Resuming work" points every new session here. From Find, a session resuming a sequence goes to its next task (Claim and build); new work starts at Story.
 
