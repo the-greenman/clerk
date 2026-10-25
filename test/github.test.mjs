@@ -34,4 +34,6 @@ test('--paginate pages by page=N on the given path, never by the Link header (cl
   assert.deepEqual(out.map((p) => p.length), [100, 100, 7]);
   assert.equal(JSON.parse(ghPaged(['api', '--paginate', 'repos/o/r/branches'], () => '[1,2]')).length, 2, 'default page size 30; arrays merged without --slurp');
   assert.deepEqual(JSON.parse(ghPaged(['api', '-X', 'GET', '--paginate', 'repos/o/r/pulls?per_page=2'], (a) => (a[3].endsWith('page=1') ? '[1,2]' : '[]'))), [1, 2]);
+  assert.throws(() => ghPaged(['api', '--paginate', 'repos/o/r/actions/runs'], () => '{"workflow_runs":[]}'), /neither an array nor \{items\}/);
+  assert.throws(() => ghPaged(['api', '--paginate', 'repos/o/r/x?per_page=1'], () => '[1]'), /more than 100 pages/);
 });
