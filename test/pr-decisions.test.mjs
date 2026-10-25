@@ -123,5 +123,6 @@ test('an owner-merge PR must ask the owner something, and every PR carries a gat
   assert.match(errs('plain body', []).join(), /no gate label and no working-group label/);
   assert.deepEqual(errs('plain body', ['wg:x']), [], 'a group PR gets its gate from its reviewer');
   assert.deepEqual(errs('plain body', ['gate:auto-merge']), []);
+  assert.doesNotMatch(checkDecisions(parseDecisions('plain body'), { body: 'plain body', labels: [], gates: G, programme: true }).map((f) => f.text).join(), /no gate label/, 'clerk#208: a programme PR is auto-merge by default');
   assert.deepEqual(checkDecisions(parseDecisions('plain body'), { body: 'plain body' }).map((f) => f.level), ['info'], 'without labels the gate is not checked');
 });
