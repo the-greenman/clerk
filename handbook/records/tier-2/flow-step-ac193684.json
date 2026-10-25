@@ -1,0 +1,36 @@
+{
+  "instanceId": "ac193684-5633-40f7-8cc2-fe0369b8fac0",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Find",
+    "flow": "work",
+    "moved_by": "every session that resumes work, or has no task: `clerk desk`, then the open sequence it lists, then that sequence's next task free to take, run through `clerk flow --chain`",
+    "mover_kind": "manual",
+    "needs": "the desk is current (rewritten on every upkeep run, clerk#203) and shows all active work: each epic's open sequences with the next task free to take, the central lane's queue, and claims with no PR (clerk#204); read the vignettes behind the work before acting",
+    "theory": "Work run in a chat window is lost when the window closes. Work that is in the flow (an issue, placed, in a sequence) is found again from the desk by any session (owner, 2026-10-25). The srs-context brief \"Resuming work\" points every new session here. From Find, a session resuming a sequence goes to its next task (Claim and build); new work starts at Story.",
+    "gaps": [
+      "The flow keeper, which joins the dots the desk reads, has no schedule yet (clerk#201)."
+    ],
+    "remedies": "clerk#203; clerk#204; clerk#201; clerk#112 (a sequence becomes a unit)",
+    "confidence_level": "medium",
+    "evidence": "owner, 2026-10-25, verbatim in srs-programme Narrative explorations (note 71d4c10a); clerk#197 run reports; desk staleness, discovery 16",
+    "maintained_by": [
+      "command: clerk desk",
+      "workflow: programme-pr-upkeep.yml (Desk step)",
+      "issue: the pinned desk (settings digest repository, label desk)",
+      "context: srs-context brief \"Resuming work\"",
+      "command: clerk flow --chain"
+    ]
+  },
+  "createdAt": "2026-10-25T10:46:23.039568230+00:00",
+  "updatedAt": "2026-10-25T10:54:08.958021538+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (the owner's session, clerk#197, 2026-10-25)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

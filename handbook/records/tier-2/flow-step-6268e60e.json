@@ -1,0 +1,33 @@
+{
+  "instanceId": "6268e60e-426d-4c99-8718-a037ff395aa3",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Derive",
+    "flow": "work",
+    "moved_by": "agents",
+    "mover_kind": "manual",
+    "needs": "each record that comes from a vignette (problem, remedy, domain, decision, exercise) is a suggestion `derived-from` it, or an existing record gets an `evidences` link from it; look before you create",
+    "theory": "Records follow the narrative (decision 77e04b19, proposed). Affirming them is not a step of this flow: it is its own layer (*The affirmation layer*), and work never waits on it.",
+    "gaps": [
+      "Nothing lists the vignettes that have no derived or linked record yet (clerk#199)."
+    ],
+    "remedies": "clerk#199; remedy 2910ac1e (affirm in context)",
+    "confidence_level": "medium",
+    "evidence": "owner, 2026-10-25, verbatim in srs-programme Narrative explorations (note 71d4c10a); clerk#197 run reports",
+    "maintained_by": [
+      "command: srs relation create (pinned CLI)",
+      "command: srs record list"
+    ]
+  },
+  "createdAt": "2026-10-25T10:46:23.184839076+00:00",
+  "updatedAt": "2026-10-25T10:54:09.281022431+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (the owner's session, clerk#197, 2026-10-25)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}
