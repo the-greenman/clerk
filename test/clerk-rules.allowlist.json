@@ -29,7 +29,6 @@
     "lib/practice/api.mjs: error",
     "lib/practice/api.mjs: fail",
     "lib/practice/api.mjs: ok",
-    "lib/practice/canon.mjs: canonOf",
     "lib/practice/charter.mjs: validateCharter",
     "lib/practice/claim.mjs: openClaim",
     "lib/practice/claim.mjs: refersTo",

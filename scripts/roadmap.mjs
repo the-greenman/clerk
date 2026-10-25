@@ -33,7 +33,7 @@ const MNS = "com.semanticops.method";
 export function derive(records, relations, today, affirmed = new Set(), outlines = []) {
   const rows = records.map((r) => ({ id: r.instanceId, type: r.record.typeName, ns: r.record.typeNamespace, fv: r.record.fieldValues }));
   const byId = new Map(rows.map((r) => [r.id, r]));
-  const canon = canonOf(relations);
+  const canon = canonOf(relations, records);
   const same = (id) => rows.filter((r) => canon(r.id) === canon(id)).map((r) => r.id); // a suggestion and its fork are one identity
   const outlineCluster = (problemId) => {
     for (const o of outlines.filter((x) => x.containerType === "domain")) {
