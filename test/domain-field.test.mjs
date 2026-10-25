@@ -75,6 +75,15 @@ test('a tension is affirmed with both its poles, poles first; never twice', () =
   assert.match(canAffirmTension(field(), 'evolution').reasons[0], /not a tension/);
 });
 
+test('a tension affirmed earlier forks only its poles, and re-points its contains to them (clerk#187)', () => {
+  const r = canAffirmTension(field({ affirmed: new Set(['sr-fork', 'evo']) }), 'evo');
+  assert.ok(r.ok);
+  assert.deepEqual(r.forks, ['evolution', 'continuity']);
+  assert.equal(r.repoint, true);
+  assert.equal(r.tensionId, 'evo');
+  assert.equal(canAffirmTension(field(), 'evo').repoint, false);
+});
+
 // axes (decision cdd272a3): Semantic records holds Identity as line 2 with Evolution yang; "Narrow" refines it and flips the pole
 const axisData = () => {
   const rs = [...records, rec('ax', 'axis-in-domain', 'Identity in Semantic records', M, { line: 2 }), rec('narrow', 'domain', 'Narrow'),
