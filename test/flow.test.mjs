@@ -104,3 +104,10 @@ test('routed: one rule for flow and topup', () => {
   assert.equal(routed(['wg:a'], { lane: 'lane:unattended', groups: g, repo: 'srs-web' }), true);
   assert.equal(routed(['wg:x'], { lane: 'lane:unattended', groups: null }), true, 'groups unknown: any wg: label');
 });
+
+test('an epic or sequence, or an assigned item, is never labelled for a lane (clerk#201)', () => {
+  const lane = (more) => dot(dotsFor({ item: item({ labels: [], ...more }), facts: facts({ problems: [{ id: 'SP-12', layer: 'suggested', domains: ['dom-other'] }] }), epics: EPICS, groups: GROUPS, wf: WF }), 'lane')[0];
+  assert.deepEqual([lane({ subIssues: 3 }).ok, lane({ subIssues: 3 }).auto, lane({ subIssues: 3 }).note], [true, false, 'holds sub-issues: its tasks are routed, not it']);
+  assert.equal(lane({ assigned: true }).note, 'assigned: its assignee holds it');
+  assert.equal(lane({}).fix, 'label it lane:unattended');
+});
