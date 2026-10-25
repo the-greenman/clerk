@@ -112,7 +112,7 @@ test('an epic lists its open sequences with the next unblocked task, or says all
   const t = threads(body);
   assert.match(t, /\| Clerk process \(clerk#19\) \| running \|.*See its sequences below \| agents \|/);
   assert.match(t, /\| ↳ sequence \[clerk#197\]\(u197\) Dogfood \| running \| - \| next: \[clerk#204\]\(u204\) desk shows work \|/);
-  assert.match(t, /\| ↳ sequence \[clerk#90\]\(u90\) Stuck \| blocked \| - \| 2 open, all blocked \|/);
+  assert.match(t, /\| ↳ sequence \[clerk#90\]\(u90\) Stuck \| waiting \| - \| 2 open, none free to take \(blocked, held or claimed\) \|/);
 });
 
 test('an epic with ready or claimed work and no PR is running, not idle (clerk#204)', () => {

@@ -23,7 +23,7 @@ export function checkMethod(records, relations, since = BOUNDARY_RULES_FROM) {
   const type = (n) => records.filter((r) => r.record.typeName === n);
   const label = (r) => `${r.record.typeName} ${r.record.fieldValues.title ?? r.record.fieldValues.statement} (${r.instanceId.slice(0, 8)})`;
   const out = (id, t) => relations.filter((x) => x.sourceId === id && x.relationType === t).map((x) => x.targetId);
-  const errors = [], canon = canonOf(relations);
+  const errors = [], canon = canonOf(relations, records);
   for (const t of type("tension")) {
     const poles = out(t.instanceId, "contains").filter((id) => records.some((r) => r.instanceId === id && r.record.typeName === "pole"));
     if (poles.length !== 2) errors.push(`${label(t)} contains ${poles.length} poles, expected exactly 2`);
@@ -85,7 +85,7 @@ export function checkGates(records, relations, affirmed, setAside, today = new D
     if (!answersAffirmed(e.instanceId) && !viaRemedy) warnings.push(`${label(e)} serves a ranked objective but answers no affirmed problem`);
   }
   // Principle 2. canon() makes a suggestion and its fork one identity; an edge on either copy counts.
-  const canon = canonOf(relations);
+  const canon = canonOf(relations, records);
   const affirmedIds = new Set([...affirmed].map(canon));
   const classOf = (id) => records.map((r) => r.instanceId).filter((x) => canon(x) === canon(id));
   const reach = (id, t) => [...new Set(classOf(id).flatMap((m) => out(m, t)).map(canon))];
