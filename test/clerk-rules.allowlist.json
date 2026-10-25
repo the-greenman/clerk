@@ -32,7 +32,6 @@
     "lib/practice/canon.mjs: canonOf",
     "lib/practice/charter.mjs: validateCharter",
     "lib/practice/claim.mjs: openClaim",
-    "lib/practice/claim.mjs: refersTo",
     "lib/practice/desk.mjs: DESK_LABEL",
     "lib/practice/desk.mjs: ageDays",
     "lib/practice/desk.mjs: heldBecause",

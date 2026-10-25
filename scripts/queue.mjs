@@ -19,9 +19,9 @@ import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { classify } from "../lib/practice/queue.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 
-/** The general lane is the bound unattended-lane label (work_label lane-unattended); each chartered group adds its own. */
 export { classify };
 
+/** The general lane is the bound unattended-lane label (work_label lane-unattended); each chartered group adds its own. */
 export const lanesFrom = (groups, general) => ({ [general]: "general", ...Object.fromEntries(groups.map((g) => [g.label, "wg"])) });
 
 const api = (path) => ghJson(["api", "--paginate", "--slurp", path]).flat();
