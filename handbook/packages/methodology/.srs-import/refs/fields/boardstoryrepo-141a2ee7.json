@@ -1,0 +1,18 @@
+{
+  "id": "141a2ee7-e8c8-4673-9c65-342a9d7b9d89",
+  "namespace": "com.semanticops.programme",
+  "name": "board_story_repo",
+  "version": 1,
+  "description": "Repository whose issues are the board's stories.",
+  "aiGuidance": {
+    "purpose": "Where gh-project looks for stories driving priority.",
+    "extraction": "Bare repository name under github_owner, e.g. semanticops.com."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-10T00:00:00Z"
+}

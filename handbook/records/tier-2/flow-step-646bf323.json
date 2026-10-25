@@ -1,0 +1,32 @@
+{
+  "instanceId": "646bf323-0459-46af-9747-0e21a383d550",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Cited thereafter",
+    "flow": "decision",
+    "moved_by": "the next builder, reviewer or session, by reading the logs",
+    "mover_kind": "none",
+    "needs": "the recorded decision holds where the change lands",
+    "theory": "A decision already taken is cited, never asked again (4445b9cf, proposed).",
+    "gaps": [
+      "rfc-decisions, ADRs and srs-context decisions are invisible to the clerk; the same question has been decided twice (1e5df0d9 and a5c769be; 2637af0a and 0b1c25b1)."
+    ],
+    "remedies": "clerk#178 (cite instead of ask), clerk#179, clerk#63",
+    "confidence_level": "medium",
+    "evidence": "decision-taxonomy discoveries §2-3; mechanics survey 2026-10-24",
+    "maintained_by": [
+      "command: clerk pr-check (a made entry with its id)"
+    ]
+  },
+  "createdAt": "2026-10-24T12:33:00.327909247+00:00",
+  "updatedAt": "2026-10-24T16:19:08.265339885+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

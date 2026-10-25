@@ -1,0 +1,18 @@
+{
+  "id": "44a66dd4-c598-4464-831b-bf2d6874b242",
+  "namespace": "com.semanticops.programme",
+  "name": "owner_actor",
+  "version": 1,
+  "description": "Actor id of the programme owner, as recorded in createdBy.",
+  "aiGuidance": {
+    "purpose": "Identifies whose session counts as the owner's; roles derive from it.",
+    "extraction": "kind:name form as in createdBy ids, e.g. human:the-greenman."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "single",
+    "format": "plain"
+  },
+  "editorHint": "singleline",
+  "createdAt": "2026-10-10T00:00:00Z"
+}

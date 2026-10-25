@@ -1,0 +1,33 @@
+{
+  "instanceId": "f78ecc64-09cc-4b1f-89dc-2752a91cdcb2",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Objective, period, epic",
+    "flow": "work",
+    "moved_by": "the owner ranks; `roadmap --apply` (daily) derives priority",
+    "mover_kind": "auto",
+    "needs": "an epic `implements` a remedy and `serves` a ranked objective",
+    "gaps": [
+      "Epic 5746dee3 answers no affirmed problem. Four of the seven roadmap epics sit in semanticops.com, which has had no commit since 2026-10-07."
+    ],
+    "measure": "epics.ungrounded",
+    "confidence_level": "medium",
+    "evidence": "the former hand-typed Flow at a glance table, row 5 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)",
+    "maintained_by": [
+      "command: clerk roadmap --apply",
+      "workflow: derive-priority.yml",
+      "record: programme/period, programme/objective, programme/epic"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:57.236659355+00:00",
+  "updatedAt": "2026-10-24T16:19:09.230888423+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

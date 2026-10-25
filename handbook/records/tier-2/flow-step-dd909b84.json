@@ -1,0 +1,34 @@
+{
+  "instanceId": "dd909b84-0390-44bd-8d5e-fd1c67f67cc7",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Precedent and principles consulted",
+    "flow": "decision",
+    "moved_by": "nothing in code; the spec's Charter Check step 4 and the steward brief by judgement",
+    "mover_kind": "none",
+    "needs": "the decision logs in scope, the compass cell and axis, the group's lean on its tensions",
+    "theory": "Clear and complicated decisions are settled by rule: cite the cell, apply the preference. A choice that follows the group's lean needs no one (clerk/docs/pr-decisions.md).",
+    "gaps": [
+      "No code searches earlier decisions. pr-check never passes groupHasLean. Principles 7 of 25 and poles 6 of 36 are affirmed and no axes are placed, so no lean can settle anything: everything escalates."
+    ],
+    "remedies": "clerk#179, clerk#178, clerk#63; decision 4445b9cf (proposed); affirm principles and poles",
+    "measure": "principles.unaffirmed",
+    "confidence_level": "medium",
+    "evidence": "decision-flow survey 2026-10-24 (srs CLI and gh api counts, recorded on clerk#126); lib/practice/pr-decisions.mjs:92,101",
+    "maintained_by": [
+      "command: /rfc (Charter Check step 4, the spec only)",
+      "routine: wg-steward (names a repeated ruling)"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:59.353293957+00:00",
+  "updatedAt": "2026-10-24T16:19:09.028150461+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

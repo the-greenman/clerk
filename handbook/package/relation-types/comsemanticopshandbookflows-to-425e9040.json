@@ -1,0 +1,13 @@
+{
+  "id": "425e9040-727b-40de-84f2-719d6a1027de",
+  "version": 1,
+  "key": "com.semanticops.handbook/flows-to",
+  "namespace": "com.semanticops.handbook",
+  "label": "Flows to",
+  "description": "Work or a decision leaving the source step enters the target step. A step may flow to several (branches); a step that flows nowhere live is a dead end, derived by clerk flow.",
+  "category": "sequence",
+  "createdAt": "2026-10-24T12:29:27.815322688+00:00",
+  "canonicalDirection": "source is the step work leaves; target is the step it enters",
+  "status": "active",
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json"
+}

@@ -1,0 +1,36 @@
+{
+  "instanceId": "26ab5d27-108b-43e3-be7c-b70ff87dba34",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Owner merge",
+    "flow": "work",
+    "moved_by": "the owner, on GitHub; from the control room once clerk#174 lands",
+    "mover_kind": "manual",
+    "needs": "`gate:owner-merge`, its asks answered, green and clean",
+    "theory": "H1: an owner act is the last step of its work. H2: a PR reaches the owner only with a question only the owner can answer.",
+    "gaps": [
+      "About 78 merged PRs carried `gate:owner-merge` in a week; an answer does not merge the PR, so every answered PR still needs a second act."
+    ],
+    "remedies": "H1, H2 (in force through pr-check, clerk#172), H3; C6 clerk#164; C11 clerk#166 (clerk#174, srs-lab#25)",
+    "measure": "prs.owner-waiting",
+    "confidence_level": "medium",
+    "evidence": "work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c); mechanics survey 2026-10-24",
+    "maintained_by": [
+      "command: clerk merge (POST /api/clerk/merge)",
+      "client: srs-lab control room (PR page)",
+      "command: clerk desk",
+      "label: gate:owner-merge"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:58.662749337+00:00",
+  "updatedAt": "2026-10-24T16:19:07.826116301+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

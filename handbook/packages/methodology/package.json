@@ -1,0 +1,68 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/package-manifest.json",
+  "title": "methodology",
+  "description": "",
+  "status": "active",
+  "createdAt": "2026-10-24T12:28:41.093823272+00:00",
+  "fields": [
+    "fields/programmetitle-f37bceb4.json",
+    "fields/githubowner-07ee0281.json",
+    "fields/governedrepos-65ff71e2.json",
+    "fields/reportissue-05e8d8e5.json",
+    "fields/digestissue-bb3caa33.json",
+    "fields/boardproject-851f95cc.json",
+    "fields/boardstoryrepo-141a2ee7.json",
+    "fields/owneractor-44a66dd4.json",
+    "fields/githublabel-1ac3e920.json",
+    "fields/bindingstatus-c54d2057.json",
+    "fields/boardstatus-e3747f9d.json",
+    "fields/binds-fe186145.json",
+    "fields/policytitle-b782003d.json",
+    "fields/policykey-b53cd964.json",
+    "fields/policyexplanation-5f0ac112.json",
+    "fields/policyorder-2c5b25b7.json",
+    "fields/confidencelevel-fb3d43a0.json",
+    "fields/signalkeys-79ce55ff.json",
+    "fields/caremust-d52f1e1d.json",
+    "fields/mergegate-16acb912.json",
+    "fields/ruleallof-71242168.json",
+    "fields/ruleanyof-d4acf2cd.json",
+    "fields/carepolicycontainer-bd1fdf74.json"
+  ],
+  "types": [
+    "types/programme-b34ef0e7.json",
+    "types/label-binding-1814db47.json",
+    "types/confidenceaxis-4d24c966.json",
+    "types/confidencegrade-f8f7cddf.json",
+    "types/caremode-4a6abffb.json",
+    "types/carerule-03dd0239.json"
+  ],
+  "relationTypes": [
+    "relation-types/comsemanticopsprogrammeset-against-23a14f00.json",
+    "relation-types/comsemanticopsprogrammegrades-8afd8e5b.json",
+    "relation-types/comsemanticopsprogrammeselects-44a3024b.json"
+  ],
+  "views": [
+    "views/confidence-axis-view-bfd65d46.json",
+    "views/confidence-grade-view-8747e6c0.json",
+    "views/care-mode-view-f7a20a28.json",
+    "views/care-rule-view-71af2bd1.json"
+  ],
+  "compositions": [
+    "compositions/confidence-and-care-5e0e58f9.json"
+  ],
+  "blueprints": [],
+  "id": "a71f013f-0207-439f-8e52-2982baa68e86",
+  "namespace": "com.semanticops.programme",
+  "name": "methodology",
+  "version": "0.3.0",
+  "lifecycles": [
+    "lifecycles/workitem-e71e57d2.json"
+  ],
+  "vocabularies": [
+    "vocabularies/worklabel-183a8ca6.json",
+    "vocabularies/mergegate-36b3c787.json",
+    "vocabularies/workhold-dcf0ee69.json",
+    "vocabularies/confidencelevel-a0e23ab8.json"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://srs.semanticops.com/schema/2.0/relation-type.json",
+  "canonicalDirection": "source is the grade; target is its axis",
+  "category": "association",
+  "createdAt": "2026-10-23T00:00:00Z",
+  "description": "Source confidence-grade is a level of the target confidence-axis.",
+  "id": "8afd8e5b-e310-4142-a4be-00f00ad1239c",
+  "key": "com.semanticops.programme/grades",
+  "label": "Grades",
+  "namespace": "com.semanticops.programme",
+  "status": "active",
+  "version": 1
+}

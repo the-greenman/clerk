@@ -101,3 +101,35 @@ test('an owner-merge PR that asks nothing leaves Needs you and goes back to an a
   assert.match(needsYou(body), /Owner merge clerk#2/);
   assert.match(unthreaded(body), /clerk#1 pr 1 \| misclassified \|/);
 });
+
+const threads = (body) => body.split('## Threads')[1].split('### ')[0];
+const epic19 = (more) => ({ ref: 'clerk#19', refs: ['clerk#19'], title: 'Clerk process', rank: 1, ...more });
+
+test('an epic lists its open sequences with the next unblocked task, or says all are blocked (clerk#204)', () => {
+  const body = deskBody({ now: NOW, epics: [epic19({ seqs: [
+    { ref: 'clerk#197', title: 'Dogfood', url: 'u197', open: 6, next: { ref: 'clerk#204', title: 'desk shows work', url: 'u204' } },
+    { ref: 'clerk#90', title: 'Stuck', url: 'u90', open: 2, next: null }] })] });
+  const t = threads(body);
+  assert.match(t, /\| Clerk process \(clerk#19\) \| running \|.*See its sequences below \| agents \|/);
+  assert.match(t, /\| ↳ sequence \[clerk#197\]\(u197\) Dogfood \| running \| - \| next: \[clerk#204\]\(u204\) desk shows work \|/);
+  assert.match(t, /\| ↳ sequence \[clerk#90\]\(u90\) Stuck \| waiting \| - \| 2 open, none free to take \(blocked, held or claimed\) \|/);
+});
+
+test('an epic with ready or claimed work and no PR is running, not idle (clerk#204)', () => {
+  const t = threads(deskBody({ now: NOW, epics: [epic19({ work: { ready: 2, claimed: 1 } })] }));
+  assert.match(t, /\| Clerk process .*\| running \|.*1 claimed; 2 ready \| agents \|/);
+  assert.match(threads(deskBody({ now: NOW, epics: [epic19()] })), /\| idle \|.*No open work \| - \|/);
+});
+
+test('the central lane is a thread with its ready queue (clerk#204)', () => {
+  const ready = [1, 2, 3, 4].map((n) => ({ repo: 'clerk', number: n, title: `t${n}` }));
+  assert.match(threads(deskBody({ now: NOW, central: { lane: 'lane:unattended', ready } })),
+    /\| Central lane \(`lane:unattended`, work no group holds\) \| running \| - \| 4 ready \(clerk#1, clerk#2, clerk#3, and 1 more\) \| unattended worker \|/);
+  assert.match(threads(deskBody({ now: NOW, central: { lane: 'lane:unattended', ready: [] } })), /\| Central lane .*\| idle \| - \| Queue is empty \| - \|/);
+});
+
+test('a claimed issue with no PR is listed with who claimed it and for how long (clerk#204)', () => {
+  const body = deskBody({ now: NOW, claims: [{ repo: 'clerk', number: 204, title: 'desk', url: 'u204', by: 'human:the-greenman', since: '2026-10-12T09:00:00Z' }] });
+  assert.match(body.split('### Claimed, no PR yet')[1].split('### Unthreaded')[0], /\| \[clerk#204\]\(u204\) desk \| human:the-greenman \| 10-12 \| 2 \|/);
+  assert.doesNotMatch(deskBody({ now: NOW }), /Claimed, no PR yet/);
+});

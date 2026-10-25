@@ -1,0 +1,32 @@
+{
+  "instanceId": "79fc31eb-4f1e-46cc-9718-0d733d0077e4",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "A decision arises",
+    "flow": "decision",
+    "moved_by": "anyone: a builder or reviewer in a PR, the steward in a report, the owner in chat or an issue, a session, an RFC",
+    "mover_kind": "manual",
+    "theory": "A decision exists when making a commitment will reduce future options (muDemocracy foundation 4.1). Decisions rarely stand alone: most follow from principles.",
+    "gaps": [
+      "Decisions arise in at least nine places (PR bodies and comments, chat, issues, run reports, sessions, exercises, srs RFCs, srs-rust ADRs, srs-context) and nothing gathers them."
+    ],
+    "confidence_level": "medium",
+    "evidence": "mechanics survey 2026-10-24; owner, 2026-10-24",
+    "maintained_by": [
+      "record: governance/decision",
+      "record: governance/exercise",
+      "block: srs-decisions in a PR body"
+    ]
+  },
+  "createdAt": "2026-10-24T12:32:59.068367710+00:00",
+  "updatedAt": "2026-10-24T16:19:08.388822137+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (mapping the flows with the owner, 2026-10-24)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}

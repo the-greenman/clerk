@@ -1,0 +1,15 @@
+{
+  "id": "59709e3d-8048-4918-aafe-4fd97c700c95",
+  "namespace": "com.semanticops.handbook",
+  "name": "maintained_by",
+  "version": 1,
+  "description": "The elements that keep this step moving: routines, commands, workflows, labels, record types, clients.",
+  "aiGuidance": {
+    "purpose": "One element per entry, as '<kind>: <name>' with kind routine, command, workflow, label, record, container or client; a routine names its standing job. Each must exist where it says; a missing one is a gap in the flow itself."
+  },
+  "fieldType": {
+    "datatype": "string",
+    "cardinality": "list"
+  },
+  "createdAt": "2026-10-24T16:19:07.451241247+00:00"
+}
