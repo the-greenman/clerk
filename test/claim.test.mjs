@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { checkClaim, claimAssigns, claimActorOf, claimComment } from '../lib/practice/claim.mjs';
+import { checkClaim, claimAssigns, claimActorOf, claimComment, refersTo } from '../lib/practice/claim.mjs';
 import { answersOf } from '../lib/practice/grounding.mjs';
 import { fxGroup, tprGroup } from './groups.fixture.mjs';
 import { readFileSync } from 'node:fs';
@@ -78,4 +78,11 @@ test('graded: collisions, holds and seats still refuse', () => {
   assert.equal(g({ prs: [{ repo: 'fixture', number: 50, title: 'Closes #10' }] }).ok, false);
   assert.equal(g({ issue: { ...issue, body: 'x', assignees: [{ login: 'someone' }] } }).ok, false);
   assert.equal(g({ seat: 'reviewer' }).ok, false);
+});
+
+test('a PR refers to an issue by "#n" or "<repo>#n", never by another repo\'s number (clerk#204 review)', () => {
+  const pr = (body) => ({ repo: 'clerk', title: 't', body, head: { ref: 'x' } });
+  assert.equal(refersTo('clerk', 25, pr('see srs-lab#25 and srs-lab/x#25')), false);
+  for (const b of ['Closes #25', 'clerk#25.', 'the-greenman/clerk#25', '(#25)']) assert.equal(refersTo('clerk', 25, pr(b)), true, b);
+  assert.equal(refersTo('clerk', 25, pr('#250')), false);
 });
