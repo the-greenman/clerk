@@ -59,9 +59,90 @@ Three rules shape everything that follows:
 
 #### Flow at a glance: what moves each stage
 
-Each step below is one `flow-step` record (clerk#126). Read it top to bottom: work stops at the first step whose input is waiting and whose mover is not live. `clerk flow` derives the live counts, dead ends and the critical path from these records; `clerk desk` shows the same picture day to day.
+Each step below is one `flow-step` record (clerk#126). Read it top to bottom: work stops at the first step whose input is waiting and whose mover is not live. The flow starts at **Find**: a session that resumes work, or has none, starts at the desk. `clerk flow` reads the dots on issues today (`--chain`, `--open`); deriving the live counts, dead ends and the critical path from these records is clerk#126, part 2. `clerk desk` shows the work day to day.
 
 Each step says how sure we are of it. Low is an agent's reading of the code, medium is what the owner has said or written, high is a step the owner stands behind. Correct a step by updating its record, and its confidence rises.
+
+
+##### Find
+
+**Moved by**: every session that resumes work, or has no task: `clerk desk`, then the open sequence it lists, then that sequence's next task free to take, run through `clerk flow --chain`
+
+**Mover**: manual
+
+**Needs before it moves**: the desk is current (rewritten on every upkeep run, clerk#203) and shows all active work: each epic's open sequences with the next task free to take, the central lane's queue, and claims with no PR (clerk#204); read the vignettes behind the work before acting
+
+**Theory**: Work run in a chat window is lost when the window closes. Work that is in the flow (an issue, placed, in a sequence) is found again from the desk by any session (owner, 2026-10-25). The srs-context brief "Resuming work" points every new session here. From Find, a session resuming a sequence goes to its next task (Claim and build); new work starts at Story.
+
+**Gap**:
+- The flow keeper, which joins the dots the desk reads, has no schedule yet (clerk#201).
+
+**Acting on it**: clerk#203; clerk#204; clerk#201; clerk#112 (a sequence becomes a unit)
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: clerk desk
+- workflow: programme-pr-upkeep.yml (Desk step)
+- issue: the pinned desk (settings digest repository, label desk)
+- context: srs-context brief "Resuming work"
+- command: clerk flow --chain
+
+**Evidence**: owner, 2026-10-25, verbatim in srs-programme Narrative explorations (note 71d4c10a); clerk#197 run reports; desk staleness, discovery 16
+
+**Flows to**: Claim and build, Story
+
+
+##### Story
+
+**Moved by**: the session agent, from the owner's own words
+
+**Mover**: manual
+
+**Needs before it moves**: the owner's words, verbatim, one Tier-0 vignette per thought in srs-programme's Narrative explorations (`80b283ef`), under the conversation's note, tagged `vignette` and `topic:<slug>`
+
+**Theory**: All problems and domains evolve from stories (owner, 2026-10-25). The method is the chapter *Narrative explorations: how meaning grows*. Vignettes are collated by conversation (the note) and by topic across sessions (the tag).
+
+**Gap**:
+- No clerk command captures a vignette or lists them by conversation and topic; agents use `srs note create` (clerk#199).
+
+**Acting on it**: clerk#199 (clerk story); remedy 74a2cbd2
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: srs note create (pinned CLI)
+- container: Narrative explorations (80b283ef)
+
+**Evidence**: owner, 2026-10-25, verbatim in srs-programme Narrative explorations (note 71d4c10a); clerk#197 run reports
+
+**Flows to**: Derive
+
+
+##### Derive
+
+**Moved by**: agents
+
+**Mover**: manual
+
+**Needs before it moves**: each record that comes from a vignette (problem, remedy, domain, decision, exercise) is a suggestion `derived-from` it, or an existing record gets an `evidences` link from it; look before you create
+
+**Theory**: Records follow the narrative (decision 77e04b19, proposed). Affirming them is not a step of this flow: it is its own layer (*The affirmation layer*), and work never waits on it.
+
+**Gap**:
+- Nothing lists the vignettes that have no derived or linked record yet (clerk#199).
+
+**Acting on it**: clerk#199; remedy 2910ac1e (affirm in context)
+
+**Confidence**: medium
+
+**Maintained by**:
+- command: srs relation create (pinned CLI)
+- command: srs record list
+
+**Evidence**: owner, 2026-10-25, verbatim in srs-programme Narrative explorations (note 71d4c10a); clerk#197 run reports
+
+**Flows to**: Domain
 
 
 ##### Domain
@@ -73,7 +154,7 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Needs before it moves**: purpose, in scope and out of scope
 
 **Gap**:
-- All seven domains are affirmed (by 2026-10-20), but every domain has 0 of 3 axes placed, so no group lean can settle a choice.
+- All seven domains are affirmed (by 2026-10-20). Axes are placed in Semantic records only (3 of 3); the other domains have none, so their group leans cannot settle a choice yet (`clerk domains`).
 
 **Acting on it**: Axes PRs clerk#135, srs-programme#206, srs-lab#18, srs-context#58 (unblocked by cdd272a3, ratified 2026-10-24)
 
@@ -201,25 +282,26 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Evidence**: the former hand-typed Flow at a glance table, row 5 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
-**Flows to**: Issue admission
+**Flows to**: Placement and sequence
 
 **Part of stage**: Objective and period
 
 
-##### Issue admission
+##### Placement and sequence
 
-**Moved by**: the filer (analyst, scout, owner)
+**Moved by**: the filer: the session agent, analyst, scout or owner
 
 **Mover**: manual
 
-**Needs before it moves**: `Answers: SP-nn` naming a problem; how sure the grounding is sets the care mode
+**Needs before it moves**: `Answers: SP-nn` naming a suggested or affirmed problem; the problem's domain and the group that holds it; a remedy where one fits; `Part of` an epic or story, with the sub-issue link (a new epic goes up as a proposed decision: *Escalating*); where work has steps, a sequence: a tracking issue whose sub-issues are its tasks, with `Blocked by` links where order matters; the issue carries `Answers:`, `Part of`, a `## Technical plan` and `## Acceptance`; proved with `clerk flow --chain`, `clerk care`, `clerk claim --dry-run` and `clerk board explain`
 
-**Theory**: Confidence grades care, it does not gate work (decision 9d50126b, ratified 2026-10-24; clerk#156): an issue that names a suggested problem is worked in the care mode the policy gives; only no problem, or an unknown or set-aside one, stops it.
+**Theory**: Confidence grades care, it does not gate work (decision 9d50126b, ratified 2026-10-24): an issue that names a suggested problem is worked in the care mode the policy gives; only no problem, or an unknown or set-aside one, stops it. A unit of work that must survive a closed chat is a sequence (clerk#197 is the first); the desk lists it until clerk#112 makes it a unit of its own.
 
 **Gap**:
-- /ship stopped on any unaffirmed problem while the routines' claim graded care; clerk#184 aligns it. `clerk queue` and the briefs do not read the care mode yet (clerk#156 phase 4).
+- No command suggests a placement (problem, domain, group, epic) for a new item (clerk#200).
+- `clerk queue` and the briefs do not read the care mode yet (clerk#156 phase 4).
 
-**Acting on it**: clerk#156 phase 4; clerk#184; decision 9d50126b; clerk#183 (clerk flow)
+**Acting on it**: clerk#200 (clerk place); clerk#156 phase 4; clerk#112; decision 9d50126b
 
 **Measure**: issues.ungrounded
 
@@ -228,9 +310,13 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Maintained by**:
 - command: clerk flow --chain
 - command: clerk care
+- command: clerk claim --dry-run
+- command: clerk board link
+- command: clerk board dep add
 - routine: wg-analyst (files; standing job 3cb9ff9b)
 - routine: handbook-watcher (files; standing job e8109ff8)
 - command: /ship
+- command: clerk board explain
 
 **Evidence**: the former hand-typed Flow at a glance table, row 6 (live 2026-10-16); clerk#156; work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
@@ -241,24 +327,26 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 ##### Routing to a group
 
-**Moved by**: the filer, then topup
+**Moved by**: the flow keeper (joins the lane dot by its rule), then topup
 
-**Mover**: none
+**Mover**: manual
 
 **Needs before it moves**: the group whose charter holds the problem's domain gets its `wg:` label; a domain no group holds goes to `lane:unattended`
 
 **Theory**: Ruled: D4, D5 and D15 (ratified 2026-10-16).
 
 **Gap**:
-- Topup does not route by meaning, so real-use issues (srs-web#587 to #590) land in no queue.
+- The flow keeper has run by hand but has no schedule yet (clerk#201); until it does, an unrouted item waits for the next session that joins it.
+- Two holding groups, or a domain read only from the repository, is a choice for a person, listed in the flow keeper's report.
 
-**Acting on it**: C13 clerk#124; H7
+**Acting on it**: clerk#201; clerk#196 (strength slots in topup); C13 clerk#124
 
 **Measure**: issues.unrouted
 
 **Confidence**: medium
 
 **Maintained by**:
+- routine: flow-keeper (standing job 9c0ce5f8)
 - command: clerk flow (the lane dot)
 - command: clerk board (topup)
 - label: lane-unattended
@@ -364,11 +452,11 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 ##### Merge on green
 
-**Moved by**: `pr-upkeep` every 15 minutes
+**Moved by**: `pr-upkeep` (every 15 minutes, and on push and workflow_run); in the programme repository, GitHub native auto-merge, armed by upkeep (clerk#208, decision c373c2c1)
 
 **Mover**: auto
 
-**Needs before it moves**: `gate:auto-merge` and clean; for a group, a valid quorum, within budget, not paused
+**Needs before it moves**: `gate:auto-merge` and clean; in the programme repository a PR with no gate label also merges on green, while `gate:owner-merge` and group labels still route as before; for a group, a valid quorum, within budget, not paused
 
 **Gap**:
 - Few PRs take this path: in the week to 10-23 every one of 254 merges went through the owner's account.
@@ -450,6 +538,15 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Flows to**: Ratified once, at its level
 
 **Part of stage**: Report, session and ratification
+
+
+#### The affirmation layer: beside the flow, never a step in it
+
+Affirmation is how the owner turns a suggestion (a problem, remedy, domain, cluster, persona) into an affirmed record. It is its own layer, with its own interface. It is never a step that work waits on, and never a question in a chat (the rule is also written in *Narrative explorations*, step 6, clerk#202).
+
+- **Where.** The affirmation editor must show each derived record in context, beside the vignettes it came from and the conversation in order, and find the same topic across sessions (remedy 2910ac1e; owner, 2026-10-25). It is not built: srs-web#617 (open), tick or deny on proposed links, is its first part. Until it exists, the Affirmation review meeting walks Suggestions in the srs-web Method editor.
+- **What it changes.** An affirmed problem raises the grounding grade, so `clerk care` may give a lighter mode; it also feeds the problem gate, the affirmed-remedy rule and the objectives. For work in flow, nothing else: an unaffirmed suggestion is worked in the mode the policy gives (decision 9d50126b).
+- **Why not in chat.** In a chat the owner cannot see the structure, so a yes there is a fake decision: the sovereign anchor becomes the thing that undermines it (owner, 2026-10-25).
 
 
 #### Decision flow at a glance: how a decision is settled and cited
@@ -830,7 +927,7 @@ Our semantics (domains, problems, tensions, principles, decisions) are developed
 3. **Derive, and point back.** A record that comes from a vignette (a problem, remedy, principle, domain, axis or pole, decision, exercise) is written as a suggestion with `derived-from` to the vignette. Look before you create: when a record already holds the meaning, relate to it instead (remedy 662030b3).
 4. **Keep contradictions.** When a vignette contradicts another vignette, a record or the practice running today, never resolve it silently: record it, citing both, as a problem or a comment on the record (SP-104 is one). Paradox is how a domain is explored.
 5. **Cycles and spirals.** Return to the vignettes, cluster and synthesise them, and let the owner refine them; the records follow the narrative, never the other way. Domains emerge from this and are refined, all within the base domain *Semantic engineering in practice*.
-6. **Affirm the story.** The owner ticks or denies a derived record beside the words it came from (srs-web#617). Until then it is a suggestion, and work does not wait on it: confidence grades care, it does not gate. **Never ask the owner to affirm records in chat.** Affirmation is its own layer, in the affirmation editor (srs-web#617) and at Affirmation review meetings, where the owner can see the structure beside the conversation it came from. A yes given in chat, without seeing that structure, is a fake decision (owner, 2026-10-25). Suggest the record and continue in the mode `clerk care` gives.
+6. **Affirm the story.** The owner ticks or denies a derived record beside the words it came from (srs-web#617). Until then it is a suggestion, and work does not wait on it: confidence grades care, it does not gate. **Never ask the owner to affirm records in chat.** Affirmation is its own layer (*The affirmation layer*): the affirmation editor, not built yet (srs-web#617 is its first part), and the Affirmation review meetings, where the owner can see the structure beside the conversation it came from. A yes given in chat, without seeing that structure, is a fake decision (owner, 2026-10-25). Suggest the record and continue in the mode `clerk care` gives.
 
 
 #### Domains, personas and problems define the work
@@ -1105,7 +1202,7 @@ flowchart TD
 
 **The central group.** Work with no `wg:` label belongs to the central group, SemanticOps, held by the Owner role. Its seats are the owner's builder and reviewer, plus agents `authorised-by` the Owner role, such as the nightly `agent:unattended-worker`. The central group never claims a delegated group's work.
 
-**Proposed rulings, not yet ratified** (srs-programme#113): SemanticOps is the root decision-making authority for its domain, and other bodies such as muDemocracy are separate (31e40305); the central group undertakes all work no group holds by delegation (4fca091f); anyone working on a group's work joins that group and works within its practices (ccd593c3); a group is chartered only with a known domain, a problem set and standing orders (9a45c0a1).
+**Rulings, ratified** (srs-programme#113): SemanticOps is the root decision-making authority for its domain, and other bodies such as muDemocracy are separate (31e40305); the central group undertakes all work no group holds by delegation (4fca091f); anyone working on a group's work joins that group and works within its practices (ccd593c3); a group is chartered only with a known domain, a problem set and standing orders (9a45c0a1).
 
 **Groups today.** WG Third-party ready (semanticops.com#31, `wg:third-party-ready`) is in force. WG Agent-supported editor (semanticops.com#29, `wg:agent-editor`) has been chartered as records. WG SRS operations (`wg:srs-ops`) is proposed in `plans/wg-srs-operations.md` (clerk#56), with an input queue fed by intake (chapter "Intake"); it is chartered only when that queue becomes steady, the usual trigger. A new group is chartered only on a trigger: a steady ready queue that needs delegated merges.
 
@@ -1306,7 +1403,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - **Layers:** the Affirmed, Suggestions and Set aside containers in srs-programme, checked by `scripts/check-method.mjs` (`checkGates`): an AI actor cannot author a record in a human layer.
-- **Roles:** only the owner is built into `lib/practice/roles.mjs`. Every group role is read from records: a `governance/role` with charter fields, the Owner role `delegates` to it, and agents `authorised-by` it carry `actor_id` and `seat` (`clerk groups`).
+- **Roles:** only the owner is built into `lib/practice/roles.mjs`. Every group role is read from records: a `governance/role` with charter fields, the Owner role `delegates` to it, and agents `authorised-by` it carry `actor_id` and `seat` (`clerk groups`; it does not yet check the `delegates` edge, clerk#137).
 - **Agents:** a `method/agent` is a universal stance agent that `instantiates` one of the eight archetypes. A `stewardship/agent` is a seat-holder in a group and is `derived-from` a method agent. The unattended worker (`agent:unattended-worker`) is `authorised-by` the Owner role as the central group's builder.
 
 **Gap**:
@@ -1327,14 +1424,13 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).
-- 7 domain records, all in Suggestions: Deep context, Programme coordination, Semantic records, Agent memory, Group meaning ownership, Evidence-backed writing, Stance.
+- The domains: `srs record list --repo <programme> --type com.semanticops.method/domain`; which are affirmed: `srs container get 5e28aa7e-4b35-4474-8f62-cf8dcae1e506 --repo <programme>` (the Affirmed container); their axes: `clerk domains --repo <programme>`.
 - 6 domain containers exist. Evidence-backed writing's outline holds its clusters and their problems (srs-programme#112).
 - Deep context nests Semantic records, Group meaning ownership and Agent memory (decision dbaa4716).
 - `clerk ground` reads domains through `contains` (domain to cluster to problem) to compute I1. Nothing else reads them.
 - Plan: [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md), walking Evidence-backed writing and Agent memory first.
 
 **Gap**:
-- No domain is affirmed.
 - Clusters still hang off domains by `contains` edges as well as by container outline: two groupings for one goal, until readers switch to the outline (decision a6280447).
 - Nothing checks that a problem has a domain.
 - An affirmed domain is a fork, so its container identity still names the suggestion; readers resolve it with `canon()`.
@@ -1354,7 +1450,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Status**: partial
 
 **Practice**:
-- Type `com.semanticops.method/persona` (title, summary, jobs, needs): 5 records, all in Suggestions.
+- Type `com.semanticops.method/persona` (title, summary, jobs, needs): count and state with `srs record list --repo <programme> --type com.semanticops.method/persona`.
 - Type `com.semanticops.method/persona-in-domain`, field `goals` and relation `in-domain`: method package v1 (clerk#34), installed in srs-programme (srs-programme#105).
 - 3 persona-in-domain records, all suggestions, all in Evidence-backed writing: Writer, AI agent, and A person working with AI.
 - 15 `held-by` edges point to a persona-in-domain; the rest still point to shared personas, as domains not yet walked are allowed to (decision e4a9b0ac).
@@ -1380,7 +1476,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - Type `com.semanticops.method/problem` (problem_id `SP-nn`, statement, kind, source_ref).
-- SP-01 to SP-66 exist; 47 are affirmed as forks of their suggestions.
+- The problems: `srs record list --repo <programme> --type com.semanticops.method/problem`; which are affirmed: `srs container get 5e28aa7e-4b35-4474-8f62-cf8dcae1e506 --repo <programme>` (the Affirmed container); the rule warnings on them: `clerk check --repo <programme>`.
 - Problems group into clusters. Parked issues are sources for problems, never bulk imports.
 - **Duplicate guard:** search the trackers and comment rather than file a near-duplicate.
 - The gate is ruled and not built (clerk#35, in the unattended lane).
@@ -1388,8 +1484,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Gap**:
 - A problem can be affirmed with no persona and no domain, which breaks the rule above.
 - Problems link to issues only backwards, as text (`source_ref`, `Answers:`).
-- The 27 affirmed problems outside the two pilot domains must be grounded or set aside before the gate errors.
-- Programme coordination's problems (SP-49 to SP-66) have no cluster and none is affirmed.
+- The affirmed problems outside the two pilot domains (`clerk check` lists them) must be grounded or set aside before the gate errors.
 - Decision ee59155b (proposed) duplicates the ratified gate e3ed9e54.
 
 **Open questions**:
@@ -1432,7 +1527,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Practice**:
 - Type `com.semanticops.method/remedy`, linked to problems by `answers`.
 - `check-method` requires an affirmed remedy to answer an affirmed problem and to carry a falsifier.
-- 5 records: two affirmed remedies with their suggestions, and one suggested remedy (lenses).
+- Remedies and their state: `clerk roadmap --explain` and `srs record list --repo <programme> --type com.semanticops.method/remedy`.
 
 **Gap**:
 - Falsifiers and `return_when` are never evaluated.
@@ -1452,7 +1547,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - Types `programme/period` (objective_rank) and `programme/objective`.
-- Current period "Focus 1: writing and memory", from 2026-10-08, no end date. It ranks five objectives: 1 Keep work moving to done (P0); 2 Agent-supported writing (P1); 3 Agent memory (P2); 4 A public specification that reads as it describes; 5 A reference implementation that honours its contracts.
+- Current period "Focus 1: writing and memory", from 2026-10-08, no end date. Its ranked objectives, in order: `clerk roadmap --json`.
 - `clerk roadmap --apply` sets epic Priority from the rank and labels unranked epics `parked`.
 
 **Gap**:
@@ -1552,10 +1647,9 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 2. It creates, as drafts and proposals: the group's log and container, the group role with its charter fields, four standing-order articles, one member agent per seat, a boundary with a compass copied from the first group, and the charter decision, listed in both the group log and the SemanticOps log.
 3. The orchestrator validates, commits on a branch and opens a PR.
 4. An owner session ratifies the charter decision and asserts `delegates` from the Owner role to the group role.
-5. Then, by hand: the `wg:` label in each governed repo, the cloud routines and their standing-job records.
+5. Then, by hand until `clerk group provision` exists (clerk#139): the `wg:` label in each governed repo, the cloud routines and their standing-job records.
 
 **Gap**:
-- WG Agent-supported editor has no `delegates` edge yet, so it is not in force.
 - The articles' prose and the role's fields state the same numbers twice; nothing checks they agree.
 - Every group reports to the same issue (#31), a programme setting.
 - The analyst was added before its decision `b447e8ea` was ratified.
@@ -2053,7 +2147,7 @@ On 2026-10-11 it ran 60 tests: 36 passing, 24 todo, none failing.
 
 #### How this handbook is made
 
-The handbook is an SRS repository in `handbook/`, with its own package `com.semanticops.handbook`: a `chapter` (title, body), a `stage` (theory, status, practice, gaps, open questions, test), an `element` (kind, home, meaning, read by) and a `flow-step` (flow, moved by, mover, needs, theory, gap, what acts on it, measure, confidence, evidence), joined by `flows-to` and `refines` to the stage it belongs to. Confidence uses the clerk's `confidence_level` from the installed `com.semanticops.programme` methodology package (`handbook/packages/methodology`, a copy refreshed with `srs package upgrade`). `clerk flow` reads the flow steps (clerk#126); nothing derived is stored in them. The root container's outline is the order of the document. The composition `handbook` renders it.
+The handbook is an SRS repository in `handbook/`, with its own package `com.semanticops.handbook`: a `chapter` (title, body), a `stage` (theory, status, practice, gaps, open questions, test), an `element` (kind, home, meaning, read by) and a `flow-step` (flow, moved by, mover, needs, theory, gap, what acts on it, measure, confidence, evidence), joined by `flows-to` and `refines` to the stage it belongs to. Confidence uses the clerk's `confidence_level` from the installed `com.semanticops.programme` methodology package (`handbook/packages/methodology`, a copy refreshed with `srs package upgrade`). `clerk flow` is to read the flow steps (clerk#126, part 2); nothing derived is stored in them. The root container's outline is the order of the document. The composition `handbook` renders it.
 
 ```mermaid
 flowchart LR

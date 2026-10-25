@@ -60,7 +60,7 @@ Show the dry-run output and ask: **"Record this session?"** Only on an explicit 
 
 - The owner is the actor (`SRS_ACTOR` is the owner's human actor, set by `scripts/session`). You are only the clerk, and the `Clerked by` line says so.
 - When the owner explains the work rather than deciding an item, record it as a vignette after the session (handbook, *Narrative explorations: how meaning grows*); never turn it into an act in this session.
-- Never ask the owner to affirm records in chat; affirmation is its own layer, in the affirmation editor (srs-web#617) and at Affirmation review meetings (handbook, *Narrative explorations*, step 6). A session ratifies decisions and takes the items on its agenda; it never asks for a yes on derived records.
+- Never ask the owner to affirm records in chat; affirmation is its own layer, in the affirmation editor (being built; srs-web#617 is its first part) and at Affirmation review meetings (handbook, *The affirmation layer*). A session ratifies decisions and takes the items on its agenda; it never asks for a yes on derived records.
 - Never act without an explicit instruction in this conversation, never extrapolate "ratify all" from "these look fine", and never ratify outside the session's level or quorum (the clerk refuses anyway).
 - Decisions made earlier in the conversation, but not yet recorded, may be recorded in this session only if the owner confirms them now.
 - Bash: plain foreground calls with an explicit timeout. Never pass run_in_background, and never use a Monitor.

@@ -8,9 +8,8 @@
     "title": "Domain",
     "theory": "A domain is an area of work with a purpose and what is in and out of scope. It tells us *when* a problem occurs. A domain is a container whose identity is the domain record; its outline holds clusters at depth 0 and their problems at depth 1. A problem with no cluster sits at depth 0: early in a domain we do not yet know all its parts, so an unclustered problem is valid, never a gap. Where a cluster is required (an objective `addresses` clusters), a cluster holding one problem is valid. Clusters evolve, and problems move between them as understanding changes (owner, 2026-10-11). A problem's domain is derived (problem `held-by` persona-in-domain `in-domain` domain), never stored. Domains nest by perspective. The owner affirms a domain in the srs-web Method editor.",
     "status": "partial",
-    "practice": "- Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).\n- 7 domain records, all in Suggestions: Deep context, Programme coordination, Semantic records, Agent memory, Group meaning ownership, Evidence-backed writing, Stance.\n- 6 domain containers exist. Evidence-backed writing's outline holds its clusters and their problems (srs-programme#112).\n- Deep context nests Semantic records, Group meaning ownership and Agent memory (decision dbaa4716).\n- `clerk ground` reads domains through `contains` (domain to cluster to problem) to compute I1. Nothing else reads them.\n- Plan: [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md), walking Evidence-backed writing and Agent memory first.",
+    "practice": "- Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).\n- The domains: `srs record list --repo <programme> --type com.semanticops.method/domain`; which are affirmed: `srs container get 5e28aa7e-4b35-4474-8f62-cf8dcae1e506 --repo <programme>` (the Affirmed container); their axes: `clerk domains --repo <programme>`.\n- 6 domain containers exist. Evidence-backed writing's outline holds its clusters and their problems (srs-programme#112).\n- Deep context nests Semantic records, Group meaning ownership and Agent memory (decision dbaa4716).\n- `clerk ground` reads domains through `contains` (domain to cluster to problem) to compute I1. Nothing else reads them.\n- Plan: [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md), walking Evidence-backed writing and Agent memory first.",
     "gaps": [
-      "No domain is affirmed.",
       "Clusters still hang off domains by `contains` edges as well as by container outline: two groupings for one goal, until readers switch to the outline (decision a6280447).",
       "Nothing checks that a problem has a domain.",
       "An affirmed domain is a fork, so its container identity still names the suggestion; readers resolve it with `canon()`.",
@@ -23,7 +22,7 @@
     "test": "Stage 2: pending (every problem has a domain; the domain says when)."
   },
   "createdAt": "2026-10-11T18:33:28.636916558+00:00",
-  "updatedAt": "2026-10-12T17:07:52.455677069+00:00",
+  "updatedAt": "2026-10-25T10:56:29.615614718+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",

@@ -6,10 +6,10 @@
   "typeName": "chapter",
   "fieldValues": {
     "title": "Flow at a glance: what moves each stage",
-    "body": "Each step below is one `flow-step` record (clerk#126). Read it top to bottom: work stops at the first step whose input is waiting and whose mover is not live. `clerk flow` derives the live counts, dead ends and the critical path from these records; `clerk desk` shows the same picture day to day.\n\nEach step says how sure we are of it. Low is an agent's reading of the code, medium is what the owner has said or written, high is a step the owner stands behind. Correct a step by updating its record, and its confidence rises."
+    "body": "Each step below is one `flow-step` record (clerk#126). Read it top to bottom: work stops at the first step whose input is waiting and whose mover is not live. The flow starts at **Find**: a session that resumes work, or has none, starts at the desk. `clerk flow` reads the dots on issues today (`--chain`, `--open`); deriving the live counts, dead ends and the critical path from these records is clerk#126, part 2. `clerk desk` shows the work day to day.\n\nEach step says how sure we are of it. Low is an agent's reading of the code, medium is what the owner has said or written, high is a step the owner stands behind. Correct a step by updating its record, and its confidence rises."
   },
   "createdAt": "2026-10-16T11:22:59.483481489+00:00",
-  "updatedAt": "2026-10-24T12:32:55.995255410+00:00",
+  "updatedAt": "2026-10-25T10:46:24.420346022+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:orchestrator",

@@ -1,0 +1,19 @@
+{
+  "instanceId": "39e960b8-a4df-47e5-a213-738ffa310c39",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "The affirmation layer: beside the flow, never a step in it",
+    "body": "Affirmation is how the owner turns a suggestion (a problem, remedy, domain, cluster, persona) into an affirmed record. It is its own layer, with its own interface. It is never a step that work waits on, and never a question in a chat (the rule is also written in *Narrative explorations*, step 6, clerk#202).\n\n- **Where.** The affirmation editor must show each derived record in context, beside the vignettes it came from and the conversation in order, and find the same topic across sessions (remedy 2910ac1e; owner, 2026-10-25). It is not built: srs-web#617 (open), tick or deny on proposed links, is its first part. Until it exists, the Affirmation review meeting walks Suggestions in the srs-web Method editor.\n- **What it changes.** An affirmed problem raises the grounding grade, so `clerk care` may give a lighter mode; it also feeds the problem gate, the affirmed-remedy rule and the objectives. For work in flow, nothing else: an unaffirmed suggestion is worked in the mode the policy gives (decision 9d50126b).\n- **Why not in chat.** In a chat the owner cannot see the structure, so a yes there is a fake decision: the sovereign anchor becomes the thing that undermines it (owner, 2026-10-25)."
+  },
+  "createdAt": "2026-10-25T10:46:24.579926792+00:00",
+  "updatedAt": "2026-10-25T10:54:08.466209472+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (the owner's session, clerk#197, 2026-10-25)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}
