@@ -23,7 +23,7 @@ export function checkMethod(records, relations, since = BOUNDARY_RULES_FROM) {
   const type = (n) => records.filter((r) => r.record.typeName === n);
   const label = (r) => `${r.record.typeName} ${r.record.fieldValues.title ?? r.record.fieldValues.statement} (${r.instanceId.slice(0, 8)})`;
   const out = (id, t) => relations.filter((x) => x.sourceId === id && x.relationType === t).map((x) => x.targetId);
-  const errors = [];
+  const errors = [], canon = canonOf(relations);
   for (const t of type("tension")) {
     const poles = out(t.instanceId, "contains").filter((id) => records.some((r) => r.instanceId === id && r.record.typeName === "pole"));
     if (poles.length !== 2) errors.push(`${label(t)} contains ${poles.length} poles, expected exactly 2`);
@@ -31,9 +31,10 @@ export function checkMethod(records, relations, since = BOUNDARY_RULES_FROM) {
   for (const p of type("principle")) {
     const gov = out(p.instanceId, `${MNS}/governs`);
     if (gov.length !== 1) { errors.push(`${label(p)} governs ${gov.length} tensions, expected exactly 1`); continue; }
-    const poles = out(gov[0], "contains");
+    // a pole and its fork are one identity: a principle may lean toward either copy (clerk#187)
+    const poles = out(gov[0], "contains").map(canon);
     const leans = out(p.instanceId, `${MNS}/leans-toward`);
-    if (leans.length !== 1 || !poles.includes(leans[0])) errors.push(`${label(p)} must lean toward exactly one pole of its tension`);
+    if (leans.length !== 1 || !poles.includes(canon(leans[0]))) errors.push(`${label(p)} must lean toward exactly one pole of its tension`);
   }
   // Boundary rules; the argument package may be absent, then there are no boundaries and nothing to check.
   const isBoundary = (r) => r.record.typeName === "boundary" && r.record.typeNamespace === ANS;
@@ -99,6 +100,10 @@ export function checkGates(records, relations, affirmed, setAside, today = new D
     });
     if (!grounded) p2.push(`${label(r)} is affirmed but no affirmed persona-in-domain holding it has exactly one in-domain reaching an affirmed domain`);
   }
+  // clerk#187: an affirmed tension contains its poles' affirmed forks, never the suggestions they were forked from
+  for (const r of records.filter((r) => r.record.typeName === "tension" && affirmed.has(r.instanceId)))
+    for (const p of out(r.instanceId, "contains").filter((p) => isType(p, "pole") && !affirmed.has(p) && classOf(p).some((x) => affirmed.has(x))))
+      errors.push(`${label(r)} contains the suggested pole ${p.slice(0, 8)} although its affirmed fork exists; re-point the contains to the fork`);
   // Axes (decision cdd272a3): an axis-in-domain refines one tension, is in-domain one domain and names one yang-pole, a pole of
   // that tension; a domain's affirmed axes are at most three, on distinct lines 1-3, with distinct tensions.
   const axes = records.filter((r) => r.record.typeName === "axis-in-domain");
