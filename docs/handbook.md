@@ -1003,6 +1003,14 @@ A domain is not fully defined until it names its trade-offs (SP-94). The goal is
 
 They meet through the I Ching ↔ zodiac alignment: hexagram line k is the zodiac axis that begins at sign k. Moving between them is a **translation**, so say so whenever you do it, and say which translation. The local reference for both, and for the translation, is `srs-programme:source-documents/decision-taxonomy-2026-10-22/three-axes-by-trigram.md`.
 
+**What a trade-off is (an evolving theory, 2026-10-25).** A trade-off is a standing tension between two goods that compete for the same constraint, so getting more of one costs some of the other. The right position depends on context and is reset over time: it is managed, never solved once. Every tension placed on an axis must have three properties, each with a test:
+
+1. **Two goods.** Each pole is something a capable team would sometimes rightly choose. Test: can you name what is lost if the domain gives up each pole entirely?
+2. **Coupled cost.** The poles draw on one constraint (time, attention, risk budget, the same people), through a cause you can name. Test: with the constraint fixed, does more of one cost some of the other, even after obvious waste is removed? If a better method gives more of both at no cost, it was an inefficiency: record it as a problem.
+3. **Context-dependent and recurring.** The right point moves with stakes, maturity or risk, and overdoing either pole fails in a way you recognise (the pole's shadow). Test: can you name a condition that moves the right point toward each pole, and the failure of each extreme?
+
+A scale with one good end, a problem, two words that only sound opposed, a one-off choice and a preference all fail at least one test. These tests judge one tension; steps 3 and 4 below judge whether several are independent. The definition is theory, not truth: it changes as practice shows where it fails (synthesised from three agents asked separately; srs-programme exercise e8a87b14, owner's vignette 30e37fb3).
+
 **1. Place before judging.** A tension can be weighed only inside a domain. Without one there is no polarity, no foundational status and nothing to test it against. So the first act is to place each tension in the domain whose purpose it trades on. The groups that hold a tension (`holds-tension`) are evidence of where it belongs, not the answer.
 
 **2. Generate the axes from the trigram; don't just collect them.** Tensions gathered from the bottom up, from the work, cluster. In Programme coordination, three said "one way" and two said "throughput". So ask what the domain's tension is on each line, in the owner's definitions:
