@@ -11,7 +11,7 @@
     "mover_kind": "manual",
     "needs": "purpose, in scope and out of scope",
     "gaps": [
-      "All seven domains are affirmed (by 2026-10-20), but every domain has 0 of 3 axes placed, so no group lean can settle a choice."
+      "All seven domains are affirmed (by 2026-10-20). Axes are placed in Semantic records only (3 of 3); the other domains have none, so their group leans cannot settle a choice yet (`clerk domains`)."
     ],
     "remedies": "Axes PRs clerk#135, srs-programme#206, srs-lab#18, srs-context#58 (unblocked by cdd272a3, ratified 2026-10-24)",
     "measure": "domains.axes-unplaced",
@@ -25,7 +25,7 @@
     ]
   },
   "createdAt": "2026-10-24T12:32:56.375331383+00:00",
-  "updatedAt": "2026-10-24T16:19:08.655798186+00:00",
+  "updatedAt": "2026-10-25T11:22:11.473669919+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

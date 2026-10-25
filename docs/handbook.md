@@ -154,7 +154,7 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 **Needs before it moves**: purpose, in scope and out of scope
 
 **Gap**:
-- All seven domains are affirmed (by 2026-10-20), but every domain has 0 of 3 axes placed, so no group lean can settle a choice.
+- All seven domains are affirmed (by 2026-10-20). Axes are placed in Semantic records only (3 of 3); the other domains have none, so their group leans cannot settle a choice yet (`clerk domains`).
 
 **Acting on it**: Axes PRs clerk#135, srs-programme#206, srs-lab#18, srs-context#58 (unblocked by cdd272a3, ratified 2026-10-24)
 
