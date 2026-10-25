@@ -1,8 +1,8 @@
 name: Programme PR upkeep
 
 # Reusable. Merge green gate:auto-merge PRs and keep gated PRs up to date across the estate
-# (clerk upkeep); with digest, also post the review digest on the settings digest_issue and
-# rewrite the owner's desk (clerk desk --post, the one open `desk` issue in that repo).
+# (clerk upkeep); with digest, also post the review digest on the settings digest_issue. Every
+# run that applies rewrites the owner's desk (clerk desk --post, the one open `desk` issue; clerk#203).
 # Triggers (15-minute cron, daily digest cron, push, workflow_run, dispatch) and the concurrency
 # group stay in the caller. github.event_name and github.event.schedule are the caller's.
 # digest-cron must equal the caller's digest cron expression.
