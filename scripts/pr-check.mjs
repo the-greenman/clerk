@@ -4,7 +4,7 @@
 import { get, list } from '../lib/adapters/github.mjs';
 import { repoRoot } from './lib/repo-arg.mjs';
 import { srsCli } from '../lib/adapters/cli.mjs';
-import { loadSettings } from '../lib/adapters/settings.mjs';
+import { loadSettings, programmeRepo } from '../lib/adapters/settings.mjs';
 import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 import { parseDecisions, checkDecisions, answersFrom } from '../lib/practice/pr-decisions.mjs';
 
@@ -19,7 +19,7 @@ try {
   const files = list(`repos/${owner}/${repo}/pulls/${n}/files?per_page=100`);
   const recordsInDiff = files.filter((f) => /records\/.*decision-[0-9a-f]{8}\.json$/.test(f.filename)).length;
   const d = parseDecisions(pr.body ?? '');
-  const findings = checkDecisions(d, { body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff, labels: pr.labels ?? [], gates, draft: Boolean(pr.draft) });
+  const findings = checkDecisions(d, { body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff, labels: pr.labels ?? [], gates, draft: Boolean(pr.draft), programme: programmeRepo(programme).name === repo });
   if (argv.includes('--json')) console.log(JSON.stringify({ ref, by: d.by, answers: d.answers, made: d.made, asks: d.asks, findings }, null, 2));
   else for (const f of findings) console.log(`${f.level.padEnd(5)} ${f.text}`);
   process.exit(findings.some((f) => f.level === 'error') ? 1 : 0);

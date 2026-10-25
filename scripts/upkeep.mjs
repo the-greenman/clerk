@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 // upkeep: keep the estate's open PRs moving (srs-programme#39, clerk#89). The rules are practice/upkeep.mjs; this reads and acts.
 //   gate:auto-merge CLEAN -> merge; BEHIND -> update branch. gate:owner-merge -> never merged here; BEHIND -> update branch.
+//   In the programme repo no gate label reads as auto, and native auto-merge is armed on auto PRs not yet CLEAN (clerk#208).
 //   A group PR (its wg: label) merges only on a valid quorum for its head commit, within budget, while the group is not paused.
 //   --digest posts one comment on the settings digest issue: conflicts, ungated PRs, group waits. Dry run unless --apply.
 //   node scripts/upkeep.mjs --repo <programme> [--apply] [--digest]      exit 0 ran clean, 1 a read or act failed, 2 usage
 import { parseArgs } from 'node:util';
-import { loadSettings, issueRef } from '../lib/adapters/settings.mjs';
+import { loadSettings, issueRef, programmeRepo } from '../lib/adapters/settings.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
 import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 import { groupStates, repoPRs } from '../lib/adapters/upkeep.mjs';
-import { mergePR, updateBranch, comment } from '../lib/adapters/github.mjs';
+import { mergePR, updateBranch, enableAutoMerge, comment } from '../lib/adapters/github.mjs';
 import { upkeepPlan, digestBody } from '../lib/practice/upkeep.mjs';
 
 let opts;
@@ -27,13 +28,15 @@ for (const [l, g] of Object.entries(G)) {
   if (g.merged === 'unknown') fail(`budget count for ${l}`);
   if (/unreadable/.test(g.pause)) fail(`pause check for ${l}`);
 }
-const repos = st.repos.flatMap((r) => { try { return [repoPRs(st.githubOwner, r, Object.keys(G), gates)]; } catch (e) { fail(`list ${r}`, e); return []; } });
+let prog = null; // the programme repo's name, from its origin remote; unreadable means no programme defaults
+try { prog = programmeRepo(opts.repo).name; } catch (e) { fail('programme repo name unreadable', e); }
+const repos = st.repos.flatMap((r) => { try { return [{ ...repoPRs(st.githubOwner, r, Object.keys(G), gates), programme: r === prog }]; } catch (e) { fail(`list ${r}`, e); return []; } });
 const plan = upkeepPlan(repos, G, gates);
 
 for (const a of plan.actions) {
   const what = `${a.do} ${a.repo}#${a.number}${a.why ? ` (${a.why})` : ''}`;
   if (!opts.apply) { console.log(`WOULD ${what}`); continue; }
-  try { (a.do === 'merge' ? mergePR : updateBranch)(`${st.githubOwner}/${a.repo}`, a.number, a.sha); console.log(`DID   ${what}`); }
+  try { ({ merge: mergePR, 'update-branch': updateBranch, 'auto-merge': enableAutoMerge })[a.do](`${st.githubOwner}/${a.repo}`, a.number, a.sha); console.log(`DID   ${what}`); }
   catch (e) { fail(what, e); }
 }
 if (opts.digest) {
