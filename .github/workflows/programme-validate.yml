@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout the programme
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the guard reads the PR's base commit
 
       # The clerk at the SAME ref the caller pinned in `uses:` (see clerk-ref above).
       - name: Checkout the clerk
@@ -49,6 +51,8 @@ jobs:
       - name: Validate the programme repository with the pinned CLI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
           clerk() { node "$RUNNER_TEMP/clerk/bin/clerk.mjs" "$@" --repo "$GITHUB_WORKSPACE"; }
           export $(clerk fetch-srs)
@@ -59,3 +63,5 @@ jobs:
           clerk roadmap --json > /dev/null
           # the Confidence and care policy is one the clerk can act on, and its rendered document matches the records
           if [ -f docs/confidence-and-care.md ]; then clerk render-policy --check; fi
+          # an authority act (ratify, set aside, affirm, authorise, receive) must carry its proof in the same change (SP-71)
+          if [ "$EVENT" = pull_request ]; then clerk guard --base "origin/$BASE_REF"; fi
