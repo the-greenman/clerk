@@ -27,7 +27,7 @@ const blockedBy = (r, n, listed) => { if (listed?.issue_dependencies_summary?.to
 
 function read(r, n, listed = null) {
   const { issue, facts, parents, parentsUnknown, result } = careFor(repo, cli, st, r, n, ctx, listed);
-  const item = { ref: `${r}#${n}`, body: issue.body, labels: issue.labels, parents, parentsUnknown, blockedBy: blockedBy(r, n, listed) };
+  const item = { ref: `${r}#${n}`, body: issue.body, labels: issue.labels, subIssues: issue.sub_issues_summary?.total, assigned: Boolean(issue.assignees?.length), parents, parentsUnknown, blockedBy: blockedBy(r, n, listed) };
   const dots = dotsFor({ item, facts, epics: ctx.epics, groups: ctx.groups, wf, care: result });
   return { ref: item.ref, title: issue.title, ...flowState(dots), dots };
 }
