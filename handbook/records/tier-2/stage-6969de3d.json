@@ -8,7 +8,7 @@
     "title": "Roles and layers",
     "theory": "Every act is done by someone holding a role. The **owner** is the programme's top authority and delegates to working groups. **Members** of a group hold seats: steward, builder, reviewer, analyst. **Scouts** suggest problems. Records carry who made them (`createdBy`) and sit in one of three layers: Affirmed, Suggestions, Set aside.",
     "status": "partial",
-    "practice": "- **Layers:** the Affirmed, Suggestions and Set aside containers in srs-programme, checked by `scripts/check-method.mjs` (`checkGates`): an AI actor cannot author a record in a human layer.\n- **Roles:** only the owner is built into `lib/practice/roles.mjs`. Every group role is read from records: a `governance/role` with charter fields, the Owner role `delegates` to it, and agents `authorised-by` it carry `actor_id` and `seat` (`clerk groups`).\n- **Agents:** a `method/agent` is a universal stance agent that `instantiates` one of the eight archetypes. A `stewardship/agent` is a seat-holder in a group and is `derived-from` a method agent. The unattended worker (`agent:unattended-worker`) is `authorised-by` the Owner role as the central group's builder.",
+    "practice": "- **Layers:** the Affirmed, Suggestions and Set aside containers in srs-programme, checked by `scripts/check-method.mjs` (`checkGates`): an AI actor cannot author a record in a human layer.\n- **Roles:** only the owner is built into `lib/practice/roles.mjs`. Every group role is read from records: a `governance/role` with charter fields, the Owner role `delegates` to it, and agents `authorised-by` it carry `actor_id` and `seat` (`clerk groups`; it does not yet check the `delegates` edge, clerk#137).\n- **Agents:** a `method/agent` is a universal stance agent that `instantiates` one of the eight archetypes. A `stewardship/agent` is a seat-holder in a group and is `derived-from` a method agent. The unattended worker (`agent:unattended-worker`) is `authorised-by` the Owner role as the central group's builder.",
     "gaps": [
       "Set aside has never been used: its only member is its own identity record.",
       "The difference between `method/agent` and `stewardship/agent` is practice, not a ruling."
@@ -19,7 +19,7 @@
     "test": "Stage 1: 3 passing. Two todos (roles read from records; the analyst as a member role) describe work already done and should become passing tests."
   },
   "createdAt": "2026-10-11T18:33:28.516811537+00:00",
-  "updatedAt": "2026-10-11T18:33:28.516820824+00:00",
+  "updatedAt": "2026-10-25T10:54:07.862095764+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",

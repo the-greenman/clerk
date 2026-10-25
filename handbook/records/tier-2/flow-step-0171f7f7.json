@@ -1,0 +1,33 @@
+{
+  "instanceId": "0171f7f7-3d61-4bb5-9f09-14e7d9d73707",
+  "typeId": "918b144e-6e3c-4128-acea-e8282f28bfd5",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "flow-step",
+  "fieldValues": {
+    "title": "Story",
+    "flow": "work",
+    "moved_by": "the session agent, from the owner's own words",
+    "mover_kind": "manual",
+    "needs": "the owner's words, verbatim, one Tier-0 vignette per thought in srs-programme's Narrative explorations (`80b283ef`), under the conversation's note, tagged `vignette` and `topic:<slug>`",
+    "theory": "All problems and domains evolve from stories (owner, 2026-10-25). The method is the chapter *Narrative explorations: how meaning grows*. Vignettes are collated by conversation (the note) and by topic across sessions (the tag).",
+    "gaps": [
+      "No clerk command captures a vignette or lists them by conversation and topic; agents use `srs note create` (clerk#199)."
+    ],
+    "remedies": "clerk#199 (clerk story); remedy 74a2cbd2",
+    "confidence_level": "medium",
+    "evidence": "owner, 2026-10-25, verbatim in srs-programme Narrative explorations (note 71d4c10a); clerk#197 run reports",
+    "maintained_by": [
+      "command: srs note create (pinned CLI)",
+      "container: Narrative explorations (80b283ef)"
+    ]
+  },
+  "createdAt": "2026-10-25T10:46:23.117776117+00:00",
+  "updatedAt": "2026-10-25T10:46:23.117783571+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "agent:claude-code",
+    "name": "Claude Code (the owner's session, clerk#197, 2026-10-25)"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}
