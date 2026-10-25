@@ -792,7 +792,7 @@ Work flows when every dot an issue needs is joined; confidence never stops it, i
 |---|---|---|---|---|
 | Problem | `Answers: SP-nn` names a suggested or affirmed problem | none: a person or a brief names it | wg-analyst, handbook-watcher, /ship, the steward's escalations | claim (collisions, the problem), then the care mode |
 | Epic | the issue, or its top parent, is a sub-issue of a ranked epic | "Part of" names the parent, when the issue has none | every producer: `Part of` and the sub-issue link | clerk flow |
-| Lane | `lane:unattended`, or the label of a group that works in the issue's repository | the group that holds the problem's domain, else the central lane (D4, D5, D15); two holders are a choice | every producer | clerk flow; topup feeds only routed issues (the same `routed` rule) |
+| Lane | `lane:unattended`, or the label of a group that works in the issue's repository | the group that holds the problem's domain, else the central lane (D4, D5, D15); two holders are a choice | every producer | clerk flow; topup feeds only routed issues (the same `routed` rule). An epic, story, plan or sequence, or an assigned item, passes the dot unlabelled: its tasks are routed, or its assignee holds it (clerk#201) |
 | Plan | a `## Technical plan` section, or written steps | none: a person or a brief writes it | wg-analyst, handbook-watcher where the fix is known | a missing plan lowers the care mode, it does not stop the work |
 | Blockers | every `Blocked by` is recorded, and none is open | "Blocked by" names the dependency | every producer: the line and the link | clerk flow, then the board's blocked mirror |
 | Hold | no `needs-input`, `parked` or `blocked` | none | | claim, queue and topup |

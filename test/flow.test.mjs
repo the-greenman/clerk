@@ -7,7 +7,7 @@ const GROUPS = [{ label: 'wg:agent-editor', domains: ['dom-writing'] }];
 const EPICS = [{ refs: ['semanticops.com#29'], parked: false }];
 const facts = (o = {}) => ({ answers: { problems: ['SP-12'], none: undefined, stated: true }, problems: [{ id: 'SP-12', layer: 'affirmed', domains: ['dom-writing'] }],
   epic: { ref: 'semanticops.com#29', ranked: true }, plan: { section: true, steps: false }, ...o });
-const item = (o = {}) => ({ ref: 'srs-web#1', body: '', labels: ['wg:agent-editor'], blockedBy: [], ...o });
+const item = (o = {}) => ({ ref: 'srs-web#1', body: '', labels: ['wg:agent-editor'], blockedBy: [], subIssues: 0, ...o });
 const dot = (dots, name) => dots.filter((d) => d.dot === name);
 
 test('an item with every dot joined flows', () => {
@@ -107,7 +107,9 @@ test('routed: one rule for flow and topup', () => {
 
 test('an epic or sequence, or an assigned item, is never labelled for a lane (clerk#201)', () => {
   const lane = (more) => dot(dotsFor({ item: item({ labels: [], ...more }), facts: facts({ problems: [{ id: 'SP-12', layer: 'suggested', domains: ['dom-other'] }] }), epics: EPICS, groups: GROUPS, wf: WF }), 'lane')[0];
-  assert.deepEqual([lane({ subIssues: 3 }).ok, lane({ subIssues: 3 }).auto, lane({ subIssues: 3 }).note], [true, false, 'holds sub-issues: its tasks are routed, not it']);
-  assert.equal(lane({ assigned: true }).note, 'assigned: its assignee holds it');
-  assert.equal(lane({}).fix, 'label it lane:unattended');
+  assert.deepEqual([lane({ subIssues: 3 }).ok, lane({ subIssues: 3 }).auto, lane({ subIssues: 3 }).note], [true, false, 'holds work: its tasks are routed, not it']);
+  assert.equal(lane({ subIssues: 0, labels: ['epic'] }).ok, true);
+  assert.match(lane({ subIssues: 0, assigned: true }).note, /^assigned: its assignee holds it/);
+  assert.deepEqual([lane({ subIssues: undefined }).ok, lane({ subIssues: undefined }).auto], [false, false], 'unread sub-issues never route');
+  assert.equal(lane({ subIssues: 0 }).fix, 'label it lane:unattended');
 });
