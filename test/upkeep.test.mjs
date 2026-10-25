@@ -140,6 +140,18 @@ test('clerk#208: in the programme repo every PR merges on green; native auto-mer
   assert.deepEqual(plan.ungated, ['r#3 pr 3']);
 });
 
+test('clerk#217: an auto PR is armed in any repo that requires checks, never in one that does not', () => {
+  const gov = { ...ctx, requiredChecks: true };
+  assert.equal(routePR(P(['gate:auto-merge'], 'BLOCKED'), gov).arm, true, 'protected repo: armed');
+  assert.equal(routePR(P(['gate:auto-merge'], 'BLOCKED'), ctx).arm, undefined, 'unprotected: never armed, it would merge before CI');
+  assert.equal(routePR(P([], 'BLOCKED'), gov).arm, undefined, 'an ungated PR outside the programme is not armed');
+  assert.equal(routePR(P(['gate:owner-merge'], 'BLOCKED'), gov).arm, undefined, 'owner merge is never armed');
+  const pr = (number, labels, state) => ({ number, title: `pr ${number}`, headSha: HEAD, ...P(labels, state) });
+  const plan = upkeepPlan([{ repo: 'c', defaultBranch: 'main', requiredChecks: true, prs: [pr(4, ['gate:auto-merge'], 'BLOCKED')] },
+    { repo: 'u', defaultBranch: 'main', prs: [pr(5, ['gate:auto-merge'], 'BLOCKED')] }], {}, GATES);
+  assert.deepEqual(plan.actions.map((a) => [a.do, a.repo, a.number, a.why]), [['auto-merge', 'c', 4, 'auto PR, merges when its required checks pass']]);
+});
+
 test('upkeep reads its gate labels from the bindings, so a renamed gate still routes and the old name no longer merges', () => {
   const renamed = { ...ctx, gates: { auto: 'merge:auto', owner: 'merge:owner' } };
   const P2 = (labels) => ({ labels, draft: false, base: 'main', state: 'CLEAN', autoMerge: false });
