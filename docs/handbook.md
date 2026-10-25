@@ -1424,7 +1424,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - Type `com.semanticops.method/domain` (title, purpose, in_scope, out_of_scope).
-- The domains and their state: `clerk domains --repo <programme>` (all seven were affirmed by 2026-10-20).
+- The domains: `srs record list --repo <programme> --type com.semanticops.method/domain`; which are affirmed: `srs container get 5e28aa7e-4b35-4474-8f62-cf8dcae1e506 --repo <programme>` (the Affirmed container); their axes: `clerk domains --repo <programme>`.
 - 6 domain containers exist. Evidence-backed writing's outline holds its clusters and their problems (srs-programme#112).
 - Deep context nests Semantic records, Group meaning ownership and Agent memory (decision dbaa4716).
 - `clerk ground` reads domains through `contains` (domain to cluster to problem) to compute I1. Nothing else reads them.
@@ -1476,7 +1476,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - Type `com.semanticops.method/problem` (problem_id `SP-nn`, statement, kind, source_ref).
-- The problems and how many are affirmed: `clerk check --repo <programme>` and `srs record list --repo <programme> --type com.semanticops.method/problem`.
+- The problems: `srs record list --repo <programme> --type com.semanticops.method/problem`; which are affirmed: `srs container get 5e28aa7e-4b35-4474-8f62-cf8dcae1e506 --repo <programme>` (the Affirmed container); the rule warnings on them: `clerk check --repo <programme>`.
 - Problems group into clusters. Parked issues are sources for problems, never bulk imports.
 - **Duplicate guard:** search the trackers and comment rather than file a near-duplicate.
 - The gate is ruled and not built (clerk#35, in the unattended lane).
@@ -1484,7 +1484,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Gap**:
 - A problem can be affirmed with no persona and no domain, which breaks the rule above.
 - Problems link to issues only backwards, as text (`source_ref`, `Answers:`).
-- The 27 affirmed problems outside the two pilot domains must be grounded or set aside before the gate errors.
+- The affirmed problems outside the two pilot domains (`clerk check` lists them) must be grounded or set aside before the gate errors.
 - Decision ee59155b (proposed) duplicates the ratified gate e3ed9e54.
 
 **Open questions**:
