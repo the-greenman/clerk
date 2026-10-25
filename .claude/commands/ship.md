@@ -14,7 +14,7 @@ Track the stages with TodoWrite. Do not stop between stages, except at these **t
 
 | # | Checkpoint | When |
 |---|---|---|
-| A | Grounding | the issue does not answer an affirmed problem |
+| A | Grounding | the issue names no usable problem (none, unknown or set aside) |
 | B | Dependency | it needs a spec change, a new core capability or a WASM binding first |
 | C | Decisions | an escalation, or a ruling with long-term consequences |
 
@@ -39,35 +39,37 @@ Read the issue: `gh issue view <n> --repo the-greenman/<repo>`.
 
 **First, is someone already on it?** Look for a `Claimed by …` comment, a `status: in progress` label, an assignee, an open PR that closes it (`gh pr list --repo the-greenman/<repo> --search "<n>" --state open`), or a branch named for it. A group's builder routine may have taken it since you last looked. If any of these exists, do not build. Report the claim or the PR, with its CI and review state, and stop. Getting an open PR to merge is the group's reviewer's job and then the owner's, not a second builder's.
 
-The issue's first line must be `Answers: SP-nn`, naming an **affirmed** problem (handbook stage 6). Check this yourself; do not trust the line as written:
+**Then read its dots and its care mode.** `clerk flow` reads the same dots as every other command and brief, and `clerk care` reads the same mode as `clerk claim` (decision 9d50126b, *Confidence grades care, it does not gate work*):
 
 ```bash
-node -e 'import(process.env.HOME+"/dev/semanticops/clerk/lib/adapters/claim.mjs").then(m=>console.log([...m.affirmedProblemIds(process.argv[1])].join(" ")))' $PROG
+$CLERK flow --chain <repo>#<n> --repo $PROG    # each dot: problem, epic, lane, plan, blockers, hold
+$CLERK care <repo>#<n> --repo $PROG            # the care mode: Build, Careful, Careful group-reviewed or Probe
 ```
+
+The issue's first line is `Answers: SP-nn`, naming a problem that is suggested or affirmed. Affirmation is not a gate: how sure the grounding is sets the care mode, and you work in that mode. Stop at checkpoint A only when the **problem** dot fails.
 
 **A problem is a user's need, never a technical concern.** It is held by a persona in a domain and says what is wrong *for them*. "Code lives in the wrong layer", "this is duplicated" or "another app can't reuse this" are not problems. They are implementation principles the work upholds, such as capability layering (`srs-rust/docs/architecture/capability-layering.md`) and ADR-048. Cite them as the `principle` in the decisions block (this command's stage 5). A technical issue answers the user-facing problem whose work it serves or unblocks: ask *whose need is this work for, and in which domain?*
 
-If the first line reads `No affirmed problem yet: …`, or names a problem that is not affirmed:
+If the problem dot fails (no `Answers:` line, `No affirmed problem yet: …`, or a problem that is unknown or set aside):
 
-1. Name the user and the need behind the work, and the domain where it happens. Then look through the affirmed problems for that need. Read titles and statements with `srs record list --repo $PROG --type com.semanticops.method/problem`. Use `$CLERK roadmap --explain` to see which problems serve a ranked objective.
-2. **Stop and ask the owner.** Offer at most three candidates, each with one line on why it fits. Then:
-   - **An affirmed problem fits:** change the issue's first line to `Answers: SP-nn`. Keep the old sentence below it as context, restated as the principle it upholds where it was a technical concern. Continue.
-   - **No affirmed problem holds the user's need:** search for duplicates first. Then add a problem **suggestion** to srs-programme's Suggestions through the CLI, with `SRS_ACTOR` set to an AI actor and a `held-by` link to a persona-in-domain where one exists. Comment the suggestion's id on the issue and **stop**. The issue stays parked until a `/session` affirms the problem. Never affirm it yourself, and never file a technical concern as a problem.
+1. Name the user and the need behind the work, and the domain where it happens. Then look through the problems for that need, affirmed ones first. Read titles and statements with `srs record list --repo $PROG --type com.semanticops.method/problem`. Use `$CLERK roadmap --explain` to see which problems serve a ranked objective.
+2. **Ask the owner.** Offer at most three candidates, each with one line on why it fits. Then:
+   - **A problem fits:** change the issue's first line to `Answers: SP-nn`. Keep the old sentence below it as context, restated as the principle it upholds where it was a technical concern. Continue in the mode `clerk care` gives.
+   - **No problem holds the user's need:** search for duplicates first. Then add a problem **suggestion** to srs-programme's Suggestions through the CLI, with `SRS_ACTOR` set to an AI actor and a `held-by` link to a persona-in-domain where one exists. Name it in `Answers:` and continue in the mode `clerk care` gives (an agent's own suggestion grades low, so this is usually Probe). Never affirm it yourself, and never file a technical concern as a problem.
 
-## 2 — Routing: which group takes it?
+## 2 — Routing: join the dots
 
-The problem's domain decides the group (handbook "How an issue reaches a group", decisions D4, D5 and D15). `$CLERK groups --repo $PROG` lists each group with its label, repos and budget.
+The problem's domain decides the group (handbook "How an issue reaches a group", decisions D4, D5 and D15). `clerk flow` already says which dots are missing. **Join every dot it marks `auto`**, citing the rule it names: the lane or group label, the sub-issue link that a "Part of" line names, the blocked-by link that a "Blocked by" line names. A dot that is not `auto` is a choice. For example, two groups both hold the domain, the issue already has a parent, or the epic is parked. Put that choice to the owner in one line. Run `flow --chain` again until only the dots you cannot join remain.
 
-- **The issue has a `wg:` label:** that group takes it. Then:
-  - **Mandate** (`routines/wg-builder.md` step 5): the issue must name the recorded ruling, RFC, invariant or affirmed remedy it executes, or be non-normative, and sit in the group's repos. If not, go to the escalation in stage 5.
+- **A group takes it** (its `wg:` label, and the group works in this repository):
+  - **Mandate** (`routines/wg-builder.md` step 5): the issue must name the recorded ruling, RFC, invariant or affirmed remedy it executes, or be non-normative. If not, go to the escalation in stage 5.
   - **Pause and budget** (wg-builder step 1):
     ```bash
     $CLERK group-state <wg:label> --repo $PROG --json    # pause must be ok, room above 0, exit 0
     ```
     Paused or over budget: comment on the issue, add `needs-input`, stop.
-- **The issue has no `wg:` label, and a group's charter holds the domain:** propose that label to the owner in one line. This is not a checkpoint unless they object.
-- **Otherwise:** the work belongs to the **central group** (SemanticOps, the Owner role), and the owner's session holds its builder seat.
-- If the issue has no parent, link it under the story or epic it serves: `CLERK_REPO=$PROG $CLERK board link <parent-repo>#<n> <repo>#<n>` (`board` reads the programme from `CLERK_REPO`, not `--repo`).
+- **Otherwise:** the work belongs to the **central group** (SemanticOps, the Owner role), labelled `lane:unattended`, and the owner's session holds its builder seat.
+- **Linking a parent:** `CLERK_REPO=$PROG $CLERK board link <parent-repo>#<n> <repo>#<n>` (`board` reads the programme from `CLERK_REPO`, not `--repo`).
 
 ## 3 — Claim
 

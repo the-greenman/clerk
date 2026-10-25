@@ -496,7 +496,8 @@ test("planTopup returns empty toNominate when queue exceeds target (overprovisio
 // consumer can pick up — else topup mis-measures. Regression: it once counted stories/epics/claimed
 // items, so a queue of 5 stories + 1 epic + 2 claimed read "full" (8) while 0 consumable work
 // remained, and topup never refilled (and merges never rehydrated the queue).
-const crow = (o) => ({ repo: "srs-rust", num: o.num ?? 1, key: `srs-rust#${o.num ?? 1}`, state: "OPEN", status: null, labels: [], ...o });
+// a routed row by default (lane:unattended): an unrouted Ready item is not consumable either
+const crow = (o) => ({ repo: "srs-rust", num: o.num ?? 1, key: `srs-rust#${o.num ?? 1}`, state: "OPEN", status: null, ...o, labels: ["lane:unattended", ...(o.labels ?? [])] });
 
 test("isConsumableReady: a plain Ready work-item counts", () => {
   assert.equal(isConsumableReady(crow({ status: "Ready" })), true);
@@ -756,7 +757,15 @@ test("positionFix: a claim label wins over Backlog or Ready; an open item in Don
 });
 
 test("isConsumableReady: any hold keeps an item out of the queue", () => {
-  const leaf = (labels) => row({ status: "Ready", labels });
+  const leaf = (labels) => row({ status: "Ready", labels: ["lane:unattended", ...labels] });
   assert.equal(isConsumableReady(leaf([])), true);
   for (const hold of ["needs-input", "blocked", "parked"]) assert.equal(isConsumableReady(leaf([hold])), false, hold);
+});
+
+test("isConsumableReady: an unrouted or already-PR'd Ready item does not count (the queue skips both)", () => {
+  const bare = { repo: "srs-rust", num: 9, key: "srs-rust#9", state: "OPEN", status: "Ready", labels: [] };
+  assert.equal(isConsumableReady(bare), false, "no lane: no routine takes it");
+  assert.equal(isConsumableReady({ ...bare, labels: ["wg:third-party-ready"] }), true, "a group label routes it (groups unknown here: any wg:)");
+  assert.equal(isConsumableReady(crow({ status: "Ready", openClosingPr: 612 })), false, "an open PR already closes it");
+  assert.equal(countConsumableReady([bare, crow({ status: "Ready" }), crow({ num: 2, status: "Ready", openClosingPr: 7 })]), 1);
 });

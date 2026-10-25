@@ -821,6 +821,18 @@ The elements that keep each step moving are listed on the step (Maintained by). 
 | A group stops | two unreceived reports | `clerk desk`, then a session's Reports |
 
 
+#### Narrative explorations: how meaning grows
+
+Our semantics (domains, problems, tensions, principles, decisions) are developed actively, from the owner's own words, not designed in advance and affirmed record by record (SP-101, SP-102, SP-103). The owner's narrative is the human source; records are derived from it (decision 77e04b19).
+
+1. **Capture verbatim.** When the owner explains the work (a story, a frustration, a theory, a ruling given in conversation), record it before acting on it, as a Tier-0 note in srs-programme's **Narrative explorations** container (`80b283ef`). One vignette per thought: a short title with the date, a `narrative` section holding the owner's words exactly as written, typos included, and a `source` section ("The owner, in conversation with <agent>, <date>; recorded verbatim"). Never paraphrase, summarise or tidy a vignette; an agent's reading of it goes into the records derived from it.
+2. **Vignettes, not a whole.** Vignettes are interconnected and need not agree. Never merge them into one document.
+3. **Derive, and point back.** A record that comes from a vignette (a problem, remedy, principle, domain, axis or pole, decision, exercise) is written as a suggestion with `derived-from` to the vignette. Look before you create: when a record already holds the meaning, relate to it instead (remedy 662030b3).
+4. **Keep contradictions.** When a vignette contradicts another vignette, a record or the practice running today, never resolve it silently: record it, citing both, as a problem or a comment on the record (SP-104 is one). Paradox is how a domain is explored.
+5. **Cycles and spirals.** Return to the vignettes, cluster and synthesise them, and let the owner refine them; the records follow the narrative, never the other way. Domains emerge from this and are refined, all within the base domain *Semantic engineering in practice*.
+6. **Affirm the story.** The owner ticks or denies a derived record beside the words it came from (srs-web#617). Until then it is a suggestion, and work does not wait on it: confidence grades care, it does not gate.
+
+
 #### Domains, personas and problems define the work
 
 A **domain** says *where* and *when* a problem occurs: an area of work with a purpose, and what is in and out of scope. A **persona** says *who* has it: their jobs and needs. A **problem** is a claim that something is wrong for that persona in that domain.
@@ -1259,7 +1271,7 @@ Exact schedules and triggers live in [tools.md](tools.md); this table says what 
 | Report | wg-steward, daily 11:30 | routine | closes the cycle: run report record, ratifies the group's decisions in one group session, report on #31 |
 | Report | handbook watcher, weekly | routine | re-reads code, data and boards; updates the handbook records; renders; opens a PR |
 
-**The desk.** Everything that needs the owner is on one pinned issue, semanticops.com#35 (label `desk`). `clerk desk --post` rewrites its body in place, never as a comment, in three parts: **Needs you** (unreceived reports first when a group is paused, decisions to ratify, open exercises, owner merges with the question each asks (an owner-merge PR that asks nothing is not listed: Threads shows it as misclassified, back to an agent; clerk#165), approved PRs that have not merged and why, issues assigned to the owner with their age, `needs-input` issues oldest first, parked issues that block ranked work (`blocks-ranked`) to re-ground), **Threads** (one line per ranked epic, working group and unthreaded PR: state, last moved, next step, who) and **Running fine** (counts only). If it is not on the desk, it does not need the owner; #31 and #33 are history.
+**The desk.** Everything that needs the owner is on one pinned issue, semanticops.com#35 (label `desk`). `clerk desk --post` rewrites its body in place, never as a comment, on every pr-upkeep run that applies (clerk#203), in three parts: **Needs you** (unreceived reports first when a group is paused, decisions to ratify, open exercises, owner merges with the question each asks (an owner-merge PR that asks nothing is not listed: Threads shows it as misclassified, back to an agent; clerk#165), approved PRs that have not merged and why, issues assigned to the owner with their age, `needs-input` issues oldest first, parked issues that block ranked work (`blocks-ranked`) to re-ground), **Threads** (one line per ranked epic, working group and unthreaded PR: state, last moved, next step, who) and **Running fine** (counts only). If it is not on the desk, it does not need the owner; #31 and #33 are history.
 
 **Rules for every routine.**
 
@@ -2034,6 +2046,7 @@ On 2026-10-11 it ran 60 tests: 36 passing, 24 todo, none failing.
 | Handbook watcher | [routines/handbook-watcher.md](../routines/handbook-watcher.md) |
 | Two-domain walk | [plans/two-domains-end-to-end.md](../plans/two-domains-end-to-end.md) |
 | Clerked owner session | `.claude/commands/session.md` |
+| Narrative explorations (the owner's vignettes) | srs-programme `Narrative explorations` container (`80b283ef`); this handbook, *Narrative explorations: how meaning grows* |
 | Programme data rules | srs-programme `CLAUDE.md` |
 | Concept and boundary mapping | srs-programme `source-documents/agent-democracy-2026-10-10/`, `boundaries-2026-10-09/` |
 

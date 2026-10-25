@@ -28,6 +28,15 @@ test("epic on ranked objective without affirmed problem warns", () => {
   assert.match(r.warnings[0], /answers no affirmed problem/);
 });
 test("same problem_id across layers (a fork) is fine", () => assert.deepEqual(run((b) => b.records.push(rec("p2", "problem", { problem_id: "SP-1" }))).errors, []));
+test("an affirmed tension still containing a suggested pole whose fork is affirmed (clerk#187)", () => {
+  const errs = run((b) => {
+    b.records.push(rec("t", "tension", { title: "T" }), rec("p", "pole", { title: "P" }), rec("pf", "pole", { title: "P" }), rec("q", "pole", { title: "Q" }));
+    b.relations.push(rel("t", "p", "contains"), rel("t", "q", "contains"), rel("pf", "p", "derived-from"));
+    b.affirmed.add("t"); b.affirmed.add("pf");
+  }).errors;
+  assert.ok(errs.some((e) => /contains the suggested pole p .*affirmed fork exists/.test(e)), errs.join("; "));
+  assert.ok(!errs.some((e) => /suggested pole q/.test(e)), "a pole with no affirmed fork is not reported");
+});
 test("record in both layers", () => assert.match(run((b) => { b.setAside = new Set(["p1"]); }).errors[0], /both Affirmed and Set aside/));
 test("unaffirmed remedy does not satisfy the epic", () => assert.match(run((b) => { b.affirmed.delete("r1"); }).warnings[0], /answers no affirmed problem/));
 test("ended period ranks nothing", () => assert.deepEqual(run((b) => { b.records[4].record.fieldValues.ends_on = "2026-02-01"; b.affirmed.clear(); }).warnings, []));
@@ -46,6 +55,16 @@ const bnd = () => {
 };
 const mm = (b) => checkMethod(b.records, b.relations);
 test("boundary with 3 tensions and a bounded principle passes", () => assert.deepEqual(mm(bnd()), []));
+test("a principle leaning toward the suggestion of a pole whose fork its tension contains passes (clerk#187)", () => {
+  const b = bnd(); b.records.push(mk("po1f", "pole", M, NEW));
+  b.relations = b.relations.map((r) => (r.sourceId === "t0" && r.targetId === "po1" ? rel("t0", "po1f", "contains") : r));
+  b.relations.push(rel("po1f", "po1", "derived-from"));
+  assert.deepEqual(mm(b), []);
+});
+test("a principle leaning toward a pole of another tension still fails", () => {
+  const b = bnd(); b.records.push(mk("x", "pole", M, NEW)); b.relations = b.relations.map((r) => (r.relationType === `${M}/leans-toward` ? rel("pr1", "x", r.relationType) : r));
+  assert.match(mm(b)[0], /must lean toward exactly one pole/);
+});
 test("boundary holding 2 tensions fails", () => { const b = bnd(); b.relations.pop(); assert.match(mm(b)[0], /holds 2 tensions, expected at least 3/); });
 test("duplicate holds-tension edges count once", () => { const b = bnd(); b.relations.pop(); b.relations.push(rel("b1", "t1", `${A}/holds-tension`)); assert.match(mm(b)[0], /holds 2 tensions/); });
 test("principle with no boundary fails", () => { const b = bnd(); b.relations = b.relations.filter((r) => r.relationType !== `${A}/within-boundary`); assert.match(mm(b)[0], /within-boundary of 0 boundaries/); });
