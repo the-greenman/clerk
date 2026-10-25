@@ -32,6 +32,7 @@ const TOOLS = {
   merge: ['merge.mjs', 'the owner merges one PR at the head they reviewed: clerk merge <repo#n> --sha <head> [--json] (as the owner only; refuses unless open, clean and at that head; exit 3)'],
   upkeep: ['upkeep.mjs', 'keep open PRs moving: merge or update-branch by gate label; group PRs on a quorum for their head commit (--digest, --apply)'],
   'group-state': ['group-state.mjs', "a working group's pause, cycle, merges and room: clerk group-state <wg:label> [--json]"],
+  guard: ['guard.mjs', 'refuse an authority act (ratify, set aside, affirm, authorise, receive) in a change that lacks its proof: clerk guard --base <ref> [--json] (read-only; exit 1 on an unproven act)'],
   steward: ['steward-check.mjs', 'guard against false closes: reopen issues closed without a merged PR (--fix acts)'],
   check: ['check-method.mjs', 'method structure rules: tensions, principles, boundaries'],
   conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
