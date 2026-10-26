@@ -77,7 +77,7 @@ import { claimActorOf } from "../lib/practice/claim.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { workflowFrom, labelDescription } from "../lib/practice/workflow.mjs";
 import { routed } from "../lib/practice/flow.mjs";
-import { loadGroups } from "../lib/adapters/groups.mjs";
+import { loadGroups } from "../lib/adapters/groups.mjs"; import { topupNominees } from "./lib/strong-feed.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
@@ -2144,7 +2144,7 @@ function cmdTopup(argv) {
   );
   candidates.sort((x, y) => (orderIndex.get(x.key) ?? Infinity) - (orderIndex.get(y.key) ?? Infinity));
 
-  const result = planTopup(candidates, readyCount, target);
+  const result = planTopup(candidates, readyCount, target); result.toNominate = topupNominees(candidates, result.deficit); // strong work takes up to 2 slots (clerk#196)
   for (const row of result.toNominate) {
     const p = row.labels.find((l) => l.startsWith("priority: ")) ?? "no priority";
     console.log(`${dryRun ? "[dry-run] " : ""}topup: ${row.key} (${p}) → promote:ready`);
