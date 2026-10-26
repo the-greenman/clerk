@@ -76,8 +76,9 @@ import { loadSettings } from "../lib/adapters/settings.mjs";
 import { claimActorOf } from "../lib/practice/claim.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { workflowFrom, labelDescription } from "../lib/practice/workflow.mjs";
-import { routed } from "../lib/practice/flow.mjs"; import { loadGroups } from "../lib/adapters/groups.mjs";
-import { planStrongTopup } from "../lib/practice/feed.mjs"; import { strongKeysOf } from "./lib/strong-feed.mjs";
+import { routed } from "../lib/practice/flow.mjs";
+import { loadGroups } from "../lib/adapters/groups.mjs";
+import { topupNominees } from "./lib/strong-feed.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
@@ -2144,7 +2145,7 @@ function cmdTopup(argv) {
   );
   candidates.sort((x, y) => (orderIndex.get(x.key) ?? Infinity) - (orderIndex.get(y.key) ?? Infinity));
 
-  const result = planTopup(candidates, readyCount, target); result.toNominate = planStrongTopup(candidates, result.deficit ? strongKeysOf(resolve(process.env.CLERK_REPO || process.cwd()), candidates) : new Set(), result.deficit);
+  const result = planTopup(candidates, readyCount, target); result.toNominate = topupNominees(candidates, result.deficit); // strong work takes up to 2 slots (clerk#196)
   for (const row of result.toNominate) {
     const p = row.labels.find((l) => l.startsWith("priority: ")) ?? "no priority";
     console.log(`${dryRun ? "[dry-run] " : ""}topup: ${row.key} (${p}) → promote:ready`);

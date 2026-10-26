@@ -4,9 +4,10 @@
 import { careContext, careFor } from './care.mjs';
 import { srsCli } from '../../lib/adapters/cli.mjs';
 import { loadSettings } from '../../lib/adapters/settings.mjs';
-import { STRONG_SLOTS_DEFAULT } from '../../lib/practice/feed.mjs';
+import { resolve } from 'node:path';
+import { STRONG_SLOTS_DEFAULT, planStrongTopup } from '../../lib/practice/feed.mjs';
 
-// candidates: rows {key, repo, num} in feed order. Reads in that order and stops at `slots` strong ones or `cap` readings.
+// candidates: rows {key, repo, num} in feed order. Reads in that order and stops at `slots` strong ones or `cap` readings (a strong item deeper than `cap` candidates waits for the epic-major order).
 export function strongKeysOf(repo, candidates, slots = STRONG_SLOTS_DEFAULT, cap = 40) {
   const strong = new Set();
   try {
@@ -21,3 +22,7 @@ export function strongKeysOf(repo, candidates, slots = STRONG_SLOTS_DEFAULT, cap
   } catch (e) { console.error(`topup: strength not read (${e.message}); epic-major order only`); }
   return strong;
 }
+
+// The deficit's nominees: strong work in its slots, then the epic-major order. Reads strength only when there is a deficit.
+export const topupNominees = (candidates, deficit) =>
+  planStrongTopup(candidates, deficit > 0 ? strongKeysOf(resolve(process.env.CLERK_REPO || process.cwd()), candidates) : new Set(), deficit);
