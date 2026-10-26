@@ -125,7 +125,7 @@ What each status, hold, gate and classification means is the work-status set in 
 | Label | Written by | Read by |
 |---|---|---|
 | `ready` | board mirror (`board promote`/`reconcile`), never by hand | queue, unattended-worker, wg-builder, steward |
-| `promote:ready` | `board topup` (intent) or the owner | `board promote`, which sets Status=Ready and the `ready` mirror |
+| `promote:ready` | `board topup` (intent; up to 2 of its nominations go to routed work whose care mode is build, whatever its epic's rank, the rest follow epic-major order) or the owner | `board promote`, which sets Status=Ready and the `ready` mirror |
 | `priority: P0` / `P1` / `P2` | `board` (derived from stories and epics; epics from `roadmap`) | queue, unattended-worker (ordering) |
 | `parked` | `roadmap --apply` (epic serves no ranked objective) | queue (held), `board` (excluded), `claim` (refuses) |
 | `blocked` | `board` mirror of open blocked-by edges | queue (held), `board` (excluded), `claim` (refuses), unattended-worker, wg-builder |
