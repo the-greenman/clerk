@@ -77,8 +77,7 @@ import { claimActorOf } from "../lib/practice/claim.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { workflowFrom, labelDescription } from "../lib/practice/workflow.mjs";
 import { routed } from "../lib/practice/flow.mjs";
-import { loadGroups } from "../lib/adapters/groups.mjs";
-import { topupNominees } from "./lib/strong-feed.mjs";
+import { loadGroups } from "../lib/adapters/groups.mjs"; import { topupNominees } from "./lib/strong-feed.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
