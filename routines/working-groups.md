@@ -150,12 +150,12 @@ flowchart TD
   C(["11:30 UTC: cycle closes"]) --> G["Steward gathers the cycle:<br/>merged PRs with their quorum lines,<br/>decisions taken, escalations, stops, budget used"]
   G --> D["Decisions and run report written to the decision log<br/>(one srs-programme PR, auto-merge)"]
   D --> P["Report posted on semanticops.com#31<br/>first line: wg-report marker"]
-  P --> A{"Owner reacts with a thumbs-up?"}
+  P --> A{"Owner receives it in a session, or reacts with a thumbs-up?"}
   A -->|yes| OK(["Acknowledged: group keeps going"])
   A -->|no| K{"The last 2 reports<br/>both unacknowledged?"}
   K -->|no| GO(["Group keeps going, within budget"])
   K -->|yes| PS["Paused: no new builds, no group merges.<br/>Reviews and escalations continue."]
-  PS --> A2{"Owner thumbs-up on a report"}
+  PS --> A2{"Owner receives a report (or a thumbs-up)"}
   A2 --> GO
 ```
 
