@@ -519,9 +519,6 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Needs before it moves**: the cycle's merged PRs
 
-**Gap**:
-- Receiving a report still means a thumbs-up on semanticops.com#31; two unreceived reports pause a group.
-
 **Acting on it**: C12 clerk#167
 
 **Measure**: reports.unreceived
@@ -1743,20 +1740,19 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - The group steward writes a `stewardship/run-report` record and the cycle report on #31 (`routines/wg-steward.md`), and ratifies the group's proposed decisions in one group session.
 - `clerk` (terminal UI) and `clerk session` write one `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives`, then open a signed PR with auto-merge enabled. `clerk comment` does the same for a comment between sessions.
 - Each act keeps when it was taken (the key press, not the write time), its agenda position (section, i of n) and what had been opened first (`v`, `o`, with the record's `updatedAt`). The session `summary` lists the acts in the order taken, and a linked `acts.json` source document (`sessions/<date>/`) holds them per act. `createdAt` stays the write time.
+- The pause rule counts a report as acknowledged when the owner gives a thumbs-up on #31 or a session `receives` its run-report record (clerk#167); receiving in a session needs no GitHub reaction.
 - The recorder warns, never blocks, when a decision fails the framing tests; the kind goes in `decision_kind`.
 - Detail: README "Sessions", `.claude/commands/session.md`, [decision-log.md](decision-log.md).
 
 **Gap**:
 - `endSession` returns from the whole function when a session takes up an exercise: that exercise's `considers`, comments and proposals, every later choice, and the validate, commit and PR are all skipped. The session record is left uncommitted in its worktree.
 - There are no exercise records yet.
-- The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link.
 - There is one kind of meeting. Affirmation, unblocking and triage happen ad hoc or not at all, and what waits for the owner is assembled by hand (clerk#59).
 
 **Open questions**:
-- Should the pause rule read `receives` instead of the thumbs-up?
 - Should a group session's quorum also be recorded on the session itself?
 
-**Test**: Stage 14: 5 passing; pending: the endSession exercise bug; pause rule reads `receives`.
+**Test**: Stage 14: 5 passing; pending: the endSession exercise bug.
 
 
 #### Measurement and retrospective
@@ -2080,7 +2076,7 @@ What the clerk reads and writes in srs-programme. When a stage changes, these ar
 
 **Meaning**: One run's minute: chose, rationale, figures, landed_as.
 
-**Read by**: the agenda (Reports), `pr-upkeep` pause rule (with the #31 thumbs-up)
+**Read by**: the agenda (Reports), `pr-upkeep` pause rule (a `receives` link or the #31 thumbs-up)
 
 
 #### held-by, in-domain, answers, implements, serves, addresses

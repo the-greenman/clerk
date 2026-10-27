@@ -43,7 +43,7 @@ if (st) {
   for (const [k, ref] of [['report issue', st.reportIssue], ['digest issue', st.digestIssue]]) probe(`${k} ${ref}`, () => { get(`repos/${issueRef(ref, O).path}`); });
   let groups = [];
   if (probe('groups', () => `${(groups = loadGroups(repo, cli)).length} chartered`) && groups.length && W) {
-    const states = groupStates(st, groups, W.gates);
+    const states = groupStates(st, groups, W.gates, undefined, repo);
     for (const g of groups) probe(`group-state ${g.label}`, () => {
       const s = states[g.label];
       if (s.why) throw new Error(s.why);

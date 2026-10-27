@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseQuorum, quorumVerdict, budgetVerdict, cycleStart, countMerged, countOpen, pauseReports, pauseState, routePR, upkeepPlan, digestBody }
+import { parseQuorum, quorumVerdict, budgetVerdict, cycleStart, countMerged, countOpen, pauseReports, pauseState, receivedReportIds, routePR, upkeepPlan, digestBody }
   from '../lib/practice/upkeep.mjs';
 const GATES = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' }; // the programme's merge_gate bindings (test/workflow.fixture.json)
 
@@ -73,6 +73,25 @@ test('a group pauses when its latest reports are all unacknowledged', () => {
   assert.equal(pauseState(rs([rep(7), rep(8)]), null, 2), 'paused: reports unreadable', 'fail closed');
   assert.equal(pauseState(null, new Set(), 2), 'paused: reports unreadable');
   assert.equal(pauseState([], new Set(), undefined), 'paused: no pause limit in the charter');
+});
+
+const run = (id, date) => ({ instanceId: id, record: { fieldValues: { run_date: `${date}T00:00:00Z` } } });
+test('a report a session receives acknowledges it with no GitHub reaction (clerk#167)', () => {
+  const L = 'wg:third-party-ready', rs = pauseReports([rep(7, L), rep(8, L)], L, 2), runs = [run('r7', '2026-10-07'), run('r8', '2026-10-08')];
+  assert.deepEqual([...receivedReportIds(rs, runs, new Set(['r7']), L)], [7]);
+  assert.equal(pauseState(rs, receivedReportIds(rs, runs, new Set(['r7']), L), 2), 'ok', 'one received');
+  assert.equal(pauseState(rs, receivedReportIds(rs, runs, new Set(), L), 2), 'paused: 2 reports unacknowledged', 'none received');
+  const both = new Set([...receivedReportIds(rs, runs, new Set(['r8']), L), 7]);
+  assert.equal(pauseState(rs, both, 2), 'ok', 'a receive and a +1 each count');
+});
+test('a receive does not un-pause what it does not name (clerk#167)', () => {
+  const L = 'wg:third-party-ready', runs = [run('r7', '2026-10-07'), run('r8', '2026-10-08')], all = new Set(['r7', 'r8']);
+  const untagged = pauseReports([rep(7), rep(8)], L, 2);
+  assert.equal(receivedReportIds(untagged, runs, all, L).size, 0, 'an untagged report can pause, never un-pause');
+  const other = pauseReports([rep(7, 'wg:agent-editor'), rep(8, 'wg:agent-editor')], 'wg:agent-editor', 2);
+  assert.equal(receivedReportIds(other, runs, all, L).size, 0, "another group's comment is not this group's");
+  assert.equal(receivedReportIds(pauseReports([rep(7, L)], L, 2), [run('r9', '2026-10-09')], new Set(['r9']), L).size, 0, 'a receive of another cycle');
+  assert.equal(pauseState(pauseReports([rep(7, L), rep(8, L)], L, 2), null, 2), 'paused: reports unreadable', 'unreadable stays unreadable');
 });
 
 const ctx = { groupLabels: ['wg:x'], defaultBranch: 'main', gates: GATES };

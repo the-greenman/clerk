@@ -9,10 +9,10 @@
     "kind": "type",
     "home": "stewardship",
     "meaning": "One run's minute: chose, rationale, figures, landed_as.",
-    "read_by": "the agenda (Reports), `pr-upkeep` pause rule (with the #31 thumbs-up)"
+    "read_by": "the agenda (Reports), `pr-upkeep` pause rule (a `receives` link or the #31 thumbs-up)"
   },
   "createdAt": "2026-10-11T18:33:32.519114404+00:00",
-  "updatedAt": "2026-10-11T18:33:32.519123418+00:00",
+  "updatedAt": "2026-10-27T11:54:25.238204599+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",
