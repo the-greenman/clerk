@@ -91,7 +91,9 @@ test('a receive does not un-pause what it does not name (clerk#167)', () => {
   const other = pauseReports([rep(7, 'wg:agent-editor'), rep(8, 'wg:agent-editor')], 'wg:agent-editor', 2);
   assert.equal(receivedReportIds(other, runs, all, L).size, 0, "another group's comment is not this group's");
   assert.equal(receivedReportIds(pauseReports([rep(7, L)], L, 2), [run('r9', '2026-10-09')], new Set(['r9']), L).size, 0, 'a receive of another cycle');
-  assert.equal(pauseState(pauseReports([rep(7, L), rep(8, L)], L, 2), null, 2), 'paused: reports unreadable', 'unreadable stays unreadable');
+  const rs = pauseReports([rep(7, L), rep(8, L)], L, 2);
+  assert.equal(pauseState(rs, receivedReportIds(rs, [], new Set(['r7', 'r8']), L), 2), 'paused: 2 reports unacknowledged', 'no run-reports read: nothing is credited');
+  assert.equal(pauseState(rs, receivedReportIds(rs, runs, new Set(), L), 2), 'paused: 2 reports unacknowledged', 'no receives read: nothing is credited');
 });
 
 const ctx = { groupLabels: ['wg:x'], defaultBranch: 'main', gates: GATES };
@@ -191,4 +193,14 @@ test('an owner-merge PR that asks nothing is listed back to an agent, never merg
   assert.deepEqual(plan.unasked, ['r#1 pr 1']);
   assert.deepEqual(plan.actions, []);
   assert.match(digestBody(plan, {}, '2026-10-23', GATES), /Owner merge that asks the owner nothing .*:\n- r#1 pr 1/);
+});
+
+// Every caller must hand groupStates the programme path, or its pause ignores `receives` and disagrees with upkeep (clerk#167: the desk's groupState missed it).
+test('every groupStates caller passes the programme path (clerk#167)', async () => {
+  const { readdirSync, readFileSync, statSync } = await import('node:fs'), { join } = await import('node:path');
+  const walk = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return statSync(p).isDirectory() ? (n === 'node_modules' ? [] : walk(p)) : /\.mjs$/.test(n) ? [p] : []; });
+  const calls = ['lib', 'scripts', 'bin', 'api'].flatMap((d) => { try { return walk(d); } catch { return []; } })
+    .flatMap((p) => readFileSync(p, 'utf8').split('\n').filter((l) => /\bgroupStates\(/.test(l) && !/export function|import /.test(l)).map((l) => `${p}: ${l.trim()}`));
+  assert.ok(calls.length >= 4, `found the callers (${calls.length})`);
+  for (const c of calls) assert.match(c, /undefined, [\w.]*repo\)/, `passes the programme path: ${c}`);
 });
