@@ -19,6 +19,7 @@ import * as A from '../lib/practice/agenda.mjs';
 import * as U from '../lib/practice/upkeep.mjs';
 import { endSession } from '../lib/adapters/session.mjs';
 import { groundPR, i1 } from '../lib/practice/grounding-check.mjs';
+import { i1Result, PENDING_EVALUATOR, PENDING_INDICATORS } from '../lib/practice/measure.mjs';
 import { readFileSync } from 'node:fs';
 import { workflowFrom } from '../lib/practice/workflow.mjs';
 
@@ -358,6 +359,17 @@ describe('stage 15: measurement and retrospective', () => {
     const rs = [null, is('x'), is('Answers: SP-2'), is('Answers: SP-1')].map((issue) => groundPR({ pr: { labels: [] }, issue, problems }));
     const s = i1(rs);
     assert.deepEqual([s.total, s.grounded, s.full], [4, 2, 1]);
+  });
+  test('clerk measure states I1 for a period as a measurement-result and leaves the judgement pending', () => {
+    const stats = { total: 4, grounded: 2, share: 0.5, full: 1, fullShare: 0.25, unknown: 1, byLevel: { none: 1, issue: 1, problem: 1, 'problem+persona+domain': 1 } };
+    const r = i1Result({ stats, since: '2026-10-20', until: '2026-10-27', cycle: 'wg:x' });
+    assert.deepEqual(Object.keys(r), ['result_id', 'observed_finding', 'observation_period', 'evaluator']);
+    assert.equal(r.result_id, 'I1 2026-10-20..2026-10-27');
+    assert.match(r.observed_finding, /2\/4 grounded to a problem \(50%\); 1\/4 with an affirmed persona and domain \(25%\)/);
+    assert.match(r.observed_finding, /1 PR\(s\) close an issue this token cannot read/);
+    assert.deepEqual(PENDING_INDICATORS, ['I2', 'I3', 'I4']); // no computation, no result
+    assert.equal(r.evaluator, PENDING_EVALUATOR); // the script never judges (decision of 2026-10-27 on clerk#25)
+    assert.equal(i1Result({ stats: { ...stats, total: 0, share: null, fullShare: null, unknown: 0 }, since: '2026-10-20' }).observation_period, '2026-10-20..now');
   });
   test.todo('handbook stage 15, I2: delegated merges against budget, plus ready count at cycle close, are computed');
   test.todo('handbook stage 15, I3: days from proposed to ratified (median), and reports awaiting acknowledgement, are computed');

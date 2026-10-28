@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ground: advisory PR grounding check and indicator I1 (clerk#22). Always exits 0 unless an input is wrong.
-//   node scripts/ground.mjs [--repo <programme>] (--pr <repo#n> | --since YYYY-MM-DD) [--json]
+//   node scripts/ground.mjs [--repo <programme>] (--pr <repo#n> | --since YYYY-MM-DD [--until YYYY-MM-DD]) [--json]
 import { derive } from "./roadmap.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
 import { srsCli } from "../lib/adapters/cli.mjs";
@@ -20,13 +20,13 @@ try {
   try { roadmap = derive(records, relations, new Date().toISOString().slice(0, 10), affirmed, outlines); }
   catch { roadmap = { epics: records.filter((r) => r.record.typeName === "epic").map((r) => ({ refs: r.record.fieldValues.issue_ref })) }; }
   const problems = problemsFrom(records, relations, affirmed), groups = loadGroups(repo, cli);
-  const refs = one ? [one] : mergedSince(st.githubOwner, st.repos, since);
+  const refs = one ? [one] : mergedSince(st.githubOwner, st.repos, since, arg("--until"));
   const rows = refs.map((ref) => { const f = fetchPR(st.githubOwner, ref); return { ref, title: f.pr.title, ...groundPR({ pr: f.pr, issue: f.issue, problems, roadmap, groups }) }; });
   const stats = i1(rows);
   if (argv.includes("--json")) console.log(JSON.stringify({ i1: stats, prs: rows }, null, 2));
   else {
     for (const r of rows) console.log(`${r.ref.padEnd(26)} ${r.level.padEnd(24)} ${r.sp ?? "-"}  ${r.reasons[0] ?? ""}`);
-    console.log(`\nI1 (${since ? `merged since ${since}` : one}): ${stats.grounded}/${stats.total} grounded to a problem (${pct(stats.share)}); ${stats.full}/${stats.total} with affirmed persona and domain (${pct(stats.fullShare)})`);
+    console.log(`\nI1 (${since ? `merged since ${since}${arg("--until") ? ` until ${arg("--until")}` : ""}` : one}): ${stats.grounded}/${stats.total} grounded to a problem (${pct(stats.share)}); ${stats.full}/${stats.total} with affirmed persona and domain (${pct(stats.fullShare)})`);
     console.log("by level: " + Object.entries(stats.byLevel).map(([l, n]) => `${l} ${n}`).join(", "));
     if (stats.unknown) console.log(`unknown: ${stats.unknown} PR(s) close an issue this token cannot read; left out of I1`);
   }
