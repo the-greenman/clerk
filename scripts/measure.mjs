@@ -2,6 +2,7 @@
 // measure: indicator I1 for a cycle as an argument/measurement-result record (clerk#25). Dry run unless --write.
 //   node scripts/measure.mjs [--repo <programme>] (--group <wg:label> | --since YYYY-MM-DD [--until YYYY-MM-DD]) [--write] [--json]
 // --group takes the group's cycle from `group-state` (cycleStart to now). --write creates the record in the Suggestions
+// --until is exclusive (a bare date means the start of that day). With --group the period ends at the run time (the steward runs at cycle close).
 // container as the session actor (SRS_ACTOR) and an `evidences` relation to the I1 indicator record. Idempotent per period.
 import { derive } from "./roadmap.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
@@ -17,6 +18,7 @@ import { i1Result, PENDING_INDICATORS } from "../lib/practice/measure.mjs";
 const argv = process.argv.slice(2), arg = (k) => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : undefined);
 try {
   const repo = repoRoot(), cli = srsCli(repo), st = loadSettings(repo, cli), groups = loadGroups(repo, cli);
+  if (arg("--group") && arg("--since")) throw new Error("give --group or --since, not both");
   let since = arg("--since"), until = arg("--until"), cycle;
   if (arg("--group")) {
     const g = groups.find((x) => x.label === arg("--group"));
