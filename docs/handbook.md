@@ -1762,8 +1762,8 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Status**: partial
 
 **Practice**:
-- **I1** is computed by `clerk ground --since <date>` and the daily `programme-ground.yml` job summary: the share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. No result record is written yet.
-- `argument/indicator` and `argument/measurement-result` are installed but have no records.
+- **I1** is computed by `clerk ground --since <date> [--until <date>]` and the daily `programme-ground.yml` job summary: the share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. `clerk measure --group <wg:label> --write` records it as an `argument/measurement-result` in Suggestions for the group's cycle (the steward's daily cycle close, as `clerk group-state` delimits it), linked to the I1 `argument/indicator` by `evidences`. The script states the result and never judges: `evaluator` stays pending for the owner's session (decided on principle, clerk#25).
+- I1 to I4 exist as `argument/indicator` records in Suggestions; I2 to I4 have no result until their computations exist.
 - `revisit_when` on decisions and roles is displayed but never checked; remedy falsifiers are never tested.
 
 | # | Question | Indicator |
@@ -1776,12 +1776,13 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 Each report records the indicators with one line each: useful, noisy or misleading. At period close a retrospective decision keeps, changes or drops each one.
 
 **Gap**:
-- I2 to I4 have no computation, and no indicator writes a result record (clerk#25).
+- I2 to I4 have no computation, so they have no result records (clerk#25 does not invent them).
+- No result carries an evaluator yet: the useful/noisy/misleading line waits for the owner's session.
 
 **Open questions**:
 - Who rules on the retrospective: the owner's session, every time?
 
-**Test**: Stage 15: 2 passing (routine drift, I1); pending: I2 to I4, revisit_when, the retrospective loop.
+**Test**: Stage 15: 3 passing (routine drift, I1, measurement-result); pending: I2 to I4, revisit_when, the retrospective loop.
 
 
 ### Reference

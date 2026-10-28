@@ -8,17 +8,18 @@
     "title": "Measurement and retrospective",
     "theory": "The process must show whether it has value. Each cycle records a few indicators; each report reads them and asks whether they still mean anything; each period closes with a retrospective that keeps, changes or drops practices. Every governing decision names an indicator (decision f6175b4a).",
     "status": "partial",
-    "practice": "- **I1** is computed by `clerk ground --since <date>` and the daily `programme-ground.yml` job summary: the share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. No result record is written yet.\n- `argument/indicator` and `argument/measurement-result` are installed but have no records.\n- `revisit_when` on decisions and roles is displayed but never checked; remedy falsifiers are never tested.\n\n| # | Question | Indicator |\n|---|---|---|\n| I1 | Is work grounded? | Share of merged PRs whose issue answers an affirmed problem with an affirmed persona-in-domain and domain |\n| I2 | Does work flow? | Delegated merges against budget, and ready count at cycle close against target |\n| I3 | Does governance keep up? | Median days from proposed to ratified; reports awaiting acknowledgement |\n| I4 | Does done mean done? | Reopened issues, false closes and reverted PRs |\n\nEach report records the indicators with one line each: useful, noisy or misleading. At period close a retrospective decision keeps, changes or drops each one.",
+    "practice": "- **I1** is computed by `clerk ground --since <date> [--until <date>]` and the daily `programme-ground.yml` job summary: the share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. `clerk measure --group <wg:label> --write` records it as an `argument/measurement-result` in Suggestions for the group's cycle (the steward's daily cycle close, as `clerk group-state` delimits it), linked to the I1 `argument/indicator` by `evidences`. The script states the result and never judges: `evaluator` stays pending for the owner's session (decided on principle, clerk#25).\n- I1 to I4 exist as `argument/indicator` records in Suggestions; I2 to I4 have no result until their computations exist.\n- `revisit_when` on decisions and roles is displayed but never checked; remedy falsifiers are never tested.\n\n| # | Question | Indicator |\n|---|---|---|\n| I1 | Is work grounded? | Share of merged PRs whose issue answers an affirmed problem with an affirmed persona-in-domain and domain |\n| I2 | Does work flow? | Delegated merges against budget, and ready count at cycle close against target |\n| I3 | Does governance keep up? | Median days from proposed to ratified; reports awaiting acknowledgement |\n| I4 | Does done mean done? | Reopened issues, false closes and reverted PRs |\n\nEach report records the indicators with one line each: useful, noisy or misleading. At period close a retrospective decision keeps, changes or drops each one.",
     "gaps": [
-      "I2 to I4 have no computation, and no indicator writes a result record (clerk#25)."
+      "I2 to I4 have no computation, so they have no result records (clerk#25 does not invent them).",
+      "No result carries an evaluator yet: the useful/noisy/misleading line waits for the owner's session."
     ],
     "open_questions": [
       "Who rules on the retrospective: the owner's session, every time?"
     ],
-    "test": "Stage 15: 2 passing (routine drift, I1); pending: I2 to I4, revisit_when, the retrospective loop."
+    "test": "Stage 15: 3 passing (routine drift, I1, measurement-result); pending: I2 to I4, revisit_when, the retrospective loop."
   },
   "createdAt": "2026-10-11T18:33:30.188986791+00:00",
-  "updatedAt": "2026-10-11T18:33:30.188995529+00:00",
+  "updatedAt": "2026-10-28T00:16:23.226557127+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:handbook-watcher",
