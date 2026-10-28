@@ -915,6 +915,22 @@ The elements that keep each step moving are listed on the step (Maintained by). 
 | A group stops | two unreceived reports | `clerk desk`, then a session's Reports |
 
 
+#### Driving a unit (holon) to delivery
+
+**Proposed** (srs-programme decision, from the owner's vignettes 1b25bad7 and 4bd4e2d0, 2026-10-28; worked example semanticops.com#42). A concept reaches delivery as one unit, a **holon**: one parent issue holding the whole chain, marked in progress and driven to finish (ratified decision 05c3ddcb: work is held as holons, one GitHub tree). The driver is a local session or a routine acting for the owner.
+
+1. **Create the holon.** Open one parent issue under the epic, titled `Unit (in progress): …`, in the filing shape. Put every item of the chain under it as a sub-issue, in delivery order, across repositories (re-parent them if needed).
+2. **Find every item in the chain.** Scan from the visible goal down to the root blocker (`clerk flow --chain` on each). Shape any item that is not: give it an epic link and a technical plan, or the queue never sees it (finding b514ca75). Record every dependency as a blocked-by edge, so that the desk's *next* is the real next task.
+3. **Mark it in progress.** Label the parent `status: in progress` and assign it. Name the driver in its body. Post progress on it at each step, which also keeps the claims from going stale.
+4. **Settle decisions by principle.** List every open decision in the chain. Settle each one the compass, an ADR, a ruling or a recorded principle decides, and record it on its issue citing the rule. Only a real owner question stays open.
+5. **Walk the delivery.** Write down every step from the first change to the acceptance: builds, gates, reviews and quorums, budgets, releases, pins, fixtures, migrations, and who acts at each.
+6. **Split if it cannot be delivered safely.** If no safe path delivers the whole, split the holon into units that each can be delivered, and keep each one whole.
+7. **Pre-empt the stops.** List each predicted stop in the parent with what is done about it. Check what can be checked now (a pin jump, a dependency, a collision). Put every question that truly needs the owner to them **together, in one focused session**, before delivery starts, never piece by piece across it.
+8. **Drive it.** Claim each item as it unblocks, and build and land it. A pause that cannot be avoided goes on the parent as `needs-input`, assigned to the owner, with the question, its options and the principle tried, so it shows in the desk's *Needs you* and never only in chat. Close the parent when its acceptance holds.
+
+Record every stop met on the way (*Recording where flow stops*).
+
+
 #### Narrative explorations: how meaning grows
 
 Our semantics (domains, problems, tensions, principles, decisions) are developed actively, from the owner's own words, not designed in advance and affirmed record by record (SP-101, SP-102, SP-103). The owner's narrative is the human source; records are derived from it (decision 77e04b19).
