@@ -23,7 +23,8 @@ await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
 for (const h of allowedHosts(server.address().port)) hosts.add(h);
 const base = `http://127.0.0.1:${server.address().port}`;
 const validate = specValidator(SPEC);
-const since = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+// one day: ground makes several GitHub calls per merged PR, and a week (~300 PRs) now outruns serve's 300 s command timeout
+const since = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
 const QUERY = { explain: '?ref=semanticops.com%2338', ground: `?since=${since}` };
 
 let failed = 0;
