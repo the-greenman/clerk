@@ -913,11 +913,32 @@ The elements that keep each step moving are listed on the step (Maintained by). 
 | A group merges nothing | builder or reviewer trigger missing or disabled | `clerk routines --check <dump>` |
 | A decision you were asked for never appears in a session | it exists only as PR text, or is in no decision log | `clerk desk` ("in no log") |
 | A group stops | two unreceived reports | `clerk desk`, then a session's Reports |
+| A working-group PR with an approving quorum never merges | strict up-to-date protection: every merge leaves it BEHIND, and a new commit voids the quorum (finding 7b1e4134; proposed decision af1c9258, clerk#235) | `clerk upkeep` digest, the group's waits |
+| Sibling PRs of one issue conflict | tasks of one sequence built in parallel, appending to one file (finding 9dfbda06) | `clerk pr-tree` (overlap) |
+| Two PRs make the same change | two issues for one fix (finding 2ea3eb56) | `clerk pr-tree`, a search of open PRs before building |
+| Every PR in an implementation repo fails the same test | a spec fixture landed before the implementation's runner could read it (finding 47205709) | the default branch's last CI run |
+
+**Recording where flow stops** (proposed decision fbba3d5e, from the owner's vignette 82e8b452, 2026-10-28). Any agent that finds work stopped records the stop before or while working round it. That covers:
+- a PR that cannot merge;
+- a gate red for a reason outside its change;
+- an issue nobody can take;
+- duplicate work;
+- work waiting on the owner that asks nothing;
+- a routine that did not run.
+
+1. **Write a finding.** A `com.semanticops.programme/finding` in the programme's Suggestions container, tagged `flow-stop`, with dated evidence (refs, times, counts).
+2. **Place it at its stage.** It `evidences` the exercise of the flow-map stage where the work stopped: one of the nine in *The archetypal flow* (container `165f3a6e`), for example `7. Review and land: what we tried and where we went too far`.
+3. **Name the cause.** It `evidences` the problem that holds the cause. When none does, suggest one (`derived-from` the finding or a vignette).
+4. **Count, don't repeat.** When a `flow-stop` finding already names the same cause, add the occurrence to its evidence instead of filing a second, so the count per cause grows.
+5. **Suggest the obvious remedy.** A suggested remedy that answers the problem.
+6. **Never wait.** Recording a stop never waits on anything and never replaces fixing it.
+
+A new cause also gets a row in the table above. To read the stops: `srs find --tag flow-stop --repo <programme>`, then `relation neighbours` on a stage's exercise to count its stops. These counts are the data for choosing remedies and evolving the practice.
 
 
 #### Driving a unit (holon) to delivery
 
-**Proposed** (srs-programme decision, from the owner's vignettes 1b25bad7 and 4bd4e2d0, 2026-10-28; worked example semanticops.com#42). A concept reaches delivery as one unit, a **holon**: one parent issue holding the whole chain, marked in progress and driven to finish (ratified decision 05c3ddcb: work is held as holons, one GitHub tree). The driver is a local session or a routine acting for the owner.
+**Proposed** (srs-programme decision, from the owner's vignettes 1b25bad7 and 4bd4e2d0, 2026-10-28, and 1c6dd3e6, 2026-10-29, for the pipelines and review; worked example semanticops.com#42). A concept reaches delivery as one unit, a **holon**: one parent issue holding the whole chain, marked in progress and driven to finish (ratified decision 05c3ddcb: work is held as holons, one GitHub tree). The driver is a local session or a routine acting for the owner.
 
 1. **Create the holon.** Open one parent issue under the epic, titled `Unit (in progress): …`, in the filing shape. Put every item of the chain under it as a sub-issue, in delivery order, across repositories (re-parent them if needed).
 2. **Find every item in the chain.** Scan from the visible goal down to the root blocker (`clerk flow --chain` on each). Shape any item that is not: give it an epic link and a technical plan, or the queue never sees it (finding b514ca75). Record every dependency as a blocked-by edge, so that the desk's *next* is the real next task.
@@ -926,7 +947,10 @@ The elements that keep each step moving are listed on the step (Maintained by). 
 5. **Walk the delivery.** Write down every step from the first change to the acceptance: builds, gates, reviews and quorums, budgets, releases, pins, fixtures, migrations, and who acts at each.
 6. **Split if it cannot be delivered safely.** If no safe path delivers the whole, split the holon into units that each can be delivered, and keep each one whole.
 7. **Pre-empt the stops.** List each predicted stop in the parent with what is done about it. Check what can be checked now (a pin jump, a dependency, a collision). Put every question that truly needs the owner to them **together, in one focused session**, before delivery starts, never piece by piece across it.
-8. **Drive it.** Claim each item as it unblocks, and build and land it. A pause that cannot be avoided goes on the parent as `needs-input`, assigned to the owner, with the question, its options and the principle tried, so it shows in the desk's *Needs you* and never only in chat. Close the parent when its acceptance holds.
+8. **Drive it through the pipelines.** As each item unblocks, run it with `/ship <repo>#<n>` (`clerk/.claude/commands/ship.md`). It claims, builds, gates, reviews, opens the PR and posts the run report, then stops at PR open with gates green; it never waits for the merge. It also stops at its checkpoints (no usable problem, a missing dependency, an escalation), which become a pause on the parent as below. For a large feature in srs-rust or srs-web, run that repository's pipeline for the stages /ship does not hold: plan review, the code-review loop and dogfooding (`srs-rust/.claude/commands/ship.md`, `srs-web/.claude/commands/ship-web.md`). /ship opens the one PR. A routine driver follows its own brief (`routines/wg-builder.md`, `routines/unattended-worker.md`) for the same steps. Build outside a pipeline only where none fits, and say why on the parent.
+9. **Review every change.** Before any item's PR opens, the driver has its diff reviewed by a reviewer subagent, never by itself (/ship stage 7, or the repo pipeline's code-review loop), in a working group's lane as well as the central one. The findings go on the issue as a comment; fix each one, or record why not. In a working group, the group's reviewer routine still reviews the PR and posts the quorum; never post your own. When the last item lands, review the holon's combined change against the parent's acceptance, and post that review on the parent before closing it.
+
+A pause that cannot be avoided goes on the parent as `needs-input`, assigned to the owner, with the question, its options and the principle tried, so it shows in the desk's *Needs you* and never only in chat. Close the parent when its acceptance holds.
 
 Record every stop met on the way (*Recording where flow stops*).
 
