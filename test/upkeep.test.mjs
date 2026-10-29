@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseQuorum, quorumVerdict, budgetVerdict, cycleStart, countMerged, countOpen, pauseReports, pauseState, routePR, upkeepPlan, digestBody }
+import { parseQuorum, quorumVerdict, budgetVerdict, cycleStart, countMerged, countOpen, pauseReports, pauseState, receivedReportIds, routePR, upkeepPlan, digestBody }
   from '../lib/practice/upkeep.mjs';
 const GATES = { auto: 'gate:auto-merge', owner: 'gate:owner-merge' }; // the programme's merge_gate bindings (test/workflow.fixture.json)
 
@@ -73,6 +73,27 @@ test('a group pauses when its latest reports are all unacknowledged', () => {
   assert.equal(pauseState(rs([rep(7), rep(8)]), null, 2), 'paused: reports unreadable', 'fail closed');
   assert.equal(pauseState(null, new Set(), 2), 'paused: reports unreadable');
   assert.equal(pauseState([], new Set(), undefined), 'paused: no pause limit in the charter');
+});
+
+const run = (id, date) => ({ instanceId: id, record: { fieldValues: { run_date: `${date}T00:00:00Z` } } });
+test('a report a session receives acknowledges it with no GitHub reaction (clerk#167)', () => {
+  const L = 'wg:third-party-ready', rs = pauseReports([rep(7, L), rep(8, L)], L, 2), runs = [run('r7', '2026-10-07'), run('r8', '2026-10-08')];
+  assert.deepEqual([...receivedReportIds(rs, runs, new Set(['r7']), L)], [7]);
+  assert.equal(pauseState(rs, receivedReportIds(rs, runs, new Set(['r7']), L), 2), 'ok', 'one received');
+  assert.equal(pauseState(rs, receivedReportIds(rs, runs, new Set(), L), 2), 'paused: 2 reports unacknowledged', 'none received');
+  const both = new Set([...receivedReportIds(rs, runs, new Set(['r8']), L), 7]);
+  assert.equal(pauseState(rs, both, 2), 'ok', 'a receive and a +1 each count');
+});
+test('a receive does not un-pause what it does not name (clerk#167)', () => {
+  const L = 'wg:third-party-ready', runs = [run('r7', '2026-10-07'), run('r8', '2026-10-08')], all = new Set(['r7', 'r8']);
+  const untagged = pauseReports([rep(7), rep(8)], L, 2);
+  assert.equal(receivedReportIds(untagged, runs, all, L).size, 0, 'an untagged report can pause, never un-pause');
+  const other = pauseReports([rep(7, 'wg:agent-editor'), rep(8, 'wg:agent-editor')], 'wg:agent-editor', 2);
+  assert.equal(receivedReportIds(other, runs, all, L).size, 0, "another group's comment is not this group's");
+  assert.equal(receivedReportIds(pauseReports([rep(7, L)], L, 2), [run('r9', '2026-10-09')], new Set(['r9']), L).size, 0, 'a receive of another cycle');
+  const rs = pauseReports([rep(7, L), rep(8, L)], L, 2);
+  assert.equal(pauseState(rs, receivedReportIds(rs, [], new Set(['r7', 'r8']), L), 2), 'paused: 2 reports unacknowledged', 'no run-reports read: nothing is credited');
+  assert.equal(pauseState(rs, receivedReportIds(rs, runs, new Set(), L), 2), 'paused: 2 reports unacknowledged', 'no receives read: nothing is credited');
 });
 
 const ctx = { groupLabels: ['wg:x'], defaultBranch: 'main', gates: GATES };
@@ -172,4 +193,14 @@ test('an owner-merge PR that asks nothing is listed back to an agent, never merg
   assert.deepEqual(plan.unasked, ['r#1 pr 1']);
   assert.deepEqual(plan.actions, []);
   assert.match(digestBody(plan, {}, '2026-10-23', GATES), /Owner merge that asks the owner nothing .*:\n- r#1 pr 1/);
+});
+
+// Every caller must hand groupStates the programme path, or its pause ignores `receives` and disagrees with upkeep (clerk#167: the desk's groupState missed it).
+test('every groupStates caller passes the programme path (clerk#167)', async () => {
+  const { readdirSync, readFileSync, statSync } = await import('node:fs'), { join } = await import('node:path');
+  const walk = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return statSync(p).isDirectory() ? (n === 'node_modules' ? [] : walk(p)) : /\.mjs$/.test(n) ? [p] : []; });
+  const calls = ['lib', 'scripts', 'bin', 'api'].flatMap((d) => { try { return walk(d); } catch { return []; } })
+    .flatMap((p) => readFileSync(p, 'utf8').split('\n').filter((l) => /\bgroupStates\(/.test(l) && !/export function|import /.test(l)).map((l) => `${p}: ${l.trim()}`));
+  assert.ok(calls.length >= 4, `found the callers (${calls.length})`);
+  for (const c of calls) assert.match(c, /undefined, [\w.]*repo\)/, `passes the programme path: ${c}`);
 });

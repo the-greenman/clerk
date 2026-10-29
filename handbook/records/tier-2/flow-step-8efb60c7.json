@@ -10,9 +10,7 @@
     "moved_by": "WG steward daily at 11:30 (run-report record and #31 comment); worker run reports on issues",
     "mover_kind": "routine",
     "needs": "the cycle's merged PRs",
-    "gaps": [
-      "Receiving a report still means a thumbs-up on semanticops.com#31; two unreceived reports pause a group."
-    ],
+    "gaps": [],
     "remedies": "C12 clerk#167",
     "measure": "reports.unreceived",
     "confidence_level": "medium",
@@ -24,7 +22,7 @@
     ]
   },
   "createdAt": "2026-10-24T12:32:58.864295245+00:00",
-  "updatedAt": "2026-10-24T16:19:08.593171255+00:00",
+  "updatedAt": "2026-10-27T11:54:25.104501699+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

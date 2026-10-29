@@ -519,9 +519,6 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 
 **Needs before it moves**: the cycle's merged PRs
 
-**Gap**:
-- Receiving a report still means a thumbs-up on semanticops.com#31; two unreceived reports pause a group.
-
 **Acting on it**: C12 clerk#167
 
 **Measure**: reports.unreceived
@@ -1743,20 +1740,19 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 - The group steward writes a `stewardship/run-report` record and the cycle report on #31 (`routines/wg-steward.md`), and ratifies the group's proposed decisions in one group session.
 - `clerk` (terminal UI) and `clerk session` write one `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives`, then open a signed PR with auto-merge enabled. `clerk comment` does the same for a comment between sessions.
 - Each act keeps when it was taken (the key press, not the write time), its agenda position (section, i of n) and what had been opened first (`v`, `o`, with the record's `updatedAt`). The session `summary` lists the acts in the order taken, and a linked `acts.json` source document (`sessions/<date>/`) holds them per act. `createdAt` stays the write time.
+- The pause rule counts a report as acknowledged when the owner gives a thumbs-up on #31 or a session `receives` its run-report record (clerk#167); receiving in a session needs no GitHub reaction.
 - The recorder warns, never blocks, when a decision fails the framing tests; the kind goes in `decision_kind`.
 - Detail: README "Sessions", `.claude/commands/session.md`, [decision-log.md](decision-log.md).
 
 **Gap**:
 - `endSession` returns from the whole function when a session takes up an exercise: that exercise's `considers`, comments and proposals, every later choice, and the validate, commit and PR are all skipped. The session record is left uncommitted in its worktree.
 - There are no exercise records yet.
-- The owner's thumbs-up on #31 still drives the pause rule, alongside the `receives` link.
 - There is one kind of meeting. Affirmation, unblocking and triage happen ad hoc or not at all, and what waits for the owner is assembled by hand (clerk#59).
 
 **Open questions**:
-- Should the pause rule read `receives` instead of the thumbs-up?
 - Should a group session's quorum also be recorded on the session itself?
 
-**Test**: Stage 14: 5 passing; pending: the endSession exercise bug; pause rule reads `receives`.
+**Test**: Stage 14: 5 passing; pending: the endSession exercise bug.
 
 
 #### Measurement and retrospective
@@ -1766,8 +1762,8 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 **Status**: partial
 
 **Practice**:
-- **I1** is computed by `clerk ground --since <date>` and the daily `programme-ground.yml` job summary: the share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. No result record is written yet.
-- `argument/indicator` and `argument/measurement-result` are installed but have no records.
+- **I1** is computed by `clerk ground --since <date> [--until <date>]` and the daily `programme-ground.yml` job summary: the share of merged PRs grounded to an affirmed problem, and separately with an affirmed persona and domain. `clerk measure --group <wg:label> --write` records it as an `argument/measurement-result` in Suggestions for the group's cycle (the steward's daily cycle close, as `clerk group-state` delimits it), linked to the I1 `argument/indicator` by `evidences`. The script states the result and never judges: `evaluator` stays pending for the owner's session (decided on principle, clerk#25).
+- I1 to I4 exist as `argument/indicator` records in Suggestions; I2 to I4 have no result until their computations exist.
 - `revisit_when` on decisions and roles is displayed but never checked; remedy falsifiers are never tested.
 
 | # | Question | Indicator |
@@ -1780,12 +1776,13 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 Each report records the indicators with one line each: useful, noisy or misleading. At period close a retrospective decision keeps, changes or drops each one.
 
 **Gap**:
-- I2 to I4 have no computation, and no indicator writes a result record (clerk#25).
+- I2 to I4 have no computation, so they have no result records (clerk#25 does not invent them).
+- No result carries an evaluator yet: the useful/noisy/misleading line waits for the owner's session.
 
 **Open questions**:
 - Who rules on the retrospective: the owner's session, every time?
 
-**Test**: Stage 15: 2 passing (routine drift, I1); pending: I2 to I4, revisit_when, the retrospective loop.
+**Test**: Stage 15: 3 passing (routine drift, I1, measurement-result); pending: I2 to I4, revisit_when, the retrospective loop.
 
 
 ### Reference
@@ -2080,7 +2077,7 @@ What the clerk reads and writes in srs-programme. When a stage changes, these ar
 
 **Meaning**: One run's minute: chose, rationale, figures, landed_as.
 
-**Read by**: the agenda (Reports), `pr-upkeep` pause rule (with the #31 thumbs-up)
+**Read by**: the agenda (Reports), `pr-upkeep` pause rule (a `receives` link or the #31 thumbs-up)
 
 
 #### held-by, in-domain, answers, implements, serves, addresses

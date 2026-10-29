@@ -24,7 +24,7 @@ let st, groups, gates;
 try { st = loadSettings(opts.repo); groups = loadGroups(opts.repo); gates = loadWorkflow(opts.repo).gates; }
 catch (e) { fail('programme settings, working groups or merge-gate labels unreadable', e); process.exit(1); } // no gate labels: no merge
 
-const G = groupStates(st, groups, gates);
+const G = groupStates(st, groups, gates, undefined, opts.repo);
 for (const [l, g] of Object.entries(G)) {
   if (g.merged === 'unknown') fail(`budget count for ${l}`);
   if (/unreadable/.test(g.pause)) fail(`pause check for ${l}`);
