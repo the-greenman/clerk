@@ -34,6 +34,7 @@ const TOOLS = {
   'group-state': ['group-state.mjs', "a working group's pause, cycle, merges and room: clerk group-state <wg:label> [--json]"],
   guard: ['guard.mjs', 'refuse an authority act (ratify, set aside, affirm, authorise, receive) in a change that lacks its proof: clerk guard --base <ref> [--json] (read-only; exit 1 on an unproven act)'],
   steward: ['steward-check.mjs', 'guard against false closes: reopen issues closed without a merged PR (--fix acts)'],
+  'steward-audit': ['steward-audit.mjs', 'weekly audit, first slice: false closes, epics closed incomplete, stale lane:unattended issues ([--since ISO] [--stale-days N] [--json]; read-only)'],
   check: ['check-method.mjs', 'method structure rules: tensions, principles, boundaries'],
   conformance: ['check-programme-conformance.mjs', 'the programme repo is an SRS repo that validates'],
   board: ['gh-project.mjs', 'story-driven priority on the GitHub Project (many subcommands, see its help)'],
