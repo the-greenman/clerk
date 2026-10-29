@@ -913,6 +913,27 @@ The elements that keep each step moving are listed on the step (Maintained by). 
 | A group merges nothing | builder or reviewer trigger missing or disabled | `clerk routines --check <dump>` |
 | A decision you were asked for never appears in a session | it exists only as PR text, or is in no decision log | `clerk desk` ("in no log") |
 | A group stops | two unreceived reports | `clerk desk`, then a session's Reports |
+| A working-group PR with an approving quorum never merges | strict up-to-date protection: every merge leaves it BEHIND, and a new commit voids the quorum (finding 7b1e4134; proposed decision af1c9258, clerk#235) | `clerk upkeep` digest, the group's waits |
+| Sibling PRs of one issue conflict | tasks of one sequence built in parallel, appending to one file (finding 9dfbda06) | `clerk pr-tree` (overlap) |
+| Two PRs make the same change | two issues for one fix (finding 2ea3eb56) | `clerk pr-tree`, a search of open PRs before building |
+| Every PR in an implementation repo fails the same test | a spec fixture landed before the implementation's runner could read it (finding 47205709) | the default branch's last CI run |
+
+**Recording where flow stops** (proposed decision fbba3d5e, from the owner's vignette 82e8b452, 2026-10-28). Any agent that finds work stopped records the stop before or while working round it. That covers:
+- a PR that cannot merge;
+- a gate red for a reason outside its change;
+- an issue nobody can take;
+- duplicate work;
+- work waiting on the owner that asks nothing;
+- a routine that did not run.
+
+1. **Write a finding.** A `com.semanticops.programme/finding` in the programme's Suggestions container, tagged `flow-stop`, with dated evidence (refs, times, counts).
+2. **Place it at its stage.** It `evidences` the exercise of the flow-map stage where the work stopped: one of the nine in *The archetypal flow* (container `165f3a6e`), for example `7. Review and land: what we tried and where we went too far`.
+3. **Name the cause.** It `evidences` the problem that holds the cause. When none does, suggest one (`derived-from` the finding or a vignette).
+4. **Count, don't repeat.** When a `flow-stop` finding already names the same cause, add the occurrence to its evidence instead of filing a second, so the count per cause grows.
+5. **Suggest the obvious remedy.** A suggested remedy that answers the problem.
+6. **Never wait.** Recording a stop never waits on anything and never replaces fixing it.
+
+A new cause also gets a row in the table above. To read the stops: `srs find --tag flow-stop --repo <programme>`, then `relation neighbours` on a stage's exercise to count its stops. These counts are the data for choosing remedies and evolving the practice.
 
 
 #### Driving a unit (holon) to delivery
