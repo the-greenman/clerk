@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { audit, report } from "./steward-audit.mjs";
+import { audit, report, orphanBranches } from "./steward-audit.mjs";
 
 const lane = "lane-x";
 const now = Date.parse("2026-10-29T00:00:00Z");
@@ -32,5 +32,11 @@ test("stale unattended: older than the cutoff, labelled, oldest first", () => {
 });
 test("report lists every rule, even with no hits", () => {
   const md = report([], "2026-10-29");
-  for (const r of ["false-close: 0", "epic-incomplete: 0", "stale-unattended: 0"]) assert.match(md, new RegExp(r));
+  for (const r of ["false-close: 0", "epic-incomplete: 0", "orphan-branch: 0", "stale-unattended: 0"]) assert.match(md, new RegExp(r));
+});
+test("orphan branches: ahead of default; unknown and merged are not reported; most commits first", () => {
+  const b = (name, ahead) => ({ repo: "srs", name, ahead });
+  const rows = orphanBranches([b("a", 1), b("merged", 0), b("unknown", null), b("big", 7)]);
+  assert.deepEqual(rows.map((r) => r.ref), ["srs:big", "srs:a"]);
+  assert.match(rows[1].detail, /1 commit not on/);
 });
