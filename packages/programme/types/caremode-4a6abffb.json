@@ -11,27 +11,32 @@
     {
       "fieldId": "b782003d-7f38-4a75-b122-3ff453511ba1",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy title"
     },
     {
       "fieldId": "b53cd964-42d5-41ab-999c-d2538783eb21",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy key"
     },
     {
       "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
       "order": 2,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy explanation"
     },
     {
       "fieldId": "d52f1e1d-67d0-468c-88a7-7adbbf9bb347",
       "order": 3,
-      "required": false
+      "required": false,
+      "displayLabel": "Care must"
     },
     {
       "fieldId": "16acb912-5795-4205-9ff6-a1eab97368d2",
       "order": 4,
-      "required": true
+      "required": true,
+      "displayLabel": "Merge gate"
     }
   ],
   "id": "4a6abffb-618f-4ed9-8009-c5ce1318961d",

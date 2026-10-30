@@ -8,17 +8,20 @@
     {
       "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Title"
     },
     {
       "fieldId": "94d587e4-7f40-478b-af61-691fd5221882",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "Actor id"
     },
     {
       "fieldId": "274fc803-3c56-432b-b061-bf24e93fca8c",
       "order": 2,
-      "required": false
+      "required": false,
+      "displayLabel": "Brief"
     }
   ],
   "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",

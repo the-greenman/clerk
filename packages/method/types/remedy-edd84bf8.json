@@ -9,32 +9,38 @@
     {
       "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Title"
     },
     {
       "fieldId": "e225fcbe-ed18-4d6c-a917-5826997b73a6",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "Move"
     },
     {
       "fieldId": "9b8c0d2c-e688-4b01-a18d-5ca110ecb62b",
       "order": 2,
-      "required": false
+      "required": false,
+      "displayLabel": "Does not fix"
     },
     {
       "fieldId": "b8b1f078-5b18-4d23-9015-37a3566e0e38",
       "order": 3,
-      "required": false
+      "required": false,
+      "displayLabel": "Falsifier"
     },
     {
       "fieldId": "0c9743ed-1d05-4b07-86c9-9bd89e0d60d1",
       "order": 4,
-      "required": false
+      "required": false,
+      "displayLabel": "Source"
     },
     {
       "fieldId": "e7197a59-e74b-45a5-9062-82f7ac9f23a4",
       "order": 5,
-      "required": false
+      "required": false,
+      "displayLabel": "Look again when"
     }
   ],
   "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",

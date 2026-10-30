@@ -9,47 +9,56 @@
     {
       "fieldId": "f37bceb4-568b-457c-9d3f-31c7e65d88a7",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Programme title"
     },
     {
       "fieldId": "07ee0281-2747-4cce-a33f-ab41d210a034",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "GitHub owner"
     },
     {
       "fieldId": "65ff71e2-902f-4e40-88fc-3022d45f7541",
       "order": 2,
-      "required": true
+      "required": true,
+      "displayLabel": "Governed repositories"
     },
     {
       "fieldId": "05e8d8e5-4b0c-4918-bcdd-75e8d0cdccb0",
       "order": 3,
-      "required": false
+      "required": false,
+      "displayLabel": "Report issue"
     },
     {
       "fieldId": "bb3caa33-3ae0-4b53-9bc7-d7b5556c00af",
       "order": 4,
-      "required": false
+      "required": false,
+      "displayLabel": "Digest issue"
     },
     {
       "fieldId": "851f95cc-a496-433b-811a-c151c33453eb",
       "order": 5,
-      "required": false
+      "required": false,
+      "displayLabel": "Board project"
     },
     {
       "fieldId": "141a2ee7-e8c8-4673-9c65-342a9d7b9d89",
       "order": 6,
-      "required": false
+      "required": false,
+      "displayLabel": "Board story repository"
     },
     {
       "fieldId": "44a66dd4-c598-4464-831b-bf2d6874b242",
       "order": 7,
-      "required": false
+      "required": false,
+      "displayLabel": "Owner actor"
     },
     {
       "fieldId": "bd1fdf74-1553-4446-a6d1-d181ea05200f",
       "order": 8,
-      "required": false
+      "required": false,
+      "displayLabel": "Care policy container"
     }
   ],
   "identityFieldId": "f37bceb4-568b-457c-9d3f-31c7e65d88a7",

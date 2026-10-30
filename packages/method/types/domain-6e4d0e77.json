@@ -8,22 +8,26 @@
     {
       "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Title"
     },
     {
       "fieldId": "7c405948-6db7-492c-ba12-e759c78781ad",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "Purpose"
     },
     {
       "fieldId": "47f51f10-40c3-4ac2-9677-734d10be3701",
       "order": 2,
-      "required": false
+      "required": false,
+      "displayLabel": "In scope"
     },
     {
       "fieldId": "c01b77c8-c1d6-49fe-aa3f-020e469fc267",
       "order": 3,
-      "required": false
+      "required": false,
+      "displayLabel": "Out of scope"
     }
   ],
   "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",

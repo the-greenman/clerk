@@ -8,17 +8,20 @@
     {
       "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Title"
     },
     {
       "fieldId": "0a273307-bfcf-4007-a4fc-dc6fe61e1e01",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "Summary"
     },
     {
       "fieldId": "8882824d-fe07-418f-aa43-3164356b9f29",
       "order": 2,
-      "required": false
+      "required": false,
+      "displayLabel": "Use when"
     }
   ],
   "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",

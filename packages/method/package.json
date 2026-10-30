@@ -68,7 +68,7 @@
   "id": "45c51908-183a-4cc5-a2b5-a0beb58bb366",
   "namespace": "com.semanticops.method",
   "name": "method",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "vocabularies": [
     "vocabularies/problem-kind-7d21013f.json",
     "vocabularies/imbalance-cc6ffec6.json"
