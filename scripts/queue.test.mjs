@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { classify, lanesFrom, bugQueue } from "./queue.mjs";
+import { classify, lanesFrom, bugQueue, rfcQueue } from "./queue.mjs";
 
 const iss = (repo, number, labels, extra = {}) =>
   ({ repo, number, title: `t${number}`, html_url: "", created_at: `2026-10-0${number}T00:00:00Z`, labels: labels.map((name) => ({ name })), ...extra });
@@ -30,4 +30,8 @@ const b = bugQueue([
 ], [], [{ label: "wg:agent-editor" }], W);
 assert.deepEqual(b.queued.map((x) => [x.ref, x.priority, x.lanes]), [["srs#2", "P0", ["central"]], ["srs-web#1", "P1", ["wg:agent-editor"]], ["srs#6", "P2", ["central"]]]);
 assert.deepEqual(b.held.map((x) => [x.ref, x.held]), [["srs#3", ["in review"]], ["srs#4", ["claimed"]], ["srs#5", ["needs-input"]]]);
+// the RFC-request queue: as bugs, but no priority floor, so an unprioritised request sorts last
+const q = rfcQueue([iss("srs", 1, ["wg:agent-editor"]), iss("srs", 2, ["priority: P2"]), iss("srs", 3, ["parked"])], [], [{ label: "wg:agent-editor" }], W);
+assert.deepEqual(q.queued.map((x) => [x.ref, x.priority, x.lanes]), [["srs#2", "P2", ["central"]], ["srs#1", null, ["wg:agent-editor"]]]);
+assert.deepEqual(q.held.map((x) => x.ref), ["srs#3"]);
 console.log("queue tests ok");
