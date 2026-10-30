@@ -29,4 +29,5 @@ test('blocks-ranked is optional: null until the programme binds the work label (
   assert.equal(workflowFrom(f).blocksRanked, 'blocks-ranked');
   const unbound = { ...f, bindings: f.bindings.filter((b) => b.github_label !== 'blocks-ranked') };
   assert.equal(workflowFrom(unbound).blocksRanked, null);
+  assert.equal(workflowFrom(f).rfcRequest, null); // rfc-request: unbound in the fixture, so the RFC queue refuses to run
 });

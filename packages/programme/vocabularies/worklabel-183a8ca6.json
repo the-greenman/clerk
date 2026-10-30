@@ -23,6 +23,14 @@
       "version": 1
     },
     {
+      "description": "Asks for new normative meaning: an RFC drafted to a reviewed Draft for the owner to accept or reject. Work for the RFC drafter, never a build and never a hold.",
+      "id": "d232c44c-6f84-43ba-9223-937a1897a7ba",
+      "key": "rfc-request",
+      "label": "RFC request",
+      "namespace": "com.semanticops.programme",
+      "version": 1
+    },
+    {
       "description": "A tracking item whose sub-issues are the work.",
       "id": "8a0231a4-773f-47e7-8914-166546c96dac",
       "key": "epic",
@@ -159,5 +167,5 @@
       "version": 1
     }
   ],
-  "version": 1
+  "version": 2
 }
