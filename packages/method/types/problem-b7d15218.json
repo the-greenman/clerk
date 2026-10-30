@@ -9,32 +9,38 @@
     {
       "fieldId": "db7fa869-1023-462b-8d64-acc149e67e45",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Problem id"
     },
     {
       "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "Title"
     },
     {
       "fieldId": "159222a6-8908-4aeb-a8db-64d1afea99b9",
       "order": 2,
-      "required": true
+      "required": true,
+      "displayLabel": "Statement"
     },
     {
       "fieldId": "50b17985-7eea-4ac5-886a-1408dab5d9e4",
       "order": 3,
-      "required": false
+      "required": false,
+      "displayLabel": "Kind"
     },
     {
       "fieldId": "0c9743ed-1d05-4b07-86c9-9bd89e0d60d1",
       "order": 4,
-      "required": false
+      "required": false,
+      "displayLabel": "Source"
     },
     {
       "fieldId": "191eb505-cdb3-4b09-ae2b-30585713c0fd",
       "order": 5,
-      "required": false
+      "required": false,
+      "displayLabel": "When out of balance"
     }
   ],
   "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",

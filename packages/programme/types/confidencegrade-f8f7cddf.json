@@ -11,22 +11,26 @@
     {
       "fieldId": "b782003d-7f38-4a75-b122-3ff453511ba1",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy title"
     },
     {
       "fieldId": "fb3d43a0-445f-4594-82fc-52ec99759fb0",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "Confidence level"
     },
     {
       "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
       "order": 2,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy explanation"
     },
     {
       "fieldId": "79ce55ff-87c5-414c-9dce-901fd14b7e41",
       "order": 3,
-      "required": false
+      "required": false,
+      "displayLabel": "Signals"
     }
   ],
   "id": "f8f7cddf-7b5f-4db9-ab04-b075e5be0b41",

@@ -11,22 +11,26 @@
     {
       "fieldId": "b782003d-7f38-4a75-b122-3ff453511ba1",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy title"
     },
     {
       "fieldId": "b53cd964-42d5-41ab-999c-d2538783eb21",
       "order": 1,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy key"
     },
     {
       "fieldId": "5f0ac112-4d2e-42ea-9d4e-5ab74783cb72",
       "order": 2,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy explanation"
     },
     {
       "fieldId": "2c5b25b7-91bc-4e07-ab0a-24b425a264c4",
       "order": 3,
-      "required": true
+      "required": true,
+      "displayLabel": "Policy order"
     }
   ],
   "id": "4d24c966-edab-4926-bd92-16e1f81a62ae",

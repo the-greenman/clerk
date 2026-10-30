@@ -8,22 +8,26 @@
     {
       "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Title"
     },
     {
       "fieldId": "0a273307-bfcf-4007-a4fc-dc6fe61e1e01",
       "order": 1,
-      "required": false
+      "required": false,
+      "displayLabel": "Summary"
     },
     {
       "fieldId": "fced003b-7144-4746-9f0f-bcbea055f717",
       "order": 2,
-      "required": false
+      "required": false,
+      "displayLabel": "Jobs"
     },
     {
       "fieldId": "c5106dcb-1d8b-4e67-848a-ae8c3dfed702",
       "order": 3,
-      "required": false
+      "required": false,
+      "displayLabel": "Needs"
     }
   ],
   "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",

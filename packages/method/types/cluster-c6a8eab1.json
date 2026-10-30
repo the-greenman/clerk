@@ -8,12 +8,14 @@
     {
       "fieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",
       "order": 0,
-      "required": true
+      "required": true,
+      "displayLabel": "Title"
     },
     {
       "fieldId": "a03abc28-2b14-4690-a498-f2c7cb697c5f",
       "order": 1,
-      "required": false
+      "required": false,
+      "displayLabel": "Description"
     }
   ],
   "identityFieldId": "7ccb4e5e-8e02-49d3-b51c-3bf3280616e0",

@@ -3,7 +3,7 @@
   "id": "a71f013f-0207-439f-8e52-2982baa68e86",
   "namespace": "com.semanticops.programme",
   "name": "methodology",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "title": "methodology",
   "description": "Programme settings; the work-status set (where a work item is: work_item; what holds it: work_hold; how its pull request merges: merge_gate; what it is: work_label), the label-binding type a programme uses to show them, the set-against relation that places a decision on its compass; and the Confidence and care policy types (confidence-axis, confidence-grade, care-mode, care-rule, the confidence_level scale, grades and selects) a programme tunes how careful work must be with. The live methodology types still live in srs-programme's primary package.",
   "status": "active",
