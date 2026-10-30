@@ -8,7 +8,7 @@ Programme and governance code lives here; programme data never does (srs-program
 
 Every script, workflow, routine and label: `docs/tools.md`. Add to it when you add one.
 
-When the owner explains the work, or starts describing a problem or remedy, capture their words as a Tier-0 vignette in the conversation's container before acting on it, unprompted: the handbook's *Narrative explorations: how meaning grows* (decision 77e04b19).
+When the owner explains the work, or starts describing a problem or remedy, capture their words as a Tier-0 vignette in the conversation's container before acting on it, unprompted. Only words that carry meaning, never bare commands or instructions: the handbook's *Narrative explorations: how meaning grows* (decision 77e04b19).
 
 The handbook is an SRS repository, `handbook/`; `docs/handbook.md` is rendered from it by `scripts/render-handbook.mjs`. Never edit the markdown: change the records with the srs CLI, render, and commit both (`validate.yml` fails on drift).
 
