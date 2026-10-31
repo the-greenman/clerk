@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { audit, report, orphanBranches } from "./steward-audit.mjs";
+import { audit, report, orphanBranches, problemsWithoutRemedy } from "./steward-audit.mjs";
 
 const lane = "lane-x";
 const now = Date.parse("2026-10-29T00:00:00Z");
@@ -39,4 +39,19 @@ test("orphan branches: ahead of default; unknown and merged are not reported; mo
   const rows = orphanBranches([b("a", 1), b("merged", 0), b("unknown", null), b("big", 7)]);
   assert.deepEqual(rows.map((r) => r.ref), ["srs:big", "srs:a"]);
   assert.match(rows[1].detail, /1 commit not on/);
+});
+
+test("an affirmed problem with no affirmed remedy answering it is listed; forks pool and suggested remedies do not count", () => {
+  const rec = (id, typeName, fieldValues) => ({ instanceId: id, record: { typeName, fieldValues } });
+  const records = [
+    rec("p1s", "problem", { problem_id: "SP-1", title: "one" }), rec("p1a", "problem", { problem_id: "SP-1", title: "one" }),
+    rec("p2a", "problem", { problem_id: "SP-2", title: "two" }), rec("p3s", "problem", { problem_id: "SP-3", title: "three" }),
+    rec("p10a", "problem", { problem_id: "SP-10", title: "ten" }),
+    rec("rA", "remedy", {}), rec("rS", "remedy", {}),
+  ];
+  const answers = (s, t) => ({ relationType: "com.semanticops.method/answers", sourceId: s, targetId: t });
+  const affirmed = new Set(["p1a", "p2a", "p10a", "rA"]);
+  const rows = problemsWithoutRemedy(records, [answers("rA", "p1s"), answers("rS", "p2a")], affirmed);
+  assert.deepEqual(rows.map((r) => r.ref), ["SP-2", "SP-10"]);
+  assert.equal(rows[0].rule, "problem-no-remedy");
 });
