@@ -6,7 +6,8 @@
 //   epic-incomplete  epic closed with open sub-issues that are not re-homed (steward-check's reopen-epic rule)
 //   stale-unattended open `lane:unattended` issue not updated for N days (default 14)
 //   orphan-branch    branch with commits not on the default branch and no PR (open or closed) from it
-// Not in this slice: affirmed problems without a remedy, remedy falsifiers, the diff against the previous
+//   problem-no-remedy affirmed problem that no affirmed remedy answers (read from the programme with srs)
+// Not in this slice: remedy falsifiers, the diff against the previous
 // run, the attachment output and the weekly routine (all named in srs-programme#38).
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
@@ -14,6 +15,8 @@ import { list, get } from "../lib/adapters/github.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { plan, fetchIssues } from "./steward-check.mjs";
 import { repoRoot } from "./lib/repo-arg.mjs";
+import { srsCli } from "../lib/adapters/cli.mjs";
+import { loadProgramme } from "../lib/adapters/ground.mjs";
 
 const RULE = { "reopen-no-pr": "false-close", "reopen-epic": "epic-incomplete" };
 
@@ -41,6 +44,22 @@ export function orphanBranches(branches) {
     .map((b) => ({ rule: "orphan-branch", ref: `${b.repo}:${b.name}`, detail: `${b.ahead} commit${b.ahead === 1 ? "" : "s"} not on the default branch, no PR` }));
 }
 
+// records/relations/affirmed as loadProgramme returns them. An affirmed problem is one with a copy in the Affirmed
+// container (forks share a problem_id, so the copies of one SP are pooled); it is answered when an affirmed remedy
+// has an `answers` relation to any copy. Returns problem-no-remedy rows, by SP number.
+export function problemsWithoutRemedy(records, relations, affirmed) {
+  const copies = new Map();
+  for (const r of records.filter((x) => x.record.typeName === "problem")) {
+    const k = r.record.fieldValues.problem_id ?? r.record.fieldValues.title;
+    copies.set(k, { title: r.record.fieldValues.title, ids: [...(copies.get(k)?.ids ?? []), r.instanceId] });
+  }
+  const remedies = new Set(records.filter((x) => x.record.typeName === "remedy" && affirmed.has(x.instanceId)).map((x) => x.instanceId));
+  const answered = new Set(relations.filter((l) => l.relationType === "com.semanticops.method/answers" && remedies.has(l.sourceId)).map((l) => l.targetId));
+  return [...copies].filter(([, c]) => c.ids.some((i) => affirmed.has(i)) && !c.ids.some((i) => answered.has(i)))
+    .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+    .map(([sp, c]) => ({ rule: "problem-no-remedy", ref: sp, detail: c.title }));
+}
+
 // Reads one repo's branches over REST: not the default, never the head of a PR (open or closed, same repo), with the
 // number of commits ahead of the default branch. A failed compare gives ahead null, not a failed repo.
 export function fetchBranches(owner, repo) {
@@ -56,7 +75,7 @@ export function fetchBranches(owner, repo) {
 }
 
 export function report(rows, date) {
-  const rules = ["false-close", "epic-incomplete", "orphan-branch", "stale-unattended"];
+  const rules = ["false-close", "epic-incomplete", "orphan-branch", "stale-unattended", "problem-no-remedy"];
   const lines = [`# Steward audit ${date}`, ""];
   for (const r of rules) {
     const hit = rows.filter((x) => x.rule === r);
@@ -87,6 +106,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       rows.push(...orphanBranches(fetchBranches(OWNER, repo)));
     } catch (e) { console.error(`${repo}: ${e.message}`); failed++; }
   }
+  try { const p = loadProgramme(srsCli(repoRoot()), repoRoot()); rows.push(...problemsWithoutRemedy(p.records, p.relations, p.affirmed)); }
+  catch (e) { console.error(`programme: ${e.message}`); failed++; }
   console.log(argv.includes("--json") ? JSON.stringify(rows, null, 2) : report(rows, new Date(now).toISOString().slice(0, 10)));
   process.exit(failed ? 1 : 0);
 }
