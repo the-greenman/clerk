@@ -54,4 +54,8 @@ test("an affirmed problem with no affirmed remedy answering it is listed; forks 
   const rows = problemsWithoutRemedy(records, [answers("rA", "p1s"), answers("rS", "p2a")], affirmed);
   assert.deepEqual(rows.map((r) => r.ref), ["SP-2", "SP-10"]);
   assert.equal(rows[0].rule, "problem-no-remedy");
+  // an epic's answers does not count, and a problem with no problem_id is keyed by its title
+  const more = [...records, rec("e", "epic", {}), rec("pn", "problem", { title: "untitled id" })];
+  const r2 = problemsWithoutRemedy(more, [answers("rA", "p1s"), answers("e", "p2a")], new Set([...affirmed, "pn"]));
+  assert.deepEqual(r2.map((r) => r.ref), ["SP-2", "SP-10", "untitled id"]);
 });

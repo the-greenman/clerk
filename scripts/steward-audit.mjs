@@ -49,12 +49,12 @@ export function orphanBranches(branches) {
 // has an `answers` relation to any copy. Returns problem-no-remedy rows, by SP number.
 export function problemsWithoutRemedy(records, relations, affirmed) {
   const copies = new Map();
-  for (const r of records.filter((x) => x.record.typeName === "problem" && x.record.fieldValues.problem_id)) {
-    const k = r.record.fieldValues.problem_id;
+  for (const r of records.filter((x) => x.record.typeName === "problem")) {
+    const k = r.record.fieldValues.problem_id ?? r.record.fieldValues.title;
     copies.set(k, { title: r.record.fieldValues.title, ids: [...(copies.get(k)?.ids ?? []), r.instanceId] });
   }
   const remedies = new Set(records.filter((x) => x.record.typeName === "remedy" && affirmed.has(x.instanceId)).map((x) => x.instanceId));
-  const answered = new Set(relations.filter((l) => l.relationType.endsWith("/answers") && remedies.has(l.sourceId)).map((l) => l.targetId));
+  const answered = new Set(relations.filter((l) => l.relationType === "com.semanticops.method/answers" && remedies.has(l.sourceId)).map((l) => l.targetId));
   return [...copies].filter(([, c]) => c.ids.some((i) => affirmed.has(i)) && !c.ids.some((i) => answered.has(i)))
     .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
     .map(([sp, c]) => ({ rule: "problem-no-remedy", ref: sp, detail: c.title }));
