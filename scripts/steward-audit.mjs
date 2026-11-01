@@ -41,7 +41,7 @@ export function audit(closed, open, { now = Date.now(), since = "1970-01-01T00:0
 export function sp01Stale(open, { now = Date.now(), days = 30, lane } = {}) {
   const cutoff = now - days * 864e5;
   return open
-    .filter((i) => i.labels.includes(lane) && /^\s*Answers:[^\n]*\bSP-0*1\b(?![\d])/im.test(i.body ?? "") && Date.parse(i.updatedAt) < cutoff)
+    .filter((i) => i.labels.includes(lane) && /^[ \t]*Answers:[^\n]*\bSP-0*1\b/im.test(i.body ?? "") && Date.parse(i.updatedAt) < cutoff)
     .sort((a, b) => Date.parse(a.updatedAt) - Date.parse(b.updatedAt))
     .map((i) => ({ rule: "falsifier-34e4af7c", ref: `${i.repo}#${i.number}`, detail: `answers SP-01, last updated ${i.updatedAt.slice(0, 10)}` }));
 }

@@ -32,7 +32,7 @@ test("stale unattended: older than the cutoff, labelled, oldest first", () => {
 });
 test("report lists every rule, even with no hits", () => {
   const md = report([], "2026-10-29");
-  for (const r of ["false-close: 0", "epic-incomplete: 0", "orphan-branch: 0", "stale-unattended: 0"]) assert.match(md, new RegExp(r));
+  for (const r of ["false-close: 0", "epic-incomplete: 0", "orphan-branch: 0", "stale-unattended: 0", "problem-no-remedy: 0", "falsifier-34e4af7c: 0"]) assert.match(md, new RegExp(r));
 });
 test("orphan branches: ahead of default; unknown and merged are not reported; most commits first", () => {
   const b = (name, ahead) => ({ repo: "srs", name, ahead });
