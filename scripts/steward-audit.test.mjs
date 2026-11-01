@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { audit, report, orphanBranches, problemsWithoutRemedy } from "./steward-audit.mjs";
+import { audit, report, orphanBranches, problemsWithoutRemedy, sp01Stale } from "./steward-audit.mjs";
 
 const lane = "lane-x";
 const now = Date.parse("2026-10-29T00:00:00Z");
@@ -32,7 +32,7 @@ test("stale unattended: older than the cutoff, labelled, oldest first", () => {
 });
 test("report lists every rule, even with no hits", () => {
   const md = report([], "2026-10-29");
-  for (const r of ["false-close: 0", "epic-incomplete: 0", "orphan-branch: 0", "stale-unattended: 0"]) assert.match(md, new RegExp(r));
+  for (const r of ["false-close: 0", "epic-incomplete: 0", "orphan-branch: 0", "stale-unattended: 0", "problem-no-remedy: 0", "falsifier-34e4af7c: 0"]) assert.match(md, new RegExp(r));
 });
 test("orphan branches: ahead of default; unknown and merged are not reported; most commits first", () => {
   const b = (name, ahead) => ({ repo: "srs", name, ahead });
@@ -58,4 +58,19 @@ test("an affirmed problem with no affirmed remedy answering it is listed; forks 
   const more = [...records, rec("e", "epic", {}), rec("pn", "problem", { title: "untitled id" })];
   const r2 = problemsWithoutRemedy(more, [answers("rA", "p1s"), answers("e", "p2a")], new Set([...affirmed, "pn"]));
   assert.deepEqual(r2.map((r) => r.ref), ["SP-2", "SP-10", "untitled id"]);
+});
+
+test("remedy 34e4af7c falsifier: SP-01 lane issues untouched for 30 days, oldest first; SP-010 and other lanes do not count", () => {
+  const now = Date.parse("2026-11-01T00:00:00Z");
+  const i = (number, body, updatedAt, labels = ["lane:unattended"]) => ({ repo: "srs", number, body, updatedAt, labels });
+  const rows = sp01Stale([
+    i(1, "Answers: SP-01 \"drift\"\nmore", "2026-09-30T00:00:00Z"),
+    i(2, "Answers: SP-1.", "2026-09-01T00:00:00Z"),
+    i(3, "Answers: SP-010", "2026-08-01T00:00:00Z"),
+    i(4, "Answers: SP-01", "2026-10-25T00:00:00Z"),
+    i(5, "Answers: SP-01", "2026-08-01T00:00:00Z", ["ready"]),
+    i(6, null, "2026-08-01T00:00:00Z"),
+  ], { now, lane: "lane:unattended" });
+  assert.deepEqual(rows.map((r) => r.ref), ["srs#2", "srs#1"]);
+  assert.equal(rows[0].rule, "falsifier-34e4af7c");
 });
