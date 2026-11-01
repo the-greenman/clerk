@@ -7,7 +7,8 @@
 //   stale-unattended open `lane:unattended` issue not updated for N days (default 14)
 //   orphan-branch    branch with commits not on the default branch and no PR (open or closed) from it
 //   problem-no-remedy affirmed problem that no affirmed remedy answers (read from the programme with srs)
-// Not in this slice: remedy falsifiers, the diff against the previous
+//   falsifier-34e4af7c open unattended-lane issue answering SP-01 untouched for 30 days (remedy 34e4af7c's falsifier)
+// Not in this slice: remedy falsifier eed1e4ef (its own issue), the diff against the previous
 // run, the attachment output and the weekly routine (all named in srs-programme#38).
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
@@ -33,6 +34,16 @@ export function audit(closed, open, { now = Date.now(), since = "1970-01-01T00:0
     .sort((a, b) => Date.parse(a.updatedAt) - Date.parse(b.updatedAt))
     .map((i) => ({ rule: "stale-unattended", ref: `${i.repo}#${i.number}`, detail: `last updated ${i.updatedAt.slice(0, 10)}${i.assignee ? `, held by ${i.assignee}` : ""}` }));
   return [...out, ...stale];
+}
+
+// Remedy 34e4af7c's falsifier, measurable now: an open lane issue whose body answers SP-01 (an `Answers:` line naming SP-01,
+// not SP-010) and was last updated more than `days` ago. Oldest first. open is shaped as audit's, plus body.
+export function sp01Stale(open, { now = Date.now(), days = 30, lane } = {}) {
+  const cutoff = now - days * 864e5;
+  return open
+    .filter((i) => i.labels.includes(lane) && /^\s*Answers:[^\n]*\bSP-0*1\b(?![\d])/im.test(i.body ?? "") && Date.parse(i.updatedAt) < cutoff)
+    .sort((a, b) => Date.parse(a.updatedAt) - Date.parse(b.updatedAt))
+    .map((i) => ({ rule: "falsifier-34e4af7c", ref: `${i.repo}#${i.number}`, detail: `answers SP-01, last updated ${i.updatedAt.slice(0, 10)}` }));
 }
 
 // branches: [{repo, name, ahead}] for branches other than the default, ahead = commits not on the default branch
@@ -75,7 +86,7 @@ export function fetchBranches(owner, repo) {
 }
 
 export function report(rows, date) {
-  const rules = ["false-close", "epic-incomplete", "orphan-branch", "stale-unattended", "problem-no-remedy"];
+  const rules = ["false-close", "epic-incomplete", "orphan-branch", "stale-unattended", "problem-no-remedy", "falsifier-34e4af7c"];
   const lines = [`# Steward audit ${date}`, ""];
   for (const r of rules) {
     const hit = rows.filter((x) => x.rule === r);
@@ -101,8 +112,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       const closed = fetchIssues(repo, days, since, OWNER).filter((i) => i.state === "CLOSED");
       const open = list(`repos/${OWNER}/${repo}/issues?state=open&labels=${encodeURIComponent(W.lane)}&per_page=100`)
         .filter((i) => !i.pull_request)
-        .map((i) => ({ repo, number: i.number, title: i.title, labels: i.labels.map((l) => l.name), updatedAt: i.updated_at, assignee: i.assignee?.login }));
+        .map((i) => ({ repo, number: i.number, title: i.title, labels: i.labels.map((l) => l.name), updatedAt: i.updated_at, body: i.body, assignee: i.assignee?.login }));
       rows.push(...audit(closed, open, { now, since, staleDays, lane: W.lane }));
+      rows.push(...sp01Stale(open, { now, lane: W.lane }));
       rows.push(...orphanBranches(fetchBranches(OWNER, repo)));
     } catch (e) { console.error(`${repo}: ${e.message}`); failed++; }
   }
