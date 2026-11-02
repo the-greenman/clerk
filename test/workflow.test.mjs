@@ -9,7 +9,7 @@ test('workflowFrom: labels and board columns come from the active bindings', () 
   const W = workflowFrom(fixture);
   assert.equal(W.inProgress, 'status: in progress');
   assert.equal(W.columns.in_review, 'In review');
-  assert.deepEqual(W.gates, { auto: 'gate:auto-merge', owner: 'gate:owner-merge' });
+  assert.deepEqual(W.gates, { auto: 'gate:auto-merge', owner: 'gate:owner-merge', own: ['bug'] });
   assert.deepEqual(W.holds, ['needs-input', 'blocked', 'parked']);
   assert.equal(W.isHeld(['ready', 'parked']), true);
   assert.equal(W.isHeld(['ready', 'status: in progress']), false);

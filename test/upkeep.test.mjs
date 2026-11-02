@@ -56,6 +56,10 @@ test('delegated merges and open PRs are counted; owner merges are not', () => {
     pr('2026-10-09T10:00:00Z', 'closed', [L]), pr(null, 'closed', [L]), pr('2026-10-09T12:00:00Z', 'closed', []), pr(null, 'open', [L])];
   assert.equal(countMerged(prs, L, '2026-10-09T11:30:00Z', GATES), 1);
   assert.equal(countOpen(prs, L, GATES), 1);
+  // a bug fix carries its own budget (owner 2026-11-02): never counted against the group
+  const own = { ...GATES, own: ['bug'] };
+  assert.equal(countOpen([...prs, pr(null, 'open', [L, 'bug'])], L, own), 1);
+  assert.equal(countMerged([...prs, pr('2026-10-09T12:00:00Z', 'closed', [L, 'bug'])], L, '2026-10-09T11:30:00Z', own), 1);
 });
 
 const rep = (id, group, assoc = 'OWNER') => ({ id, body: `<!-- wg-report cycle=2026-10-0${id}${group ? ` group=${group}` : ''} -->\nreport`, created_at: `2026-10-0${id}T11:30:00Z`, author_association: assoc });

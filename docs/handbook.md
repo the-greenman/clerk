@@ -412,8 +412,9 @@ Each step says how sure we are of it. Low is an agent's reading of the code, med
 - command: clerk group-state
 - routine: unattended-worker (standing job 2aee4156)
 - routine: wg-builder (standing jobs 63def3a3, a12f5821)
-- routine: bug-fixer (no standing job yet)
+- routine: bug-fixer (standing job b7640456; its own budget, 11a311a7)
 - command: /ship
+- routine: rfc-drafter (standing job 06530737; RFC requests only, 778f154a)
 
 **Evidence**: the former hand-typed Flow at a glance table, row 9 (live 2026-10-16); work-flow audit 2026-10-23 (srs-programme source document 6c0c8c5c)
 
@@ -595,6 +596,7 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 
 **Maintained by**:
 - command: /rfc (Charter Check, the spec only)
+- routine: rfc-drafter (Stages 0 to 4 to a reviewed Draft; acceptance stays the owner's, 778f154a)
 
 **Evidence**: decision-compass.md; srs-programme source-documents/decision-taxonomy-2026-10-22/discoveries.md; clerk#63
 
