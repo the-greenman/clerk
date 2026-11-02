@@ -156,3 +156,18 @@ test('each act keeps the time it was taken, its agenda position and what was see
   assert.match(s, /Acts in the order taken \(UTC\):\n- 14:12:30Z ratify: A \[aaaaaaaa\] \(Ratify 1 of 5, saw full record\)\n- 14:20:00Z comment: B \[bbbbbbbb\] \(Ratify 2 of 5, saw discussion, record updated 2026-10-10T09:00:00Z\)\n- 15:40:00Z edit/);
   assert.doesNotMatch(summarise([{ id: 'abcdef123', title: 'T', action: 'consider', edits: [] }], 'S'), /Acts in the order/);
 });
+
+test('a choice absent from the write copy is refused before any write (clerk#116)', async () => {
+  const { missingItems, pendingWords } = await import('../lib/adapters/session.mjs');
+  const here = new Set(['on-master']);
+  const S = (args) => { if (!here.has(args[2])) throw new Error('E2UnknownEndpoint'); return {}; };
+  const ch = [{ id: 'on-master', title: 'A', action: 'ratify', comments: [{ text: 'x', replyTo: 'gone-comment' }] }, { id: 'not-yet', title: 'B', action: 'ratify' }, { id: 'comment:7', title: 'C', commentOnly: true }];
+  assert.deepEqual(missingItems(S, ch), ['gone-comment', 'not-yet']);
+  assert.deepEqual(missingItems(S, [ch[0]].map((c) => ({ ...c, comments: [] }))), []);
+});
+test('the owner\'s comment text and edits are kept as words, so a mid-run failure can return them (clerk#116)', async () => {
+  const { pendingWords } = await import('../lib/adapters/session.mjs');
+  const ch = [{ id: 'a', title: 'A', action: 'other', text: 'new resolution', edits: [{ field: 'why', text: 'because' }], comments: [{ text: 'I disagree\nsecond line' }] }];
+  const w = pendingWords(ch);
+  assert.deepEqual(w.map((x) => [x.kind, x.text]), [['comment', 'I disagree\nsecond line'], ['edit', 'new resolution'], ['edit', 'because']]);
+});
