@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // steward-audit: the weekly audit, first slice (srs-programme#38, Answers SP-02). Read-only: prints a report, writes nothing.
-//   node scripts/steward-audit.mjs [--since ISO] [--stale-days N] [--json]
+//   node scripts/steward-audit.mjs [--since ISO] [--stale-days N] [--json] [--previous rows.json]
 // Measures what the 2026-10-08 archaeology measured by hand, from issues alone:
 //   false-close      closed COMPLETED, not an epic, no merged closing PR (steward-check's reopen-no-pr rule, over all of history)
 //   epic-incomplete  epic closed with open sub-issues that are not re-homed (steward-check's reopen-epic rule)
@@ -8,8 +8,10 @@
 //   orphan-branch    branch with commits not on the default branch and no PR (open or closed) from it
 //   problem-no-remedy affirmed problem that no affirmed remedy answers (read from the programme with srs)
 //   falsifier-34e4af7c open unattended-lane issue answering SP-01 untouched for 30 days (remedy 34e4af7c's falsifier)
-// Not in this slice: remedy falsifier eed1e4ef (its own issue), the diff against the previous
-// run, the attachment output and the weekly routine (all named in srs-programme#38).
+// --previous takes an earlier run's --json output and adds a "Changes since previous run" section (new and resolved rows).
+// Not in this slice: remedy falsifier eed1e4ef (its own issue), the attachment output
+// and the weekly routine (named in srs-programme#38).
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { list, get } from "../lib/adapters/github.mjs";
@@ -85,12 +87,25 @@ export function fetchBranches(owner, repo) {
     });
 }
 
-export function report(rows, date) {
+// Rows are the same finding when rule and ref match (detail changes, like age, do not make a new finding).
+// Returns {added, resolved}: rows only in `rows`, rows only in `previous`.
+export function diffRows(previous, rows) {
+  const key = (r) => `${r.rule}\u0000${r.ref}`;
+  const before = new Set(previous.map(key)), after = new Set(rows.map(key));
+  return { added: rows.filter((r) => !before.has(key(r))), resolved: previous.filter((r) => !after.has(key(r))) };
+}
+
+export function report(rows, date, previous) {
   const rules = ["false-close", "epic-incomplete", "orphan-branch", "stale-unattended", "problem-no-remedy", "falsifier-34e4af7c"];
   const lines = [`# Steward audit ${date}`, ""];
   for (const r of rules) {
     const hit = rows.filter((x) => x.rule === r);
     lines.push(`## ${r}: ${hit.length}`, ...hit.map((x) => `- ${x.ref}${x.detail ? ` (${x.detail})` : ""}`), "");
+  }
+  if (previous) {
+    const { added, resolved } = diffRows(previous, rows);
+    const fmt = (x) => `- ${x.rule}: ${x.ref}${x.detail ? ` (${x.detail})` : ""}`;
+    lines.push(`## Changes since previous run: ${added.length} new, ${resolved.length} resolved`, "", "New:", ...(added.length ? added.map(fmt) : ["- none"]), "", "Resolved:", ...(resolved.length ? resolved.map(fmt) : ["- none"]), "");
   }
   return lines.join("\n");
 }
@@ -101,6 +116,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const since = arg("--since", "2026-01-01T00:00:00Z");
   const staleDays = Number(arg("--stale-days", 14));
   if (Number.isNaN(Date.parse(since)) || !(staleDays > 0)) { console.error("--since needs an ISO date, --stale-days a positive number"); process.exit(2); }
+  let previous;
+  if (argv.includes("--previous")) {
+    try { previous = JSON.parse(fs.readFileSync(arg("--previous"), "utf8")); if (!Array.isArray(previous)) throw new Error("not an array of rows"); }
+    catch (e) { console.error(`--previous needs a file holding an earlier --json run: ${e.message}`); process.exit(2); }
+  }
   let settings; try { settings = loadSettings(repoRoot()); } catch (e) { console.error("steward-audit: " + e.message); process.exit(2); }
   let W; try { W = loadWorkflow(repoRoot()); } catch (e) { console.error("steward-audit: " + e.message); process.exit(2); }
   const OWNER = settings.githubOwner;
@@ -120,6 +140,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
   try { const p = loadProgramme(srsCli(repoRoot()), repoRoot()); rows.push(...problemsWithoutRemedy(p.records, p.relations, p.affirmed)); }
   catch (e) { console.error(`programme: ${e.message}`); failed++; }
-  console.log(argv.includes("--json") ? JSON.stringify(rows, null, 2) : report(rows, new Date(now).toISOString().slice(0, 10)));
+  console.log(argv.includes("--json") ? JSON.stringify(rows, null, 2) : report(rows, new Date(now).toISOString().slice(0, 10), previous));
   process.exit(failed ? 1 : 0);
 }
