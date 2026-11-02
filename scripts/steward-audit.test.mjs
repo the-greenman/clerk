@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { audit, report, orphanBranches, problemsWithoutRemedy, sp01Stale } from "./steward-audit.mjs";
+import { audit, report, orphanBranches, problemsWithoutRemedy, sp01Stale, diffRows } from "./steward-audit.mjs";
 
 const lane = "lane-x";
 const now = Date.parse("2026-10-29T00:00:00Z");
@@ -73,4 +73,16 @@ test("remedy 34e4af7c falsifier: SP-01 lane issues untouched for 30 days, oldest
   ], { now, lane: "lane:unattended" });
   assert.deepEqual(rows.map((r) => r.ref), ["srs#2", "srs#1"]);
   assert.equal(rows[0].rule, "falsifier-34e4af7c");
+});
+
+test("diff against the previous run: new and resolved by rule and ref; a changed detail is the same finding", () => {
+  const r = (rule, ref, detail) => ({ rule, ref, detail });
+  const prev = [r("false-close", "srs#1"), r("stale-unattended", "srs#2", "last updated 2026-09-01"), r("orphan-branch", "srs:x", "1 commit")];
+  const now = [r("stale-unattended", "srs#2", "last updated 2026-09-05"), r("orphan-branch", "srs:y", "2 commits"), r("false-close", "srs#1")];
+  const d = diffRows(prev, now);
+  assert.deepEqual(d.added.map((x) => x.ref), ["srs:y"]);
+  assert.deepEqual(d.resolved.map((x) => x.ref), ["srs:x"]);
+  const md = report(now, "2026-11-02", prev);
+  assert.match(md, /Changes since previous run: 1 new, 1 resolved/);
+  assert.doesNotMatch(report(now, "2026-11-02"), /Changes since/);
 });
