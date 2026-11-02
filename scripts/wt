@@ -2,7 +2,7 @@
 # wt: the one way to create, list and prune git worktrees.
 #   wt new <repo> <slug> [branch]   worktree at $WT_ROOT/<repo>/<slug> off origin/<default>
 #   wt ls                           every worktree: dirty / merged / pushed
-#   wt prune [-n]                   remove worktrees that are clean AND merged (-n = dry run)
+#   wt prune [-n]                   remove worktrees that are clean AND merged (-n = dry run); a fresh one (no commit since `wt new`) is kept
 # Independent of the gh project tooling on purpose.
 set -euo pipefail
 
@@ -21,9 +21,16 @@ worktrees() {
   git -C "$1" worktree list --porcelain | awk '/^worktree /{p=$2} /^branch /{b=$2; sub("refs/heads/","",b)} /^$/{if(n++)print p"\t"b; b=""}'
 }
 
-# merged = HEAD is in origin/<default>, or (gh) the branch has a merged PR (squash merges)
+# fresh = the branch still sits at the commit `wt new` made it at (branch.<b>.wtBase): it has no work yet, so nothing has "landed" (clerk#148)
+is_fresh() { # repo path branch
+  local base; base=$(git -C "$1" config --get "branch.$3.wtBase" 2>/dev/null) || return 1
+  [ "$base" = "$(git -C "$2" rev-parse HEAD)" ]
+}
+
+# merged = the branch has work and it is in origin/<default>, or (gh) it has a merged PR (squash merges)
 is_merged() { # repo path branch
   local def; def=$(default_branch "$1")
+  [ -n "$3" ] && is_fresh "$1" "$2" "$3" && return 1
   git -C "$1" merge-base --is-ancestor "$(git -C "$2" rev-parse HEAD)" "origin/$def" 2>/dev/null && return 0
   # squash merge: a merged PR whose head commit is exactly our HEAD (a name match alone could hide unpushed commits). REST, not `gh pr list` (GraphQL is refused in cloud sessions).
   local slug; slug=$(git -C "$1" remote get-url origin | sed -E 's#^.*[:/]([^/]+/[^/]+)$#\1#; s#\.git$##')
@@ -61,6 +68,7 @@ case "${1:-}" in
     git -C "$r" fetch -q origin
     mkdir -p "$WT_ROOT/$2"
     git -C "$r" worktree add -b "${4:-$3}" "$dest" "origin/$def"
+    git -C "$r" config "branch.${4:-$3}.wtBase" "$(git -C "$dest" rev-parse HEAD)"
     [ "$(git -C "$dest" rev-parse --is-shallow-repository)" = true ] && git -C "$dest" fetch -q --unshallow
     echo "$dest" ;;
   ls) each ls_one ;;
