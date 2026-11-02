@@ -65,7 +65,7 @@ The problem's domain decides the group (handbook "How an issue reaches a group",
   - **Mandate** (`routines/wg-builder.md` step 5): the issue must name the recorded ruling, RFC, invariant or affirmed remedy it executes, or be non-normative. If not, go to the escalation in stage 5.
   - **Pause and budget** (wg-builder step 1):
     ```bash
-    $CLERK group-state <wg:label> --repo $PROG --json    # pause must be ok, room above 0, exit 0
+    $CLERK group-state <wg:label> --repo $PROG --json    # exit 0; clerk claim refuses at pause not ok or room 0 (clerk#147)
     ```
     Paused or over budget: comment on the issue, add `needs-input`, stop.
 - **Otherwise:** the work belongs to the **central group** (SemanticOps, the Owner role), labelled `lane:unattended`, and the owner's session holds its builder seat.
