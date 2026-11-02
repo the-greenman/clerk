@@ -19,11 +19,12 @@
     "confidence_level": "medium",
     "evidence": "decision-compass.md; srs-programme source-documents/decision-taxonomy-2026-10-22/discoveries.md; clerk#63",
     "maintained_by": [
-      "command: /rfc (Charter Check, the spec only)"
+      "command: /rfc (Charter Check, the spec only)",
+      "routine: rfc-drafter (Stages 0 to 4 to a reviewed Draft; acceptance stays the owner's, 778f154a)"
     ]
   },
   "createdAt": "2026-10-24T12:32:59.205321422+00:00",
-  "updatedAt": "2026-10-24T16:19:08.134963124+00:00",
+  "updatedAt": "2026-11-02T12:22:36.207913317+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",

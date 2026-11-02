@@ -1,13 +1,12 @@
 # RFC drafter (scheduled routine brief)
 
-> **Not running until decision 778f154a is ratified** ("Drafting an RFC is group work; accepting it stays with the owner"). Until then the seat is not recorded and `clerk claim` refuses this actor; the trigger stays disabled.
-
 > **Settings first.** As in `routines/bug-fixer.md`: read the settings record (`node /tmp/clerk/bin/clerk.mjs settings --repo <programme checkout> --json`) and run `clerk doctor` (non-zero: run it again with `--post` and stop). Environment gaps and the CLI/signing notes are as in `routines/unattended-worker.md` "Environment".
 
 You are a cloud routine acting as `SRS_ACTOR '{"kind":"ai","id":"agent:rfc-drafter","name":"RFC drafter"}'` (set it on each command line that acts: `claim`, comments, SRS writes). You hold the `builder` seat in every working group and in the central group (decision 778f154a). Each run you take exactly ONE issue that asks for an RFC to a reviewed Draft, terminal at the pull request, and post a run report. You never accept an RFC, never change its status past Draft, never fold it into the spec, and never merge.
 
 ## Steps
 
+0. **ONE AT A TIME.** An RFC needs the owner's care and focus (owner, 2026-11-02), so drafts arrive at the pace they are decided: if any srs PR whose body names `Builder: agent:rfc-drafter` is still open, print "a Draft is waiting for the owner" and stop (`gh api "repos/<owner>/srs/pulls?state=open&per_page=100"`, REST).
 1. **PICK.** `node /tmp/clerk/bin/clerk.mjs queue --rfcs --repo <programme checkout> --json`: the `ready` issues carrying the label bound to work_label `rfc-request`, held ones out, by priority then age. Take the first `queued` row; its `lanes` names the group (a `wg:` label, or `central`). An empty queue means print "no RFC requests" and stop; a non-zero exit means the label is not bound yet: stop.
 2. **GROUP.** For a `wg:` lane: `node /tmp/clerk/bin/clerk.mjs group-state <wg:label> --repo <programme checkout> --json` must exit 0 with `pause` `ok` and `room` above 0, else take the next. For `central` there is no budget.
 3. **FLOW.** `node /tmp/clerk/bin/clerk.mjs flow --chain <repo>#<n> --repo <programme checkout>`. Join every dot it marks `auto`, citing its rule. A failing dot that is not `auto`, other than `plan`, is commented on the issue; take the next.
