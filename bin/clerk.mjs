@@ -168,9 +168,9 @@ if (sub) {
     args('--attendee').forEach(addAttendee);
     if ((args('--ratify').length || args('--set-aside').length) && !quorumNow().met) throw new Error(`${quorumText(quorumNow())}: --ratify/--set-aside refused; --consider and --edit are still allowed`);
     const items = A.ratifyItems(records, mainLog, parentLogs);
-    const pick = (p) => { const m = items.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single proposed decision matches "${p}"`); return m[0]; };
     const pool = [...items, ...(isOwner ? groupLogs.flatMap((g) => A.escalationItems(records, g.log, mainLog, A.stewardsOf(g))) : [])];
-    const find = (p) => { const m = pool.filter((r) => r.instanceId.startsWith(p)); if (m.length !== 1) throw new Error(`no single decision on the agenda matches "${p}"`); return m[0]; };
+    const pick = (p) => A.pickOne(pool, p, 'proposed decision'); // --ratify/--set-aside reach escalations too (clerk#132)
+    const find = (p) => A.pickOne(pool, p);
     const item = (r) => ({ instanceId: r.instanceId, title: A.fv(r).title });
     const choices = [];
     const takeAct = (it, patch) => take(choices, it, { ...patch, act: { at: new Date().toISOString() } }); // non-interactive: time only, no agenda position
@@ -181,7 +181,7 @@ if (sub) {
     }
     if (argv[0] === 'comment') { postComments({ cli, programme, now, choices, transcript, dryRun, clerkedBy: arg('--clerked-by'), autoMerge: W.gates.auto }); process.exit(0); } // discussion between sessions: no session record, no quorum
     args('--set-aside').forEach((p) => takeAct(item(pick(p)), { action: 'setaside' }));
-    args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => takeAct(item(r), { action: 'ratify' }));
+    args('--ratify').flatMap((p) => (p === 'all' ? items : [pick(p)])).filter((r) => !choices.some((c) => c.id === r.instanceId)).forEach((r) => takeAct(item(r), { action: items.includes(r) ? 'ratify' : 'accept' })); // an escalation is accepted into the main log, as the TUI's [a]
     args('--consider').forEach((p) => takeAct(item(find(p)), {}));
     const [fs, ts] = [args('--field'), args('--text')];
     args('--edit').forEach((p, i) => { if (!fs[i] || ts[i] === undefined) throw new Error('--edit <id> needs a matching --field and --text'); takeAct(item(find(p)), { edit: { field: fs[i], text: ts[i] } }); });
@@ -252,7 +252,7 @@ const keys = {
   1: { prompt: '[r]atify [s]et aside [c]omment [v]iew discussion [e]dit [h]old [o]pen full [n]ext [q]uit > ', screen: (r) => A.decisionScreen(r, history(r), D.discussionLines(threadOf(r))) },
   2: { prompt: '[r]eceive [c]omment [o]pen [n]ext [q]uit > ', screen: (it) => A.reportScreen(it, { pause: gstate[it.group]?.pause, waiting: sections[4].items.length, exercises: sections[3].items.length, next: next[it.group] }) },
   3: { prompt: '[c]omment (give input) [v]iew discussion [e]dit [p]ropose a decision [o]pen [n]ext [q]uit > ', screen: (r) => A.exerciseScreen(r, history(r), D.discussionLines(threadOf(r)), A.fedInto(r.instanceId, derivedRels)) },
-  4: { prompt: '[a]ccept recommendation [c]hoose other co[m]ment [v]iew discussion [e]dit [h]old [d]efer [o]pen [n]ext [q]uit > ', screen: (r) => A.escalationScreen(r, history(r), D.discussionLines(threadOf(r))) },
+  4: { prompt: '[a]ccept recommendation [c]hoose other [s]et aside co[m]ment [v]iew discussion [e]dit [h]old [d]efer [o]pen [n]ext [q]uit > ', screen: (r) => A.escalationScreen(r, history(r), D.discussionLines(threadOf(r))) },
   5: { prompt: '[m]erge [o]pen in browser [n]ext [q]uit > ', screen: A.prScreen },
 };
 
@@ -277,7 +277,7 @@ async function walk(n) {
       if (k === 'n' || (k === 'd' && n === 4)) break;
       if (k === 'o') { seen.add('full record'); if (dec) show(A.fullScreen(it)); else if (n === 2) show([...it.text.split('\n'), ...(it.comment ? ['  ' + it.comment.html_url] : [])]); else openUrl(it.url); continue; }
       try {
-        if (dec && ((n === 1 && (k === 'r' || k === 's')) || (n === 4 && (k === 'a' || k === 'c'))) && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
+        if (dec && ((n === 1 && (k === 'r' || k === 's')) || (n === 4 && (k === 'a' || k === 'c' || k === 's'))) && !quorumNow().met) { console.log(`  refused: ${quorumText(quorumNow())}; ratifying or setting aside needs it. You can still [e]dit or [h]old.`); continue; }
         if (dec && k === 'v') { seen.add('discussion'); show(D.fullDiscussion(threadOf(it))); continue; }
         if (dec && (k === 'm' || ((n === 1 || n === 3) && k === 'c'))) { // any attendee may comment; no quorum needed
           const th = threadOf(it); if (th.length) seen.add('discussion'), show(D.fullDiscussion(th));
@@ -321,6 +321,7 @@ async function walk(n) {
           }
           continue;
         }
+        if (n === 4 && k === 's') { const why = await ask('reason (optional) > '); choice('setaside'); if (why) takeAct(ref, { comment: { text: why } }); console.log('  noted for the session'); break; }
         if (n === 4 && k === 'a') { choice('accept'); console.log('  noted for the session'); break; }
         if (n === 4 && k === 'c') { const t = await ask('resolution text > '); if (t) { choice('other', t); console.log('  noted for the session'); break; } continue; }
         if (n === 5 && k === 'm') { if (dryRun) console.log('  [dry run] would merge'); else mergePR(`${GH_OWNER}/${it.repo}`, it.number); acted.merge++; doneIds[5].add(it.number); console.log('  merged'); break; }
