@@ -50,6 +50,7 @@ A decision presents real courses of action, and the owner chooses between them (
 - **Dispositions are not options.** Ratify, set aside, hold, shelve, accept, deny, approve, reject and merge are what is done *with* an ask: the owner's answer, a hold for the session, a `review:requested`, or a session's ratify / set aside. "Accept option A / Shelve / Deny" is one option dressed as three.
 - **Place it where the domain allows.** `tension` names the trade-off: a group tension, or for spec and implementation work a compass axis from `srs/docs/charter/decision-compass.md` (for example `3-9`). Each option's `pole` says which way it leans. `layer` names the plane and layer, or the boundary, it lives in. Two decisions that take opposite poles on one tension conflict only within one layer; across layers, the difference is a boundary. When nothing fits, say why in `why_unplaced`. A complex decision links a consequence map instead of naming one tension.
 - **The recommendation is one of the options.** It follows the lean, or quotes the boundary clause that lets it go against it.
+- **One option model.** An ask's options are read by `askOptions` (`lib/practice/pr-decisions.mjs`); a decision record's `alternatives_considered` prose is read by `parseProseOptions` (`lib/practice/decision-options.mjs`) into the same shape. The session agenda lists them one per line and warns when a decision is not a choice (fewer than two options, no status quo, options without what they lead to). Advice only.
 
 ## Actors
 
