@@ -5,6 +5,7 @@ import { loadProgramme, parentChainRead } from '../../lib/adapters/ground.mjs';
 import { issueWithComments } from '../../lib/adapters/github.mjs';
 import { loadPolicy, loadProblemFacts } from '../../lib/adapters/care-policy.mjs';
 import { loadGroups } from '../../lib/adapters/groups.mjs';
+import { loadWorkflow } from '../../lib/adapters/workflow.mjs';
 import { evaluate, itemFacts, epicOf } from '../../lib/practice/care-policy.mjs';
 
 // What every reading shares, loaded once: a sweep over many items reuses it. -> {policy, epics, problems, groups}
@@ -15,7 +16,7 @@ export function careContext(repo, cli, st) {
   let epics; // an inactive period must not stop the reading: epics are then read from the records, unranked
   try { epics = derive(records, relations, new Date().toISOString().slice(0, 10), affirmed, outlines).epics; }
   catch { epics = records.filter((r) => r.record.typeName === 'epic').map((r) => ({ refs: r.record.fieldValues.issue_ref, parked: true })); }
-  return { policy, epics, problems: loadProblemFacts(repo, cli), groups: loadGroups(repo, cli) };
+  return { policy, epics, problems: loadProblemFacts(repo, cli), groups: loadGroups(repo, cli), bugLabel: loadWorkflow(repo, cli).bug };
 }
 
 // -> {policy, issue, epic, parents, parentsUnknown, facts, result} for <itemRepo>#<n>; throws when the policy cannot be acted on.
@@ -26,6 +27,6 @@ export function careFor(repo, cli, st, itemRepo, n, ctx = careContext(repo, cli,
   const chain = parentChainRead(st.githubOwner, itemRepo, n), parents = chain.parents.map((p) => p.ref);
   const epic = epicOf(ctx.epics, [ref, ...parents]);
   const facts = itemFacts({ item: { body: issue.body, comments: issue.comments }, problems: ctx.problems, epic, actor, ownerActor: st.ownerActor,
-    labels: issue.labels, repo: itemRepo, groups: ctx.groups });
+    labels: issue.labels, repo: itemRepo, groups: ctx.groups, bug: Boolean(ctx.bugLabel) && issue.labels.includes(ctx.bugLabel) });
   return { policy: ctx.policy, issue, epic, parents, parentsUnknown: chain.unknown, facts, result: ctx.policy ? evaluate(ctx.policy, facts) : null };
 }

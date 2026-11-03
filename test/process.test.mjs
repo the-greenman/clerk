@@ -168,6 +168,7 @@ describe('stage 8: work item', () => {
     assert.equal(run(issue.body).length, 0);
     assert.equal(run('No affirmed problem yet: edits are invisible').length, 0);
     assert.equal(run('Add a change view')[0].rule, 'answers');
+    assert.equal(stewardPlan([{ ...open, body: 'Found while: x', labels: ['bug'] }], { now: Date.parse('2026-10-11T12:00:00Z'), since: '2026-10-09T00:00:00Z' }).length, 0, 'a bug needs no problem (clerk#223)');
   });
   test.todo('handbook stage 8: the problem link is a record or relation, not a line of text');
 });

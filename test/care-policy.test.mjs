@@ -221,3 +221,8 @@ test('careNote: the claim comment names the mode, the rule, the cautions and the
   assert.equal(careNote({ mode: null }), 'Care mode: none (the policy selected no mode)');
   assert.match(careNote({ mode: { key: 'build', must: [] }, rule: { order: 1, title: 'Rule 1: a clear plan builds' } }), /^Care mode: build, by rule 1 \(a clear plan builds\)\.$/);
 });
+
+test('a bug states its answer without an Answers line (clerk#223)', () => {
+  assert.equal(itemFacts({ item: { body: 'Found while: x' }, bug: true }).answers.stated, true);
+  assert.equal(itemFacts({ item: { body: 'Found while: x' } }).answers.stated, false);
+});

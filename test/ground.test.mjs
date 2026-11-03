@@ -64,3 +64,8 @@ test('an issue this token cannot read is unknown: reported, never counted as ung
   const s = i1([ok, u]);
   assert.deepEqual([s.total, s.grounded, s.share, s.unknown], [1, 1, 1, 1]);
 });
+test('a bug with no Answers line grounds at the problem step; a non-bug does not (clerk#223)', () => {
+  const bug = (labels) => g({ issue: issue({ body: 'Found while: x', labels }), bugLabel: 'bug' });
+  assert.deepEqual([bug(['bug']).level, bug(['bug']).grounded, bug(['bug']).reasons.some((r) => /Answers/.test(r))], ['problem', true, false]);
+  assert.deepEqual([bug([]).level, bug([]).grounded], ['issue', false]);
+});
