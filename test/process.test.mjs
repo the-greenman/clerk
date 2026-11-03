@@ -235,7 +235,8 @@ describe('stage 11: assignment and claim', () => {
     assert.deepEqual(q.held[0].held, ['blocked']);
   });
   test('a clerk command claims an issue: refuses unless free, grounded and the actor holds the seat (clerk claim)', () => {
-    assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder', W }).ok, true);
+    const state = { pause: 'ok', budget: 10, merged: 0, open: 0 };
+    assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, state, affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder', W }).ok, true);
     assert.equal(checkClaim({ issue: { ...issue, state: 'open' }, groups, affirmed: new Set(['SP-901']), branches: ['10-x'], actor: 'agent:fx-builder', seat: 'builder', W }).ok, false);
   });
 });

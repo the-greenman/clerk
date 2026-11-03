@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// clerk claim <repo#n> --as <seat> [--repo <programme>] [--branch <name>] [--dry-run]: one claim path for humans and agents (clerk#21).
+// clerk claim <repo#n> --as <seat> [--repo <programme>] [--branch <name>] [--dry-run] [--over-budget --reason <why>]: one claim path for humans and agents (clerk#21).
 import { repoRoot } from './lib/repo-arg.mjs';
 import { loadSettings } from '../lib/adapters/settings.mjs';
 import { loadGroups, loadCentralGroup } from '../lib/adapters/groups.mjs';
@@ -8,12 +8,13 @@ import { checkClaim, claimComment, claimAssigns } from '../lib/practice/claim.mj
 import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 import { srsCli } from '../lib/adapters/cli.mjs';
 import { careFor } from './lib/care.mjs';
+import { groupStates } from '../lib/adapters/upkeep.mjs';
 import { careNote } from '../lib/practice/care-policy.mjs';
 
 const argv = process.argv.slice(2), arg = (k) => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : undefined);
 const fail = (m) => { console.error('claim: ' + m); process.exit(2); };
 const m = /^([\w.-]+)#(\d+)$/.exec(argv[0] ?? ''), seat = arg('--as');
-if (!m || !seat) fail('usage: clerk claim <repo#n> --as <seat> [--repo <programme>] [--branch <name>] [--dry-run]');
+if (!m || !seat) fail('usage: clerk claim <repo#n> --as <seat> [--repo <programme>] [--branch <name>] [--dry-run] [--over-budget --reason <why>]');
 let actor; try { actor = JSON.parse(process.env.SRS_ACTOR ?? '').id; } catch { /* below */ }
 if (!actor) fail('SRS_ACTOR must be a JSON actor, e.g. SRS_ACTOR=\'{"kind":"ai","id":"agent:<name>"}\' on the same command line');
 const repo = repoRoot(), s = loadSettings(repo), W = loadWorkflow(repo), n = Number(m[2]);
@@ -22,9 +23,12 @@ const { issue, prs, branches } = readIssue(s.githubOwner, m[1], n);
 // cannot act on stops the claim. Without one, the old rule holds: an unaffirmed or missing Answers: line refuses.
 let care = null;
 if (s.carePolicyContainer) { try { care = careFor(repo, srsCli(repo), s, m[1], n); } catch (e) { fail(e.message); } }
-const r = checkClaim({ issue, prs, branches, groups: loadGroups(repo), central: loadCentralGroup(repo), affirmed: affirmedProblemIds(repo), actor, seat, ownerActor: s.ownerActor, W, graded: Boolean(care) });
+const groups = loadGroups(repo), g0 = groups.find((g) => (issue.labels ?? []).some((l) => (l.name ?? l) === g.label));
+let state; if (g0) { try { state = groupStates(s, [g0], W.gates, undefined, repo)[g0.label]; } catch { /* unread: the check refuses */ } }
+const overBudget = argv.includes('--over-budget') ? { reason: arg('--reason') } : undefined;
+const r = checkClaim({ issue, prs, branches, groups, central: loadCentralGroup(repo), state, overBudget, affirmed: affirmedProblemIds(repo), actor, seat, ownerActor: s.ownerActor, W, graded: Boolean(care) });
 const branch = arg('--branch') ?? `${n}-<slug>`;
-const comment = r.group && [claimComment(actor, seat, r.group.title, branch), ...(care ? [careNote(care.result, r.cautions)] : [])].join('\n');
+const comment = r.group && [claimComment(actor, seat, r.group.title, branch, r.overridden), ...(care ? [careNote(care.result, r.cautions)] : [])].join('\n');
 const dry = argv.includes('--dry-run');
 for (const t of r.todo) console.log('todo: ' + t);
 if (!r.ok) { console.error(`claim refused for ${m[1]}#${n}:\n` + r.reasons.map((x) => '  - ' + x).join('\n')); process.exit(2); }

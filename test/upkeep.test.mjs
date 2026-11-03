@@ -208,3 +208,10 @@ test('every groupStates caller passes the programme path (clerk#167)', async () 
   assert.ok(calls.length >= 4, `found the callers (${calls.length})`);
   for (const c of calls) assert.match(c, /undefined, [\w.]*repo\)/, `passes the programme path: ${c}`);
 });
+
+test('roomOf: budget - merged - open, 0 when a count is unknown (clerk#147)', async () => {
+  const { roomOf } = await import('../lib/practice/upkeep.mjs');
+  assert.equal(roomOf({ budget: 10, merged: 6, open: 2 }), 2);
+  assert.equal(roomOf({ budget: 10, merged: 'unknown', open: 2 }), 0);
+  assert.equal(roomOf(undefined), 0);
+});

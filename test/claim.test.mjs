@@ -9,7 +9,7 @@ import { workflowFrom } from '../lib/practice/workflow.mjs';
 const W = workflowFrom(JSON.parse(readFileSync(new URL('./workflow.fixture.json', import.meta.url), 'utf8')));
 
 const issue = { repo: 'fixture', number: 10, state: 'open', labels: [{ name: 'wg:fixture' }], assignees: [], body: 'Answers: SP-901' };
-const base = { issue, groups: [tprGroup, fxGroup], affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder', ownerActor: 'human:ada', W };
+const base = { issue, groups: [tprGroup, fxGroup], affirmed: new Set(['SP-901']), actor: 'agent:fx-builder', seat: 'builder', ownerActor: 'human:ada', W, state: { pause: 'ok', budget: 10, merged: 3, open: 2 } };
 const why = (o) => checkClaim({ ...base, ...o }).reasons.join('|');
 
 test('a member in the right seat on a grounded, free issue may claim', () => {
@@ -85,4 +85,25 @@ test('a PR refers to an issue by "#n" or "<repo>#n", never by another repo\'s nu
   assert.equal(refersTo('clerk', 25, pr('see srs-lab#25 and srs-lab/x#25')), false);
   for (const b of ['Closes #25', 'clerk#25.', 'the-greenman/clerk#25', '(#25)']) assert.equal(refersTo('clerk', 25, pr(b)), true, b);
   assert.equal(refersTo('clerk', 25, pr('#250')), false);
+});
+
+test('a group lane is refused at room 0 and when paused (clerk#147)', () => {
+  assert.match(why({ state: { pause: 'ok', budget: 10, merged: 6, open: 4 } }), /no room \(6 merged \+ 4 open of 10\).*ask the owner/);
+  assert.match(why({ state: { pause: 'ok', budget: 10, merged: 'unknown', open: 1 } }), /no room/);
+  assert.match(why({ state: { pause: 'paused: 2 reports unacknowledged', budget: 10, merged: 0, open: 0 } }), /is paused: 2 reports/);
+  assert.match(why({ state: undefined }), /was not read/);
+});
+test('the owner overrides the room, recorded in the claim comment; nobody overrides a pause (clerk#147)', () => {
+  const full = { pause: 'ok', budget: 10, merged: 6, open: 4 }, over = { reason: 'delivery PRs are owner-merged' };
+  const r = checkClaim({ ...base, actor: 'human:ada', state: full, overBudget: over });
+  assert.deepEqual([r.ok, r.overridden], [true, { room: 0, reason: over.reason }]);
+  assert.match(claimComment('human:ada', 'builder', 'WG Fixture', 'b', r.overridden), /Over budget \(room 0\), owner override: delivery PRs/);
+  assert.match(why({ state: full, overBudget: over }), /no room.*the owner's/);
+  assert.match(why({ actor: 'human:ada', state: full, overBudget: {} }), /no room/);
+  assert.match(why({ actor: 'human:ada', state: { ...full, pause: 'paused: x' }, overBudget: over }), /is paused/);
+});
+test('a bug draws on its own budget: full room does not stop it, a pause does (clerk#147)', () => {
+  const bug = { ...issue, labels: [{ name: 'wg:fixture' }, { name: W.bug }] }, full = { pause: 'ok', budget: 10, merged: 6, open: 4 };
+  assert.equal(checkClaim({ ...base, issue: bug, state: full }).ok, true);
+  assert.match(why({ issue: bug, state: { ...full, pause: 'paused: x' } }), /is paused/);
 });
