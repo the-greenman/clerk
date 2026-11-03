@@ -113,3 +113,11 @@ test('an epic or sequence, or an assigned item, is never labelled for a lane (cl
   assert.deepEqual([lane({ subIssues: undefined }).ok, lane({ subIssues: undefined }).auto], [false, false], 'unread sub-issues never route');
   assert.equal(lane({ subIssues: 0 }).fix, 'label it lane:unattended');
 });
+
+test('a bug with no Answers line joins the problem dot; a non-bug does not (clerk#223)', () => {
+  const noAnswers = (bug) => facts({ answers: { problems: [], none: undefined, stated: bug, bug }, problems: [] });
+  const bugDots = dotsFor({ item: item({ labels: ['bug', 'wg:agent-editor'] }), facts: noAnswers(true), epics: EPICS, groups: GROUPS, wf: WF });
+  assert.equal(dot(bugDots, 'problem')[0].ok, true);
+  const plain = dotsFor({ item: item(), facts: noAnswers(false), epics: EPICS, groups: GROUPS, wf: WF });
+  assert.equal(dot(plain, 'problem')[0].ok, false);
+});

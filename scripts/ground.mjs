@@ -6,6 +6,7 @@ import { repoRoot } from "./lib/repo-arg.mjs";
 import { srsCli } from "../lib/adapters/cli.mjs";
 import { loadSettings } from "../lib/adapters/settings.mjs";
 import { loadGroups } from "../lib/adapters/groups.mjs";
+import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { fetchPR, mergedSince, loadProgramme } from "../lib/adapters/ground.mjs";
 import { groundPR, problemsFrom, i1 } from "../lib/practice/grounding-check.mjs";
 
@@ -19,9 +20,9 @@ try {
   let roadmap; // an inactive period must not stop the check: epics are then read from the records
   try { roadmap = derive(records, relations, new Date().toISOString().slice(0, 10), affirmed, outlines); }
   catch { roadmap = { epics: records.filter((r) => r.record.typeName === "epic").map((r) => ({ refs: r.record.fieldValues.issue_ref })) }; }
-  const problems = problemsFrom(records, relations, affirmed), groups = loadGroups(repo, cli);
+  const problems = problemsFrom(records, relations, affirmed), groups = loadGroups(repo, cli), bugLabel = loadWorkflow(repo, cli).bug;
   const refs = one ? [one] : mergedSince(st.githubOwner, st.repos, since, arg("--until"));
-  const rows = refs.map((ref) => { const f = fetchPR(st.githubOwner, ref); return { ref, title: f.pr.title, ...groundPR({ pr: f.pr, issue: f.issue, problems, roadmap, groups }) }; });
+  const rows = refs.map((ref) => { const f = fetchPR(st.githubOwner, ref); return { ref, title: f.pr.title, ...groundPR({ pr: f.pr, issue: f.issue, problems, roadmap, groups, bugLabel }) }; });
   const stats = i1(rows);
   if (argv.includes("--json")) console.log(JSON.stringify({ i1: stats, prs: rows }, null, 2));
   else {

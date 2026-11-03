@@ -86,3 +86,14 @@ test('a PR refers to an issue by "#n" or "<repo>#n", never by another repo\'s nu
   for (const b of ['Closes #25', 'clerk#25.', 'the-greenman/clerk#25', '(#25)']) assert.equal(refersTo('clerk', 25, pr(b)), true, b);
   assert.equal(refersTo('clerk', 25, pr('#250')), false);
 });
+
+test('a bug needs no problem: no Answers line is no caution, a non-bug still gets one (clerk#223)', () => {
+  const bug = { ...issue, body: 'Found while: x', labels: [{ name: 'wg:fixture' }, { name: W.bug }] };
+  const r = checkClaim({ ...base, issue: bug, graded: true });
+  assert.deepEqual([r.ok, r.cautions], [true, []]);
+  assert.equal(checkClaim({ ...base, issue: bug }).ok, true, 'ungraded: not refused either');
+  assert.match(checkClaim({ ...base, issue: { ...bug, labels: [{ name: 'wg:fixture' }] }, graded: true }).cautions.join('|'), /no "Answers/);
+  assert.match(why({ issue: { ...issue, body: 'x' } }), /no "Answers/);
+  assert.deepEqual(answersOf('x', true).stated, true);
+  assert.deepEqual(answersOf('x').stated, false);
+});

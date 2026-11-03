@@ -16,6 +16,7 @@
 // plan() is pure (rows in, actions out); the GitHub I/O is the thin REST layer below (lib/adapters/github.mjs).
 import { fileURLToPath } from "node:url";
 import { loadSettings } from "../lib/adapters/settings.mjs";
+import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { answersOf } from "../lib/practice/grounding.mjs";
 import { prereqRefs, REF_RE as LANDED_REF_RE } from "../lib/practice/refs.mjs";
 import { gh } from "../lib/adapters/cli.mjs";
@@ -58,7 +59,7 @@ export function rehomed(child) {
 // issue: {repo, number, title, body, state, stateReason, createdAt, closedAt, labels:[name], comments:[body],
 //         closingPrs:[{merged}], landedPrs:[{repo, number, merged}] (from landedRefs), openChildren:[{number, comments:[body]}],
 //         blockedBy:[ref] (blocked-by edges, read only when the body names a prerequisite)}
-export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE } = {}) {
+export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE, bugLabel = "bug" } = {}) {
   const since = Math.max(Date.parse(cutoff), now - days * 864e5);
   const out = [];
   for (const i of issues) {
@@ -75,7 +76,7 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
         out.push({ rule: "reopen-no-pr", ref, repo: i.repo, number: i.number, reopen: true,
           comment: `${M.noPr}\nReopened by steward-check: closed as completed within ${days} days but no merged pull request closes it, so the fix may only exist on a branch. Link the merged PR, or add the \`no-code\` label if no code was needed, then close it again. Re-closing after this comment is respected.` });
     }
-    if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !answersOf(i.body || "").stated && !(i.comments || []).some((c) => answersOf(c).stated) && !hasMarker(i, M.answers))
+    if (i.state === "OPEN" && !i.bot && i.createdAt && Date.parse(i.createdAt) >= since && !answersOf(i.body || "", i.labels.includes(bugLabel)).stated && !(i.comments || []).some((c) => answersOf(c).stated) && !hasMarker(i, M.answers))
       out.push({ rule: "answers", ref, repo: i.repo, number: i.number, reopen: false,
         comment: `${M.answers}\nsteward-check: this issue has no \`Answers:\` line. State \`Answers: SP-nn\` or \`No affirmed problem yet: <one-line problem>\` in the description (see srs-programme CLAUDE.md, "Filing issues").` });
     if (i.state === "OPEN" && !i.bot && i.blockedBy !== null && i.createdAt && Date.parse(i.createdAt) >= since && !hasMarker(i, M.prereq)) {
@@ -140,11 +141,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (!(days > 0)) { console.error("--days needs a positive number"); process.exit(2); }
   let settings; try { settings = loadSettings(repoRoot()); } catch (e) { console.error("steward: " + e.message); process.exit(2); }
   const OWNER = settings.githubOwner;
+  let bugLabel; try { bugLabel = loadWorkflow(repoRoot()).bug; } catch (e) { console.error("steward: " + e.message); process.exit(2); }
   let failed = 0, n = 0;
   for (const repo of settings.repos) {
     let issues;
     try { issues = fetchIssues(repo, days, cutoff, OWNER); } catch (e) { console.error(`${repo}: ${e.message}`); failed++; continue; }
-    for (const a of plan(issues, { days, since: cutoff })) {
+    for (const a of plan(issues, { days, since: cutoff, bugLabel })) {
       n++;
       console.log(`${fix ? "ACT " : "WOULD"} ${a.rule.padEnd(12)} ${a.ref}${a.reopen ? " (reopen)" : ""}`);
       if (fix) try { apply(a, OWNER); } catch (e) { console.error(`${a.ref}: ${e.message}`); failed++; }

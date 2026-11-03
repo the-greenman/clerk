@@ -32,7 +32,7 @@ try {
   try { roadmap = derive(records, relations, new Date().toISOString().slice(0, 10), affirmed, outlines); }
   catch { roadmap = { epics: records.filter((r) => r.record.typeName === "epic").map((r) => ({ refs: r.record.fieldValues.issue_ref })) }; }
   const problems = problemsFrom(records, relations, affirmed);
-  const rows = mergedSince(st.githubOwner, st.repos, since, until).map((ref) => { const f = fetchPR(st.githubOwner, ref); return groundPR({ pr: f.pr, issue: f.issue, problems, roadmap, groups }); });
+  const rows = mergedSince(st.githubOwner, st.repos, since, until).map((ref) => { const f = fetchPR(st.githubOwner, ref); return groundPR({ pr: f.pr, issue: f.issue, problems, roadmap, groups, bugLabel: loadWorkflow(repo, cli).bug }); });
   const result = i1Result({ stats: i1(rows), since, until, cycle });
   const indicator = records.find((r) => r.record.typeName === "indicator" && r.record.fieldValues.indicator_id === "I1");
   const existing = records.find((r) => r.record.typeName === "measurement-result" && r.record.fieldValues.result_id === result.result_id);
