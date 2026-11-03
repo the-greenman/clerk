@@ -171,3 +171,18 @@ test('the owner\'s comment text and edits are kept as words, so a mid-run failur
   const w = pendingWords(ch);
   assert.deepEqual(w.map((x) => [x.kind, x.text]), [['comment', 'I disagree\nsecond line'], ['edit', 'new resolution'], ['edit', 'because']]);
 });
+
+test('an escalation can be set aside: the pool resolves it, the plan carries sets-aside, and it needs quorum (clerk#132)', () => {
+  const rec = (id, by) => ({ instanceId: id, record: { lifecycleState: 'proposed', createdBy: { id: by }, fieldValues: { title: id } } });
+  const records = [rec('local111', 'human:o'), rec('escal222', 'agent:tpr-steward')];
+  const log = (...ids) => ({ memberInstanceIds: ids.map((instanceId) => ({ instanceId })) });
+  const own = A.ratifyItems(records, log('local111'));
+  const pool = [...own, ...A.escalationItems(records, log('escal222'), log('local111'), ['agent:tpr-steward'])];
+  assert.throws(() => A.pickOne(own, 'escal', 'proposed decision'), /no single proposed decision matches "escal"/);
+  const e = A.pickOne(pool, 'escal');
+  assert.equal(e.instanceId, 'escal222');
+  assert.throws(() => A.pickOne(pool, 'zzz'), /no single decision on the agenda/);
+  const choices = []; take(choices, { instanceId: e.instanceId, title: 'escal222' }, { action: 'setaside' });
+  assert.match(summarise(choices, 'S'), /Set aside: escal222/);
+  assert.throws(() => assertQuorum(choices, { met: false, needs: 'owner' }), /cannot ratify or set aside/);
+});
