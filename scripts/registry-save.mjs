@@ -7,7 +7,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { savePass } from '../lib/adapters/registry-save.mjs';
-import { createPR, enableAutoMerge, list, mergePR } from '../lib/adapters/github.mjs';
+import { createPR, enableAutoMerge, get, list, mergePR } from '../lib/adapters/github.mjs';
 import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 
 // ponytail: the one code host the clerk knows. Another host is another forge; the save pass doesn't change.
@@ -23,10 +23,12 @@ const forge = {
     return pr ? { url: pr.html_url, number: pr.number } : null;
   },
   create: ({ remote, base, head, title, body, label }) => createPR({ slug: slugOf(remote), base, head, title, body, labels: label ? [label] : [] }),
-  merge({ remote, pr }) {
+  merge({ remote, base, pr }) {
     const slug = slugOf(remote);
-    // A repository with no required checks refuses auto-merge: there is nothing to wait for, so it merges directly.
-    try { enableAutoMerge(slug, pr.number); } catch { mergePR(slug, pr.number); }
+    // Merges directly only where the branch requires nothing. On a protected branch any failure to arm auto-merge is a hold:
+    // falling back to a merge there could use an admin's rights to skip the checks.
+    if (get(`repos/${slug}/branches/${encodeURIComponent(base)}`).protected) enableAutoMerge(slug, pr.number);
+    else mergePR(slug, pr.number);
   },
 };
 

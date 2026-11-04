@@ -1,8 +1,8 @@
 // The save pass against real git and a local bare remote, with a fake forge and srs, and no programme anywhere.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, utimesSync, writeFileSync, existsSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { saveEntry, savePass, changedPaths } from '../lib/adapters/registry-save.mjs';
@@ -34,10 +34,10 @@ function write(clone, file = 'new.json', body = '2\n') { writeFileSync(join(clon
 // Real git; srs and the forge answered here. prs is what the forge has open.
 function runner({ validate = { ok: true, payload: { summary: { errors: 0 } } }, prs = [] } = {}) {
   const calls = [];
-  const run = (cmd, args, { cwd } = {}) => {
-    if (cmd === 'git') return Promise.resolve(execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
+  const run = async (cmd, args, { cwd } = {}) => {
+    if (cmd === 'git') return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     calls.push(['srs', ...args]);
-    return Promise.resolve(JSON.stringify(validate));
+    return JSON.stringify(validate);
   };
   const forge = {
     findOpen: (a) => { calls.push(['findOpen', a]); return prs[0] ?? null; },
@@ -52,6 +52,7 @@ const named = (r, name) => r.calls.filter((c) => c[0] === name);
 test('changedPaths reads porcelain -z, spaces included', () => {
   assert.deepEqual(changedPaths('?? a b.json\0 M c.json\0'), ['a b.json', 'c.json']);
   assert.deepEqual(changedPaths(''), []);
+  assert.deepEqual(changedPaths('R  new.json\0old.json\0?? x.json\0'), ['new.json', 'x.json']);
 });
 
 test('a clean pass commits, pushes the machine branch and opens a self-merging PR', async () => {
@@ -175,4 +176,48 @@ test('savePass reads the registry and reports a non-local locator as held', asyn
   assert.deepEqual(rows.map((x) => x.id), ['r1', 'r2']);
   assert.equal(rows[0].held, null);
   assert.match(rows[1].held, /local/);
+});
+
+test('a deletion that just happened counts as still arriving', async () => {
+  const f = fixture(), r = runner();
+  mkdirSync(join(f.clone, 'd'));
+  writeFileSync(join(f.clone, 'd', 'x.json'), '1\n');
+  git(f.clone, 'add', '-A'); git(f.clone, 'commit', '-q', '-m', 'x');
+  rmSync(join(f.clone, 'd', 'x.json'));
+  mkdirSync(join(f.clone, 'd'), { recursive: true });
+  writeFileSync(join(f.clone, 'd', 'keep'), '');
+  assert.match((await saveEntry(f.entry, opts(r))).held, /arriving/);
+});
+
+test('a path that is not a git repository holds, and nothing is created there', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'clerk-nogit-')), r = runner();
+  const res = await saveEntry({ kind: 'repository', id: 'r', locator: { mode: 'local', path: dir } }, opts(r));
+  assert.match(res.held, /not a git repository/);
+  assert.ok(!existsSync(join(dir, '.git')));
+});
+
+test('a branch that moved since the fetch is not overwritten', async () => {
+  const f = fixture(), r = runner();
+  write(f.clone);
+  // the lease fails: the tracking ref says this, the remote holds something else
+  const seenByRemote = git(f.seed, 'rev-parse', 'HEAD');
+  git(f.seed, 'push', '-q', 'origin', `${seenByRemote}:refs/heads/writes/box`);
+  const run = (cmd, args, o) => {
+    if (cmd === 'git' && args[0] === 'push') {
+      writeFileSync(join(f.seed, 'late.json'), '9\n');
+      git(f.seed, 'add', '-A'); git(f.seed, 'commit', '-q', '-m', 'late'); git(f.seed, 'push', '-q', '--force', 'origin', 'HEAD:refs/heads/writes/box');
+    }
+    return r.run(cmd, args, o);
+  };
+  const res = await saveEntry(f.entry, { ...opts(r), run });
+  assert.match(res.held, /push/);
+  assert.match(git(f.bare, 'log', '-1', '--format=%s', 'writes/box'), /late/);
+});
+
+test('clerk save runs from anywhere with no programme', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'clerk-noprog-')), registry = join(dir, 'registry.json');
+  writeFileSync(registry, JSON.stringify({ registryRevision: 1, entries: [] }));
+  const out = spawnSync(process.execPath, [new URL('../bin/clerk.mjs', import.meta.url).pathname, 'save', '--registry', registry, '--json'], { cwd: dir, encoding: 'utf8' });
+  assert.equal(out.status, 0, out.stderr);
+  assert.deepEqual(JSON.parse(out.stdout), []);
 });

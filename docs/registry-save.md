@@ -38,10 +38,12 @@ Each entry is handled on its own. A failure in one never stops the others.
    3. Commit everything, signed as usual. A signing failure holds the pass; signing is never bypassed.
 3. Fetch and rebase `served` onto `origin/<default>`. On conflict, abort the rebase and hold.
 4. If nothing is ahead of `origin/<default>`, stop: the earlier writes have merged and `served` is back on main.
-5. Force-push to `writes/<host>`. The branch belongs to this machine and each pass rebuilds it, which also keeps its pull request up to date under strict branch protection.
-6. Open a pull request if none is open, then ask it to merge itself when checks pass. A repository with no required checks merges directly.
+5. Push to `writes/<host>`, replacing it unless it moved since the fetch. The branch belongs to this machine and each pass rebuilds it, which also keeps its pull request up to date under strict branch protection.
+6. Open a pull request if none is open, then ask it to merge itself when checks pass. A branch with no protection merges directly. On a protected branch, a failure to arm auto-merge holds, and never falls back to a direct merge.
 
 A hold loses nothing: the write stays in the clone and is still served. The next pass tries again.
+
+**Pull requests must land as merge commits.** A squash or rebase merge of several commits leaves `served` replaying the old ones, so it conflicts and every later pass holds. The pass always asks for a merge commit, so this only happens if someone merges by hand another way.
 
 ## Status
 
@@ -64,7 +66,7 @@ The command exits 0 whenever the pass ran, because a hold is data. It exits 2 on
 
 ## What it doesn't do
 
-- **Lost updates.** Two sessions changing the same record can still lose a write, because each stdio session runs its own server process. That needs a per-repository lock file the server and the pass share (SP-144); it would replace the 2-minute wait.
+- **Lost updates and half-saved writes.** Two sessions changing the same record can still lose a write, because each stdio session runs its own server process. A write landing between validation and commit goes in unvalidated, for the repository's own checks to catch. Both need a per-repository lock file the server and the pass share (SP-144); it would replace the 2-minute wait.
 - **Feature-branch writes.** A session on a feature branch writes with the CLI and `--repo` in its own worktree.
 - **Other hosts.** The clerk's command supplies only GitHub, through its signed adapter (`lib/adapters/github.mjs`). The pass itself doesn't change for another host.
 - **Running on a schedule.** It's a command. It joins `clerk serve` when it meets ruling `a1b06725`.
