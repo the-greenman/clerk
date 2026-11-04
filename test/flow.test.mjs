@@ -121,3 +121,15 @@ test('a bug with no Answers line joins the problem dot; a non-bug does not (cler
   const plain = dotsFor({ item: item(), facts: noAnswers(false), epics: EPICS, groups: GROUPS, wf: WF });
   assert.equal(dot(plain, 'problem')[0].ok, false);
 });
+
+test('bug track: a bug with no epic passes the epic dot; a non-bug with no epic still fails (clerk#255)', () => {
+  const bugAnswers = { problems: [], none: undefined, stated: false, bug: true };
+  let d = dotsFor({ item: item({ labels: ['bug', 'lane:unattended'] }), facts: facts({ answers: bugAnswers, problems: [], epic: null }), epics: EPICS, groups: GROUPS, wf: WF });
+  assert.equal(dot(d, 'epic')[0].ok, true);
+  assert.match(dot(d, 'epic')[0].note, /bug track/);
+  d = dotsFor({ item: item({ labels: ['lane:unattended'] }), facts: facts({ epic: null }), epics: EPICS, groups: GROUPS, wf: WF });
+  assert.equal(dot(d, 'epic')[0].ok, false);
+  // a bug that names a parent is still checked as before
+  d = dotsFor({ item: item({ body: 'Part of semanticops.com#29' }), facts: facts({ answers: bugAnswers, problems: [], epic: null }), epics: EPICS, groups: GROUPS, wf: WF });
+  assert.equal(dot(d, 'epic')[0].auto, true);
+});
