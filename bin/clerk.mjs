@@ -29,6 +29,7 @@ const TOOLS = {
   flow: ['flow.mjs', 'the dots an item needs before work can flow, and which an agent can join by rule: clerk flow --chain <repo#n> | --open <repo> [--json] (read-only)'],
   care: ['care.mjs', 'how confident the programme is in one work item and the care mode its Confidence and care policy gives it: clerk care <repo#n> [--json]'],
   'render-policy': ['render-policy.mjs', 'check a programme\'s Confidence and care policy and render it to <programme>/docs/confidence-and-care.md (--check: exit 1 on drift or a policy the clerk cannot act on)'],
+  save: ['registry-save.mjs', 'one pass over a registry: take writes to the main line through a self-merging PR, fast-forward read-only copies: clerk save [--registry F] [--label L | --repo <programme>] [--srs PATH] [--json]'],
   merge: ['merge.mjs', 'the owner merges one PR at the head they reviewed: clerk merge <repo#n> --sha <head> [--json] (as the owner only; refuses unless open, clean and at that head; exit 3)'],
   upkeep: ['upkeep.mjs', 'keep open PRs moving: merge or update-branch by gate label; group PRs on a quorum for their head commit (--digest, --apply)'],
   'group-state': ['group-state.mjs', "a working group's pause, cycle, merges and room: clerk group-state <wg:label> [--json]"],
@@ -62,7 +63,7 @@ if (argv[0] === 'help' || argv[0] === '--help') {
 }
 if (TOOLS[argv[0]] || argv[0] === 'desk') {
   // Every tool but wt works on a programme repo (an SRS repo, so it has .srs/). Say so plainly instead of failing deep inside.
-  if (argv[0] !== "wt" && argv[0] !== "pr-tree") {
+  if (argv[0] !== "wt" && argv[0] !== "pr-tree" && argv[0] !== "save") {
     const i = argv.indexOf("--repo");
     const repo = resolve(argv[0] === "board" ? process.env.CLERK_REPO || "." : i >= 0 ? argv[i + 1] : ".");
     if (!existsSync(resolve(repo, ".srs"))) {
