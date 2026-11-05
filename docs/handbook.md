@@ -1765,7 +1765,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - The reviewer posts the `<!-- wg-quorum -->` comment and adds `gate:auto-merge` (`routines/wg-reviewer.md`). It assents to a builder's decision and never ratifies it; the group's session at cycle close does (decision 70a05a5c).
-- `pr-upkeep` checks the quorum every 15 minutes and merges. A quorum approves the PR's change, not a commit (decision af1c9258): it holds on a later head whose own diff is unchanged, in a repository whose default branch requires status checks. A diff that changed, by a conflict resolution or any edit, needs a new review. Where checks are required, `pr-upkeep` also keeps group PRs up to date, and the reviewer does not review an update again. `clerk quorum <repo#n>` prints the verdict.
+- `pr-upkeep` checks the quorum every 15 minutes and merges. A quorum approves the PR's change, not a commit (decision af1c9258): it holds on a later head whose own diff is unchanged, in a repository whose default branch requires status checks. A diff that changed, by a conflict resolution or any edit, needs a new review. Where checks are required, `pr-upkeep` also keeps a group PR up to date while its quorum holds, and the reviewer does not review that update again. `clerk quorum <repo#n>` prints the verdict.
 - PRs outside any group follow their gate label: `gate:auto-merge` or `gate:owner-merge`.
 
 **Gap**:

@@ -4,7 +4,7 @@
 //   In the programme repo no gate label reads as auto, and native auto-merge is armed on auto PRs not yet CLEAN (clerk#208);
 //   in any other repo whose default branch requires checks, it is armed on gate:auto-merge PRs too (clerk#217).
 //   A group PR (its wg: label) merges only on a valid quorum for its head commit, or carried to it (own diff unchanged, required checks; af1c9258),
-//   within budget, while the group is not paused. Where checks are required, BEHIND -> update branch.
+//   within budget, while the group is not paused. Where checks are required and its quorum holds, BEHIND -> update branch.
 //   --digest posts one comment on the settings digest issue: conflicts, ungated PRs, group waits. Dry run unless --apply.
 //   node scripts/upkeep.mjs --repo <programme> [--apply] [--digest]      exit 0 ran clean, 1 a read or act failed, 2 usage
 import { parseArgs } from 'node:util';

@@ -35,7 +35,8 @@ test('clerk#89: a quorum on another commit, or with red gates, never merges', ()
 const F = (patch, more = {}) => ({ filename: 'a.mjs', status: 'modified', patch, ...more });
 const OWN = '@@ -10,3 +10,3 @@ function f\n ctx\n-old\n+new';
 test('clerk#235: sameChange reads the PR\'s own lines, not where the base has moved them', () => {
-  assert.equal(sameChange([F(OWN)], [F('@@ -90,3 +95,3 @@ function g\n other ctx\n-old\n+new')]), true, 'base merged in or a rebase: only offsets and context moved');
+  assert.equal(sameChange([F(OWN)], [F('@@ -90,3 +95,3 @@ function g\n ctx\n-old\n+new')]), true, 'base merged in or a rebase: only the hunk header moved');
+  assert.equal(sameChange([F(OWN)], [F('@@ -90,3 +95,3 @@ function g\n other ctx\n-old\n+new')]), false, 'the same lines applied at another site are another change');
   assert.equal(sameChange([F(OWN), F(OWN, { filename: 'b.mjs' })], [F(OWN, { filename: 'b.mjs' }), F(OWN)]), true, 'file order does not matter');
   assert.equal(sameChange([F(OWN)], [F('@@ -10,3 +10,3 @@\n ctx\n-old\n+resolved differently')]), false, 'a conflict resolution changed the diff');
   assert.equal(sameChange([F(OWN)], [F(OWN), F(OWN, { filename: 'b.mjs' })]), false, 'a file added');
@@ -76,7 +77,7 @@ test('clerk#235: the report says why, and whether this commit is already judged'
   assert.deepEqual([quorumReport([], HEAD).quorumSha, quorumReport([], HEAD).judgedHead], [null, false]);
 });
 
-test('clerk#235: a run keeps group PRs current where checks are required, and merges on a carried quorum', () => {
+test('clerk#235: a run keeps a group PR current while its quorum holds, where checks are required, and merges on a carried quorum', () => {
   const old = 'aaaaaaaa11111111', G = () => ({ 'wg:x': { budget: 9, merged: 0, pause: 'ok' } }), labels = ['wg:x', 'gate:auto-merge'];
   const pr = (more = {}) => ({ number: 1, title: 'pr 1', headSha: HEAD, comments: [q({ sha: old })], ...P(labels), ...more });
   const plan = (p, requiredChecks = true) => upkeepPlan([{ repo: 'r', defaultBranch: 'main', requiredChecks, prs: [p] }], G(), GATES);
@@ -90,6 +91,10 @@ test('clerk#235: a run keeps group PRs current where checks are required, and me
   assert.equal(merged.merged['wg:x'], 1, 'a carried merge spends budget');
   const updated = plan(pr({ carried: true, state: 'BEHIND' }));
   assert.deepEqual(updated.actions.map((a) => a.do), ['update-branch']);
+  assert.deepEqual(plan(pr({ comments: [q()], state: 'BEHIND' })).actions.map((a) => a.do), ['update-branch'], 'a quorum on the head is kept current');
+  for (const [what, more] of [['rejected', { comments: [q({ verdict: 'reject' })] }], ['not carried', { carried: false }], ['compare unreadable', { carried: null }], ['comments unreadable', { comments: null }], ['not yet reviewed', { labels: ['wg:x'] }]])
+    assert.deepEqual(plan(pr({ state: 'BEHIND', ...more })).actions, [], `${what}: the head stays put, the reviewer updates when it reviews`);
+  assert.deepEqual(upkeepPlan([{ repo: 'r', defaultBranch: 'main', requiredChecks: true, prs: [pr({ comments: [q()], state: 'BEHIND' })] }], { 'wg:x': { budget: 0, merged: 0, pause: 'ok' } }, GATES).actions.map((a) => a.do), ['update-branch'], 'over budget: still kept ready');
   assert.deepEqual(updated.waits['wg:x'], ['r#1 pr 1 (quorum ok, waiting for state BEHIND)']);
 
   for (const carried of [false, null]) {
