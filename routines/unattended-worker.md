@@ -43,7 +43,7 @@ Group: WG Third-party ready (semanticops.com#31), PRs and issues labelled `wg:th
 Each run, after the general queue:
 
 1. `node /tmp/clerk/bin/clerk.mjs group-state <the group's wg: label> --repo <programme checkout> --json`. A `pause` other than `ok`, or a non-zero exit, means build nothing here; reviews still run.
-2. REVIEW sweep: for each open `wg:third-party-ready` PR (not `gate:owner-merge`) in srs-rust, srs, srs-vscode, srs-web with no valid owner-account quorum comment newer than its head commit, follow `routines/wg-reviewer.md` as `agent:tpr-reviewer`.
+2. REVIEW sweep: for each open `wg:third-party-ready` PR (not `gate:owner-merge`) in srs-rust, srs, srs-vscode, srs-web where `clerk quorum` gives no `ok` verdict and no `judgedHead`, follow `routines/wg-reviewer.md` as `agent:tpr-reviewer`.
 3. BUILD sweep: if the budget allows (per `wg-builder.md`), build at most ONE `ready` + `wg:third-party-ready` issue by `routines/wg-builder.md`, as `agent:tpr-builder`. This counts toward the run's 3 issues.
 
 ## On a stop
