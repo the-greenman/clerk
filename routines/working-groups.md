@@ -90,8 +90,8 @@ flowchart TD
 flowchart TD
   T(["Group PR opened, updated, labelled or reopened"]) --> W{"Open, not draft,<br/>labelled wg:third-party-ready,<br/>not gate:owner-merge?"}
   W -->|no| Z0(["Exit"])
-  W -->|yes| ID{"Valid quorum comment<br/>newer than the head commit?"}
-  ID -->|yes| Z1(["Exit quietly<br/>(stops the reviewer's own push from looping)"])
+  W -->|yes| ID{"clerk quorum: holds on this head,<br/>or this commit already judged?"}
+  ID -->|yes| Z1(["Exit quietly<br/>(a branch update with the same diff needs no new review)"])
   ID -->|no| SB{"PR's Builder is the reviewer?"}
   SB -->|yes| Z2(["Exit: never review your own work"])
   SB -->|no| BH{"Branch behind base?"}
@@ -130,8 +130,8 @@ flowchart TD
   DA -->|no| W3(["Wait: same actor"])
   DA -->|yes| VA{"Verdict approve?"}
   VA -->|no| W4(["Wait: rejected"])
-  VA -->|yes| NW{"Gates green on the head commit?<br/>(gates=green@sha, sha = head)"}
-  NW -->|no| W5(["Wait: quorum is for another commit, or gates red"])
+  VA -->|yes| NW{"Gates green, and sha = head<br/>or carried to it?<br/>(same own diff, repo requires checks)"}
+  NW -->|no| W5(["Wait: quorum is for another change, or gates red"])
   NW -->|yes| PA{"Group paused?"}
   PA -->|yes| W6(["Wait: paused"])
   PA -->|no| BU{"Delegated merges this cycle < 10?"}
@@ -141,7 +141,7 @@ flowchart TD
   CL -->|yes| MG(["Merge, count 1 against the budget"])
 ```
 
-Group PRs are never branch-updated by upkeep: a new commit voids the quorum, so the reviewer updates and re-reviews instead. The merge names the reviewed commit, so a push between the check and the merge is refused by GitHub. Drafts and PRs whose base is not the default branch are never merged. If the budget count or the reports cannot be read, or the charter has no budget, the group is treated as over budget or paused (fail closed). The rules are `lib/practice/upkeep.mjs`.
+A quorum approves the PR's change, not a commit (decision af1c9258). It holds on a later head whose own diff (merge base to head) is the same file by file and line by line, ignoring hunk offsets, but only in a repository whose default branch requires status checks, so the head that merges has passed them. A diff that changed, or a comparison that cannot be read in full (a binary file, GitHub's 300-file limit), needs a new review. In those repositories upkeep updates a BEHIND group PR like any other, and the reviewer does not review it again; in any other repository upkeep never updates a group PR, and the reviewer updates and reviews. `clerk quorum <repo#n>` prints the verdict. The merge names the head it checked, so a push between the check and the merge is refused by GitHub. Drafts and PRs whose base is not the default branch are never merged. If the budget count or the reports cannot be read, or the charter has no budget, the group is treated as over budget or paused (fail closed). The rules are `lib/practice/upkeep.mjs`.
 
 ## 6. Cycle, report and pause
 

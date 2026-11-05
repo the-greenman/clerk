@@ -915,7 +915,7 @@ The elements that keep each step moving are listed on the step (Maintained by). 
 | A group merges nothing | builder or reviewer trigger missing or disabled | `clerk routines --check <dump>` |
 | A decision you were asked for never appears in a session | it exists only as PR text, or is in no decision log | `clerk desk` ("in no log") |
 | A group stops | two unreceived reports | `clerk desk`, then a session's Reports |
-| A working-group PR with an approving quorum never merges | strict up-to-date protection: every merge leaves it BEHIND, and a new commit voids the quorum (finding 7b1e4134; proposed decision af1c9258, clerk#235) | `clerk upkeep` digest, the group's waits |
+| A working-group PR with an approving quorum does not merge | its own diff changed after the review, or its repository requires no status checks, so the quorum does not carry (decision af1c9258) | `clerk quorum <repo#n>`; `clerk upkeep` digest, the group's waits |
 | Sibling PRs of one issue conflict | tasks of one sequence built in parallel, appending to one file (finding 9dfbda06) | `clerk pr-tree` (overlap) |
 | Two PRs make the same change | two issues for one fix (finding 2ea3eb56) | `clerk pr-tree`, a search of open PRs before building |
 | Every PR in an implementation repo fails the same test | a spec fixture landed before the implementation's runner could read it (finding 47205709) | the default branch's last CI run |
@@ -1256,7 +1256,7 @@ flowchart TD
   RP --> OS["Owner session: receives the report,<br/>ratifies or sets aside the escalation"]
 ```
 
-**Quorum and merge.** A group PR merges only when a builder and a *different* reviewer agree after the last commit, the gates are green, the cycle's budget is not spent and the group is not paused. The reviewer posts a `<!-- wg-quorum -->` comment; `pr-upkeep` checks it every 15 minutes and merges. A new commit voids the quorum.
+**Quorum and merge.** A group PR merges only when a builder and a *different* reviewer agree on the change, the gates are green, the cycle's budget is not spent and the group is not paused. The reviewer posts a `<!-- wg-quorum -->` comment; `pr-upkeep` checks it every 15 minutes and merges. A quorum approves the PR's change, not a commit (decision af1c9258): it holds on a later head whose own diff is unchanged, in a repository whose default branch requires status checks. A diff that changed, by a conflict resolution or any edit, needs a new review.
 
 **Pause.** If the owner leaves two cycle reports unacknowledged, the group pauses: no new builds and no group merges, though reviews and escalations continue. Silence slows the group down rather than letting it run unwatched.
 
@@ -1765,7 +1765,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 **Practice**:
 - The reviewer posts the `<!-- wg-quorum -->` comment and adds `gate:auto-merge` (`routines/wg-reviewer.md`). It assents to a builder's decision and never ratifies it; the group's session at cycle close does (decision 70a05a5c).
-- `pr-upkeep` checks the quorum every 15 minutes and merges.
+- `pr-upkeep` checks the quorum every 15 minutes and merges. A quorum approves the PR's change, not a commit (decision af1c9258): it holds on a later head whose own diff is unchanged, in a repository whose default branch requires status checks. A diff that changed, by a conflict resolution or any edit, needs a new review. Where checks are required, `pr-upkeep` also keeps group PRs up to date, and the reviewer does not review an update again. `clerk quorum <repo#n>` prints the verdict.
 - PRs outside any group follow their gate label: `gate:auto-merge` or `gate:owner-merge`.
 
 **Gap**:
