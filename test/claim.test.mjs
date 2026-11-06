@@ -83,8 +83,16 @@ test('graded: collisions, holds and seats still refuse', () => {
 test('a PR refers to an issue by "#n" or "<repo>#n", never by another repo\'s number (clerk#204 review)', () => {
   const pr = (body) => ({ repo: 'clerk', title: 't', body, head: { ref: 'x' } });
   assert.equal(refersTo('clerk', 25, pr('see srs-lab#25 and srs-lab/x#25')), false);
-  for (const b of ['Closes #25', 'clerk#25.', 'the-greenman/clerk#25', '(#25)']) assert.equal(refersTo('clerk', 25, pr(b)), true, b);
+  for (const b of ['Closes #25', 'Fixes clerk#25.', 'resolves the-greenman/clerk#25', 'Closes: #25']) assert.equal(refersTo('clerk', 25, pr(b)), true, b);
   assert.equal(refersTo('clerk', 25, pr('#250')), false);
+  assert.equal(refersTo('clerk', 25, pr('Closes #250')), false);
+});
+
+test('a PR that only mentions an issue does not take it on (clerk#275)', () => {
+  const pr = (body, title = 't') => ({ repo: 'clerk', title, body, head: { ref: 'x' } });
+  for (const b of ['the owner\'s answer is to add types by install (clerk#25)', 'Refs #25', 'see (#25)', 'Follow-up: #25 later']) assert.equal(refersTo('clerk', 25, pr(b)), false, b);
+  assert.equal(refersTo('clerk', 25, pr('x', 'Docs for #25: thing')), false);
+  assert.equal(refersTo('clerk', 25, { repo: 'clerk', title: 't', body: 'x', head: { ref: '25-thing' } }), true);
 });
 
 test('a bug needs no problem: no Answers line is no caution, a non-bug still gets one (clerk#223)', () => {
