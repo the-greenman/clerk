@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { domainField, canAffirmTension, canSetAxis, canUnsetAxis } from '../lib/practice/domain-field.mjs';
+import { domainField, canAffirmTension, canSetAxis, canUnsetAxis, carryIncomingContext, lostDomains } from '../lib/practice/domain-field.mjs';
 
 const M = 'com.semanticops.method', A = 'com.mudemocracy.argument';
 const rec = (id, typeName, title, ns = M, extra = {}) => ({ instanceId: id, record: { typeName, typeNamespace: ns, fieldValues: { title, ...extra } } });
@@ -82,6 +82,27 @@ test('a tension affirmed earlier forks only its poles, and re-points its contain
   assert.equal(r.repoint, true);
   assert.equal(r.tensionId, 'evo');
   assert.equal(canAffirmTension(field(), 'evo').repoint, false);
+});
+
+test('a forked tension takes its holders with it, from their affirmed copies when they have them (clerk#271)', () => {
+  const rs = [...records, rec('evo-fork', 'tension', 'Identity')];
+  const ls = [...relations, rel('contains', 'sr', 'evo'), rel('contains', 'sr-fork', 'evo'), rel('derived-from', 'evo-fork', 'evo')];
+  const got = carryIncomingContext({ records: rs, relations: ls, affirmed: new Set(['sr-fork', 'evo-fork']) }, 'evo', 'evo-fork');
+  assert.deepEqual(got.map((r) => [r.relationType, r.sourceInstanceId, r.targetInstanceId]).sort(), [
+    [`${A}/holds-tension`, 'std', 'evo-fork'],
+    ['contains', 'sr-fork', 'evo-fork'], // both copies of the domain contain the suggestion: one edge, from the affirmed copy
+  ]);
+  // its poles stay out of it, and a second run adds nothing
+  const again = [...ls, ...got.map((r) => rel(r.relationType, r.sourceInstanceId, r.targetInstanceId))];
+  assert.deepEqual(carryIncomingContext({ records: rs, relations: again, affirmed: new Set(['sr-fork', 'evo-fork']) }, 'evo', 'evo-fork'), []);
+});
+
+test('an affirmed tension in no domain and held by nothing is reported; a domain or a holder clears it (clerk#271)', () => {
+  const rs = [rec('dom', 'domain', 'D'), rec('ten', 'tension', 'T')], lost = (ls) => lostDomains(rs, ls, new Set(['ten'])).length;
+  assert.equal(lost([]), 1);
+  assert.equal(lost([rel('contains', 'dom', 'ten')]), 0);
+  assert.equal(lost([rel(`${A}/holds-tension`, 'b', 'ten')]), 0);
+  assert.equal(lostDomains(rs, [], new Set()).length, 0);
 });
 
 // axes (decision cdd272a3): Semantic records holds Identity as line 2 with Evolution yang; "Narrow" refines it and flips the pole
