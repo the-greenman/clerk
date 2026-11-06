@@ -5,10 +5,10 @@
 import { execFileSync } from "child_process";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
-
 import { repoRoot } from "./lib/repo-arg.mjs";
 import { srsCli } from "../lib/adapters/cli.mjs";
 import { canonOf } from "../lib/practice/canon.mjs";
+import { lostDomains } from "../lib/practice/domain-field.mjs";
 const ROOT = repoRoot();
 const MNS = "com.semanticops.method";
 const ANS = "com.mudemocracy.argument";
@@ -124,7 +124,7 @@ export function checkGates(records, relations, affirmed, setAside, today = new D
       for (const x of xs) { if (seen.has(x[k])) errors.push(`${label(x.a)} repeats ${k === "line" ? `line ${x.line}` : "a tension"} among its domain's affirmed axes`); seen.add(x[k]); }
     }
   }
-  return { errors, warnings };
+  return { errors, warnings: [...warnings, ...lostDomains(records, relations, affirmed)] };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
