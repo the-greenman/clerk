@@ -69,3 +69,12 @@ test('a bug with no Answers line grounds at the problem step; a non-bug does not
   assert.deepEqual([bug(['bug']).level, bug(['bug']).grounded, bug(['bug']).reasons.some((r) => /Answers/.test(r))], ['problem', true, false]);
   assert.deepEqual([bug([]).level, bug([]).grounded], ['issue', false]);
 });
+
+import { mapPool } from '../lib/practice/pool.mjs';
+test('mapPool keeps item order and bounds concurrency (clerk#245)', async () => {
+  let live = 0, peak = 0;
+  const out = await mapPool([30, 5, 20, 1, 10, 2], 3, async (ms, i) => { live++; peak = Math.max(peak, live); await new Promise((r) => setTimeout(r, ms)); live--; return i; });
+  assert.deepEqual(out, [0, 1, 2, 3, 4, 5]);
+  assert.ok(peak > 1 && peak <= 3, `peak ${peak}`);
+  assert.deepEqual(await mapPool([], 4, async () => 1), []);
+});
