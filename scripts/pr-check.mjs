@@ -25,7 +25,8 @@ try {
   const d = parseDecisions(pr.body ?? '');
   // ids an option's `serves` may name (DC-15): problem codes and the 8-hex ids of problems and remedies
   let known = null;
-  try { known = new Set(['com.semanticops.method/problem', 'com.semanticops.method/remedy'].flatMap((t) => (srs(cli, programme, ['record', 'list', '--type', t]).records ?? []).flatMap((r) => [r.record.instanceId.slice(0, 8), r.record.fieldValues?.problem_id].filter(Boolean)))); } catch { /* no programme records: skip the check */ }
+  try { known = new Set(['com.semanticops.method/problem', 'com.semanticops.method/remedy'].flatMap((t) => (srs(cli, programme, ['record', 'list', '--type', t]).records ?? []).flatMap((r) => [r.record.instanceId.slice(0, 8), r.record.fieldValues?.problem_id].filter(Boolean))));
+    if (!known.size) known = null; } catch (e) { console.error(`clerk pr-check: serves ids not checked: ${e.message.split('\n')[0]}`); }
   const findings = checkDecisions(d, { known, body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff, labels: pr.labels ?? [], gates, groupLabels, draft: Boolean(pr.draft), programme: programmeRepo(programme).name === repo });
   if (argv.includes('--json')) console.log(JSON.stringify({ ref, by: d.by, answers: d.answers, made: d.made, asks: d.asks, findings }, null, 2));
   else for (const f of findings) console.log(`${f.level.padEnd(5)} ${f.text}`);

@@ -190,6 +190,20 @@ test('an option names its paths and what it serves, and the ids resolve (DC-15)'
   assert.deepEqual(checklist({ ...full, options: [option('Composition only', { serves: ['SP-999'] }), option('Do nothing')] }), [], 'no known ids: not checked');
 });
 
+test('an empty serves is an answer, an absent one a gap; ids match in any case', () => {
+  assert.deepEqual(checklist({ ...full, options: [option('Composition only', { serves: ['sp-05', '7C02A070-1234'] }), option('Do nothing', { serves: [] })] }, { known }), []);
+  const { serves, ...noServes } = option('Do nothing');
+  assert.match(checklist({ ...full, options: [option('Composition only'), noServes] }, { known })[0].text, /"Do nothing" lacks serves/);
+});
+
+test('srs#998 ask D1: the block as first filed misses each article; the rewrite misses only DC-15, which came after it', async () => {
+  const { readFileSync } = await import('node:fs');
+  const fixture = (f) => JSON.parse(readFileSync(new URL(`./fixtures/pr-decisions/${f}`, import.meta.url)));
+  const dcs = (a) => [...new Set(checklist(a, { known }).map((x) => x.text.match(/DC-\d+/)[0]))];
+  assert.deepEqual(dcs(fixture('srs-998-d1-first-filed.json')), ['DC-01', 'DC-06', 'DC-12', 'DC-13', 'DC-14', 'DC-15']);
+  assert.deepEqual(dcs(fixture('srs-998-d1-rewritten.json')), ['DC-15']);
+});
+
 test('a technical ask names its technical context (DC-15)', () => {
   assert.match(checklist({ ...full, form: 'technical' }, { known })[0].text, /technical_context lacks component, constraint, evidence, weigh/);
   assert.deepEqual(checklist({ ...full, form: 'technical', technical_context: { component: 'c', constraint: 'k', evidence: 'e', weigh: 'w' } }, { known }), []);

@@ -68,7 +68,7 @@ Well formed is not enough: the owner must be able to judge the ask without openi
 | `form: "technical"` + `technical_context` | Only when real technical judgement is needed: `{ component, constraint, evidence, weigh }`. The options still say what moves strategically, or that nothing does. | DC-15 |
 | `small: true` | A small decision gets a line: it needs only `statement` and `why`. | DC-11 |
 
-Options carrying these fields are written as objects, so a "Do nothing" option is `{ "action": "Do nothing", "leads_to": …, "opens": …, "shuts": …, "serves": […] }`. Worked example: srs#1009's ask D1, shortened. It carried every field except the per-option ones, which came afterwards with DC-15; they are filled in here to show the shape:
+Options carrying these fields are written as objects (a string option `"Do X: leads to Y"` cannot carry them, so it always warns DC-15), so a "Do nothing" option is `{ "action": "Do nothing", "leads_to": …, "opens": …, "shuts": …, "serves": [] }`. An empty `serves` says the option serves nothing; leaving it out is the gap. Worked example: srs#1009's ask D1, shortened. It carried every field except the per-option ones, which came afterwards with DC-15; they are filled in here to show the shape:
 
 ```json
 { "key": "D1", "question": "Does the display title go on the Composition only, or on every named definition?",
