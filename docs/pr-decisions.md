@@ -40,6 +40,7 @@ So the richer a group's soil (affirmed tensions, principles, its trigram), the m
 | error | An ask option that is a disposition (ratify, set aside, hold, shelve, accept, deny, approve, reject, merge, defer): what is done *with* an ask is never one of its options. |
 | error | An ask with fewer than two options. |
 | warn | An ask with no status-quo option ("Do nothing: …"), an option that does not say what it leads to, no `tension` and no `why_unplaced`, or a `recommend` that names none of its options. |
+| warn | An ask missing what the owner needs to judge it, one warning per gap, each naming its checklist article: see [What it takes to judge an ask](#what-it-takes-to-judge-an-ask). |
 | info | A decision record named in the prose but not in the block. |
 
 ## Well-formed asks
@@ -51,6 +52,40 @@ A decision presents real courses of action, and the owner chooses between them (
 - **Place it where the domain allows.** `tension` names the trade-off: a group tension, or for spec and implementation work a compass axis from `srs/docs/charter/decision-compass.md` (for example `3-9`). Each option's `pole` says which way it leans. `layer` names the plane and layer, or the boundary, it lives in. Two decisions that take opposite poles on one tension conflict only within one layer; across layers, the difference is a boundary. When nothing fits, say why in `why_unplaced`. A complex decision links a consequence map instead of naming one tension.
 - **The recommendation is one of the options.** It follows the lean, or quotes the boundary clause that lets it go against it.
 - **One option model.** An ask's options are read by `askOptions` (`lib/practice/pr-decisions.mjs`); a decision record's `alternatives_considered` prose is read by `parseProseOptions` (`lib/practice/decision-options.mjs`) into the same shape. The session agenda lists them one per line and warns when a decision is not a choice (fewer than two options, no status quo, options without what they lead to). Advice only.
+
+## What it takes to judge an ask
+
+Well formed is not enough: the owner must be able to judge the ask without opening a file. The checks live in one place, the **Decision checklist** (srs-programme container `871b27f9`, articles DC-01 to DC-15, reviewed at every owner session for now). This section lists only the fields that carry them; the articles say what makes each one good.
+
+| Field | Says | Article |
+|---|---|---|
+| `statement` | The decision in one sentence: "We will …". | DC-01 |
+| `compass` | `{ settles, leaves_open }`: what the compass and the rulings already settle, in words, and what is left to ask. | DC-12 |
+| `consulted` | The decisions and principles checked, by id, or a reason the list is empty. | DC-13 |
+| `stakes` | `{ changes, forecloses, undo, wrong_if }`: what changes and for whom, what it rules out, whether it can be undone, what would make the recommendation wrong. | DC-14 |
+| `revisit` | `{ not_working, done }`: a sign it is failing and a sign it has done its job. | DC-06 |
+| option `opens`, `shuts`, `serves` | Which strategic paths the option opens and shuts, and which problems (SP-nn) and remedies (8-hex id) it serves, by id. Add `inferred: true` where an agent inferred them. `pr-check` warns on a `serves` id the programme does not hold. | DC-15 |
+| `form: "technical"` + `technical_context` | Only when real technical judgement is needed: `{ component, constraint, evidence, weigh }`. The options still say what moves strategically, or that nothing does. | DC-15 |
+| `small: true` | A small decision gets a line: it needs only `statement` and `why`. | DC-11 |
+
+Options carrying these fields are written as objects, so a "Do nothing" option is `{ "action": "Do nothing", "leads_to": …, "opens": …, "shuts": …, "serves": […] }`. Worked example: srs#1009's ask D1, shortened. It carried every field except the per-option ones, which came afterwards with DC-15; they are filled in here to show the shape:
+
+```json
+{ "key": "D1", "question": "Does the display title go on the Composition only, or on every named definition?",
+  "statement": "We will add title to the Composition only.", "tension": "3-9", "layer": "EXPRESSION: composition",
+  "compass": { "settles": "That a title belongs on the definition, not in each client.", "leaves_open": "How far to extend it now, without evidence for the other definitions." },
+  "consulted": ["cce3c00e", "6523cf5e", "628cf6c4"],
+  "stakes": { "changes": "Compositions gain author-written names.", "forecloses": "Nothing: a later RFC can extend the same property by name.", "undo": "Easy while unused.", "wrong_if": "Clients need human names for Types as urgently." },
+  "options": [
+    { "action": "Composition only, now", "leads_to": "covers the evidence and the ruling", "pole": "shared-coherence",
+      "opens": "titles for other definitions, one RFC at a time", "shuts": "nothing", "serves": ["SP-05"], "inferred": true },
+    { "action": "Do nothing", "leads_to": "clients keep humanising Type names", "opens": "nothing", "shuts": "one name across clients", "serves": [] } ],
+  "recommend": "Composition only, now", "why": "It is what the evidence and the owner's ruling cover.",
+  "revisit": { "not_working": "A second definition shows the same workaround in clients.", "done": "No client derives a Composition's display text from name." },
+  "blocks": "merge" }
+```
+
+These are warnings, not errors (convention first, e337703b): a later decision may make some of them refuse.
 
 ## Actors
 

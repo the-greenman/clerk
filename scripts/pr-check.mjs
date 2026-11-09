@@ -3,7 +3,7 @@
 //   node scripts/pr-check.mjs <repo#n> [--repo <programme>] [--merging] [--json]   (the GitHub owner comes from the settings record)
 import { get, list } from '../lib/adapters/github.mjs';
 import { repoRoot } from './lib/repo-arg.mjs';
-import { srsCli } from '../lib/adapters/cli.mjs';
+import { srsCli, srs } from '../lib/adapters/cli.mjs';
 import { loadSettings, programmeRepo } from '../lib/adapters/settings.mjs';
 import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 import { loadGroups } from '../lib/adapters/groups.mjs';
@@ -23,7 +23,10 @@ try {
   const files = list(`repos/${owner}/${repo}/pulls/${n}/files?per_page=100`);
   const recordsInDiff = files.filter((f) => /records\/.*decision-[0-9a-f]{8}\.json$/.test(f.filename)).length;
   const d = parseDecisions(pr.body ?? '');
-  const findings = checkDecisions(d, { body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff, labels: pr.labels ?? [], gates, groupLabels, draft: Boolean(pr.draft), programme: programmeRepo(programme).name === repo });
+  // ids an option's `serves` may name (DC-15): problem codes and the 8-hex ids of problems and remedies
+  let known = null;
+  try { known = new Set(['com.semanticops.method/problem', 'com.semanticops.method/remedy'].flatMap((t) => (srs(cli, programme, ['record', 'list', '--type', t]).records ?? []).flatMap((r) => [r.record.instanceId.slice(0, 8), r.record.fieldValues?.problem_id].filter(Boolean)))); } catch { /* no programme records: skip the check */ }
+  const findings = checkDecisions(d, { known, body: pr.body ?? '', merging: argv.includes('--merging'), answered: answersFrom(comments), recordsInDiff, labels: pr.labels ?? [], gates, groupLabels, draft: Boolean(pr.draft), programme: programmeRepo(programme).name === repo });
   if (argv.includes('--json')) console.log(JSON.stringify({ ref, by: d.by, answers: d.answers, made: d.made, asks: d.asks, findings }, null, 2));
   else for (const f of findings) console.log(`${f.level.padEnd(5)} ${f.text}`);
   process.exit(findings.some((f) => f.level === 'error') ? 1 : 0);
