@@ -6,7 +6,7 @@ A working group is an epic run like a co-op subcommittee. The owner delegates a 
 
 The rules live in the group's charter records in srs-programme (not in this repository): the group role (what it decides, what it escalates) and four standing orders (Membership and quorum, Cycle and report, Budget, Reporting and minutes). The briefs that agents follow are `wg-builder.md`, `wg-reviewer.md`, `wg-steward.md`, `wg-analyst.md` and `unattended-worker.md` (fallback sweep). The merge check is `clerk upkeep`. If this page and those disagree, the records and the script win.
 
-The group has four members: Steward, Builder, Reviewer and the Analyst (scout; added by decision b447e8ea, still `proposed`, so not yet ratified), whose standing job is to keep the queue fed. It acts only when the latest cycle report forecasts "Queue running dry", finds ruling-backed work in conformance gaps and unimplemented rulings, and files it as ready issues for the Builder. It never builds, reviews, merges or sets a priority; anything needing a new ruling becomes an exercise, not work.
+The group has four members: Steward, Builder, Reviewer and the Analyst (scout; added by decision b447e8ea, still `proposed`, so not yet ratified), whose standing job is to keep the queue fed. It acts only when the latest cycle report forecasts "Queue running dry", finds ruling-backed work in conformance gaps and unimplemented rulings, and files it as ready issues for the Builder. It never builds, reviews, merges or sets a priority; anything needing a new ruling becomes a proposed decision for the owner, not work.
 
 Current settings: cycle closes daily at 11:30 UTC · budget 10 delegated merges per cycle · pause after 2 unacknowledged reports.
 

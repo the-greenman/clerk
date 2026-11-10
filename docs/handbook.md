@@ -781,7 +781,7 @@ How a decision arises, is settled and is cited, step by step, beside the theory 
 **Theory**: Ratified in exactly one session, at the level that owns it, with that level's quorum (handbook, Decisions).
 
 **Gap**:
-- Two ratification models (sessions for the programme, RFC acceptance for the spec). Merges taken in a session are not minuted; interrupted sessions leave partial minutes; exercises never close (0 of 5).
+- Two ratification models (sessions for the programme, RFC acceptance for the spec). Merges taken in a session are not minuted; interrupted sessions leave partial minutes; an exercise closes only when someone records what it led to (the exercise lifecycle, srs-programme#533).
 
 **Acting on it**: H6; C11 clerk#166
 
@@ -1188,7 +1188,7 @@ flowchart TB
 
 1. **Receive.** Anyone, human or agent, files a request while doing work (the Request template, in Reference). Label `intake`. A session that hits friction files it at once and carries on; it does not fix it in passing. An srs-context **finding** is memory (the trap, so the next agent avoids it); the work to remove it is a request. A finding with no issue gets a Request, and its issue link points at it. The srs-context dream cycle files these when it records new findings.
 2. **Place.** The programme's router reads the domain records (purpose, in and out of scope) and the problem register. It runs the duplicate guard and posts a Placement. When a group's domain fits, it adds that group's `wg:` label, and the request is now in the group's **input queue**. When no group holds the domain, the request stays with the central group. When no domain fits, it adds `needs-input`, and the request becomes an exercise for the owner's session: perhaps a new domain.
-3. **Assess.** The group's analyst reproduces the request and posts an Assessment. The verdict is *accept*, *merge into* an existing issue, *return* (misplaced: the `wg:` label is removed and the request goes back to step 2), *set aside* (with a reason) or *needs a ruling* (an exercise, never work). The analyst judges against the group's mandate, its ready queue against its budget, and its local priorities. It never sets a priority.
+3. **Assess.** The group's analyst reproduces the request and posts an Assessment. The verdict is *accept*, *merge into* an existing issue, *return* (misplaced: the `wg:` label is removed and the request goes back to step 2), *set aside* (with a reason) or *needs a ruling* (never work: a proposed decision carrying the options and the recommended one, parked as below; an exercise only when the question needs open discussion before any option can be stated, decision 2df0a314). The analyst judges against the group's mandate, its ready queue against its budget, and its local priorities. It never sets a priority.
 4. **Propose.** For an accepted request, the group's synthesizer posts a Proposal and files the issues in the governed repos, each with `Answers:` and as a sub-issue of the group's epic or story. Placement under a story is what gives the issue its priority, through the rollup. Bugs get the `bug` label and the bug track. If no affirmed problem fits, it writes a **suggested problem `held-by` a persona-in-domain** in srs-programme. That record is the durable form of the domain estimate: the domain is derived through it, never stored.
 5. **Decide.** Inside the mandate, the filed issues flow through the board as usual, and any group decision is ratified at the group's session. A new epic, a placement in another group's epic, or anything needing a new ruling goes up as one proposed decision.
 6. **Report.** The request is closed with links to what it became. The steward's cycle report carries an Intake section, and the router's misplacements are counted there.
@@ -1204,7 +1204,8 @@ stateDiagram-v2
   Placed --> Done: merged into an existing issue
   Placed --> Accepted: Assessment accepts
   Placed --> SetAside: Assessment sets it aside
-  Placed --> Exercise: needs a ruling
+  Placed --> Proposed: needs a ruling, put as a proposed decision with its options
+  Proposed --> Done: the owner's session ratifies, amends or sets it aside
   Accepted --> Done: Proposal filed issues, request closed
   Accepted --> Escalated: new epic or other group's epic
   Escalated --> Done: owner's session decides
@@ -1356,7 +1357,7 @@ stateDiagram-v2
 - **Recorded at once.** A choice made between sessions is written straight away as `proposed` and may be acted on if it falls inside the group's remit.
 - **Ratified once.** A decision is ratified in exactly one session, at the level that owns it (a group's log, or the SemanticOps log for the owner) and with that level's quorum. Before that it may pass through many sessions as a proposal, each recording `considers`.
 - **Sessions.** A session has attendees, a time and an agenda in this order: decisions since the last session, reports, exercises, decisions for this session, merges. `clerk` (a terminal UI) and `clerk session` write one `programme/session` record with `attended-by`, `ratifies`, `sets-aside`, `considers` and `receives` relations, and open a signed PR that merges itself.
-- **Three kinds of minute.** A *report* is received, not decided. An *exercise* is an open discussion that feeds proposals and is never ratified. A *decision* is ratified or set aside.
+- **Three kinds of minute.** A *report* is received, not decided. An *exercise* is an open discussion: agents comment on it, it may lead to many elements, each derived-from it, and it is never ratified (decision 5f7ec370). It closes once what it led to is recorded; a plain choice between options is a proposed decision, not an exercise (decision 2df0a314). A *decision* is ratified or set aside.
 - **Discussion.** Humans and agents comment the same way: a comment record `comments-on` the decision (`clerk comment`). A comment between sessions is discussion, not a session.
 
 **Kinds of meeting** (proposed, clerk#56 decisions D12 and D13, clerk#59). Different questions need different meetings. Each kind has its own agenda, and every kind writes the same `programme/session` record, with its kind.
@@ -1778,7 +1779,7 @@ Facts here were checked against clerk and srs-programme on 2026-10-11. The weekl
 
 #### Report, session and ratification
 
-**Theory**: There are three kinds of minute: a **report**, received by the parent's session; an **exercise**, an open discussion that feeds proposals and is never ratified; and a **decision**, ratified in exactly one session. A session has attendees, a time, and an agenda: decisions since the last session, reports, exercises, decisions for this session, merges.
+**Theory**: There are three kinds of minute: a **report**, received by the parent's session; an **exercise**, an open discussion that agents comment on, which may lead to many elements, is never ratified, and closes once what it led to is recorded (a plain choice between options is a proposed decision instead); and a **decision**, ratified in exactly one session. A session has attendees, a time, and an agenda: decisions since the last session, reports, exercises, decisions for this session, merges.
 
 **Status**: partial
 
