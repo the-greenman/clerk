@@ -57,7 +57,7 @@ export function rehomed(child) {
 }
 
 // issue: {repo, number, title, body, state, stateReason, createdAt, closedAt, labels:[name], comments:[body],
-//         closingPrs:[{merged}], landedPrs:[{repo, number, merged}] (from landedRefs), openChildren:[{number, comments:[body]}],
+//         closingPrs:[{merged}], landedPrs:[{repo, number, merged}] (from landedRefs), openChildren:[{number, comments:[body]}], childTotal (sub-issue count; a unit all of whose sub-issues closed is covered by them, each judged on its own closing PR),
 //         blockedBy:[ref] (blocked-by edges, read only when the body names a prerequisite)}
 export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE, bugLabel = "bug" } = {}) {
   const since = Math.max(Date.parse(cutoff), now - days * 864e5);
@@ -72,7 +72,7 @@ export function plan(issues, { now = Date.now(), days = 7, since: cutoff = SINCE
         if (orphans.length && !hasMarker(i, M.epic))
           out.push({ rule: "reopen-epic", ref, repo: i.repo, number: i.number, reopen: true,
             comment: `${M.epic}\nReopened by steward-check: this epic was closed while sub-issues are still open and not re-homed: ${orphans.map((c) => "#" + c.number).join(", ")}. Close it again once each is finished, or comment on each child saying where it moved (e.g. "re-homed to #123"). Re-closing after this comment is respected.` });
-      } else if (i.stateReason === "COMPLETED" && !(i.comments || []).some((c) => RESET_RE.test(c)) && !i.labels.includes("no-code") && !(i.closingPrs || []).some((p) => p.merged) && !(i.landedPrs || []).some((p) => p.merged) && i.closer?.__typename !== "Commit" && !i.closer?.merged && !i.labels.includes("duplicate") && !hasMarker(i, M.noPr))
+      } else if (i.stateReason === "COMPLETED" && !((i.childTotal || 0) > 0) && !(i.comments || []).some((c) => RESET_RE.test(c)) && !i.labels.includes("no-code") && !(i.closingPrs || []).some((p) => p.merged) && !(i.landedPrs || []).some((p) => p.merged) && i.closer?.__typename !== "Commit" && !i.closer?.merged && !i.labels.includes("duplicate") && !hasMarker(i, M.noPr))
         out.push({ rule: "reopen-no-pr", ref, repo: i.repo, number: i.number, reopen: true,
           comment: `${M.noPr}\nReopened by steward-check: closed as completed within ${days} days but no merged pull request closes it, so the fix may only exist on a branch. Link the merged PR, or add the \`no-code\` label if no code was needed, then close it again. Re-closing after this comment is respected.` });
     }
@@ -120,7 +120,7 @@ export function fetchIssues(repo, days, cutoff = SINCE, OWNER) {
     }
     return { repo, number: n.number, title: n.title, body: n.body, state, stateReason: n.state_reason?.toUpperCase() ?? null,
       createdAt: n.created_at, closedAt: n.closed_at, labels, comments: cs, blockedBy,
-      closingPrs, landedPrs, closer, bot: n.user?.type === "Bot", openChildren };
+      closingPrs, landedPrs, closer, bot: n.user?.type === "Bot", openChildren, childTotal: subTotal };
   });
 }
 
