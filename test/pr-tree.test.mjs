@@ -26,6 +26,11 @@ test('overlap: the readier PR goes first and the other rebases after it', () => 
   assert.deepEqual(t.prs['clerk#10'].next, { do: 'rebase', ref: 'clerk#11', why: 'both change a.mjs' });
 });
 
+test('a PR behind its base waits for an update, never a merge the clerk would refuse', () => {
+  const t = prTree([pr(12, { mergeState: 'BEHIND' })], GATES);
+  assert.deepEqual(t.prs['clerk#12'].next, { do: 'wait', why: 'behind its base: update the branch' });
+});
+
 test('a cycle is reported, never ordered', () => {
   const t = prTree([pr(20, { base: 'b21' }), pr(21, { base: 'b20' })], GATES);
   assert.deepEqual(t.cycles, [['clerk#20', 'clerk#21']]);
