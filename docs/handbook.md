@@ -1328,6 +1328,8 @@ A decision is **one standing choice that governs later choices**. It is not a ta
 
 Anything that fails the first test is still recorded, but as an issue (a task), an application or a plan, linked to the decision it serves.
 
+**What it takes to judge one.** The checks a decision put to someone must pass live in one place, the Decision checklist (srs-programme container `871b27f9`, articles DC-01 to DC-15), reviewed at every owner session for now (proposed decision d91facdd). Cite an article by its number rather than restating it. An ask in a PR carries the fields `docs/pr-decisions.md` lists (statement, compass, consulted, stakes, revisit, and per option the paths it opens and shuts and what it serves), and `clerk pr-check` warns, naming the article, when one is missing.
+
 **Seven kinds**, adopted to test (`decision_kind` on the decision record):
 
 | Kind | Frame | Example |
