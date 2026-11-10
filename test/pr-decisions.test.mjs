@@ -26,7 +26,7 @@ test('a ruling needs a record; a broken block is reported', () => {
 });
 
 test('a merge-blocking ask must be answered before merge', () => {
-  const d = parseDecisions(block({ by: 'a', asks: [{ key: 'A1', question: 'q', tension: '3-9', options: ['Do x: x happens', 'Do nothing: y stays'], recommend: 'Do x', blocks: 'merge' }] }));
+  const d = parseDecisions(block({ by: 'a', asks: [{ key: 'A1', question: 'q', small: true, statement: 'We will x.', why: 'w', tension: '3-9', options: ['Do x: x happens', 'Do nothing: y stays'], recommend: 'Do x', blocks: 'merge' }] }));
   assert.equal(checkDecisions(d)[0].level, 'ok');
   assert.ok(checkDecisions(d, { merging: true }).some((f) => f.level === 'error'));
   const answered = answersFrom(['<!-- srs:answer ask=A1 choice="x" -->\n**Decision A1:** x']);
@@ -50,7 +50,7 @@ test('an ask offers two or more options, a status quo, and says where each leads
   assert.ok(w.some((t) => /"Do x" does not say what it leads to/.test(t)));
   assert.ok(w.some((t) => /no tension and no why_unplaced/.test(t)));
   assert.ok(w.some((t) => /none of its options/.test(t)));
-  const ok = ask({ why_unplaced: 'no compass for this domain yet', options: [{ action: 'Do x', leads_to: 'x', pole: 'p' }, { action: 'Do nothing', leads_to: 'y stays' }], recommend: 'Do x' });
+  const ok = ask({ small: true, statement: 'We will x.', why: 'w', why_unplaced: 'no compass for this domain yet', options: [{ action: 'Do x', leads_to: 'x', pole: 'p' }, { action: 'Do nothing', leads_to: 'y stays' }], recommend: 'Do x' });
   assert.equal(ok[0].level, 'ok');
 });
 
@@ -153,4 +153,58 @@ test('a decision already taken is cited, never asked again: an owner merge that 
   assert.deepEqual(checkDecisions(d, { body: cites, labels: ['gate:owner-merge'], gates: G }).filter((f) => f.level === 'error'), []);
   const reask = '```srs-decisions\n{"made":[{"class":"ruling","id":"e745e9b2","title":"reach"}],"asks":[{"key":"A1","id":"e745e9b2","question":"Is reach enough?","options":["Keep: x","Do nothing: y"]}]}\n```';
   assert.match(checkDecisions(parseDecisions(reask), { body: reask }).map((f) => f.text).join(), /asks again a decision the PR says it applies/);
+});
+
+// The decision checklist (srs-programme container 871b27f9): advice that names its DC number, never an error.
+const option = (action, extra = {}) => ({ action, leads_to: 'l', opens: 'o', shuts: 's', serves: ['SP-05'], ...extra });
+const full = {
+  statement: 'We will add title to the Composition only.', tension: '3-9', why: 'w', recommend: 'Composition only',
+  compass: { settles: 's', leaves_open: 'l' }, consulted: ['cce3c00e'], stakes: { changes: 'c', forecloses: 'f', undo: 'u', wrong_if: 'w' },
+  revisit: { not_working: 'n', done: 'd' }, options: [option('Composition only'), option('Do nothing')],
+};
+const known = new Set(['SP-05', '7c02a070']);
+const checklist = (a, opts) => checkDecisions(parseDecisions(block({ by: 'a', asks: [{ key: 'A1', question: 'q', ...a }] })), opts).filter((f) => /\(DC-\d+\)$/.test(f.text));
+
+test('a full ask raises no checklist warning', () => {
+  assert.deepEqual(checklist(full, { known }), []);
+});
+
+test('a bare ask warns once per missing field, each naming its DC number', () => {
+  const f = checklist({ tension: 't', recommend: 'Do x', options: ['Do x: x', 'Do nothing: y'] });
+  assert.ok(f.every((x) => x.level === 'warn'));
+  assert.deepEqual([...new Set(f.map((x) => x.text.match(/DC-\d+/)[0]))], ['DC-01', 'DC-06', 'DC-12', 'DC-13', 'DC-14', 'DC-15']);
+  assert.equal(f.filter((x) => /DC-15/.test(x.text)).length, 2, 'one per option');
+});
+
+test('a small ask needs only a statement and a why (DC-11)', () => {
+  assert.deepEqual(checklist({ small: true, statement: 'We will x.', why: 'w', options: ['Do x: x', 'Do nothing: y'] }), []);
+  assert.match(checklist({ small: true, statement: 'We will x.', options: ['Do x: x', 'Do nothing: y'] })[0].text, /DC-11/);
+});
+
+test('an option names its paths and what it serves, and the ids resolve (DC-15)', () => {
+  const bare = checklist({ ...full, options: [{ action: 'Composition only', leads_to: 'l' }, option('Do nothing')] }, { known });
+  assert.match(bare[0].text, /"Composition only" lacks opens, shuts, serves.*\(DC-15\)/);
+  const stray = checklist({ ...full, options: [option('Composition only', { serves: ['SP-999', '7c02a070'] }), option('Do nothing')] }, { known });
+  assert.equal(stray.length, 1);
+  assert.match(stray[0].text, /serves SP-999, which names no problem or remedy/);
+  assert.deepEqual(checklist({ ...full, options: [option('Composition only', { serves: ['SP-999'] }), option('Do nothing')] }), [], 'no known ids: not checked');
+});
+
+test('an empty serves is an answer, an absent one a gap; ids match in any case', () => {
+  assert.deepEqual(checklist({ ...full, options: [option('Composition only', { serves: ['sp-05', '7C02A070-1234'] }), option('Do nothing', { serves: [] })] }, { known }), []);
+  const { serves, ...noServes } = option('Do nothing');
+  assert.match(checklist({ ...full, options: [option('Composition only'), noServes] }, { known })[0].text, /"Do nothing" lacks serves/);
+});
+
+test('srs#998 ask D1: the block as first filed misses each article; the rewrite misses only DC-15, which came after it', async () => {
+  const { readFileSync } = await import('node:fs');
+  const fixture = (f) => JSON.parse(readFileSync(new URL(`./fixtures/pr-decisions/${f}`, import.meta.url)));
+  const dcs = (a) => [...new Set(checklist(a, { known }).map((x) => x.text.match(/DC-\d+/)[0]))];
+  assert.deepEqual(dcs(fixture('srs-998-d1-first-filed.json')), ['DC-01', 'DC-06', 'DC-12', 'DC-13', 'DC-14', 'DC-15']);
+  assert.deepEqual(dcs(fixture('srs-998-d1-rewritten.json')), ['DC-15']);
+});
+
+test('a technical ask names its technical context (DC-15)', () => {
+  assert.match(checklist({ ...full, form: 'technical' }, { known })[0].text, /technical_context lacks component, constraint, evidence, weigh/);
+  assert.deepEqual(checklist({ ...full, form: 'technical', technical_context: { component: 'c', constraint: 'k', evidence: 'e', weigh: 'w' } }, { known }), []);
 });

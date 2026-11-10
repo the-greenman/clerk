@@ -159,7 +159,7 @@ Labels:
 
 - **Working group:** its `wg:` label and **no** `gate:` label.
 - **Central group, clear or complicated mode, and Door 1 or non-normative:** `gate:auto-merge`.
-- **Central group, anything else** (mode complex, Door 2 or 3, a new dependency, a user-visible product change, or anything you are unsure of): `gate:owner-merge`, with the question for the owner as an `asks` entry in the block, well formed per `docs/pr-decisions.md` (two or more courses of action including "Do nothing", never dispositions, placed on a tension where one fits).
+- **Central group, anything else** (mode complex, Door 2 or 3, a new dependency, a user-visible product change, or anything you are unsure of): `gate:owner-merge`, with the question for the owner as an `asks` entry in the block, well formed per `docs/pr-decisions.md` (two or more courses of action including "Do nothing", never dispositions, placed on a tension where one fits), carrying what the owner needs to judge it (*What it takes to judge an ask* in the same file).
 
 Then `$CLERK pr-check <repo>#<pr> --repo $PROG` must exit 0; fix every error it reports.
 

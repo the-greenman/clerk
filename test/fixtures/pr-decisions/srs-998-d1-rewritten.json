@@ -1,0 +1,51 @@
+{
+ "key": "D1",
+ "id": null,
+ "question": "Should a client get a Field's id in the outputs it already receives, reversing RFC-039's retirement of the keyword, or through a separate name-to-id read?",
+ "statement": "We will report each Field's id beside its name in the outputs clients already receive.",
+ "tension": "5-11",
+ "layer": "OPERATION: core service -> adapters",
+ "compass": {
+  "settles": "Not doing nothing: b2ff7c91 requires the identifier in these outputs. The Conformance cell (one way over many) favours A.",
+  "leaves_open": "Axis 5-11 prefers reliability. A reverses a standing statement, which its boundary clause allows only as explicit supersession at a declared boundary. Whether that reversal is worth it, and whether to add the lookup later, is your judgement."
+ },
+ "consulted": [
+  "cce3c00e",
+  "b2ff7c91",
+  "7d3dda60",
+  "5f8204bc",
+  "1e7c0c8e",
+  "6b5e2810"
+ ],
+ "stakes": {
+  "changes": "Clients get ids with no extra calls; srs-web regains its field option under Tell apart by. About 58 bytes per schema property.",
+  "forecloses": "A lookup as the primary mechanism. Five srs-rust tests that assert the keyword's absence are inverted.",
+  "undo": "Hard once third parties conform to it: removing the keyword would be a further supersession.",
+  "wrong_if": "Most clients that need an id hold only a Record, with no schema or facet in hand."
+ },
+ "options": [
+  "Do nothing: clients see names only; srs-web keeps no field option; b2ff7c91 stays unmet in these outputs",
+  {
+   "action": "A: id beside name in the authoring schema and facets",
+   "leads_to": "one mechanism, no extra calls; RFC-039's retirement reversed by name",
+   "pole": "renewal"
+  },
+  {
+   "action": "B: a separate (typeId, typeVersion, name) -> fieldId read plus facets listing contributing Types",
+   "leads_to": "the schema stays id-free, closest to RFC-039; a second mechanism; one call per Type per view; a client must combine per-Type results itself",
+   "pole": "reliability"
+  },
+  {
+   "action": "A now, with B's Record-only lookup later if an agent use case appears",
+   "leads_to": "A's outcome with a second mechanism left open as a convenience",
+   "pole": "renewal"
+  }
+ ],
+ "recommend": "A: id beside name in the authoring schema and facets",
+ "why": "One mechanism over two: B's facet rule still leaves the client calling once per Type and combining results, which is grouping logic in the client.",
+ "revisit": {
+  "not_working": "Agents keep reading a schema or running a find only to learn one field's id; then add the lookup.",
+  "done": "srs-web restores Tell apart by with no client name matching."
+ },
+ "blocks": "merge"
+}

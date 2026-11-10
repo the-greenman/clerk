@@ -1,0 +1,23 @@
+{
+ "key": "D1",
+ "id": null,
+ "question": "Should a client get a Field's id in the outputs it already receives (A) or through a separate name-to-id read (B)?",
+ "tension": "5-11",
+ "layer": "OPERATION: core service -> adapters",
+ "options": [
+  "Do nothing: clients see names only; srs-web keeps no field option; b2ff7c91 stays unmet in these outputs",
+  {
+   "action": "A: id beside name in the authoring schema and facets",
+   "leads_to": "one mechanism, no extra calls, RFC-039's retirement reversed by name",
+   "pole": "reliability"
+  },
+  {
+   "action": "B: a separate (typeId, typeVersion, name) -> fieldId read plus facets listing contributing Types",
+   "leads_to": "schema stays id-free; a second mechanism; one call per Type per view",
+   "pole": "renewal"
+  }
+ ],
+ "recommend": "A: id beside name in the authoring schema and facets",
+ "why": "one way over many; a lookup cannot fix a merged facet",
+ "blocks": "merge"
+}
