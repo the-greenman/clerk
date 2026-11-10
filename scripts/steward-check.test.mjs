@@ -94,3 +94,8 @@ test("prereq-edge: text-only prerequisite comments once; an edge or our marker i
 test("REF_RE reads owner/repo#n, repo#n and a bare #n", () => {
   assert.deepEqual([..."the-greenman/clerk#1 srs#2 #3".matchAll(REF_RE)].map((m) => [m[2] ?? null, m[3]]), [["clerk", "1"], ["srs", "2"], [null, "3"]]);
 });
+
+test("a unit whose sub-issues all closed is covered by its children; no sub-issues and no PR still reopens (clerk#283)", () => {
+  assert.equal(p({ childTotal: 4, openChildren: [] }).length, 0);
+  assert.equal(p({ childTotal: 0, openChildren: [] })[0].rule, "reopen-no-pr");
+});
