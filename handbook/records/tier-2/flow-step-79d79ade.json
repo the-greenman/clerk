@@ -12,7 +12,7 @@
     "needs": "a `proposed` decision recorded in a decision log",
     "theory": "Ratified in exactly one session, at the level that owns it, with that level's quorum (handbook, Decisions).",
     "gaps": [
-      "Two ratification models (sessions for the programme, RFC acceptance for the spec). Merges taken in a session are not minuted; interrupted sessions leave partial minutes; exercises never close (0 of 5)."
+      "Two ratification models (sessions for the programme, RFC acceptance for the spec). Merges taken in a session are not minuted; interrupted sessions leave partial minutes; an exercise closes only when someone records what it led to (the exercise lifecycle, srs-programme#533)."
     ],
     "remedies": "H6; C11 clerk#166",
     "measure": "decisions.proposed",
@@ -24,7 +24,7 @@
     ]
   },
   "createdAt": "2026-10-24T12:33:00.133497361+00:00",
-  "updatedAt": "2026-10-24T16:19:08.329019615+00:00",
+  "updatedAt": "2026-11-10T13:44:26.379885718+00:00",
   "createdBy": {
     "kind": "ai",
     "id": "agent:claude-code",
