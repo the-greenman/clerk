@@ -17,7 +17,7 @@ Not in force until `RATIFYING_DECISION_ID` (defined in `routines/unattended-work
 7. FINDINGS: run `node /tmp/clerk/bin/clerk.mjs pr-check <repo>#<n> --repo <programme checkout>`; each `error` is a finding (a decision left in prose, a ruling with no record). List them; an empty list is stated as `findings: none`. Your quorum comment ends with `<!-- actor: agent:tpr-reviewer -->` on its own line.
 8. QUORUM. Post ONE comment whose first line is exactly
    `<!-- wg-quorum --> builder=agent:tpr-builder reviewer=agent:tpr-reviewer gates=<green|red>@<sha> mandate=<ruling, no spaces> verdict=<approve|reject>`
-   and whose later lines are the findings. Use the builder named in the PR. Red gates or findings mean `reject`: post it and add nothing.
+   and whose later lines are the findings. Use the builder named in the PR's `Builder:` line: an agent seat, or `human:<login>` when a local `/ship` session built it (clerk#290). The reviewer is always you. Red gates or findings mean `reject`: post it and add nothing.
 9. On `approve` only, after posting, add `gate:auto-merge`. `pr-upkeep` merges on a valid quorum within budget.
 10. A within-mandate decision the Builder created `proposed`: leave it `proposed`. Name it in your quorum comment's findings as `decision <id>: assent` (or `decision <id>: dissent, <why>`). The group's next session ratifies it (`routines/wg-steward.md` step 2). Never ratify it yourself: a decision is ratified in exactly one session (handbook principle 6; owner decision 70a05a5c, 2026-10-11).
 
