@@ -11,7 +11,15 @@ const q = ({ builder = 'agent:tpr-builder', reviewer = 'agent:tpr-reviewer', gat
 test('a quorum line parses; anything else is malformed', () => {
   assert.deepEqual(parseQuorum(q().body), { builder: 'agent:tpr-builder', reviewer: 'agent:tpr-reviewer', gates: 'green', sha: HEAD, mandate: 'srs-rust#1', verdict: 'approve' });
   assert.equal(parseQuorum('<!-- wg-quorum --> builder=agent:a reviewer=agent:b gates=green mandate=m verdict=approve'), null, 'gates must name the commit');
-  assert.equal(parseQuorum('<!-- wg-quorum --> builder=human:x reviewer=agent:b gates=green@abcdef1 mandate=m verdict=approve'), null, 'builder and reviewer are agents');
+  assert.equal(parseQuorum('<!-- wg-quorum --> builder=agent:a reviewer=human:x gates=green@abcdef1 mandate=m verdict=approve'), null, 'the reviewer is an agent seat');
+  assert.equal(parseQuorum('<!-- wg-quorum --> builder=robot:a reviewer=agent:b gates=green@abcdef1 mandate=m verdict=approve'), null, 'the builder is an agent or a human');
+  assert.equal(parseQuorum('<!-- wg-quorum --> builder=human: reviewer=agent:b gates=green@abcdef1 mandate=m verdict=approve'), null, 'a human builder names a login');
+});
+
+test('a human builder (a local /ship session) with an agent reviewer is a quorum (clerk#290)', () => {
+  assert.equal(parseQuorum(q({ builder: 'human:the-greenman' }).body).builder, 'human:the-greenman');
+  assert.equal(quorumVerdict([q({ builder: 'human:the-greenman', reviewer: 'agent:editor-reviewer' })], HEAD), 'ok');
+  assert.equal(quorumVerdict([q({ builder: 'human:the-greenman', verdict: 'reject' })], HEAD), 'verdict reject');
 });
 
 test('the latest owner quorum for the head commit decides', () => {

@@ -111,6 +111,7 @@ The quorum comment's first line is exactly:
 ```
 <!-- wg-quorum --> builder=agent:tpr-builder reviewer=agent:tpr-reviewer gates=green@<sha> mandate=<ruling> verdict=approve
 ```
+(`builder=` is the PR's `Builder:` line: an agent seat, or `human:<login>` for a local `/ship` session, clerk#290.)
 
 ## 5. Quorum and merge: what pr-upkeep checks
 
