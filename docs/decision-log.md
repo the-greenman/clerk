@@ -10,6 +10,10 @@ The decision log holds the standing choices that govern later choices. It is not
 - **D4, framing rules.** One thing per record. A timeless statement. A review condition. Technical decisions cite a design principle. This is a convention first (decision e337703b): the session recorder warns and never blocks, until a later decision enforces the rules.
 - **D5, the existing log.** Re-express only the five missing decisions and the clear splits, as a sample. Learn from it, then decide on the rest. Leave the rest as history.
 
+## Writing one: the lifecycle is the state
+
+A decision is created in lifecycle `draft`, and every agenda and desk reads the lifecycle only. So a decision meant for a session is created **and proposed in the same change** (`record transition <id>` with `{"byTransition":"propose"}`), then placed in the log of the level that owns it. The `status` field repeats the lifecycle and drifts from it (clerk#130); read the lifecycle, never the field. `clerk check` refuses a draft whose `status` says `proposed` or `active`, and warns on a draft left in a log for over a day (clerk#239).
+
 ## What the feedback says
 
 Read together, the 11 comments make one argument:

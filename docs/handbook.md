@@ -1215,7 +1215,7 @@ stateDiagram-v2
 
 **Parking a decision.** A decision someone cannot make in the moment is a request too, of kind *decision*. It is the commonest way a working window is lost: the work stops on a question, and the question is never asked anywhere it would be answered. So the question is recorded at once as a proposed decision, never held in the head of whoever is stuck (D11, ratified 2026-10-15):
 
-1. Whoever is stuck, human or agent, writes it as a **proposed decision** in the decision log of the level that owns it. It records what is blocked, the options seen so far, and the next action once it is decided (template T8). If you do not know which level owns it, use the SemanticOps log: the router moves it.
+1. Whoever is stuck, human or agent, writes it as a **proposed decision** in the decision log of the level that owns it: create it, then propose it in the same change (`record transition <id>` with `{"byTransition":"propose"}`). A created decision starts as a `draft`, and no agenda shows a draft (clerk#239). It records what is blocked, the options seen so far, and the next action once it is decided (template T8). If you do not know which level owns it, use the SemanticOps log: the router moves it.
 2. The blocked issue gets `needs-input` and a comment linking the proposal. Work moves to something else, or stops cleanly with a run report.
 3. The proposal appears on that level's agenda (decisions to ratify), where the session ratifies it, amends it or sets it aside.
 4. When the decision is ratified, `needs-input` comes off and the work resumes under it.

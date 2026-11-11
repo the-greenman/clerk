@@ -9,6 +9,7 @@ import { repoRoot } from "./lib/repo-arg.mjs";
 import { srsCli } from "../lib/adapters/cli.mjs";
 import { canonOf } from "../lib/practice/canon.mjs";
 import { lostDomains } from "../lib/practice/domain-field.mjs";
+import { checkDecisions } from "../lib/practice/agenda.mjs";
 const ROOT = repoRoot();
 const MNS = "com.semanticops.method";
 const ANS = "com.mudemocracy.argument";
@@ -137,13 +138,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     // the identity record is container scaffolding, not a method record
     return new Set(k ? k.memberInstanceIds.map((m) => m.instanceId).filter((id) => id !== k.identityInstanceId) : []);
   };
-  const gates = checkGates(records, relations, members("Affirmed"), members("Set aside"));
-  gates.warnings.forEach((w) => console.warn(`! ${w}`));
+  const gates = checkGates(records, relations, members("Affirmed"), members("Set aside")), decisions = checkDecisions(records, (await import("../lib/adapters/groups.mjs")).loadDecisionLogs(ROOT, cli), new Date().toISOString());
+  [...gates.warnings, ...decisions.warnings].forEach((w) => console.warn(`! ${w}`));
   // advisory (SP-94, SP-98, clerk#129): a domain is not fully defined until three of its tensions are placed as axes
-  const { loadField } = await import("../lib/adapters/domain-field.mjs");
-  for (const c of loadField(ROOT, cli).contexts.filter((c) => c.domain && c.axes.filter((a) => a.state === "affirmed" && !a.inherited).length < 3))
+  for (const c of (await import("../lib/adapters/domain-field.mjs")).loadField(ROOT, cli).contexts.filter((c) => c.domain && c.axes.filter((a) => a.state === "affirmed" && !a.inherited).length < 3))
     console.warn(`! domain ${c.title} has ${c.axes.filter((a) => a.state === "affirmed" && !a.inherited).length} of 3 affirmed axes (clerk domains)`);
-  const errors = [...checkMethod(records, relations), ...gates.errors];
+  const errors = [...checkMethod(records, relations), ...gates.errors, ...decisions.errors];
   if (errors.length) { errors.forEach((e) => console.error(`✗ ${e}`)); process.exit(1); }
   console.log("✓ method: every tension has 2 poles; every principle governs one tension and leans toward one of its poles.");
 }
