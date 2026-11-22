@@ -18,7 +18,7 @@ if (!m || !seat) fail('usage: clerk claim <repo#n> --as <seat> [--repo <programm
 let actor; try { actor = JSON.parse(process.env.SRS_ACTOR ?? '').id; } catch { /* below */ }
 if (!actor) fail('SRS_ACTOR must be a JSON actor, e.g. SRS_ACTOR=\'{"kind":"ai","id":"agent:<name>"}\' on the same command line');
 const repo = repoRoot(), s = loadSettings(repo), W = loadWorkflow(repo), n = Number(m[2]);
-const { issue, prs, branches } = readIssue(s.githubOwner, m[1], n);
+const { issue, prs, branches, staleBranches } = readIssue(s.githubOwner, m[1], n);
 // With a Confidence and care policy in force, uncertainty sets the care mode instead of refusing (clerk#156); a policy the clerk
 // cannot act on stops the claim. Without one, the old rule holds: an unaffirmed or missing Answers: line refuses.
 let care = null;
@@ -26,7 +26,7 @@ if (s.carePolicyContainer) { try { care = careFor(repo, srsCli(repo), s, m[1], n
 const groups = loadGroups(repo), g0 = groups.find((g) => (issue.labels ?? []).some((l) => (l.name ?? l) === g.label));
 let state; if (g0) { try { state = groupStates(s, [g0], W.gates, undefined, repo)[g0.label]; } catch { /* unread: the check refuses */ } }
 const overBudget = argv.includes('--over-budget') ? { reason: arg('--reason') } : undefined;
-const r = checkClaim({ issue, prs, branches, groups, central: loadCentralGroup(repo), state, overBudget, affirmed: affirmedProblemIds(repo), actor, seat, ownerActor: s.ownerActor, W, graded: Boolean(care) });
+const r = checkClaim({ issue, prs, branches, staleBranches, groups, central: loadCentralGroup(repo), state, overBudget, affirmed: affirmedProblemIds(repo), actor, seat, ownerActor: s.ownerActor, W, graded: Boolean(care) });
 const branch = arg('--branch') ?? `${n}-<slug>`;
 const comment = r.group && [claimComment(actor, seat, r.group.title, branch, r.overridden), ...(care ? [careNote(care.result, r.cautions)] : [])].join('\n');
 const dry = argv.includes('--dry-run');
