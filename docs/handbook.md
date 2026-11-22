@@ -2206,6 +2206,20 @@ On 2026-10-11 it ran 60 tests: 36 passing, 24 todo, none failing.
 | Narrative explorations (the owner's vignettes) | srs-programme `Narrative explorations` container (`80b283ef`); this handbook, *Narrative explorations: how meaning grows* |
 | Programme data rules | srs-programme `CLAUDE.md` |
 | Concept and boundary mapping | srs-programme `source-documents/agent-democracy-2026-10-10/`, `boundaries-2026-10-09/` |
+| The srs skill, and how it changes | srs-rust `skills/SKILL.md`, `skills/MAINTAINING.md`; this handbook, *Teaching agents to use SRS* |
+
+
+#### Teaching agents to use SRS
+
+An agent learns to use a repository from five places, lowest first: what the tool does and the errors it gives, the tool descriptions, the server instructions with the repository's own guidance, the repository itself, and last the srs skill. The first three reach every agent. The skill reaches only an agent whose client loaded it. A cold-agent test on 2026-11-22 found the basic calls already taught by the tool descriptions, and every remaining failure a tool gap (srs-programme finding f316ae52).
+
+- **Fix a lesson at the lowest place that can hold it.** A trap an agent hit with a tool is filed against the tool first: a warning, a better error, a bound. It goes into the skill only while the tool cannot carry it, and leaves when the tool is fixed.
+- **A friction finding carries its `friction_category` and the error code.** Without them the monthly classification has nothing to count.
+- **A change to the skill follows srs-rust `skills/MAINTAINING.md`.** Every rule traces to evidence in its ledger, the PR records cold-agent scores for the old file and the new, and `skills/check-skill.sh` passes in CI.
+- **Every repository we serve sets its guidance** with `srs repo guidance set`, and its identity record is a reading guide. The guidance is the one orientation every MCP agent receives.
+- **Records that must link to each other live in one repository.** A relation cannot cross a repository boundary yet (decision 31e9fd27 orders that work). Share vocabulary between repositories by package.
+- **Our public examples show SRS used as it should be:** a type for what a thing is, lifecycle for where it stands, a relation for a link, a container for reading order. Not tags, `status` fields or copies doing that work (the owner, 2026-11-22, vignette 89961c00).
+
 
 
 #### How this handbook is made

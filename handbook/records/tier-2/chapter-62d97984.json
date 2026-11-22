@@ -1,0 +1,18 @@
+{
+  "instanceId": "62d97984-39ef-492a-bbc3-e1441816d459",
+  "typeId": "1b1c9741-e69e-4576-9df3-7cc33f5b3e26",
+  "typeVersion": 1,
+  "typeNamespace": "com.semanticops.handbook",
+  "typeName": "chapter",
+  "fieldValues": {
+    "title": "Teaching agents to use SRS",
+    "body": "An agent learns to use a repository from five places, lowest first: what the tool does and the errors it gives, the tool descriptions, the server instructions with the repository's own guidance, the repository itself, and last the srs skill. The first three reach every agent. The skill reaches only an agent whose client loaded it. A cold-agent test on 2026-11-22 found the basic calls already taught by the tool descriptions, and every remaining failure a tool gap (srs-programme finding f316ae52).\n\n- **Fix a lesson at the lowest place that can hold it.** A trap an agent hit with a tool is filed against the tool first: a warning, a better error, a bound. It goes into the skill only while the tool cannot carry it, and leaves when the tool is fixed.\n- **A friction finding carries its `friction_category` and the error code.** Without them the monthly classification has nothing to count.\n- **A change to the skill follows srs-rust `skills/MAINTAINING.md`.** Every rule traces to evidence in its ledger, the PR records cold-agent scores for the old file and the new, and `skills/check-skill.sh` passes in CI.\n- **Every repository we serve sets its guidance** with `srs repo guidance set`, and its identity record is a reading guide. The guidance is the one orientation every MCP agent receives.\n- **Records that must link to each other live in one repository.** A relation cannot cross a repository boundary yet (decision 31e9fd27 orders that work). Share vocabulary between repositories by package.\n- **Our public examples show SRS used as it should be:** a type for what a thing is, lifecycle for where it stands, a relation for a link, a container for reading order. Not tags, `status` fields or copies doing that work (the owner, 2026-11-22, vignette 89961c00).\n"
+  },
+  "createdAt": "2026-11-22T09:35:14.455764172+00:00",
+  "updatedAt": "2026-11-22T09:35:14.455766349+00:00",
+  "createdBy": {
+    "kind": "ai",
+    "id": "claude-code"
+  },
+  "$schema": "https://srs.semanticops.com/schema/2.0/record.json"
+}
