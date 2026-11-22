@@ -54,6 +54,9 @@ const TOOLS = {
   'fetch-srs': ['fetch-pinned-srs.mjs', 'download the pinned srs CLI; prints SRS_CLI_PATH=...'],
   snapshot: ['snapshot.mjs', 'the programme as one snapshot: records, relations, container outlines (--json)'],
   serve: ['serve.mjs', 'the local service for web clients, on loopback (docs/service.md, api/openapi.json): CLERK_PORT, CLERK_SYNC_MINUTES, CLERK_DESK_MINUTES, CLERK_STATE_DIR'],
+  'dream-inventory': ['dream/inventory.mjs', 'programme dream, layer 1: catalogue and vignette batches for the workflow, read-only (--out <dir> [--srs P] [--batch N] [--since YYYY-MM-DD])'],
+  'dream-apply': ['dream/apply.mjs', 'programme dream, last layer: write kept links, comments and suggested problems as agent:programme-dream (--dir <dir> --container <dream container> [--date D] [--sp N]; never edits or deletes)'],
+  'dream-depth': ['dream/depth.mjs', 'depth of context per domain, before and after a dream (read-only JSON; [--srs P])'],
   doctor: ['doctor.mjs', 'self-test where it runs: srs CLI, settings, every repo readable, group state, SRS_ACTOR (--json; --post records it on the digest issue)'],
 };
 if (argv[0] === 'help' || argv[0] === '--help') {
