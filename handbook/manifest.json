@@ -1,6 +1,16 @@
 {
   "rootContainerId": "8c686bc8-1018-4196-990b-dd62f19a2f92",
   "$schema": "https://srs.semanticops.com/schema/2.0/manifest.json",
+  "aiGuidance": {
+    "summary": "The clerk handbook: how a programme run by the clerk works, from problem to merged PR to report, written by the clerk's maintainers and agents. docs/handbook.md is a rendered projection, never edited. Read the identity record, then \"The whole picture\".",
+    "suggestedEntryPoints": [
+      "records/tier-2/purpose-9cabd30d.json",
+      "records/tier-2/chapter-371a41cf.json",
+      "records/tier-2/chapter-9ea1e5b4.json",
+      "records/tier-2/chapter-4ba1adbf.json"
+    ],
+    "navigationHints": "Areas, in order: How work is driven (whole picture, flow at a glance, the flow-steps Find to Report, affirmation layer, decision flow), Stage by stage (one stage record per step of the chain), Reference (principles, SRS elements, templates, board labels, where things are documented, how this handbook is made). Chapters are com.semanticops.handbook/chapter; flow steps are flow-step and stages are stage, joined by com.semanticops.handbook/flows-to, and refines points a flow-step at its stage. Order is the root container's outline, so new chapters go in the root container at the right place, not at the end. The Programme methodology package is a copy under handbook/packages/methodology, refreshed with srs package upgrade, never hand-edited. Here, edit records only, then run node scripts/render-handbook.mjs (no SRS_CLI_PATH) and commit docs/handbook.md too; CI fails on drift."
+  },
   "createdAt": "2026-10-11T18:33:26.232942085+00:00",
   "dataModelRevision": 11,
   "description": "How a programme run by the clerk works. The records are the source of truth; docs/handbook.md is a rendered Composition.",
