@@ -2,7 +2,7 @@
 // Writes <out>/catalogue.json (domains, personas-in-domain, problems; suggestion and affirmed copies merged, the affirmed copy
 // canonical), <out>/batches/NN.json (vignettes with words, date, existing links) and <out>/index.json.
 // clerk dream-inventory --repo <programme> --out <dir> [--srs <path>] [--batch 25] [--since YYYY-MM-DD]
-// --since keeps only vignettes created on or after that date; the catalogue is always whole.
+// --since keeps vignettes created on or after that date, plus undated ones no dream has linked; the catalogue is always whole.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { flags, call, find, pool } from './lib.mjs';
 
@@ -58,7 +58,11 @@ const vignette = async (i) => {
 };
 let vigs = (await pool(await ids('--tier', '0', '--tag', 'vignette'), vignette))
   .sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.id < b.id ? -1 : 1));
-if (f.since) vigs = vigs.filter((v) => v.date && v.date >= f.since);
+// A note made through the MCP note tool carries no createdAt and often no date in its title, so a date filter
+// alone skips it. Keep an undated vignette until a dream has linked it (a link created by the dream's actor).
+// ponytail: an undated vignette a dream read but linked to nothing is read again each run; record reads if that grows.
+const dreamt = new Set(rels.filter((r) => r.createdBy?.id === 'agent:programme-dream').map((r) => r.sourceId));
+if (f.since) vigs = vigs.filter((v) => (v.date ? v.date >= f.since : !dreamt.has(v.id)));
 
 mkdirSync(`${OUT}/batches`, { recursive: true });
 writeFileSync(`${OUT}/catalogue.json`, JSON.stringify(catalogue, null, 1));
