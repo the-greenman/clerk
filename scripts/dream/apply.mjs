@@ -43,6 +43,12 @@ async function main() {
   };
   const relate = (relationType, s, t, notes) => write('relation', ['relation', 'create'], { relationType, sourceInstanceId: s, targetInstanceId: t, ...(notes && { notes }) });
   const record = (type, fieldValues, container, tags) => write('record', ['record', 'create', '--type', type, ...(container ? ['--container', container] : [])], { fieldValues, ...(tags && { tags }) });
+  // Members sit at depth 1 under the run note, so the run note must be the container's first entry (an outline starts at depth 0).
+  const box = await call(f, ['container', 'members', 'outline', DREAM]);
+  if (!box.entries.length) {
+    if (!box.anchorInstanceId) throw new Error(`container ${DREAM} has no entries and no anchor: put the run note in it first`);
+    await call(f, ['container', 'members', 'add', DREAM, box.anchorInstanceId, '--depth', '0'], undefined, ACTOR);
+  }
   const intoDream = (i) => call(f, ['container', 'members', 'add', DREAM, i, '--depth', '1'], undefined, ACTOR);
   const comment = async (text, kind, target) => { const c = await record(`${C}/comment`, { comment_text: text, kind }, null, ['dream']); await relate(`${C}/comments-on`, c, target); await intoDream(c); };
   const day = (v) => vig[v].date || 'undated', s = (n) => (n > 1 ? 's' : '');
