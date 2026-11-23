@@ -13,6 +13,9 @@ const short = (s, n = 280) => { s = (s || '').replace(/\s+/g, ' ').trim(); retur
 const ids = async (...a) => (await find(f, ...a)).map((h) => h.instanceId);
 
 const rels = (await call(f, ['relation', 'list'])).relations;
+// The incremental filter below knows what a dream has read only from each relation's createdBy; an srs build whose
+// relation list omits it would silently re-read every undated vignette, so refuse it instead.
+if (f.since && rels.length && !rels.some((r) => r.createdBy)) throw new Error('this srs build lists relations without createdBy, so --since cannot tell what a dream has read; use a newer build (the pinned SRS_RUST_CLI_TAG)');
 const out = new Map(), into = new Map();
 const push = (m, k, v) => (m.get(k) || m.set(k, []).get(k)).push(v);
 for (const r of rels) { push(out, r.sourceId, [r.relationType, r.targetId]); push(into, r.targetId, [r.relationType, r.sourceId]); }
