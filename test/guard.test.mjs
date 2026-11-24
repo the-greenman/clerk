@@ -63,6 +63,17 @@ test('a group log\'s decision is ratified by a group member, not by an unrelated
   assert.match(acts[0].why, /WG Editor group's members/);
 });
 
+test('the owner, as a human, ratifies or sets aside a decision in a group log through a session', () => {
+  const log = [box('log-wg', 'WG Editor', ['d1'])];
+  const go = (state, type, by, sess = [session('s1')], had = []) => unproven(run(snap([rec('d1'), ...had], [], log),
+    snap([rec('d1', { state }), ...had, ...sess], [rel('r1', `com.semanticops.programme/${type}`, 's1', 'd1', by)], log)));
+  assert.deepEqual(go('ratified', 'ratifies', human), []);
+  assert.deepEqual(go('abandoned', 'sets-aside', human), []);
+  assert.equal(go('ratified', 'ratifies', { kind: 'ai', id: OWNER }).length, 1); // not a human
+  assert.equal(go('ratified', 'ratifies', { kind: 'human', id: 'human:other' }).length, 1); // not the owner
+  assert.equal(go('ratified', 'ratifies', human, [], [session('s1')]).length, 1); // an old session
+});
+
 test('a record forked into Affirmed by the owner passes; by an agent fails', () => {
   const sug = rec('p1', { type: 'problem' });
   const before = snap([sug], [], [box('c-aff', 'Affirmed', [])]);
