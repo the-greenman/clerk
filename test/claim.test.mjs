@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { checkClaim, claimAssigns, claimActorOf, claimComment, refersTo } from '../lib/practice/claim.mjs';
+import { checkClaim, claimAssigns, claimActorOf, claimComment, refersTo, isStaleBranch } from '../lib/practice/claim.mjs';
 import { answersOf } from '../lib/practice/grounding.mjs';
 import { fxGroup, tprGroup } from './groups.fixture.mjs';
 import { readFileSync } from 'node:fs';
@@ -124,4 +124,16 @@ test('a bug draws on its own budget: full room does not stop it, a pause does (c
   const bug = { ...issue, labels: [{ name: 'wg:fixture' }, { name: W.bug }] }, full = { pause: 'ok', budget: 10, merged: 6, open: 4 };
   assert.equal(checkClaim({ ...base, issue: bug, state: full }).ok, true);
   assert.match(why({ issue: bug, state: { ...full, pause: 'paused: x' } }), /is paused/);
+});
+test('a stale branch is a caution, not a hold', () => {
+  const r = checkClaim({ ...base, staleBranches: ['10-old-plan'] });
+  assert.equal(r.ok, true);
+  assert.match(r.cautions.join('|'), /ignored stale branch 10-old-plan/);
+  assert.equal(checkClaim({ ...base, staleBranches: ['11-other'] }).cautions.length, 0);
+});
+test('isStaleBranch needs both age and distance', () => {
+  const now = Date.parse('2026-11-22'), old = '2026-11-01T00:00:00Z', fresh = '2026-11-20T00:00:00Z';
+  assert.equal(isStaleBranch({ lastCommitAt: old, behindBy: 43 }, now), true);
+  assert.equal(isStaleBranch({ lastCommitAt: fresh, behindBy: 43 }, now), false);
+  assert.equal(isStaleBranch({ lastCommitAt: old, behindBy: 3 }, now), false);
 });
