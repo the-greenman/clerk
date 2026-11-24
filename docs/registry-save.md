@@ -39,7 +39,7 @@ Each entry is handled on its own. A failure in one never stops the others.
 3. Fetch and rebase `served` onto `origin/<default>`. On conflict, abort the rebase and hold.
 4. If nothing is ahead of `origin/<default>`, stop: the earlier writes have merged and `served` is back on main.
 5. Push to `writes/<host>`, replacing it unless it moved since the fetch. The branch belongs to this machine and each pass rebuilds it, which also keeps its pull request up to date under strict branch protection.
-6. Open a pull request if none is open, then ask it to merge itself when checks pass. A branch with no protection merges directly. On a protected branch, a failure to arm auto-merge holds, and never falls back to a direct merge.
+6. Open a pull request if none is open, then ask it to merge itself when checks pass. A branch with no protection has nothing to wait on, so the pass waits itself: it merges only a head an earlier pass pushed, whose checks have all finished and none failed, and otherwise holds (clerk#299). Where the base has no checks at all, it merges directly. On a protected branch, a failure to arm auto-merge holds, and never falls back to a direct merge.
 
 A hold loses nothing: the write stays in the clone and is still served. The next pass tries again.
 
