@@ -156,3 +156,18 @@ test('an owner merge that cites the decision it applies is on Needs you to revie
   assert.match(needsYou(body), /Owner merge clerk#5:\*\* pr 5 \| Review it against e745e9b2, then merge/);
   assert.doesNotMatch(body, /misclassified/);
 });
+
+test('a red or conflicting PR is not "running": it names what holds it and goes to an agent (clerk#303)', () => {
+  const pr = (number, label, extra) => ({ repo: 'srs-programme', number, title: `pr ${number}`, body: 'plain', labels: [{ name: label }], mergeStateStatus: 'CLEAN', statusCheckRollup: [], chain: [], ...extra });
+  const failing = [{ conclusion: 'FAILURE' }];
+  const body = deskBody({ now: NOW, gates: { auto: 'gate:auto-merge', owner: 'gate:owner-merge' }, prs: [
+    pr(1, 'gate:auto-merge', {}),
+    pr(2, 'gate:auto-merge', { statusCheckRollup: failing }),
+    pr(3, 'gate:auto-merge', { mergeStateStatus: 'DIRTY' }),
+    pr(4, 'gate:owner-merge', { mergeStateStatus: 'DIRTY' })] });
+  const u = unthreaded(body);
+  assert.match(u, /srs-programme#1 pr 1 \| running \| .* \| Auto-merges when green \|/);
+  assert.match(u, /srs-programme#2 pr 2 \| stopped \| .* \| Stopped: checks 1 failing; fix the check, never weaken it \| agent \|/);
+  assert.match(u, /srs-programme#3 pr 3 \| stopped \| .* \| Stopped: merge state dirty; rebase and resolve the conflict \| agent \|/);
+  assert.match(u, /srs-programme#4 pr 4 \| stopped \| .*Stopped: merge state dirty/);
+});
