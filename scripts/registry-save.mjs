@@ -6,7 +6,7 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { savePass } from '../lib/adapters/registry-save.mjs';
+import { checksHold, savePass } from '../lib/adapters/registry-save.mjs';
 import { createPR, enableAutoMerge, get, list, mergePR } from '../lib/adapters/github.mjs';
 import { loadWorkflow } from '../lib/adapters/workflow.mjs';
 
@@ -23,12 +23,16 @@ const forge = {
     return pr ? { url: pr.html_url, number: pr.number } : null;
   },
   create: ({ remote, base, head, title, body, label }) => createPR({ slug: slugOf(remote), base, head, title, body, labels: label ? [label] : [] }),
-  merge({ remote, base, pr }) {
+  merge({ remote, base, pr, sha, fresh }) {
     const slug = slugOf(remote);
     // Merges directly only where the branch requires nothing. On a protected branch any failure to arm auto-merge is a hold:
     // falling back to a merge there could use an admin's rights to skip the checks.
-    if (get(`repos/${slug}/branches/${encodeURIComponent(base)}`).protected) enableAutoMerge(slug, pr.number);
-    else mergePR(slug, pr.number);
+    const branch = get(`repos/${slug}/branches/${encodeURIComponent(base)}`);
+    if (branch.protected) return enableAutoMerge(slug, pr.number);
+    const runs = (ref) => get(`repos/${slug}/commits/${ref}/check-runs?per_page=100`).check_runs ?? [];
+    const hold = checksHold({ runs: runs(sha), baseChecked: runs(branch.commit.sha).length > 0, fresh });
+    if (hold) throw new Error(`${pr.url}: ${hold}`);
+    mergePR(slug, pr.number, sha);
   },
 };
 
