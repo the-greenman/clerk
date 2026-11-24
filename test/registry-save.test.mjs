@@ -5,7 +5,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { saveEntry, savePass, changedPaths } from '../lib/adapters/registry-save.mjs';
+import { saveEntry, savePass, changedPaths, checksHold } from '../lib/adapters/registry-save.mjs';
 
 const git = (cwd, ...a) => execFileSync('git', a, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 const LONG_AGO = new Date('2020-01-01T00:00:00Z');
@@ -80,6 +80,28 @@ test('a second pass reuses the open PR', async () => {
   assert.equal(named(r, 'create').length, 1);
   assert.equal(named(r, 'merge').length, 2, 'each pass asks again');
   assert.equal(res.pending, 2);
+});
+
+test('an unprotected base waits for the checks (clerk#299)', () => {
+  const ok = { name: 'ci', status: 'completed', conclusion: 'success' }, red = { ...ok, conclusion: 'failure' }, on = { name: 'ci', status: 'in_progress', conclusion: null };
+  const hold = (runs, more = {}) => checksHold({ runs, baseChecked: true, fresh: false, ...more });
+  assert.equal(hold([ok, { ...ok, conclusion: 'skipped' }]), null);
+  assert.match(hold([ok, red]), /checks failed: ci/);
+  assert.match(hold([{ ...ok, conclusion: 'cancelled' }]), /failed/);
+  assert.match(hold([ok, on]), /still running: ci/);
+  assert.match(hold([ok], { fresh: true }), /not reported/, 'a head just pushed may list only some of its checks');
+  assert.equal(hold([], { fresh: true, baseChecked: false }), null, 'a repository with no checks merges at once');
+});
+
+test('a held merge is a hold, and only a head an earlier pass pushed is not fresh', async () => {
+  const f = fixture(), r = runner();
+  r.forge.merge = (a) => { r.calls.push(['merge', a]); throw new Error('checks failed: ci'); };
+  write(f.clone);
+  const first = await saveEntry(f.entry, opts(r)), second = await saveEntry(f.entry, opts(r));
+  assert.deepEqual([first.held, first.pending, second.pending], ['checks failed: ci', 1, 1], 'the write stays served');
+  const merges = named(r, 'merge').map((c) => c[1]);
+  assert.deepEqual(merges.map((m) => m.fresh), [true, false]);
+  assert.equal(merges[0].sha, git(f.bare, 'rev-parse', 'writes/box').trim());
 });
 
 test('red validation holds, and the write stays in place uncommitted', async () => {
