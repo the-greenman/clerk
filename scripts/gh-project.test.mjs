@@ -769,3 +769,25 @@ test("isConsumableReady: an unrouted or already-PR'd Ready item does not count (
   assert.equal(isConsumableReady(crow({ status: "Ready", openClosingPr: 612 })), false, "an open PR already closes it");
   assert.equal(countConsumableReady([bare, crow({ status: "Ready" }), crow({ num: 2, status: "Ready", openClosingPr: 7 })]), 1);
 });
+
+// clerk#304: with no `gh` CLI, a failed sub-issue link must exit non-zero with the HTTP reason.
+test("board link without gh: a 422 from the sub-issue POST exits non-zero and says why", async () => {
+  const { mkdtempSync, writeFileSync, chmodSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join, dirname } = await import("node:path");
+  const { spawnSync } = await import("node:child_process");
+  const dir = mkdtempSync(join(tmpdir(), "fake-curl-"));
+  writeFileSync(join(dir, "curl"), [
+    "#!/bin/bash",
+    'if [[ "$*" == *"-X POST"* ]]; then printf \'{"message":"Validation Failed"}\\n422\'; exit 0; fi',
+    "echo '{\"id\":1}'", ""].join("\n"));
+  chmodSync(join(dir, "curl"), 0o755);
+  const r = spawnSync(process.execPath, [new URL("./gh-project.mjs", import.meta.url).pathname, "link", "semanticops.com#31", "clerk#304"], {
+    encoding: "utf8",
+    env: { PATH: `${dir}:${dirname(process.execPath)}`, HOME: tmpdir(), GITHUB_TOKEN: "x",
+      GHP_OWNER: "the-greenman", GHP_PROJECT: "6", GHP_STORY_REPO: "semanticops.com" },
+  });
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /422/);
+  assert.match(r.stderr, /Validation Failed/);
+});

@@ -77,7 +77,7 @@ import { claimActorOf } from "../lib/practice/claim.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { workflowFrom, labelDescription } from "../lib/practice/workflow.mjs";
 import { routed } from "../lib/practice/flow.mjs";
-import { loadGroups } from "../lib/adapters/groups.mjs"; import { topupNominees } from "./lib/strong-feed.mjs";
+import { loadGroups } from "../lib/adapters/groups.mjs"; import { mutateApi } from "../lib/adapters/gh-rest.mjs"; import { topupNominees } from "./lib/strong-feed.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
@@ -310,7 +310,7 @@ function ghHttpApi(args) {
     return curlGet(`https://api.github.com/${args[1]}?per_page=100`, { paginate: true });
   }
 
-  // Plain REST (with optional --jq): ["path", ...flags]
+  if (args[0] === "-X") return mutateApi(args, curlMutateStatus); // mutating REST, status-checked (clerk#304)
   const path   = args[0];
   const jqIdx  = args.indexOf("--jq");
   const body   = curlGet(`https://api.github.com/${path}`);
