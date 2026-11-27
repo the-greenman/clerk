@@ -77,7 +77,7 @@ import { claimActorOf } from "../lib/practice/claim.mjs";
 import { loadWorkflow } from "../lib/adapters/workflow.mjs";
 import { workflowFrom, labelDescription } from "../lib/practice/workflow.mjs";
 import { routed } from "../lib/practice/flow.mjs";
-import { loadGroups } from "../lib/adapters/groups.mjs"; import { mutateApi } from "../lib/adapters/gh-rest.mjs"; import { topupNominees } from "./lib/strong-feed.mjs";
+import { loadGroups } from "../lib/adapters/groups.mjs"; import { pausedGroupLabels } from "../lib/adapters/upkeep.mjs"; import { mutateApi } from "../lib/adapters/gh-rest.mjs"; import { topupNominees } from "./lib/strong-feed.mjs";
 
 // ---------------------------------------------------------------------------
 // Configuration (overridable via env)
@@ -481,7 +481,7 @@ function board() {
           number state title repository { name }
           labels(first:30){ nodes{ name } }
           assignees(first:10){ nodes{ login } }
-          blockedBy(first:20){ nodes{ number state repository{ name } } }
+          blockedBy(first:20){ nodes{ number state repository{ name } } } subIssuesSummary{ total }
         } }
       }
     } } }
@@ -511,7 +511,7 @@ function board() {
         state: c.state,
         title: c.title,
         labels: c.labels.nodes.map((l) => l.name),
-        assignees: (c.assignees?.nodes ?? []).map((a) => a.login),
+        assignees: (c.assignees?.nodes ?? []).map((a) => a.login), subIssues: c.subIssuesSummary?.total ?? 0,
         // Native "blocked by" dependency edges (#671), with each blocker's live state —
         // enough to derive blockedness without any further lookups. first:20 above is a
         // practical cap; >20 blockers on one issue is a modelling problem, not a real case.
@@ -914,7 +914,7 @@ function sizeWeight(row) {
 function isWorkItem(row) {
   return !row.labels.includes("epic")
     && !row.labels.includes(STORY_LABEL)
-    && !row.labels.includes("plan");
+    && !row.labels.includes("plan") && !(row.subIssues > 0); // a Unit parent holds work: its tasks are routed, not it (clerk flow's lane rule)
 }
 
 // ---------------------------------------------------------------------------
@@ -945,18 +945,18 @@ function blockedLabelWant(row) {
 // NOT already claimed (`status: in progress`). This MUST match what the consumer skips, or topup
 // mis-measures the queue. Counting stories/epics/claimed items made it read "full" (Ready: 8) while
 // zero consumable work remained, so it never refilled — and merges never rehydrated the queue.
-function isConsumableReady(row) {
+function isConsumableReady(row, paused = new Set()) {
   return row.state === "OPEN"
     && isWorkItem(row)
     && !row.labels.includes(WF.inProgress)
     // Held (#715), unrouted or already under an open PR: no routine picks it, so counting it would clog the queue (clerk flow's routed rule).
-    && !WF.isHeld(row.labels) && hasLane(row.labels, row.repo) && !row.openClosingPr
+    && !WF.isHeld(row.labels) && hasLane(row.labels, row.repo) && !row.openClosingPr && !row.labels.some((l) => paused.has(l)) // paused: its group's builder opens nothing
     // Bugs ride the DEDICATED BUG TRACK (#717), not the Ready queue — see cmdTopup.
     && !row.labels.includes(WF.bug)
     && (row.status === COL.ready || row.labels.includes(PROMOTE_INTENT_LABEL));
 }
-function countConsumableReady(rows) {
-  return rows.filter(isConsumableReady).length;
+function countConsumableReady(rows, paused = new Set()) {
+  return rows.filter((r) => isConsumableReady(r, paused)).length;
 }
 // Open leaf work items with no size label.
 function unsizedLeaves() {
@@ -2110,7 +2110,7 @@ function cmdTopup(argv) {
 
   const b = board(); // an open PR that closes a Ready item takes its slot from the queue (one lookup per Ready item)
   for (const row of b.values()) if (row.state === "OPEN" && row.status === COL.ready && isWorkItem(row)) row.openClosingPr = openClosingPr(row.repo, row.num);
-  const readyCount = countConsumableReady([...b.values()]);
+  const paused = pausedGroupLabels(resolve(process.env.CLERK_REPO || process.cwd())), readyCount = countConsumableReady([...b.values()], paused);
 
   // Feed candidates in IMPLEMENTATION ORDER — epic-major: epic Priority, started epics
   // first within a tier, then issue priority, then sub-issue position — NOT by flat
@@ -2139,7 +2139,7 @@ function cmdTopup(argv) {
     // claim semantics and the bug-floor priority derivation all still apply to bugs.
     !row.labels.includes(WF.bug) &&
     !row.labels.includes(PROMOTE_INTENT_LABEL) &&
-    hasLane(row.labels, row.repo) &&   // routed to a lane when grounded; no lane, no routine to take it
+    hasLane(row.labels, row.repo) && !row.labels.some((l) => paused.has(l)) &&   // routed to a running lane; no lane, no routine to take it
     !wontExcluded.has(row.key)
   );
   candidates.sort((x, y) => (orderIndex.get(x.key) ?? Infinity) - (orderIndex.get(y.key) ?? Infinity));

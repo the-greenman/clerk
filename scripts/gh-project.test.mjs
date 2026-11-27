@@ -513,6 +513,17 @@ test("isConsumableReady: epics, stories, and plans never count even when Ready",
   assert.equal(isConsumableReady(crow({ status: "Ready", labels: ["plan"] })), false);
 });
 
+test("isConsumableReady: an issue with sub-issues (a Unit parent) holds work and does not count", () => {
+  assert.equal(isConsumableReady(crow({ status: "Ready", subIssues: 3 })), false);
+  assert.equal(isConsumableReady(crow({ status: "Ready", subIssues: 0 })), true);
+});
+
+test("isConsumableReady: work in a paused group does not count", () => {
+  const paused = new Set(["wg:agent-editor"]);
+  assert.equal(isConsumableReady(crow({ status: "Ready", labels: ["wg:agent-editor"] }), paused), false);
+  assert.equal(isConsumableReady(crow({ status: "Ready" }), paused), true);
+});
+
 test("isConsumableReady: an already-claimed (status: in progress) Ready item does not count", () => {
   assert.equal(isConsumableReady(crow({ status: "Ready", labels: ["status: in progress"] })), false);
 });
